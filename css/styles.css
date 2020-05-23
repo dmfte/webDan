@@ -1,3 +1,15 @@
+/*Navigation bar style*/
+.ulSize{
+    width: 25%;
+}
+.liSize{
+    width: 100%;
+}
+.btnSize{
+    width: 100%;
+    font-size: 6rem;
+}
+
 .headStyle{
 
   background: #f7f7f7;
@@ -11,6 +23,6 @@
 }
 
 .card-body, .modal-body{
-  font-size: 2rem;
-  color: green;
+  font-size: 3rem;
+  color: red;
 }
