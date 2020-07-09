@@ -38,12 +38,47 @@ p, h2{
 }
 
 .headStyle{
-  background: #f7f7f7;
-  box-shadow: inset 0 -5px 25px -5px #4d4c7d;
+  background: #000000;
+  box-shadow: inset 0 -5px 25px -5px rgb(209, 209, 209);
   padding: 0.7rem 0;
-
 }
 
 .btn{
   height: 100%;
+}
+
+
+.col-7{
+    position: relative;
+    background-color: orange;
+    margin: 0;
+    padding: 10px;
+}
+.col-1{
+    background-color: lightblue;
+}
+.col-3{
+    background-color: gray;
+}
+#txtCont{
+    background-color: lightgray;
+    width: 100%;
+    height: 100px;
+    overflow-y: scroll;
+}
+
+.myTab, .myTab:hover{
+  color: white;
+}
+
+.btn-link{
+  color: #fff;
+}
+.card-body{
+  background-color: rgb(40, 40, 40);
+  color: #fff;
+}
+
+.card-body a{
+  color: rgb(225, 25, 25);
 }
