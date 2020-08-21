@@ -25,13 +25,3 @@ heads.forEach(head => {
     }
   });
 });
-
-//
-// var btnPlus = document.querySelector(".btn-plus");
-// btnPlus.addEventListener("click", function(){
-//   var allDiv = document.querySelectorAll(".div");
-//   allDiv.forEach(div => {
-//     var strng = "calc(" + getComputedStyle(div).getPropertyValue("font-size") + " + 4px";
-//     div.style.fontSize = strng;
-//   });
-// });
