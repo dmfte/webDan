@@ -3,157 +3,201 @@
 
 <head>
   <meta charset="utf-8">
-  <title>BOSQUEJO</title>
-
-  <!-- Font Awesome link -->
-  <script src="https://use.fontawesome.com/releases/v5.13.0/js/all.js" data-auto-a11y="true"></script>
-
-  <!-- Bootstrap links: -->
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-
+  <title>Temp</title>
   <!-- CSS file link -->
   <link rel="stylesheet" href="css/styles.css">
-
-  <!-- Navigation bar -->
-  <div class="divHeight">
-    <nav class="navbar fixed-top navbar-expand bg-secondary" id="navbar1">
-      <a class="navbar-brand changeFont" href="">dmfte</a>
-      <ul class="navbar-nav ml-auto">
-        <li class="nav-item" id="collapseAll"><i class="btn-link fas fa-chevron-circle-up fa-3x navIconStyle changeFont"></i></li>
-        <li class="nav-item pl-5" id="collapseNone"><i class="btn-link fas fa-chevron-circle-down fa-3x navIconStyle changeFont"></i></li>
-      </ul>
-      <ul class="navbar-nav ml-auto">
-        <li class="nav-item liButton"><button id="btnPlus" class="btnSize btn btn-outline-light changeFont">+</button></li>
-        <li class="nav-item liButton"><button id="btnLess" class="btnSize btn btn-outline-light changeFont">-</button></li>
-      </ul>
-    </nav>
-  </div>
+  <!-- Fontawesome link -->
+  <!-- <script src="https://kit.fontawesome.com/599c597507.js" crossorigin="anonymous"></script> -->
+  <!-- Google Fonts typeface "Sora" link -->
+  <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@100&display=swap" rel="stylesheet">
 </head>
 
 <body>
-
-  <div class='accordion' id='idAccordion'>
-    <div class='modal fade' id='modal1' tabindex='-1' role='dialog' aria-labelledby='modalLabel1' aria-hidden='true'>
-      <div class='modal-dialog' role='document'>
-        <div class='modal-content'>
-          <div class='modal-header'>
-            <h2 class='modal-title changeFont' id='modalLabel1'></h2><button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
-          </div>
-          <div class='modal-body changeFont'></div>
-        </div>
+  <div class="container-buttons">
+    <button class="fontSize btn-plus">&#x0002B;</button>
+    <button class="fontSize btn-less">&#x02212;</button>
+  </div>
+  <div class="container-accordion">
+  <div class="accordion">
+      <div class="header" data-target-id="body1"> "¿A caso soy judío?" <div class="i">&#x025BD;</div></div>
+      <div class="body" id="body1">
+        <div class="body-content">
+              <ul>
+                  <li>Pilato había preguntado</li>
+                  <li>Jesús dijo "¿Se te occurrió a tí o te hablaron de mí?"</li>
+                  <li>Entonces Jesús ¿Qué respondió?...</li>
+              </ul>
+            </div>
       </div>
-    </div>
-    <div class='card'>
-      <div class='headStyle' id='heading1'><button class='btn btn-link btn-lg col-12 changeFont' type='button' data-toggle='collapse' data-target='#collapse1' aria-expanded='false' aria-controls='collapse1'>Imagínese… últimos días sistema
-          egipcio.</button></div>
-      <div id='collapse1' class='collapse' aria-labelledby='heading1' data-parent='#idAccordion'>
-        <div class='card-body changeFont'>
-          Nació esclavo.
-          <br>Llega a saber de Moisés. Compara.Señas.
-          <br>Moisés cumpliendo2 opciones: Amargarse – Expectativa
-          <br>Familiar? Esclavitud, mundo opresor, cerca liberación. NO coincidencia.
-        </div>
+  </div>
+  <div class="accordion">
+      <div class="header" data-target-id="body2"> (1) <div class="i">&#x025BD;</div></div>
+      <div class="body" id="body2">
+        <div class="body-content">
+              <ul>
+                  <li>¿Qué contesta Jesús cuando le preguntan si es rey?...</li>
+              </ul>
+            </div>
       </div>
-    </div>
-    <div class='modal fade' id='modal2' tabindex='-1' role='dialog' aria-labelledby='modalLabel2' aria-hidden='true'>
-      <div class='modal-dialog' role='document'>
-        <div class='modal-content'>
-          <div class='modal-header'>
-            <h2 class='modal-title changeFont' id='modalLabel2'>Exo 6:1</h2><button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
-          </div>
-          <div class='modal-body changeFont'>
-            Así que Jehová le contestó a Moisés: “Ahora verás lo que le haré al faraón. Una mano poderosa lo obligará a dejarlos salir, y una mano poderosa lo obligará a expulsarlos de su tierra”.
-          </div>
-        </div>
+  </div>
+  <div class="accordion">
+      <div class="header" data-target-id="body3"> ¿Qué aclaró Jesús?... <div class="i">&#x025BD;</div></div>
+      <div class="body" id="body3">
+        <div class="body-content">
+              <ul>
+                  <li>Que no era una amenaza</li>
+                  <li>A Pilato le preocupaba una sublevación política</li>
+              </ul>
+            </div>
       </div>
-    </div>
-    <div class='card'>
-      <div class='headStyle' id='heading2'><button class='btn btn-link btn-lg col-12 changeFont' type='button' data-toggle='collapse' data-target='#collapse2' aria-expanded='false' aria-controls='collapse2'>DETALLE</button></div>
-      <div id='collapse2' class='collapse' aria-labelledby='heading2' data-parent='#idAccordion'>
-        <div class='card-body changeFont'>
-          “Libera a mi pueblo”, más trabajo, enojados, ora a Jh
-          <br><a href='' data-toggle='modal' data-target='#modal2'>Exo 6:1</a>
-          <br>“Ahora verás” ¿Qué siente?
-          <br>Confianza: – Moisés – Nosotros
-          <br>Hecho algo bueno: Precursorado:
-          <br>Enfermedades, $ Estudiar B: Burla, ocupado
-        </div>
+  </div>
+  <div class="accordion">
+      <div class="header" data-target-id="body4"> Nos da una idea <div class="i">&#x025BD;</div></div>
+      <div class="body" id="body4">
+        <div class="body-content">
+              <ul>
+                  <li>Si declaramos ante autoridades, siguient ejemplo de JC, ¿Cómo podemos empezar?...</li>
+                  <li>Carta a autoridades rusas ¿Qué aclarab?...</li>
+              </ul>
+            </div>
       </div>
-    </div>
-    <div class='modal fade' id='modal3' tabindex='-1' role='dialog' aria-labelledby='modalLabel3' aria-hidden='true'>
-      <div class='modal-dialog' role='document'>
-        <div class='modal-content'>
-          <div class='modal-header'>
-            <h2 class='modal-title changeFont' id='modalLabel3'>Exo 6:6,7</h2><button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
-          </div>
-          <div class='modal-body changeFont'>
-            ”Por lo tanto, diles a los israelitas: ‘Yo soy Jehová, y los libraré de las pesadas cargas que les imponen los egipcios y de la esclavitud a la que los someten. Los rescataré con brazo poderoso y con grandes castigos. 7 Y los recibiré como mi pueblo y seré su Dios. Ustedes de veras sabrán que yo soy Jehová su Dios, aquel que los está librando de las pesadas cargas de Egipto.
-          </div>
-        </div>
+  </div>
+  <div class="accordion">
+      <div class="header" data-target-id="body5"> "Mi reino no es parte de este mundo" <div class="i">&#x025BD;</div></div>
+      <div class="body" id="body5">
+        <div class="body-content">
+              <ul>
+                  <li>En general, ¿qué pensamos "no debo ser parte del mundo"?...</li>
+                  <li>Lo que esperan que hagamos y no nos van a ver hacer</li>
+                  <li>Si no soy parte del mundo... El reino no es del mundo... ¿Entonces el rey...?...</li>
+                  <li>Le servimos, nos cuida, promete...</li>
+              </ul>
+            </div>
       </div>
-    </div>
-    <div class='card'>
-      <div class='headStyle' id='heading3'><button class='btn btn-link btn-lg col-12 changeFont' type='button' data-toggle='collapse' data-target='#collapse3' aria-expanded='false' aria-controls='collapse3'>Respuesta a Moisés Exo 6:6,7</button></div>
-      <div id='collapse3' class='collapse' aria-labelledby='heading3' data-parent='#idAccordion'>
-        <div class='card-body changeFont'>
-          <a href='' data-toggle='modal' data-target='#modal3'>Exo 6:6,7</a>
-          <br>¿Se cumplió? ¿Se cumplirá?
-          <br>“Uds de veras sabrán”: Ídolos – Costumbres – Esclavos
-          <br>Conocerán su significado.
-          <br>Nosotros: Jh sabe que no es fácil: Luchamos – Rodeados – Enfermedades, $
-          <br><a href='' data-toggle='modal' data-target='#modal4'>Cambiemos 6:6,7…</a>
-          <br>Si confía en Jehová, verá su poderosa mano. No solo ahora.
-        </div>
+  </div>
+  <div class="accordion">
+      <div class="header" data-target-id="body6"> (1) continuación <div class="i">&#x025BD;</div></div>
+      <div class="body" id="body6">
+        <div class="body-content">
+              <ul>
+                  <li>¿Qué contesta Jesús cuando le preguntan si es rey?</li>
+              </ul>
+            </div>
       </div>
-    </div>
-    <div class='modal fade' id='modal4' tabindex='-1' role='dialog' aria-labelledby='modalLabel4' aria-hidden='true'>
-      <div class='modal-dialog' role='document'>
-        <div class='modal-content'>
-          <div class='modal-header'>
-            <h2 class='modal-title changeFont' id='modalLabel4'>Cambiemos 6:6,7…</h2><button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
-          </div>
-          <div class='modal-body changeFont'>
-            ”Por lo tanto, diles a los testigos de Jehová que viven en el 2020: ‘Yo soy Jehová, y los libraré de las pesadas cargas que les impone este sistema de cosas malvado y de la esclavitud al pecado en la que están. Los rescataré con brazo poderoso y con grandes castigos. 7 Y los recibiré como mi pueblo y seré su Dios. Ustedes, testigos que viven en este tiempo del fin, de veras sabrán que yo soy Jehová su Dios, aquel que los está librando de las pesadas cargas de este sistema cruel.
-          </div>
-        </div>
+  </div>
+  <div class="accordion">
+      <div class="header" data-target-id="body7"> Texto diario ayer "escuchar voz Jesús" <div class="i">&#x025BD;</div></div>
+      <div class="body" id="body7">
+        <div class="body-content">
+              <ul>
+                  <li>Ir al paso de herramientas</li>
+                  <li>¿Cuáles herramientas especialmente útiles en aislamiento?...</li>
+                  <ul>
+                    <li>Artículos</li>
+                    <li>Videos</li>
+                  </ul>
+                  <li>Hermanos han aprendido</li>
+              </ul>
+            </div>
       </div>
-    </div>
-    <div class='card'>
-      <div class='headStyle' id='heading4'><button class='btn btn-link btn-lg col-12 changeFont' type='button' data-toggle='collapse' data-target='#collapse4' aria-expanded='false' aria-controls='collapse4'>¿Qué esperar de estos últimos días?</button></div>
-      <div id='collapse4' class='collapse' aria-labelledby='heading4' data-parent='#idAccordion'>
-        <div class='card-body changeFont'><a href='' data-toggle='modal' data-target='#modal5'>Exo 7:4,5</a>
-          <br>Endurecer: Faraón y consejeros – amargarse, “no hay Dios”
-          <br>Ablandar: Israelitas y egipcios – Sensible a urgencia, compasión por los que no conocen</div>
+  </div>
+  <div class="accordion">
+      <div class="header" data-target-id="body8"> ¿"¿Qué es la verdad?"? <div class="i">&#x025BD;</div></div>
+      <div class="body" id="body8">
+        <div class="body-content">
+              <ul>
+                  <li>¿Qué nos dice de Pilato esa pregunta?...</li>
+                  <li>Pensemos en el gesto</li>
+                  <ul>
+                    <li>Asuntos polítcos</li>
+                    <li>Indiferencia a la verdad</li>
+                  </ul>
+              </ul>
+            </div>
       </div>
-    </div>
-    <div class='modal fade' id='modal5' tabindex='-1' role='dialog' aria-labelledby='modalLabel5' aria-hidden='true'>
-      <div class='modal-dialog' role='document'>
-        <div class='modal-content'>
-          <div class='modal-header'>
-            <h2 class='modal-title changeFont' id='modalLabel5'>Exo 7:4,5</h2><button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
-          </div>
-          <div class='modal-body changeFont'>
-            Pero el faraón no les hará caso. Así que pondré mi mano sobre Egipto y de allí sacaré a mis multitudes, mi pueblo, los israelitas. Los sacaré con grandes castigos contra Egipto. 5 Y los egipcios de veras sabrán que yo soy Jehová cuando extienda mi mano contra Egipto y saque de entre ellos a los israelitas”.
-          </div>
-        </div>
+  </div>
+  <div class="accordion">
+      <div class="header" data-target-id="body9"> (2) <div class="i">&#x025BD;</div></div>
+      <div class="body" id="body9">
+        <div class="body-content">
+              <ul>
+                  <li>¿Qué le dice Pilato a la multitud que está fuera del palacio? ¿Qué le responde la multitud? ¿Qué hace entonces Pilato?</li>
+                  <li>Marco 15:5</li>
+              </ul>
+            </div>
       </div>
-    </div>
-    <div class='card'>
-      <div class='headStyle' id='heading5'><button class='btn btn-link btn-lg col-12 changeFont' type='button' data-toggle='collapse' data-target='#collapse5' aria-expanded='false' aria-controls='collapse5'>No 400, 100</button></div>
-      <div id='collapse5' class='collapse' aria-labelledby='heading5' data-parent='#idAccordion'>
-        <div class='card-body changeFont'>
-          ILUSTRACIÓN 1 ¿Se ve ud ahí?
-          <br><li>Liberación sucedido antes</li>
-          ILUSTRACIÓN 2 ¿Se ve ahí?
-          <br>Estamos cerca. Ahora veremos lo que Jh le hará a este sistema
-        </div>
+  </div>
+  <div class="accordion">
+      <div class="header" data-target-id="body10"> Nos da un ejemplo en cuanto a cuándo callar <div class="i">&#x025BD;</div></div>
+      <div class="body" id="body10">
+        <div class="body-content">
+              <ul>
+                <li>No podemos generalizar. Pero si nos acusan falsamente, quizás...</li>
+                <li>¿Qué hay si decidimos que es mejor callar? ¿Es fácil? ¿Cómo reaccionamos?...</li>
+                <li>Puede que se nos ocurra ¿Lo haremos?</li>
+                <ul>
+                  <li>¿Necesitó Jesús hablar para quedar inocente?...</li>
+                  <li>Si Jesús "César lo de César", "Ustedes hacerme rey" ¿Qué hubiera pasado?</li>
+                </ul>
+                <li>A veces es más eficiente no decir nada</li>
+                <li>Si lo hacemos, cuando creemos tener razón, será fácil callar cuando sepamos que la tenemos</li>
+              </ul>
+            </div>
       </div>
-    </div>
-
-    <script type="text/javascript" src="javascript/index.js"></script>
+  </div>
+  <div class="accordion">
+      <div class="header" data-target-id="body11"> Continuemos.. <div class="i">&#x025BD;</div></div>
+      <div class="body" id="body11">
+        <div class="body-content">
+              <ul>
+                  <li>Galilea &#x027F9; Herodes (3)</li>
+                  <li>¿Por qué se alegra Herodes Antipas de ver a Jesús? ¿Qué hace con él?</li>
+                  <li>Buen parámetro cuándo callar ¿Por qué no decía nada Jesús?...</li>
+                  <li>¿Indicio de cuándo callar?...</li>
+              </ul>
+            </div>
+      </div>
+  </div>
+  <div class="accordion">
+      <div class="header" data-target-id="body12"> (4) <div class="i">&#x025BD;</div></div>
+      <div class="body" id="body12">
+        <div class="body-content">
+              <ul>
+                  <li>¿Por qué desea Pilato liberar a Jesús?</li>
+                  <li>Evaluemos
+                    <ul>
+                      <li>Asuntos políticos</li>
+                      <li>Indeferencia a la verdad</li>
+                      <li>Librarse de él con Herodes</li>
+                      <li>Se da cuenta que es inocente</li>
+                      <li>Esposa le cuenta sueño</li>
+                    </ul>
+                  </li>
+                  <li>¿Libre de culpa?</li>
+              </ul>
+            </div>
+      </div>
+  </div>
+  <div class="accordion">
+      <div class="header" data-target-id="body13"> ¿P.Q. posiblem. sueño de procedencia divina? <div class="i">&#x025BD;</div></div>
+      <div class="body" id="body13">
+        <div class="body-content">
+              <ul>
+                  <li>Pregunta de los lectores</li>
+                  <li>Mateo:</li>
+                  <ul>
+                    <li>Sueño de José, huir a Egipto</li>
+                    <li>Sueño de los astrólogos</li>
+                    <li>Sueño de la esposa</li>
+                  </ul>
+                  <li>Si fue procedencia divina ¿por qué? - Tarea</li>
+              </ul>
+            </div>
+      </div>
+  </div>
+</div>
+  <script type="text/javascript" src="index.js"></script>
 </body>
 
 </html>
