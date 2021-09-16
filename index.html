@@ -2,978 +2,982 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Outline</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap"
-        rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>Outline</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <nav id="topNav">
-        <div class="logo">
-            <svg viewBox="0 0 104 40">
-                <path stroke="rgb(1, 1, 1)" stroke-linecap="round" stroke-linejoin="round" fill="none"
-                    stroke-width="4px"
-                    d="m 20 28 a 8 8 0 0 0 -16 0 a 8 8 0 0 0 16 0 m 0 8 l 0 -32 m 0 24 a 8 8 0 0 1 16 0 l 0 8 m 0 -8 a 8 8 0 0 1 16 0 l 0 8 m 0 -8 l 0 -16 m 0 0 a 8 8 0 0 1 16 0 l 0 16 a 8 8 0 0 0 16 0 a 8 8 0 0 1 16 0 l -16 0 a 8 8 0 0 0 13.66 5.66 m -45.66 -13.66 l 8 0 m 8 0 l 8 0">
-                </path>
-            </svg>
-        </div>
-        <div class="stopwatch">
-            <div class="counter">
-                <svg id="minT" viewBox="0 0 124 204">
-                    <path id="tl" d="M 20 20 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
-                    <path id="bl" d="M 20 104 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
-                    <path id="t" d="M 22 18 l 10 10 l 60 0 l 10 -10 l -10 -10 l -60 0 z"></path>
-                    <path id="m" d="M 22 102 l 10 10 l 60 0 l 10 -10 l -10 -10 l -60 0 z"></path>
-                    <path id="tr" d="M 104 20 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
-                    <path id="br" d="M 104 104 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
-                    <path id="b" d="M 22 186  l 10 10 l 60 0 l 10 -10 l -10 -10 l -60 0 z"></path>
-                </svg>
-                <svg id="minU" viewBox="0 0 124 204">
-                    <path id="tl" d="M 20 20 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
-                    <path id="bl" d="M 20 104 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
-                    <path id="t" d="M 22 18 l 10 10 l 60 0 l 10 -10 l -10 -10 l -60 0 z"></path>
-                    <path id="m" d="M 22 102 l 10 10 l 60 0 l 10 -10 l -10 -10 l -60 0 z"></path>
-                    <path id="tr" d="M 104 20 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
-                    <path id="br" d="M 104 104 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
-                    <path id="b" d="M 22 186  l 10 10 l 60 0 l 10 -10 l -10 -10 l -60 0 z"></path>
-                </svg>
-                <svg id="twoDots" viewBox="0 0 20 204">
-                    <path d="M 0 50 l 20 0 l 0 20 l -20 0 z M 0 134 l 20 0 l 0 20 l -20 0 z"></path>
-                </svg>
-                <svg id="secT" viewBox="0 0 124 204">
-                    <path id="tl" d="M 20 20 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
-                    <path id="bl" d="M 20 104 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
-                    <path id="t" d="M 22 18 l 10 10 l 60 0 l 10 -10 l -10 -10 l -60 0 z"></path>
-                    <path id="m" d="M 22 102 l 10 10 l 60 0 l 10 -10 l -10 -10 l -60 0 z"></path>
-                    <path id="tr" d="M 104 20 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
-                    <path id="br" d="M 104 104 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
-                    <path id="b" d="M 22 186  l 10 10 l 60 0 l 10 -10 l -10 -10 l -60 0 z"></path>
-                </svg>
-                <svg id="secU" viewBox="0 0 124 204">
-                    <path id="tl" d="M 20 20 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
-                    <path id="bl" d="M 20 104 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
-                    <path id="t" d="M 22 18 l 10 10 l 60 0 l 10 -10 l -10 -10 l -60 0 z"></path>
-                    <path id="m" d="M 22 102 l 10 10 l 60 0 l 10 -10 l -10 -10 l -60 0 z"></path>
-                    <path id="tr" d="M 104 20 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
-                    <path id="br" d="M 104 104 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
-                    <path id="b" d="M 22 186  l 10 10 l 60 0 l 10 -10 l -10 -10 l -60 0 z"></path>
-                </svg>
-            </div>
-            <button id="btnStart">
-                <svg viewBox="0 0 60 80">
-                    <path></path>
-                </svg>
-            </button>
-            <button id="btnRestart">
-                <svg viewBox="0 0 60 80">
-                    <path></path>
-                </svg>
-            </button>
-        </div>
-    </nav>
-
-    <div class="row">
-        <div class="header-outer" id="header1" onclick="headerOuterClick(this)">
-            <div class="header-inner">
-                <h3>Naturaleza imperfecta, obedecer.</h3>
-                <div class="arrow"><svg width="50" height="50" viewBox="0 0 100 100">
-                        <path id="Rectangle"></path>
-                        <path id="Rectangle-1"></path>
-                    </svg></div>
-            </div>
-        </div>
-        <div class="container-body" style="max-height: 0px;">
-            <div class="body">
-                <ul>
-                    <li>Niños, opuesto.</li>
-                    <li>Jóvenes, cuestionan.</li>
-                    <li>Empleo, cambio ¿por qué?</li>
-                    <li>¿ha preguntado por qué hacer caso cartas o Broad</li>
-                </ul>
-            </div>
-        </div>
+  <nav id="topNav">
+    <div class="logo">
+      <svg viewBox="0 0 104 40">
+        <path stroke="rgb(1, 1, 1)" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-width="4px"
+          d="m 20 28 a 8 8 0 0 0 -16 0 a 8 8 0 0 0 16 0 m 0 8 l 0 -32 m 0 24 a 8 8 0 0 1 16 0 l 0 8 m 0 -8 a 8 8 0 0 1 16 0 l 0 8 m 0 -8 l 0 -16 m 0 0 a 8 8 0 0 1 16 0 l 0 16 a 8 8 0 0 0 16 0 a 8 8 0 0 1 16 0 l -16 0 a 8 8 0 0 0 13.66 5.66 m -45.66 -13.66 l 8 0 m 8 0 l 8 0">
+        </path>
+      </svg>
     </div>
-    <div class="row">
-        <div class="header-outer" id="header2" onclick="headerOuterClick(this)">
-            <div class="header-inner">
-                <h3>¿Cómo dirige, antes, hoy, obedecer guía?</h3>
-                <div class="arrow"><svg width="50" height="50" viewBox="0 0 100 100">
-                        <path id="Rectangle"></path>
-                        <path id="Rectangle-1"></path>
-                    </svg></div>
-            </div>
-        </div>
-        <div class="container-body" style="max-height: 0px;">
-            <div class="body">
-                <ul>
-                    <li><span onclick="openModal(this)" class="span-link"
-                            data-text="17 Cada vez que la nube se elevaba por encima de la tienda, los israelitas se trasladaban de inmediato, y, en el lugar donde la nube se detenía, allí acampaban los israelitas. 18 Por orden de Jehová se trasladaban los israelitas y por orden de Jehová acampaban. Mientras la nube permanecía encima del tabernáculo, ellos se quedaban acampados.">
-                            Nú 9:17, 18 </span></li>
-                    <li>Nube, fuego, moverse, acampar.</li>
-                    <li>Jh no cambia, señal visible, C.G.</li>
-                    <li>Ancianos de tribu, 100, 50 = Sup Circ, ancianos.</li>
-                    <li>Movimiento ponía a prueba paciencia.</li>
-                </ul>
-            </div>
-        </div>
+    <div class="stopwatch">
+      <div class="counter">
+        <svg id="minT" viewBox="0 0 124 204">
+          <path id="tl" d="M 20 20 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
+          <path id="bl" d="M 20 104 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
+          <path id="t" d="M 22 18 l 10 10 l 60 0 l 10 -10 l -10 -10 l -60 0 z"></path>
+          <path id="m" d="M 22 102 l 10 10 l 60 0 l 10 -10 l -10 -10 l -60 0 z"></path>
+          <path id="tr" d="M 104 20 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
+          <path id="br" d="M 104 104 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
+          <path id="b" d="M 22 186  l 10 10 l 60 0 l 10 -10 l -10 -10 l -60 0 z"></path>
+        </svg>
+        <svg id="minU" viewBox="0 0 124 204">
+          <path id="tl" d="M 20 20 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
+          <path id="bl" d="M 20 104 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
+          <path id="t" d="M 22 18 l 10 10 l 60 0 l 10 -10 l -10 -10 l -60 0 z"></path>
+          <path id="m" d="M 22 102 l 10 10 l 60 0 l 10 -10 l -10 -10 l -60 0 z"></path>
+          <path id="tr" d="M 104 20 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
+          <path id="br" d="M 104 104 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
+          <path id="b" d="M 22 186  l 10 10 l 60 0 l 10 -10 l -10 -10 l -60 0 z"></path>
+        </svg>
+        <svg id="twoDots" viewBox="0 0 20 204">
+          <path d="M 0 50 l 20 0 l 0 20 l -20 0 z M 0 134 l 20 0 l 0 20 l -20 0 z"></path>
+        </svg>
+        <svg id="secT" viewBox="0 0 124 204">
+          <path id="tl" d="M 20 20 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
+          <path id="bl" d="M 20 104 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
+          <path id="t" d="M 22 18 l 10 10 l 60 0 l 10 -10 l -10 -10 l -60 0 z"></path>
+          <path id="m" d="M 22 102 l 10 10 l 60 0 l 10 -10 l -10 -10 l -60 0 z"></path>
+          <path id="tr" d="M 104 20 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
+          <path id="br" d="M 104 104 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
+          <path id="b" d="M 22 186  l 10 10 l 60 0 l 10 -10 l -10 -10 l -60 0 z"></path>
+        </svg>
+        <svg id="secU" viewBox="0 0 124 204">
+          <path id="tl" d="M 20 20 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
+          <path id="bl" d="M 20 104 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
+          <path id="t" d="M 22 18 l 10 10 l 60 0 l 10 -10 l -10 -10 l -60 0 z"></path>
+          <path id="m" d="M 22 102 l 10 10 l 60 0 l 10 -10 l -10 -10 l -60 0 z"></path>
+          <path id="tr" d="M 104 20 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
+          <path id="br" d="M 104 104 l -10 10 l 0 60 l 10 10 l 10 -10 l 0 -60 z"></path>
+          <path id="b" d="M 22 186  l 10 10 l 60 0 l 10 -10 l -10 -10 l -60 0 z"></path>
+        </svg>
+      </div>
+      <button id="btnStart">
+        <svg viewBox="0 0 60 80">
+          <path></path>
+        </svg>
+      </button>
+      <button id="btnRestart">
+        <svg viewBox="0 0 60 80">
+          <path></path>
+        </svg>
+      </button>
     </div>
-    <div class="row">
-        <div class="header-outer" id="header3" onclick="headerOuterClick(this)">
-            <div class="header-inner">
-                <h3>En orden, trompetas, E.</h3>
-                <div class="arrow"><svg width="50" height="50" viewBox="0 0 100 100">
-                        <path id="Rectangle"></path>
-                        <path id="Rectangle-1"></path>
-                    </svg></div>
-            </div>
-        </div>
-        <div class="container-body" style="max-height: 0px;">
-            <div class="body">
-                <ul>
-                    <li>¿Paciencia cartas? ¿Contactos? ¿Acumulan?</li>
-                    <li>Difícil, tantos, inesperados.</li>
-                    <li>Conme, descargar Asambl, cartas. Adaptarnos, debemos.</li>
-                    <li>¿Cuántas más? Núm 33 - 40 cambios.</li>
-                </ul>
-            </div>
-        </div>
+  </nav>
+  <div class='row'>
+    <div class='header-outer' id='header1' onclick='headerOuterClick(this)'>
+      <div class='header-inner'>
+        <h3>¿Notaron todo el éxito que Jehová le dio a Josué?</h3>
+        <div class='arrow'><svg width='50' height='50' viewBox='0 0 100 100'>
+            <path id='Rectangle'></path>
+            <path id='Rectangle-1'></path>
+          </svg></div>
+      </div>
     </div>
-    <div class="row">
-        <div class="header-outer" id="header4" onclick="headerOuterClick(this)">
-            <div class="header-inner">
-                <h3>Volvamos israelitas:</h3>
-                <div class="arrow"><svg width="50" height="50" viewBox="0 0 100 100">
-                        <path id="Rectangle"></path>
-                        <path id="Rectangle-1"></path>
-                    </svg></div>
-            </div>
-        </div>
-        <div class="container-body" style="max-height: 0px;">
-            <div class="body">
-                <ul>
-                    <li><span onclick="openModal(this)" class="span-link"
-                            data-text="21 Otras veces la nube se detenía solo desde la noche hasta la mañana y, cuando la nube se elevaba por la mañana, ellos se trasladaban. Cuando la nube se elevaba, fuera de día o de noche, ellos se trasladaban. 22 Mientras la nube permaneciera encima del tabernáculo —fueran dos días, un mes o más—, los israelitas se quedaban acampados y no se trasladaban. Pero, si se elevaba, ellos se trasladaban.">
-                            Nú 9:21, 22 </span></li>
-                    <li>Llegar, desempacar, irse, otra vez...</li>
-                    <li>Cuando cambios: obedecer cuanto antes.</li>
-                    <li>Sombra. "No sé por qué mover".</li>
-                    <li>¿Qué podía pasar? Hobab, guía, desierto.</li>
-                    <li>Cuestionar predicación, S.R., insisten compañeros, advierte Educ. Supr.</li>
-                    <li>Perdernos en mundo, tal como desierto.</li>
-                </ul>
-            </div>
-        </div>
+    <div class='container-body' style='max-height: 0px;'>
+      <div class='body'>
+        <ul>
+          <li>Cruzaron el Jordán.</li>
+          <li>Conquistó Jericó, la ciudad de Hai, y el resto de la tierra prometida.</li>
+          <li>Derrotó a los amorreos.</li>
+          <li>Jehová lo escuchó y detuvo el sol.</li>
+          <li>Repartieron la tierra promeida.</li>
+          <li>Dejó últimas palabras inspiradoras.</li>
+        </ul>
+      </div>
     </div>
-    <div class="row">
-        <div class="header-outer" id="header5" onclick="headerOuterClick(this)">
-            <div class="header-inner">
-                <h3>¿Qué otra razón hay para seguir la guía?</h3>
-                <div class="arrow"><svg width="50" height="50" viewBox="0 0 100 100">
-                        <path id="Rectangle"></path>
-                        <path id="Rectangle-1"></path>
-                    </svg></div>
-            </div>
-        </div>
-        <div class="container-body" style="max-height: 0px;">
-            <div class="body">
-                <ul>
-                    <li><span onclick="openModal(this)" class="span-link"
-                            data-text="5 ”Cuando suene una serie de toques cortos de trompeta, deben trasladarse los campamentos de los que están al este. 6 Cuando suene una serie de toques cortos de trompeta por segunda vez, deben trasladarse los campamentos de los que están al sur. Hay que hacer sonar los toques de trompeta de esta manera cada vez que una de las divisiones se traslade. 7 ”Para convocar a la congregación, deben tocar las trompetas, pero no con series de toques cortos. 8 Los hijos de Aarón, los sacerdotes, deben tocar las trompetas; esto será un estatuto permanente para ustedes generación tras generación.">
-                            Nú 10:5-8 </span></li>
-                    <li>Jh pudo utilizar, truenos, temblor.</li>
-                    <li>Seres humanos, equivocar, códigos.</li>
-                    <li>Toque ancianos tribus, al llegar apenados.</li>
-                    <li>C.G., Supers, ancianos -&gt;.</li>
-                </ul>
-            </div>
-        </div>
+  </div>
+
+  <div class='row'>
+    <div class='header-outer' id='header2' onclick='headerOuterClick(this)'>
+      <div class='header-inner'>
+        <h3>¿Podemos tener nosotros éxito así?</h3>
+        <div class='arrow'><svg width='50' height='50' viewBox='0 0 100 100'>
+            <path id='Rectangle'></path>
+            <path id='Rectangle-1'></path>
+          </svg></div>
+      </div>
     </div>
-    <div class="row">
-        <div class="header-outer" id="header6" onclick="headerOuterClick(this)">
-            <div class="header-inner">
-                <h3>¿Se imaginan israelita no haciendo caso?</h3>
-                <div class="arrow"><svg width="50" height="50" viewBox="0 0 100 100">
-                        <path id="Rectangle"></path>
-                        <path id="Rectangle-1"></path>
-                    </svg></div>
-            </div>
-        </div>
-        <div class="container-body" style="max-height: 0px;">
-            <div class="body">
-                <ul>
-                    <li>Contra instrucciones Jh.</li>
-                    <li>¿Se imagina hno rechazando consejo de anciano porque en el pasado dio mal consejo, trató mal?
-                    </li>
-                    <li>Consejo en el clavo, molesta.</li>
-                    <li>Contra guía Jh. Tan imperfectos nos.</li>
-                </ul>
-            </div>
-        </div>
+    <div class='container-body' style='max-height: 0px;'>
+      <div class='body'>
+        <ul>
+          <li>Mismo Jh le dijo a <span onclick="openModal(this)" class="span-link"
+              data-text="7 ”Solo sé valiente y muy fuerte, y obedece cuidadosamente toda la Ley que mi siervo Moisés te mandó. No te desvíes de ella ni a la derecha ni a la izquierda, para que actúes sabiamente vayas donde vayas. 8 Este libro de la Ley no debe apartarse de tu boca, y tienes que leerlo y meditar en él día y noche, a fin de que obedezcas cuidadosamente todo lo que está escrito en él; porque entonces te irá bien en tu camino y entonces actuarás con sabiduría.">Josué
+              1:7, 8</span>.</li>
+          <li>Clave 1: leer y obedecer la B.</li>
+          <li>Meditar:</li>
+          <ul>
+            <li>(Perspic.)≈Pensar y reflexionar con intensidad en alguna cosa, experiencia, situación del presente o posible futuro.</li>
+          </ul>
+          <li>Lisa: <span onclick="openModal(this)" class="span-link"
+              data-text="“Después de bautizarme en 94’, me mantuve muy activa en la verdad. Asistía a todas las reuniones, informaba entre treinta y cuarenta horas al mes y tenía amistad con mis hermanos cristianos. Luego empecé a apartarme. Caí tan bajo, que hasta violé la ley de Dios, pero recapacité y decidí limpiar mi vida por completo. Estoy contentísima de que Jehová haya visto mi arrepentimiento y me haya vuelto a aceptar. Muchas veces me he preguntado por qué me aparté, y la única respuesta que hallo es que descuidé el estudio y la meditación. Sencillamente, la verdad bíblica no me había calado hondo. A partir de ahora, siempre ocuparán un espacio importante en mi vida el estudio personal y la meditación”">w01
+              15/10</span></li>
+        </ul>
+      </div>
     </div>
-    <div class="row">
-        <div class="header-outer" id="header7" onclick="headerOuterClick(this)">
-            <div class="header-inner">
-                <h3>Conclusión</h3>
-                <div class="arrow"><svg width="50" height="50" viewBox="0 0 100 100">
-                        <path id="Rectangle"></path>
-                        <path id="Rectangle-1"></path>
-                    </svg></div>
-            </div>
-        </div>
-        <div class="container-body" style="max-height: 0px;">
-            <div class="body">
-                <ul>
-                    <li>Cuando obedecemos a quienes nos dirigen, ancianos, Supers, C.G., en realidad estamos obedeciendo
-                        a Jehová.</li>
-                </ul>
-            </div>
-        </div>
+  </div>
+
+  <div class='row'>
+    <div class='header-outer' id='header3' onclick='headerOuterClick(this)'>
+      <div class='header-inner'>
+        <h3>Clave 2:</h3>
+        <div class='arrow'><svg width='50' height='50' viewBox='0 0 100 100'>
+            <path id='Rectangle'></path>
+            <path id='Rectangle-1'></path>
+          </svg></div>
+      </div>
     </div>
-    <div class="container-modal" id="mod-quote">
-        <div class="modal-title">
-            <div class="title-label"></div>
-            <div class="btn-cancel">&#x000D7;</div>
-        </div>
-        <div class="modal-body">
-            <div class="quote-text"></div>
-        </div>
+    <div class='container-body' style='max-height: 0px;'>
+      <div class='body'>
+        <ul>
+          <li><span onclick="openModal(this)" class="span-link" data-text="9 ¿Acaso no te he ordenado yo que seas fuerte y valiente? No tengas miedo ni terror, porque Jehová tu Dios está contigo vayas donde vayas”.">Josué 1:9</span></li>
+          <li>Fuerte, valiente, no se logra con una orden.</li>
+          <li>¿Por qué Jh lo ordena?</li>
+          <li>Fuerza y valentía no dependen de nosotros.</li>
+          <li>No solos:</li>
+          <ul>
+            <li>JC como cabeza.</li>
+            <li>Hermandad 8M+.</li>
+            <li>Experiencias valentía.</li>
+            <li>“Su fuerza dependerá de que mantengan la calma y demuestren confianza”.</li>
+          </ul>
+        </ul>
+      </div>
     </div>
-    <div class="overlay-modal"></div>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Noto Sans JP
-        }
-
-        body {
-            background-color: rgb(110, 134, 158)
-        }
-
-        #topNav {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background-color: gray;
-            display: flex;
-            flex-direction: row;
-            justify-content: flex-start;
-            align-items: stretch;
-            transition: 300ms ease-in-out;
-            z-index: 10;
-        }
-
-        #topNav .logo {
-            background-color: rgb(255, 255, 255);
-            cursor: pointer;
-            transition: 300ms ease-in-out;
-        }
-
-        #topNav .logo svg {
-            width: 100%;
-            height: 100%;
-        }
-
-        #topNav .stopwatch {
-            background-color: gray;
-            flex: 1;
-            display: flex;
-            flex-direction: row;
-            justify-content: flex-end;
-            align-items: stretch;
-        }
-
-        #topNav .stopwatch .counter {
-            background-color: rgb(0, 0, 0);
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            align-items: stretch;
-            /* margin: 0 5px; */
-        }
-
-        #topNav .stopwatch .counter svg {
-            height: 100%;
-        }
-
-        #topNav .stopwatch .counter svg path {
-            stroke: none;
-            fill: rgb(65, 65, 65);
-        }
-
-        #topNav .stopwatch button {
-            /* border: 1px solid red; */
-            background-color: transparent;
-            border: none;
-            outline: none;
-            margin: 0 1px;
-
-        }
-
-        #topNav .stopwatch button svg {
-            height: 100%;
-            width: 100%;
-        }
-
-        #topNav .stopwatch button svg path {
-            fill: none;
-            stroke: rgb(0, 0, 0);
-            stroke-width: 15;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            transition: d 500ms ease-in-out;
-        }
-
-        #topNav .stopwatch button:hover svg path {
-            stroke: rgb(126, 173, 171);
-        }
-
-        #topNav .stopwatch button:active svg path {
-            stroke: rgb(188, 255, 252)
-        }
-
-        #topNav .stopwatch #btnStart svg path {
-            d: path("M 10 10 l 40 30 M 50 40 l -40 30");
-        }
-
-        #topNav .stopwatch #btnStart.pause svg path {
-            d: path("M 10 15 l 0 50 M 50 65 l 0 -50");
-        }
-
-        #topNav .stopwatch #btnRestart svg path {
-            d: path("M 60 15 l -50 0 l 0 50 l 50 0 z");
-        }
-
-        .overlay-modal {
-            position: fixed;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
-            background-color: rgb(0, 0, 0);
-            opacity: 0.5;
-            transform: scale(0);
-            z-index: 5
-        }
-
-        .overlay-modal.active {
-            transform: scale(1)
-        }
-
-        .container-modal {
-            background-color: rgb(168, 197, 226);
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            overflow: hidden;
-            border: 2px solid rgb(15, 52, 96);
-            border-radius: 15px;
-            z-index: 10;
-            transition: 300ms ease-in-out
-        }
-
-        .container-modal.active {
-            transform: translate(-50%, -50%) scale(1)
-        }
-
-        .container-modal .modal-title {
-            display: flex;
-            justify-content: flex-start;
-            align-items: stretch;
-            border-bottom: 2px solid rgb(15, 52, 96)
-        }
-
-        .container-modal .modal-title .title-label {
-            color: rgb(15, 52, 96);
-            display: flex;
-            align-items: center
-        }
-
-        .container-modal .modal-title .btn-cancel {
-            display: flex;
-            align-items: center;
-            margin-left: auto;
-            cursor: pointer
-        }
-
-        .container-modal .modal-body {
-            color: rgb(15, 52, 96)
-        }
-
-        .container-modal .modal-footer {
-            display: flex;
-            flex-direction: row;
-            align-items: stretch
-        }
-
-        .container-modal .modal-footer .btn {
-            background-color: rgb(88, 136, 184);
-            color: rgb(163, 228, 225);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex: 1;
-            outline: none;
-            border: none;
-            cursor: pointer
-        }
-
-        .container-modal .modal-footer .btn-cancel {
-            border-right: 1px solid rgb(15, 52, 96)
-        }
-
-        .container-modal .modal-footer .btn-ok {
-            border-left: 1px solid rgb(15, 52, 96)
-        }
-
-        .row {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: stretch
-        }
-
-        .row .header-outer {
-            background-color: rgb(5, 40, 75);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: 300ms ease-in-out
-        }
-
-        .row .header-outer.active {
-            border-radius: 20px 20px 0 0;
-            transition: none
-        }
-
-        .row .header-outer .header-inner {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex: 1;
-            background-color: rgb(5, 40, 75);
-            border: 3px solid rgb(90, 185, 180);
-            border-radius: 17px;
-            transition: 300ms ease-in-out
-        }
-
-        .row .header-outer.active .header-inner {
-            background-color: rgb(20, 65, 110)
-        }
-
-        .row .header-outer.target-remove .header-inner {
-            border: 3px solid rgb(210, 20, 20);
-            box-shadow: inset 0 0 15px 3px rgb(235, 75, 75)
-        }
-
-        .row .header-outer.target-edit .header-inner {
-            border: 3px solid rgb(255, 166, 0);
-            box-shadow: inset 0 0 15px 3px rgb(235, 179, 75);
-            transition: none
-        }
-
-        .row .header-outer .header-inner h3 {
-            color: rgb(155, 180, 190);
-            transition: 300ms ease-in-out
-        }
-
-        .row .header-outer.active .header-inner h3 {
-            color: rgb(255, 255, 255)
-        }
-
-        .row .header-outer .header-inner .arrow {
-            height: 100%;
-            position: absolute;
-            right: 0;
-            overflow: visible
-        }
-
-        .row .header-outer .header-inner .arrow svg {
-            height: 90%
-        }
-
-        .row .header-outer .header-inner .arrow svg path {
-            stroke: rgb(90, 185, 180);
-            fill: none;
-            stroke-width: 13px;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            transition: 300ms ease-in-out
-        }
-
-        .row .header-outer .header-inner .arrow svg path#Rectangle {
-            d: path("M 10 50 L 50 85 L 90 50")
-        }
-
-        .row .header-outer .header-inner .arrow svg path#Rectangle-1 {
-            d: path("M 10 10 L 50 45 L 90 10")
-        }
-
-        .row .header-outer.active .header-inner .arrow svg path#Rectangle {
-            d: path("M 10 85 L 50 50 L 90 85")
-        }
-
-        .row .header-outer.active .header-inner .arrow svg path#Rectangle-1 {
-            d: path("M 10 45 L 50 10 L 90 45")
-        }
-
-        .row .container-body {
-            background-color: rgb(185, 210, 255);
-            max-height: 0px;
-            overflow: hidden;
-            border-radius: 0 0 20px 20px;
-            transition: 300ms ease-in-out
-        }
-
-        .row .container-body .body {
-            width: 100%;
-            height: 100%;
-            border-color: rgb(5, 40, 75);
-            border-style: solid;
-            border-radius: 0 0 20px 20px
-        }
-
-        .row .container-body .body .span-link {
-            text-decoration: underline solid rgb(0, 0, 255);
-            color: rgb(0, 0, 255);
-            cursor: pointer;
-            font-weight: bolder
-        }
-
-        .row .container-body .body .span-link:hover {
-            color: rgb(143, 143, 143);
-            text-decoration-color: rgb(143, 143, 143)
-        }
-
-        @media (max-width: 600px) {
-            .row .header-outer {
-                padding: 3px
-            }
-
-            .row .header-outer .header-inner {
-                padding: 1rem 0
-            }
-
-            .row .header-outer .header-inner h3 {
-                font-size: 1rem
-            }
-
-            .row .header-outer .header-inner .arrow {
-                padding: 1.2rem 0
-            }
-
-            .row .container-body .body {
-                padding: 1rem 2rem;
-                border-width: 0 3px 3px 3px
-            }
-
-            .row .container-body .body ul li {
-                font-size: 0.9rem
-            }
-
-            .container-modal {
-                width: 75%
-            }
-
-            .container-modal .modal-title {
-                min-height: 3rem;
-                font-size: 1rem;
-                padding-left: 1rem
-            }
-
-            .container-modal .modal-title .btn-cancel {
-                font-size: 1.3rem;
-                padding: 0 0.5rem
-            }
-
-            .container-modal .modal-body {
-                padding: 0.2rem 0.2rem;
-                font-size: 1rem
-            }
-
-            .container-modal .modal-footer .btn {
-                padding: 0.4rem 0;
-                font-size: 1rem
-            }
-        }
-
-        @media (min-width: 601px) and (max-width: 900px) {
-            .row .header-outer {
-                padding: 4px
-            }
-
-            .row .header-outer .header-inner {
-                padding: 1.3rem 0
-            }
-
-            .row .header-outer .header-inner h3 {
-                font-size: 1.2rem
-            }
-
-            .row .header-outer .header-inner .arrow {
-                padding: 1.5rem 0.3rem
-            }
-
-            .row .container-body .body {
-                padding: 1rem 2.5rem;
-                border-width: 0 4px 4px 4px
-            }
-
-            .row .container-body .body ul li {
-                font-size: 1.1rem
-            }
-
-            .container-modal {
-                width: 60%
-            }
-
-            .container-modal .modal-title {
-                min-height: 3.5rem;
-                font-size: 1.2rem;
-                padding-left: 1.2rem
-            }
-
-            .container-modal .modal-title .btn-cancel {
-                font-size: 1.5rem;
-                padding: 0 0.8rem
-            }
-
-            .container-modal .modal-body {
-                padding: 0.2rem 0.3rem;
-                font-size: 1.2rem
-            }
-
-            .container-modal .modal-footer .btn {
-                padding: 0.6rem 0;
-                font-size: 1.2rem
-            }
-        }
-
-        @media (min-width: 901px) {
-            .row .header-outer {
-                padding: 5px
-            }
-
-            .row .header-outer .header-inner {
-                padding: 2rem 0
-            }
-
-            .row .header-outer .header-inner h3 {
-                font-size: 1.8rem
-            }
-
-            .row .header-outer .header-inner .arrow {
-                padding: 2rem 1.3rem
-            }
-
-            .row .container-body .body {
-                padding: 1.5rem 3rem;
-                border-width: 0 5px 5px 5px
-            }
-
-            .row .container-body .body ul li {
-                font-size: 1.5rem
-            }
-
-            .container-modal {
-                width: 50%
-            }
-
-            .container-modal .modal-title {
-                min-height: 4rem;
-                font-size: 1.6rem;
-                padding-left: 1.5rem
-            }
-
-            .container-modal .modal-title .btn-cancel {
-                font-size: 2rem;
-                padding: 0 0.8rem
-            }
-
-            .container-modal .modal-body {
-                padding: 0.3rem 0.4rem;
-                font-size: 1.6rem
-            }
-
-            .container-modal .modal-footer .btn {
-                padding: 0.8rem 0;
-                font-size: 1.6rem
-            }
-        }
-
-        @media (max-width: 600px) {
-            body {
-                padding-top: 40px;
-            }
-
-            #topNav {
-                height: 40px;
-            }
-
-            #topNav .logo {
-                width: 90px;
-                padding: 5px;
-                border-radius: 20px;
-            }
-
-            #topNav .stopwatch .counter {
-                width: 150px;
-                padding: 3px;
-            }
-
-            #topNav .stopwatch button {
-                width: 70px;
-            }
-        }
-
-        @media (min-width: 601px) and (max-width:900px) {
-            body {
-                padding-top: 50px;
-            }
-
-            #topNav {
-                height: 50px;
-            }
-
-            #topNav .logo {
-                width: 120px;
-                padding: 6px;
-                border-radius: 25px;
-            }
-
-            #topNav .stopwatch .counter {
-                width: 220px;
-                padding: 4px;
-            }
-
-            #topNav .stopwatch button {
-                width: 75px;
-            }
-        }
-
-        @media (min-width: 901px) {
-            body {
-                padding-top: 60px;
-            }
-
-            #topNav {
-                height: 60px;
-            }
-
-            #topNav .logo {
-                width: 150px;
-                padding: 7px;
-                border-radius: 30px;
-            }
-
-            #topNav .stopwatch .counter {
-                width: 270px;
-                padding: 5px;
-            }
-
-            #topNav .stopwatch button {
-                width: 80px;
-            }
-        }
-    </style>
-    <script>const conainerBody = document.querySelector(".container-body"); const modalQuote = document.getElementById("mod-quote"); const overlayModal = document.querySelector(".overlay-modal"); const btnsModalClose = document.querySelectorAll(".container-modal .btn-cancel"); document.addEventListener("keyup", function (k) { if (modalQuote.classList.contains("active") && k.key == "Escape") { closeModal(); } }); overlayModal.addEventListener("click", closeModal); btnsModalClose.forEach(btn => { btn.addEventListener("click", closeModal); }); function headerOuterClick(element) { if (element.classList.contains("active")) { closeHeader(element); } else { document.querySelectorAll(".header-outer").forEach((header) => { header.classList.remove("active"); }); openHeader(element); } } function closeHeader(element) { element.classList.remove("active"); element.nextElementSibling.style.maxHeight = "0px"; } function openHeader(element) { const otherHeaders = document.querySelectorAll("." + element.classList[0] + ":not(#" + element.id + ")"); otherHeaders.forEach(header => { header.classList.remove("active"); header.nextElementSibling.style.maxHeight = "0px"; }); element.classList.add("active"); element.nextElementSibling.style.maxHeight = element.nextElementSibling.scrollHeight + "px"; } function openModal(element) { let title = element.innerText; let body = element.dataset.text; modalQuote.querySelector(".title-label").innerText = title; modalQuote.querySelector(".quote-text").innerText = body; modalQuote.classList.add("active"); overlayModal.classList.add("active"); } function closeModal() { const modals = document.querySelectorAll(".container-modal"); modals.forEach(modal => { modal.classList.remove("active"); }); overlayModal.classList.remove("active"); }
-        const btnStart = document.getElementById("btnStart");
-        const btnRestart = document.getElementById("btnRestart");
-        const divCounter = document.querySelector(".counter");
-
-        var stopwatchInterval;
-        const svgMintT = document.querySelector("nav .stopwatch #minT");
-        const svgMinU = document.querySelector("nav .stopwatch #minU");
-        const svgSecT = document.querySelector("nav .stopwatch #secT");
-        const svgSecU = document.querySelector("nav .stopwatch #secU");
-        const colorOn = "rgb(174, 236, 233)";
-        const colorOff = "rgb(65, 65, 65)";
-
-        btnStart.addEventListener("click", runStopwatch);
-        btnRestart.addEventListener("click", function () {
-            toggleMatrix(false);
-            resetStopwatch();
+  </div>
+
+  <div class='row'>
+    <div class='header-outer' id='header4' onclick='headerOuterClick(this)'>
+      <div class='header-inner'>
+        <h3>¿Situaciones?</h3>
+        <div class='arrow'><svg width='50' height='50' viewBox='0 0 100 100'>
+            <path id='Rectangle'></path>
+            <path id='Rectangle-1'></path>
+          </svg></div>
+      </div>
+    </div>
+    <div class='container-body' style='max-height: 0px;'>
+      <div class='body'>
+        <ul>
+          <li>Ilustración.</li>
+          <li>Estudiar y obedecer B.</li>
+          <li>Confiemos en Jh: Bien en la vida.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="container-modal" id="mod-quote">
+    <div class="modal-title">
+      <div class="title-label"></div>
+      <div class="btn-cancel">&#x000D7;</div>
+    </div>
+    <div class="modal-body">
+      <div class="quote-text"></div>
+    </div>
+  </div>
+  <div class="overlay-modal"></div>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Noto Sans JP
+    }
+
+    body {
+      background-color: rgb(110, 134, 158)
+    }
+
+    ul ul li {
+      margin-left: 2em;
+    }
+
+    #topNav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background-color: gray;
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      align-items: stretch;
+      transition: 300ms ease-in-out;
+      z-index: 10;
+    }
+
+    #topNav .logo {
+      background-color: rgb(255, 255, 255);
+      cursor: pointer;
+      transition: 300ms ease-in-out;
+    }
+
+    #topNav .logo svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    #topNav .stopwatch {
+      background-color: gray;
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+      align-items: stretch;
+    }
+
+    #topNav .stopwatch .counter {
+      background-color: rgb(0, 0, 0);
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: stretch;
+      /* margin: 0 5px; */
+    }
+
+    #topNav .stopwatch .counter svg {
+      height: 100%;
+    }
+
+    #topNav .stopwatch .counter svg path {
+      stroke: none;
+      fill: rgb(65, 65, 65);
+    }
+
+    #topNav .stopwatch button {
+      /* border: 1px solid red; */
+      background-color: transparent;
+      border: none;
+      outline: none;
+      margin: 0 1px;
+
+    }
+
+    #topNav .stopwatch button svg {
+      height: 100%;
+      width: 100%;
+    }
+
+    #topNav .stopwatch button svg path {
+      fill: none;
+      stroke: rgb(0, 0, 0);
+      stroke-width: 15;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: d 500ms ease-in-out;
+    }
+
+    #topNav .stopwatch button:hover svg path {
+      stroke: rgb(126, 173, 171);
+    }
+
+    #topNav .stopwatch button:active svg path {
+      stroke: rgb(188, 255, 252)
+    }
+
+    #topNav .stopwatch #btnStart svg path {
+      d: path("M 10 10 l 40 30 M 50 40 l -40 30");
+    }
+
+    #topNav .stopwatch #btnStart.pause svg path {
+      d: path("M 10 15 l 0 50 M 50 65 l 0 -50");
+    }
+
+    #topNav .stopwatch #btnRestart svg path {
+      d: path("M 60 15 l -50 0 l 0 50 l 50 0 z");
+    }
+
+    .overlay-modal {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background-color: rgb(0, 0, 0);
+      opacity: 0.5;
+      transform: scale(0);
+      z-index: 5
+    }
+
+    .overlay-modal.active {
+      transform: scale(1)
+    }
+
+    .container-modal {
+      background-color: rgb(168, 197, 226);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      overflow: hidden;
+      border: 2px solid rgb(15, 52, 96);
+      border-radius: 15px;
+      z-index: 10;
+      transition: 300ms ease-in-out
+    }
+
+    .container-modal.active {
+      transform: translate(-50%, -50%) scale(1)
+    }
+
+    .container-modal .modal-title {
+      display: flex;
+      justify-content: flex-start;
+      align-items: stretch;
+      border-bottom: 2px solid rgb(15, 52, 96)
+    }
+
+    .container-modal .modal-title .title-label {
+      color: rgb(15, 52, 96);
+      display: flex;
+      align-items: center
+    }
+
+    .container-modal .modal-title .btn-cancel {
+      display: flex;
+      align-items: center;
+      margin-left: auto;
+      cursor: pointer
+    }
+
+    .container-modal .modal-body {
+      color: rgb(15, 52, 96)
+    }
+
+    .container-modal .modal-footer {
+      display: flex;
+      flex-direction: row;
+      align-items: stretch
+    }
+
+    .container-modal .modal-footer .btn {
+      background-color: rgb(88, 136, 184);
+      color: rgb(163, 228, 225);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex: 1;
+      outline: none;
+      border: none;
+      cursor: pointer
+    }
+
+    .container-modal .modal-footer .btn-cancel {
+      border-right: 1px solid rgb(15, 52, 96)
+    }
+
+    .container-modal .modal-footer .btn-ok {
+      border-left: 1px solid rgb(15, 52, 96)
+    }
+
+    .row {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: stretch
+    }
+
+    .row .header-outer {
+      background-color: rgb(5, 40, 75);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: 300ms ease-in-out
+    }
+
+    .row .header-outer.active {
+      border-radius: 20px 20px 0 0;
+      transition: none
+    }
+
+    .row .header-outer .header-inner {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex: 1;
+      background-color: rgb(5, 40, 75);
+      border: 3px solid rgb(90, 185, 180);
+      border-radius: 17px;
+      transition: 300ms ease-in-out
+    }
+
+    .row .header-outer.active .header-inner {
+      background-color: rgb(20, 65, 110)
+    }
+
+    .row .header-outer.target-remove .header-inner {
+      border: 3px solid rgb(210, 20, 20);
+      box-shadow: inset 0 0 15px 3px rgb(235, 75, 75)
+    }
+
+    .row .header-outer.target-edit .header-inner {
+      border: 3px solid rgb(255, 166, 0);
+      box-shadow: inset 0 0 15px 3px rgb(235, 179, 75);
+      transition: none
+    }
+
+    .row .header-outer .header-inner h3 {
+      color: rgb(155, 180, 190);
+      transition: 300ms ease-in-out
+    }
+
+    .row .header-outer.active .header-inner h3 {
+      color: rgb(255, 255, 255)
+    }
+
+    .row .header-outer .header-inner .arrow {
+      height: 100%;
+      position: absolute;
+      right: 0;
+      overflow: visible
+    }
+
+    .row .header-outer .header-inner .arrow svg {
+      height: 90%
+    }
+
+    .row .header-outer .header-inner .arrow svg path {
+      stroke: rgb(90, 185, 180);
+      fill: none;
+      stroke-width: 13px;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: 300ms ease-in-out
+    }
+
+    .row .header-outer .header-inner .arrow svg path#Rectangle {
+      d: path("M 10 50 L 50 85 L 90 50")
+    }
+
+    .row .header-outer .header-inner .arrow svg path#Rectangle-1 {
+      d: path("M 10 10 L 50 45 L 90 10")
+    }
+
+    .row .header-outer.active .header-inner .arrow svg path#Rectangle {
+      d: path("M 10 85 L 50 50 L 90 85")
+    }
+
+    .row .header-outer.active .header-inner .arrow svg path#Rectangle-1 {
+      d: path("M 10 45 L 50 10 L 90 45")
+    }
+
+    .row .container-body {
+      background-color: rgb(185, 210, 255);
+      max-height: 0px;
+      overflow: hidden;
+      border-radius: 0 0 20px 20px;
+      transition: 300ms ease-in-out
+    }
+
+    .row .container-body .body {
+      width: 100%;
+      height: 100%;
+      border-color: rgb(5, 40, 75);
+      border-style: solid;
+      border-radius: 0 0 20px 20px
+    }
+
+    .row .container-body .body .span-link {
+      text-decoration: underline solid rgb(0, 0, 255);
+      color: rgb(0, 0, 255);
+      cursor: pointer;
+      font-weight: bolder
+    }
+
+    .row .container-body .body .span-link:hover {
+      color: rgb(143, 143, 143);
+      text-decoration-color: rgb(143, 143, 143)
+    }
+
+    @media (max-width: 600px) {
+      .row .header-outer {
+        padding: 3px
+      }
+
+      .row .header-outer .header-inner {
+        padding: 1rem 0
+      }
+
+      .row .header-outer .header-inner h3 {
+        font-size: 1rem
+      }
+
+      .row .header-outer .header-inner .arrow {
+        padding: 1.2rem 0
+      }
+
+      .row .container-body .body {
+        padding: 1rem 2rem;
+        border-width: 0 3px 3px 3px
+      }
+
+      .row .container-body .body ul li {
+        font-size: 0.9rem
+      }
+
+      .container-modal {
+        width: 75%
+      }
+
+      .container-modal .modal-title {
+        min-height: 3rem;
+        font-size: 1rem;
+        padding-left: 1rem
+      }
+
+      .container-modal .modal-title .btn-cancel {
+        font-size: 1.3rem;
+        padding: 0 0.5rem
+      }
+
+      .container-modal .modal-body {
+        padding: 0.2rem 0.2rem;
+        font-size: 1rem
+      }
+
+      .container-modal .modal-footer .btn {
+        padding: 0.4rem 0;
+        font-size: 1rem
+      }
+    }
+
+    @media (min-width: 601px) and (max-width: 900px) {
+      .row .header-outer {
+        padding: 4px
+      }
+
+      .row .header-outer .header-inner {
+        padding: 1.3rem 0
+      }
+
+      .row .header-outer .header-inner h3 {
+        font-size: 1.2rem
+      }
+
+      .row .header-outer .header-inner .arrow {
+        padding: 1.5rem 0.3rem
+      }
+
+      .row .container-body .body {
+        padding: 1rem 2.5rem;
+        border-width: 0 4px 4px 4px
+      }
+
+      .row .container-body .body ul li {
+        font-size: 1.1rem
+      }
+
+      .container-modal {
+        width: 60%
+      }
+
+      .container-modal .modal-title {
+        min-height: 3.5rem;
+        font-size: 1.2rem;
+        padding-left: 1.2rem
+      }
+
+      .container-modal .modal-title .btn-cancel {
+        font-size: 1.5rem;
+        padding: 0 0.8rem
+      }
+
+      .container-modal .modal-body {
+        padding: 0.2rem 0.3rem;
+        font-size: 1.2rem
+      }
+
+      .container-modal .modal-footer .btn {
+        padding: 0.6rem 0;
+        font-size: 1.2rem
+      }
+    }
+
+    @media (min-width: 901px) {
+      .row .header-outer {
+        padding: 5px
+      }
+
+      .row .header-outer .header-inner {
+        padding: 2rem 0
+      }
+
+      .row .header-outer .header-inner h3 {
+        font-size: 1.8rem
+      }
+
+      .row .header-outer .header-inner .arrow {
+        padding: 2rem 1.3rem
+      }
+
+      .row .container-body .body {
+        padding: 1.5rem 3rem;
+        border-width: 0 5px 5px 5px
+      }
+
+      .row .container-body .body ul li {
+        font-size: 1.5rem
+      }
+
+      .container-modal {
+        width: 50%
+      }
+
+      .container-modal .modal-title {
+        min-height: 4rem;
+        font-size: 1.6rem;
+        padding-left: 1.5rem
+      }
+
+      .container-modal .modal-title .btn-cancel {
+        font-size: 2rem;
+        padding: 0 0.8rem
+      }
+
+      .container-modal .modal-body {
+        padding: 0.3rem 0.4rem;
+        font-size: 1.6rem
+      }
+
+      .container-modal .modal-footer .btn {
+        padding: 0.8rem 0;
+        font-size: 1.6rem
+      }
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding-top: 40px;
+      }
+
+      #topNav {
+        height: 40px;
+      }
+
+      #topNav .logo {
+        width: 90px;
+        padding: 5px;
+        border-radius: 20px;
+      }
+
+      #topNav .stopwatch .counter {
+        width: 150px;
+        padding: 3px;
+      }
+
+      #topNav .stopwatch button {
+        width: 70px;
+      }
+    }
+
+    @media (min-width: 601px) and (max-width:900px) {
+      body {
+        padding-top: 50px;
+      }
+
+      #topNav {
+        height: 50px;
+      }
+
+      #topNav .logo {
+        width: 120px;
+        padding: 6px;
+        border-radius: 25px;
+      }
+
+      #topNav .stopwatch .counter {
+        width: 220px;
+        padding: 4px;
+      }
+
+      #topNav .stopwatch button {
+        width: 75px;
+      }
+    }
+
+    @media (min-width: 901px) {
+      body {
+        padding-top: 60px;
+      }
+
+      #topNav {
+        height: 60px;
+      }
+
+      #topNav .logo {
+        width: 150px;
+        padding: 7px;
+        border-radius: 30px;
+      }
+
+      #topNav .stopwatch .counter {
+        width: 270px;
+        padding: 5px;
+      }
+
+      #topNav .stopwatch button {
+        width: 80px;
+      }
+    }
+  </style>
+  <script>
+    const conainerBody = document.querySelector(".container-body");
+    const modalQuote = document.getElementById("mod-quote");
+    const overlayModal = document.querySelector(".overlay-modal");
+    const btnsModalClose = document.querySelectorAll(".container-modal .btn-cancel");
+    document.addEventListener("keyup", function(k) {
+      if (modalQuote.classList.contains("active") && k.key == "Escape") {
+        closeModal();
+      }
+    });
+    overlayModal.addEventListener("click", closeModal);
+    btnsModalClose.forEach(btn => {
+      btn.addEventListener("click", closeModal);
+    });
+
+    function headerOuterClick(element) {
+      if (element.classList.contains("active")) {
+        closeHeader(element);
+      } else {
+        document.querySelectorAll(".header-outer").forEach((header) => {
+          header.classList.remove("active");
         });
+        openHeader(element);
+      }
+    }
 
-        function runStopwatch() {  //  For the button that will start/pause the stopwatch.
-            const btn = document.getElementById("btnStart");
+    function closeHeader(element) {
+      element.classList.remove("active");
+      element.nextElementSibling.style.maxHeight = "0px";
+    }
 
-            if (btn.classList.contains("pause")) {  //  If svg path shows the pause sign, meaning it is running.
-                startFromZero = false;
-                clearInterval(stopwatchInterval);
-                btn.classList.remove("pause");
-            } else {  //  If svg path shows the play sign, meaning is not running
-                if (startFromZero) {
-                    toggleMatrix(true);
-                    timeI = new Date().getTime();
-                } else {  //  If it has been previously paused
-                    timeI = (new Date().getTime()) - timeCounter - 1;
-                }
-                stopwatchInterval = window.setInterval(function () {
-                    timeCounter = (new Date()).getTime() - timeI;
-                    // console.log(timeCounter);
-                    var arrTimeDigits = millisecsToArray(timeCounter);
-                    lightMatrix(document.getElementById("minT"), arrTimeDigits[0]);
-                    lightMatrix(document.getElementById("minU"), arrTimeDigits[1]);
-                    lightMatrix(document.getElementById("secT"), arrTimeDigits[2]);
-                    lightMatrix(document.getElementById("secU"), arrTimeDigits[3]);
-                }, 1000);
-                btn.classList.add("pause");
-            }
+    function openHeader(element) {
+      const otherHeaders = document.querySelectorAll("." + element.classList[0] + ":not(#" + element.id + ")");
+      otherHeaders.forEach(header => {
+        header.classList.remove("active");
+        header.nextElementSibling.style.maxHeight = "0px";
+      });
+      element.classList.add("active");
+      element.nextElementSibling.style.maxHeight = element.nextElementSibling.scrollHeight + "px";
+    }
+
+    function openModal(element) {
+      let title = element.innerText;
+      let body = element.dataset.text;
+      modalQuote.querySelector(".title-label").innerText = title;
+      modalQuote.querySelector(".quote-text").innerText = body;
+      modalQuote.classList.add("active");
+      overlayModal.classList.add("active");
+    }
+
+    function closeModal() {
+      const modals = document.querySelectorAll(".container-modal");
+      modals.forEach(modal => {
+        modal.classList.remove("active");
+      });
+      overlayModal.classList.remove("active");
+    }
+    const btnStart = document.getElementById("btnStart");
+    const btnRestart = document.getElementById("btnRestart");
+    const divCounter = document.querySelector(".counter");
+
+    var stopwatchInterval;
+    const svgMintT = document.querySelector("nav .stopwatch #minT");
+    const svgMinU = document.querySelector("nav .stopwatch #minU");
+    const svgSecT = document.querySelector("nav .stopwatch #secT");
+    const svgSecU = document.querySelector("nav .stopwatch #secU");
+    const colorOn = "rgb(174, 236, 233)";
+    const colorOff = "rgb(65, 65, 65)";
+
+    btnStart.addEventListener("click", runStopwatch);
+    btnRestart.addEventListener("click", function() {
+      toggleMatrix(false);
+      resetStopwatch();
+    });
+
+    function runStopwatch() { //  For the button that will start/pause the stopwatch.
+      const btn = document.getElementById("btnStart");
+
+      if (btn.classList.contains("pause")) { //  If svg path shows the pause sign, meaning it is running.
+        startFromZero = false;
+        clearInterval(stopwatchInterval);
+        btn.classList.remove("pause");
+      } else { //  If svg path shows the play sign, meaning is not running
+        if (startFromZero) {
+          toggleMatrix(true);
+          timeI = new Date().getTime();
+        } else { //  If it has been previously paused
+          timeI = (new Date().getTime()) - timeCounter - 1;
         }
-        function resetStopwatch() {
-            clearInterval(stopwatchInterval);
-            document.getElementById("btnStart").classList.remove("pause");
-            startFromZero = true;
-        }
-        //  Global variables for runStopwatch(), resetStopwatch().
-        var timeI, timeCounter, startFromZero = true;
+        stopwatchInterval = window.setInterval(function() {
+          timeCounter = (new Date()).getTime() - timeI;
+          // console.log(timeCounter);
+          var arrTimeDigits = millisecsToArray(timeCounter);
+          lightMatrix(document.getElementById("minT"), arrTimeDigits[0]);
+          lightMatrix(document.getElementById("minU"), arrTimeDigits[1]);
+          lightMatrix(document.getElementById("secT"), arrTimeDigits[2]);
+          lightMatrix(document.getElementById("secU"), arrTimeDigits[3]);
+        }, 1000);
+        btn.classList.add("pause");
+      }
+    }
+
+    function resetStopwatch() {
+      clearInterval(stopwatchInterval);
+      document.getElementById("btnStart").classList.remove("pause");
+      startFromZero = true;
+    }
+    //  Global variables for runStopwatch(), resetStopwatch().
+    var timeI, timeCounter, startFromZero = true;
 
 
-        function millisecsToArray(timeInMillisecs) {  // Returns an array of [minutes tens, minutes units, seconds tens, second units].
-            let timeArray = new Array;
-            let minsInDecimal = timeInMillisecs / 60000;  // divided by 1000 milliseconds and by 60 seconds.
-            if (minsInDecimal >= 99) {
-                timeArray = [0, 0, 0, 0];
+    function millisecsToArray(timeInMillisecs) { // Returns an array of [minutes tens, minutes units, seconds tens, second units].
+      let timeArray = new Array;
+      let minsInDecimal = timeInMillisecs / 60000; // divided by 1000 milliseconds and by 60 seconds.
+      if (minsInDecimal >= 99) {
+        timeArray = [0, 0, 0, 0];
+      } else {
+        let pureMins = parseInt(minsInDecimal);
+        let secsInDecimal = minsInDecimal - pureMins;
+        let pureSecs = Math.round(secsInDecimal * 60);
+        timeArray[0] = separateInTwoDigits(pureMins)[0]; // First digit of minutes.
+        timeArray[1] = separateInTwoDigits(pureMins)[1]; // Second digit of minutes.
+
+        timeArray[2] = separateInTwoDigits(pureSecs)[0]; // First digit of seconds.
+        timeArray[3] = separateInTwoDigits(pureSecs)[1]; // Second digit of seconds.
+      }
+      return timeArray;
+    }
+
+    function separateInTwoDigits(numInt) { // Returns an array of [tens, units].
+      let arrayOfDigits = new Array;
+      if (numInt < 10) {
+        arrayOfDigits[0] = 0;
+        arrayOfDigits[1] = numInt;
+      } else {
+        let tens = parseInt(numInt / 10);
+        let units = Math.round(((numInt / 10) - tens) * 10);
+        arrayOfDigits[0] = tens;
+        arrayOfDigits[1] = units;
+      }
+      return arrayOfDigits;
+    }
+
+    function lightMatrix(svgElement, integer) { //  Changes the color of a 7-path-matrix calculator-like number.
+      let arrMtrx = svgElement.querySelectorAll("path");
+      switch (integer) {
+        case 0:
+          arrMtrx.forEach(e => {
+            if (e.id === "m") {
+              e.style.fill = colorOff;
             } else {
-                let pureMins = parseInt(minsInDecimal);
-                let secsInDecimal = minsInDecimal - pureMins;
-                let pureSecs = Math.round(secsInDecimal * 60);
-                timeArray[0] = separateInTwoDigits(pureMins)[0];  // First digit of minutes.
-                timeArray[1] = separateInTwoDigits(pureMins)[1];  // Second digit of minutes.
-
-                timeArray[2] = separateInTwoDigits(pureSecs)[0];  // First digit of seconds.
-                timeArray[3] = separateInTwoDigits(pureSecs)[1];  // Second digit of seconds.
+              e.style.fill = colorOn;
             }
-            return timeArray;
-        }
-
-        function separateInTwoDigits(numInt) {  // Returns an array of [tens, units].
-            let arrayOfDigits = new Array;
-            if (numInt < 10) {
-                arrayOfDigits[0] = 0;
-                arrayOfDigits[1] = numInt;
+          });
+          break;
+        case 1:
+          arrMtrx.forEach(e => {
+            if (e.id === "tr" || e.id === "br") {
+              e.style.fill = colorOn;
             } else {
-                let tens = parseInt(numInt / 10);
-                let units = Math.round(((numInt / 10) - tens) * 10);
-                arrayOfDigits[0] = tens;
-                arrayOfDigits[1] = units;
+              e.style.fill = colorOff;
             }
-            return arrayOfDigits;
-        }
-
-        function lightMatrix(svgElement, integer) {  //  Changes the color of a 7-path-matrix calculator-like number.
-            let arrMtrx = svgElement.querySelectorAll("path");
-            switch (integer) {
-                case 0:
-                    arrMtrx.forEach(e => {
-                        if (e.id === "m") {
-                            e.style.fill = colorOff;
-                        } else {
-                            e.style.fill = colorOn;
-                        }
-                    });
-                    break;
-                case 1:
-                    arrMtrx.forEach(e => {
-                        if (e.id === "tr" || e.id === "br") {
-                            e.style.fill = colorOn;
-                        } else {
-                            e.style.fill = colorOff;
-                        }
-                    });
-                    break;
-                case 2:
-                    arrMtrx.forEach(e => {
-                        if (e.id === "tl" || e.id === "br") {
-                            e.style.fill = colorOff;
-                        } else {
-                            e.style.fill = colorOn;
-                        }
-                    });
-                    break;
-                case 3:
-                    arrMtrx.forEach(e => {
-                        if (e.id === "tl" || e.id === "bl") {
-                            e.style.fill = colorOff;
-                        } else {
-                            e.style.fill = colorOn;
-                        }
-                    });
-                    break;
-                case 4:
-                    arrMtrx.forEach(e => {
-                        if (e.id === "t" || e.id === "bl" || e.id === "b") {
-                            e.style.fill = colorOff;
-                        } else {
-                            e.style.fill = colorOn;
-                        }
-                    });
-                    break;
-                case 5:
-                    arrMtrx.forEach(e => {
-                        if (e.id === "tr" || e.id === "bl") {
-                            e.style.fill = colorOff;
-                        } else {
-                            e.style.fill = colorOn;
-                        }
-                    });
-                    break;
-                case 6:
-                    arrMtrx.forEach(e => {
-                        if (e.id === "tr") {
-                            e.style.fill = colorOff;
-                        } else {
-                            e.style.fill = colorOn;
-                        }
-                    });
-                    break;
-                case 7:
-                    arrMtrx.forEach(e => {
-                        if (e.id === "t" || e.id === "tr" || e.id === "br") {
-                            e.style.fill = colorOn;
-                        } else {
-                            e.style.fill = colorOff;
-                        }
-                    });
-                    break;
-                case 8:
-                    arrMtrx.forEach(e => {
-                        e.style.fill = colorOn;
-                    });
-                    break;
-                case 9:
-                    arrMtrx.forEach(e => {
-                        if (e.id === "bl" || e.id === "b") {
-                            e.style.fill = colorOff;
-                        } else {
-                            e.style.fill = colorOn;
-                        }
-                    });
-                    break;
-                default:
-                    break;
+          });
+          break;
+        case 2:
+          arrMtrx.forEach(e => {
+            if (e.id === "tl" || e.id === "br") {
+              e.style.fill = colorOff;
+            } else {
+              e.style.fill = colorOn;
             }
-        }
+          });
+          break;
+        case 3:
+          arrMtrx.forEach(e => {
+            if (e.id === "tl" || e.id === "bl") {
+              e.style.fill = colorOff;
+            } else {
+              e.style.fill = colorOn;
+            }
+          });
+          break;
+        case 4:
+          arrMtrx.forEach(e => {
+            if (e.id === "t" || e.id === "bl" || e.id === "b") {
+              e.style.fill = colorOff;
+            } else {
+              e.style.fill = colorOn;
+            }
+          });
+          break;
+        case 5:
+          arrMtrx.forEach(e => {
+            if (e.id === "tr" || e.id === "bl") {
+              e.style.fill = colorOff;
+            } else {
+              e.style.fill = colorOn;
+            }
+          });
+          break;
+        case 6:
+          arrMtrx.forEach(e => {
+            if (e.id === "tr") {
+              e.style.fill = colorOff;
+            } else {
+              e.style.fill = colorOn;
+            }
+          });
+          break;
+        case 7:
+          arrMtrx.forEach(e => {
+            if (e.id === "t" || e.id === "tr" || e.id === "br") {
+              e.style.fill = colorOn;
+            } else {
+              e.style.fill = colorOff;
+            }
+          });
+          break;
+        case 8:
+          arrMtrx.forEach(e => {
+            e.style.fill = colorOn;
+          });
+          break;
+        case 9:
+          arrMtrx.forEach(e => {
+            if (e.id === "bl" || e.id === "b") {
+              e.style.fill = colorOff;
+            } else {
+              e.style.fill = colorOn;
+            }
+          });
+          break;
+        default:
+          break;
+      }
+    }
 
-        function toggleMatrix(boolOnOff) {  //  True will turn it on. False will turn it off.
-            let allMatrixDigits = document.querySelectorAll(".stopwatch .counter svg");
-            allMatrixDigits.forEach(svg => {
-                svg.querySelectorAll("path").forEach(p => {
-                    if (boolOnOff) {
-                        p.style.fill = colorOn;
-                    } else {
-                        p.style.fill = colorOff;
-                    }
-                });
-            });
-        }</script>
+    function toggleMatrix(boolOnOff) { //  True will turn it on. False will turn it off.
+      let allMatrixDigits = document.querySelectorAll(".stopwatch .counter svg");
+      allMatrixDigits.forEach(svg => {
+        svg.querySelectorAll("path").forEach(p => {
+          if (boolOnOff) {
+            p.style.fill = colorOn;
+          } else {
+            p.style.fill = colorOff;
+          }
+        });
+      });
+    }
+  </script>
 </body>
 
 </html>
