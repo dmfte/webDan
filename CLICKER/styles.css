@@ -1,0 +1,111 @@
+/* FontAweseome */
+@import url('http://fonts.cdnfonts.com/css/sebastian-gothic-nbp');
+/* Bootstrap icons */
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css");
+
+html{
+  height: 100%;
+}
+body {
+  height: 100%;
+  padding-top: 60px;
+}
+
+.tooltip-center{
+  z-index: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: lightyellow;
+  border: 1px solid black;
+  border-radius: 2em;
+  padding: 1em;
+  white-space: nowrap;
+  opacity: 0;
+  transition: 500ms ease-in-out;
+}
+.tooltip-center.active{
+  z-index: 2;
+  opacity: 1;
+}
+#navTop{
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 60px;
+  padding: 0 0.3em;
+  background-color: gray;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  overflow: visible;
+  z-index: 2;
+}
+#navTop .logo{
+  background-color: white;
+  border-radius: 2em;
+  padding: 0.1em 1em;
+  margin: 0.3em 0;
+  cursor: pointer;
+}
+#navTop .logo:hover{
+  background-color: lightgrey;
+}
+#navTop .logo svg{
+  width: 100%;
+  height: 100%;
+}
+
+#navTop #submenuCopy{
+  background-color: darkgray;
+  margin-left: auto;
+  padding: 0.5em 1em;
+  margin: 0.2em 0 0.2em auto;
+  display: flex;
+  align-items: center;
+  user-select: none;
+  cursor: pointer;
+}
+#navTop #submenuCopy:hover{
+  background-color: lightgrey;
+  -webkit-box-shadow: inset 0px 0px 0px 5px darkgray;
+  -moz-box-shadow: inset 0px 0px 0px 5px darkgray;
+  box-shadow: inset 0px 0px 0px 5px darkgray;
+}
+#navTop #submenuCopy:active{
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}
+
+.container-fluid {
+  position: relative;
+  height: 100%;
+}
+
+#btnCounter,
+#modNumpad .modal-body button,
+#modNumpad .modal-title {
+  font-family: 'Sebastian Gothic NBP', sans-serif;
+  font-weight: bold;
+}
+
+#btnCounter {
+  background-color: white;
+  border-radius: 0.25em;
+  transition: 100ms ease-in-out;
+  /* font-size: 10em; */
+  line-height: 0;
+}
+
+#btnCounter:active {
+  -moz-box-shadow: inset 0px 0px 100px 100px #11468F;
+  -webkit-box-shadow: inset 0px 0px 100px 100px #11468F;
+  box-shadow: inset 0px 0px 100px 100px #11468F;
+}
+
+button svg {
+  width: 50%;
+  height: 50%;
+}
