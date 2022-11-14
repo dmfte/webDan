@@ -19,6 +19,7 @@ navHamb.addEventListener("click", function () {
 const modcontentSeparatorChar = document.getElementById("modcontentSeparatorChar");
 const modcontentCleartabs = document.getElementById("modcontentCleartabs");
 const modcontentClearDefaultVals = document.getElementById("modcontentClearDefaultVals");
+const modcontentClearStoredData = document.getElementById("modcontentClearStoredData");
 navSubmenu.addEventListener("click", evt => {
   let params = {};
   switch (evt.target.id) {
@@ -26,7 +27,8 @@ navSubmenu.addEventListener("click", evt => {
       modcontentSeparatorChar.querySelector("#itSeparatorChar").value = CSVnator.separator;
       params = {
         title: "Caracter separador",
-        content: modcontentSeparatorChar
+        content: modcontentSeparatorChar,
+        okEnabled: false
       }
       break;
     case "clear-data":
@@ -35,7 +37,8 @@ navSubmenu.addEventListener("click", evt => {
       });
       params = {
         title: "Limpiar datos",
-        content: modcontentCleartabs
+        content: modcontentCleartabs,
+        okEnabled: false
       }
       break;
     case "clear-default":
@@ -44,7 +47,15 @@ navSubmenu.addEventListener("click", evt => {
       });
       params = {
         title: "Limpiar valores por defecto.",
-        content: modcontentClearDefaultVals
+        content: modcontentClearDefaultVals,
+        okEnabled: false
+      }
+      break;
+    case "clear-stored-data":
+      params = {
+        title: "Limpiar datos guardados.",
+        content: modcontentClearStoredData,
+        okEnabled: true
       }
       break;
     default:
@@ -158,7 +169,7 @@ function clearDefaultValues(tab) {
 function showDialog(dialog, params) {
   dialog.querySelector(".title").innerText = params.title;
   dialog.querySelector("form .body").appendChild(params.content);
-  dialog.querySelector("#btnOk").disabled = true;
+  if (!params.okEnabled) dialog.querySelector("#btnOk").disabled = true;
   dialog.showModal();
 }
 
@@ -302,7 +313,7 @@ function onInputInput(e) {
         if (rn.last.querySelector("input.first").classList.contains("btn")) { //  If the last Date was a button.
           makeButton(e);
           //  Focus on preious (two before last one) first-input field.
-          rn.arr[rn.l - 3].querySelector("iput.first").focus();
+          rn.arr[rn.l - 3].querySelector("input.first").focus();
         }
         parent.removeChild(rn.last);
       }
@@ -333,11 +344,12 @@ function onInputInput(e) {
       let totTaxable = arrTaxable.reduce((tot, taxable) => {
         return parseFloat(tot) + parseFloat(taxable);
       });
-      if (e.value.length > 0) {
-        taxOn.value = getIva(totTaxable);
-      } else {
-        if (totTaxable == 0) taxOn.value = "0.00";
-      }
+      taxOn.value = getTax(totTaxable, taxOn.dataset.perct);
+      // if (e.value.length > 0) {
+      //   taxOn.value = getTax(totTaxable, taxOn.dataset.perct);
+      // } else {
+      //   if (totTaxable == 0) taxOn.value = "0.00";
+      // }
     }
     //  Calculate total of dolar amounts:
     if (e.classList.contains("addend")) {
@@ -395,7 +407,7 @@ function addDefaultDate(evt) {
   unmakeButton(input);
   setDefaultValues(row);
   validateInputsRegexp(row);
-  input.focus();
+  autoSave();
 }
 
 function addBlankRowAtEnd(parent, dateListener) {
@@ -417,8 +429,9 @@ function addBlankRowAtEnd(parent, dateListener) {
   parent.appendChild(cloneRow);
 }
 
-function getIva(num) {
-  return twoDecimals(num * 0.13);
+function getTax(num, intPerct) {
+  let tax = parseInt(intPerct) / 100;
+  return twoDecimals(num * tax);
 }
 
 function getTotal(e) {
@@ -594,7 +607,7 @@ function getCurrentTab() {
 }
 //  GENERATE CSV FILE
 function generateCSV() {
-  let tabName = document.body.classList;
+  let tabName = document.body.classList[0];
   //  Get the array of data from the current tab.
   let arrRows = [];
   CSVnator.values.forEach(objTabs => {
@@ -619,15 +632,16 @@ function generateCSV() {
 
   //  Get the first part of the file name.
   let docFileName = "";
+  console.log(tabName);
   switch (tabName) {
     case "ventas":
-      docFileName = "Detalle de Ventas"
+      docFileName = "Detalle de Ventas "
       break;
     case "compras":
-      docFileName = "Detalle de Compras";
+      docFileName = "Detalle de Compras ";
       break;
     case "retencion":
-      docFileName = "Detalle de Retencion";
+      docFileName = "Detalle de Retencion ";
       break;
     default:
       break;
@@ -662,4 +676,17 @@ function addZerosFirst(txtNum, intOfDigits) {
     txtNum = "0" + txtNum;
   }
   return txtNum;
+}
+
+function onInputFocus(e) {
+  let parent = e.closest(".container-rows");
+  let arrRows = parent.querySelectorAll(".row");
+  arrRows.forEach(row => {
+    row.style.borderBottom = "none";
+  });
+  let row = e.closest(".row");
+  let rn = rowNumber(row);
+  row.style.borderBottom = "5px solid orange";
+  // if (row !== rn.last) {
+  // }
 }
