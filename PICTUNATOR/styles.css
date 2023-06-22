@@ -1,0 +1,1019 @@
+@font-face {
+	font-family: "outfit";
+	src: url(fonts/outfit.ttf);
+}
+
+@font-face {
+	font-family: "mono3x3";
+	src: url(fonts/3x3mono.ttf);
+}
+
+@font-face {
+	font-family: "mukta";
+	src: url(fonts/mukta.ttf);
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	user-select: none;
+	font-family: 'Outfit', sans-serif;
+	/* weight 200, 400, 600. */
+	font-weight: 600;
+	font-size: 0.9rem;
+	color: var(--blue-darkest);
+}
+
+/* #397DF8
+#3299D9
+#44DBEF
+#32D9BE
+#39F8A4 */
+
+:root {
+	/* FOR NAVIGATION BAR */
+	--nav-bg: rgb(26, 26, 46);
+	--nav-icon: rgb(233, 69, 96);
+	/* --nav-icon-bg:rgb(22, 64, 115); */
+	--nav-icon-bg: rgb(67, 101, 139);
+	--nav-dialog-body: #6ba9cf;
+	/* FOR WEB TOOL */
+	--blue-darkest: #162c4c;
+	--blue-dark: #2c5270;
+	--blue-soothing: #527387;
+	--blue-shade: #6e8b9d;
+	--blue-medium: #87a3b4;
+	--blue-muted: #9bb8c7;
+	--blue-light: #DDE6ED;
+
+	/* PIXELS */
+	--nav-height-desk: 40px;
+	--nav-height-mob: 48px;
+}
+
+/* General styles. */
+html,
+body {
+	width: 100%;
+	height: 100%;
+}
+
+svg {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+/* Styles for the dynamically added dialog with AutoDialog.js */
+dialog {
+	border-width: 3px;
+	max-width: 40vw;
+
+	@media (max-width: 600px) {
+		border-width: 2px;
+		max-width: 80vw;
+	}
+
+	@media (max-width: 250px) {
+		border-width: 1px;
+		min-width: calc(100vw - 3px);
+		max-width: calc(100vw - 3px);
+	}
+
+	& .wrapper {
+		& .container-title {
+			overflow: hidden;
+			& .title{
+				user-select: text;
+			}
+			& .x-it {
+				display: inline-block;
+				rotate: 45deg;
+				transition: rotate 300ms ease-in-out;
+			}
+
+			& .x-it:hover {
+				scale: 1.5;
+				background-color: transparent;
+				rotate: 405deg;
+			}
+		}
+
+		.body {
+			background-color: var(--nav-dialog-body);
+			padding: 0.5rem 1rem;
+			user-select: text;
+		}
+	}
+}
+dialog::backdrop{
+	background-color: rgb(0, 0, 0);
+	opacity: 0.5;
+}
+/* --------- */
+
+input[type=radio],
+input[type=checkbox] {
+	display: none;
+}
+.g-action input~label,
+.btn input~label{
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	height: 100%;
+	cursor: pointer;
+}
+/* --------- */
+nav.top-nav {
+	height: var(--nav-height-desk);
+	background-color: var(--nav-bg);
+	display: flex;
+	flex-direction: row;
+	justify-content: start;
+	align-items: stretch;
+	padding: 0.2rem 0.5rem;
+	width: 100%;
+}
+
+/* Logo. */
+nav.top-nav .logo {
+	background-color: white;
+	border-radius: calc(var(--nav-height-desk)/2);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100px;
+	cursor: pointer;
+}
+
+nav.top-nav .logo svg {
+	max-width: 80%;
+	max-height: 80%;
+}
+
+nav.top-nav .nav-items {
+	padding: 0;
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-end;
+	align-items: stretch;
+	flex: 1;
+}
+
+nav.top-nav .nav-items .nav-i {
+	margin: 0 0.2rem;
+	display: flex;
+	justify-content: center;
+	align-items: stretch;
+	cursor: pointer;
+}
+
+nav.top-nav .nav-items .nav-i svg path {
+	fill: var(--nav-icon-bg);
+}
+
+nav.top-nav .nav-items .nav-i:hover svg path {
+	fill: var(--nav-icon);
+}
+
+nav.top-nav .nav-items .nav-i:active svg path {
+	fill: var(--nav-icon);
+}
+
+.not-nav {
+	position: relative;
+	width: 100%;
+	height: calc(100% - var(--nav-height-desk));
+	background-color: lightgreen;
+	display: grid;
+	grid-template-areas: "global global" "toolbar display" "download download";
+	grid-template-columns: 200px 1fr;
+	grid-template-rows: 64px 1fr 36px;
+}
+
+#secGlobalActions {
+	grid-area: global;
+	background-color: var(--blue-medium);
+	padding: 0.1rem 0.3rem;
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	align-items: center;
+	z-index: 1;
+}
+
+#secGlobalActions .g-action {
+	position: relative;
+	border-radius: 0.7rem;
+	border: 2px solid var(--blue-dark);
+	display: flex;
+	justify-content: center;
+	align-items: stretch;
+	margin: 0 0.2rem;
+	/* padding: 0.4rem; */
+	background-color: var(--blue-medium);
+	width: 58px;
+	height: 58px;
+}
+
+#secGlobalActions .g-action input~label {
+	/* padding: 0.2rem;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	cursor: pointer; */
+}
+
+/* Input file button. */
+#secGlobalActions #gaInputImage {
+	padding: 0;
+	align-items: stretch;
+	width: auto;
+	max-width: 150px;
+	margin-right: 2rem;
+}
+
+#secGlobalActions #gaInputImage::before {
+	position: absolute;
+	content: "";
+	border: 2px solid var(--blue-dark);
+	border-radius: 0.5rem;
+	top: 1px;
+	right: 1px;
+	bottom: 1px;
+	left: 1px;
+	opacity: 1;
+	transition: top 100ms, right 100ms, bottom 100ms, left 100ms;
+}
+
+#secGlobalActions #gaInputImage:hover::before {
+	top: 4px;
+	right: 4px;
+	bottom: 4px;
+	left: 4px;
+}
+
+#secGlobalActions #gaInputImage:active::before {
+	top: 10px;
+	right: 10px;
+	bottom: 10px;
+	left: 10px;
+	opacity: 0;
+}
+
+#secGlobalActions #gaInputImage #ifGaImage {
+	display: none;
+}
+
+#secGlobalActions #gaInputImage #ifGaImage+label {
+	padding: 7px;
+	font-size: 0.9rem;
+	line-height: 0.9rem;
+	cursor: pointer;
+	overflow: hidden;
+	z-index: 1;
+}
+
+/* Horizontal or vertical display. */
+#secGlobalActions #gaHorzVert input[type="checkbox"] {
+	/* display: none; */
+}
+
+/* Floating display. */
+#secGlobalActions #gaSmallFloat {
+	position: relative;
+}
+
+#secGlobalActions #gaSmallFloat input[type=checkbox]~label{
+	/* padding: 0.2rem; */
+}
+
+/* ---------- */
+
+#secToolbar {
+	position: relative;
+	grid-area: toolbar;
+	background-color: var(--blue-darkest);
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: stretch;
+	overflow-y: auto;
+	z-index: 3;
+}
+
+#secToolbar .effect {
+	border: none;
+	border-radius: 1rem;
+	margin: 0.7rem 0.3rem;
+	padding: 0.4rem 0.2rem;
+	box-shadow: 0px -9px 15px -6px var(--blue-medium), 0px 6px 19px -7px black;
+	display: flex;
+	flex-direction: column;
+	justify-content: start;
+	align-items: stretch;
+}
+
+#secToolbar .effect.active {
+	box-shadow: inset 0px 5px 10px -5px black, inset 0px -5px 15px -4px var(--blue-light);
+	background-color: var(--blue-dark);
+}
+
+#secToolbar .effect input[name=rgEffects] {
+	display: none;
+}
+
+#secToolbar .effect input[name=rgEffects]+label {
+	padding: 0 0.2rem;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	cursor: pointer;
+	color: var(--blue-muted)
+}
+
+#secToolbar .effect input[name=rgEffects]:checked+label {
+	transform-origin: center;
+	transform: scale(0.9);
+	color: var(--blue-light);
+}
+
+#secToolbar .effect input[name=rgEffects]+label span.rb-dot {
+	background: var(--blue-muted);
+	border-radius: 50%;
+	margin-right: 0.4em;
+	width: 0.7em;
+	height: 0.7em;
+	/* opacity: 0.6; */
+	transform: scale(0);
+}
+
+#secToolbar .effect input[name=rgEffects]:checked+label span.rb-dot {
+	transform: scale(1);
+}
+
+#secToolbar .effect .controllers {
+	position: relative;
+	margin: 0;
+	padding: 0;
+	max-height: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: stretch;
+	overflow: hidden;
+}
+
+#secToolbar .effect input[name=rgEffects]:checked~.controllers {
+	max-height: 1000px;
+	padding-top: 0.8rem;
+	transition: max-height 1s ease-in;
+}
+
+#secToolbar .effect .controllers .cont {
+	margin: 0.1rem 0;
+}
+
+#secToolbar .effect .controllers .cont.other {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	align-items: stretch;
+}
+
+#secToolbar .effect .controllers .cont.other .btn {
+	border-radius: 20%;
+	border: 1px solid var(--blue-darkest);
+	margin: 0 0.2rem;
+	/* padding: 0 0.3rem; */
+	padding: 0;
+	color: var(--blue-dark);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 48px;
+	height: 48px;
+	overflow: hidden;
+}
+#secToolbar .effect#effectHatching .controllers .cont.other .btn.btn.with-submenu{
+	padding: 0 0.3rem;
+}
+
+#secToolbar .effect .controllers .cont.other .btn input,
+#secToolbar .effect .controllers .cont.other .btn label {
+	cursor: pointer;
+	width: 100%;
+	height: 100%;
+}
+
+/* Colorpickers in toolbar */
+#secToolbar .effect.active .controllers .cont.other .btn.color {
+	display: flex;
+	justify-content: center;
+	align-items: stretch;
+	border-width: 3px;
+	padding: 0;
+	/* Default color will be set as label's background-color on JS. */
+}
+
+#secToolbar .effect.active .controllers .cont.other .btn input[type=color] {
+	width: 0;
+	border: none;
+}
+
+/* -------- */
+/* To display grid either by width or height. */
+#secToolbar .effect .controllers .cont.other .wOrH {
+	display: flex;
+	justify-content: center;
+	align-items: stretch;
+}
+
+#secToolbar .effect .controllers .cont.other .wOrH input[type=checkbox] {
+	display: none;
+}
+
+#secToolbar .effect .controllers .cont.other .wOrH input[type=checkbox]~label {
+	display: grid;
+	grid-template-areas: "arrowUp width" "arrowDown height";
+	align-items: center;
+
+}
+
+#secToolbar .effect .controllers .cont.other .wOrH input[type=checkbox]~label span:not(.arrow) {
+	font-size: 0.8rem;
+	line-height: 1.5;
+	white-space: nowrap;
+}
+
+#secToolbar .effect .controllers .cont.other .wOrH input[type=checkbox]~label span {
+	color: var(--blue-muted);
+	font-weight: 400;
+
+}
+
+#secToolbar .effect .controllers .cont.other .wOrH input[type=checkbox]~label span.arrow {
+	grid-area: arrowUp;
+}
+
+#secToolbar .effect .controllers .cont.other .wOrH input[type=checkbox]:checked~label span.arrow {
+	grid-area: arrowDown;
+}
+
+#secToolbar .effect .controllers .cont.other .wOrH input[type=checkbox]~label span.grid-by-w {
+	grid-area: width;
+	color: var(--blue-muted);
+}
+
+#secToolbar .effect .controllers .cont.other .wOrH input[type=checkbox]:checked~label span.grid-by-w {
+	color: var(--blue-shade);
+}
+
+#secToolbar .effect .controllers .cont.other .wOrH input[type=checkbox]~label span.grid-by-h {
+	grid-area: height;
+	color: var(--blue-shade);
+}
+
+#secToolbar .effect .controllers .cont.other .wOrH input[type=checkbox]:checked~label span.grid-by-h {
+	color: var(--blue-muted);
+}
+
+/* ------ */
+/* GRAYSCALING. For the button to switch between including-black-and-white and only-grays. */
+#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label {
+	display: flex;
+}
+#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label span{
+	flex: 1;
+	height: 100%;
+}
+#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label span.stripe1{
+	background-color: rgb(64, 64, 64);
+}
+#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label:hover span.stripe1{
+	animation: 700ms infinite alternate black-to-gray;
+}
+#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw input:checked~label span.stripe1{
+	background-color: rgb(0, 0, 0);
+}
+#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label span.stripe2{
+	background-color: rgb(127, 127, 127);
+}
+#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label span.stripe3{
+	background-color: rgb(160, 160, 160);
+}
+#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label:hover span.stripe3{
+	animation: 700ms infinite alternate white-to-gray;
+}
+#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw input:checked~label span.stripe3{
+	background-color: rgb(255, 255, 255);
+}
+/* rgb(64, 64, 64) */
+/* rgb(160, 160, 160) */
+
+@keyframes black-to-gray{
+	from{
+		background-color: rgb(0, 0, 0);
+	}
+	35%{
+		background-color: rgb(0, 0, 0);
+	}
+	65%{
+		background-color: rgb(64, 64, 64);
+	}
+	to{
+		background-color: rgb(64, 64, 64);
+	}
+}
+@keyframes white-to-gray{
+	from{
+		background-color: rgb(255, 255, 255);
+	}
+	35%{
+		background-color: rgb(255, 255, 255);
+	}
+	60%{
+		background-color: rgb(160, 160, 160);
+	}
+	to{
+		background-color: rgb(160, 160, 160);
+	}
+}
+/* ------ */
+/* HATCHING. For the button to change the direction of the Hatching. */
+#secToolbar .effect .controllers .cont.other .btn.with-submenu {
+	position: relative;
+	overflow: visible;
+	cursor: pointer;
+	z-index: 3;
+	/* width: 100%; */
+}
+
+#secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+#secToolbar .effect .controllers .cont.other .btn.with-submenu .submenu {
+	background-color: green;
+	position: absolute;
+	top: 110%;
+	left: 0;
+	width: 0;
+	padding: 0;
+}
+
+#secToolbar .effect .controllers .cont.other .btn.with-submenu:focus-within .submenu {
+	width: auto;
+	box-shadow: 0 0 30px 20px rgba(0, 0, 0, 0.7);
+}
+
+#secToolbar .effect .controllers .cont.other .btn.with-submenu .submenu .wrapper {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+#secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection .submenu#rgdirections .wrapper {
+	padding: 0.3rem;
+}
+
+#secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection .submenu#rgdirections .wrapper input[type=radio]+label {
+	width: 40px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+#secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection .submenu#rgdirections .wrapper input[type=radio]:checked+label svg {
+	scale: 0.9;
+}
+
+#secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection .submenu#rgdirections .wrapper input[type=radio]:checked+label svg path {
+	stroke: var(--blue-light);
+}
+
+#secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection .submenu#rgdirections .wrapper input[type=radio]:not(:checked)+label:hover svg path {
+	stroke: var(--blue-muted);
+}
+
+/* ------ */
+
+#secToolbar .effect .controllers .cont.slider {
+	position: relative;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: stretch;
+}
+
+/* ----------- */
+#secDisplay {
+	position: relative;
+	background-color: var(--blue-light);
+}
+
+#secDisplay .disp {
+	position: absolute;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 1rem;
+	transition-timing-function: linear;
+	transition-duration: 300ms;
+	transition-property: top, righ, bottom, left, width, height;
+	/* transition: top 500ms, right 500ms, bottom 500ms, left 500ms, width 500ms, height 500ms; */
+}
+
+#secDisplay .disp.left {
+	background-color: var(--blue-muted);
+	z-index: 2;
+}
+
+#secDisplay .disp.right {
+	background-color: var(--blue-light);
+}
+
+#secDisplay.horizontal .disp.left {
+	left: 0;
+	top: 0;
+	bottom: 0;
+	right: auto;
+	width: 50%;
+	height: 100%;
+}
+
+#secDisplay.horizontal .disp.right {
+	left: auto;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	width: 50%;
+	height: 100%;
+}
+
+#secDisplay.vertical .disp.left {
+	left: 0;
+	top: 0;
+	bottom: auto;
+	right: 0;
+	width: 100%;
+	height: 50%;
+}
+
+#secDisplay.vertical .disp.right {
+	left: 0;
+	top: auto;
+	bottom: 0;
+	right: 0;
+	width: 100%;
+	height: 50%;
+}
+
+#secDisplay.float .disp.left {
+	bottom: auto;
+	right: auto;
+	padding: 0.5rem;
+	width: 120px;
+	height: 120px;
+	cursor: move;
+}
+
+#secDisplay.float .disp.right {
+	width: 100%;
+	height: 100%;
+}
+
+#secDisplay .disp canvas {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+#secDisplay .disp.left canvas {
+	pointer-events: none;
+}
+
+/* ----------- */
+#secDownloadBar {
+	grid-area: download;
+	background-color: var(--blue-dark);
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-end;
+	align-items: stretch;
+	z-index: 4;
+}
+
+#secDownloadBar .d-bar {
+	margin: 0.1rem 0.2rem;
+}
+
+#secDownloadBar .d-bar.d-button {
+	display: flex;
+	justify-content: center;
+	align-items: stretch;
+	margin: 0.3rem 0.5rem;
+}
+
+#secDownloadBar .d-bar.d-button button {
+	position: relative;
+	border: none;
+	border-radius: 0.5rem;
+	margin: 0;
+	padding: 0;
+	width: 75px;
+}
+
+#secDownloadBar .d-bar.d-button button label {
+	cursor: pointer;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	height: 100%;
+}
+
+/* Grid button effect. */
+#secDownloadBar .d-bar.d-button button.grid::before {
+	position: absolute;
+	content: "";
+	border-right: 1px solid red;
+	border-left: 1px solid red;
+	border-color: transparent;
+	left: 50%;
+	transform: translate(-50%, 0);
+	width: 100%;
+	height: 125%;
+	transition: width 300ms;
+}
+
+#secDownloadBar .d-bar.d-button button.grid:hover::before {
+	border-color: red;
+	width: 40%;
+}
+
+#secDownloadBar .d-bar.d-button button.grid::after {
+	position: absolute;
+	content: "";
+	border-top: 1px solid red;
+	border-bottom: 1px solid red;
+	border-color: transparent;
+	left: 50%;
+	transform: translate(-50%, 0);
+	width: 125%;
+	height: 110%;
+	transition: height 300ms;
+}
+
+#secDownloadBar .d-bar.d-button button.grid:hover::after {
+	border-color: red;
+	height: 40%;
+}
+
+/* Pixelated button effect. */
+#secDownloadBar .d-bar.d-button button.pixelate {
+	align-items: center;
+	overflow: hidden;
+}
+
+#secDownloadBar .d-bar.d-button button.pixelate label {
+	transition: font-family 300ms;
+}
+
+#secDownloadBar .d-bar.d-button button.pixelate:hover label {
+	font-size: 0.6rem;
+	font-family: mono3x3;
+}
+
+/* Black and white button effect. */
+#secDownloadBar .d-bar.d-button button.bwing {
+	box-shadow: inset 0 0 0 0 black;
+	transition: box-shadow 500ms;
+}
+
+#secDownloadBar .d-bar.d-button button.bwing:hover {
+	box-shadow: inset 75px 0 0px 0 black;
+}
+
+#secDownloadBar .d-bar.d-button button.bwing:hover label {
+	color: white;
+}
+
+/* ------------ */
+@media screen and (max-width: 600px) {
+	nav.top-nav {
+		height: var(--nav-height-mob);
+	}
+
+	.not-nav {
+		background-color: transparent;
+		grid-template-areas: "global global" "display toolbar" "download download";
+		grid-template-columns: 1fr 60px;
+		grid-template-rows: 64px 1fr 48px;
+		height: calc(100% - var(--nav-height-mob));
+		overflow: hidden;
+	}
+
+	#secToolbar {
+		/* background-color: transparent; */
+		left: 0;
+		width: 60px;
+		padding: 0.5rem 0 0 0;
+		overflow: visible;
+	}
+
+	#secToolbar.expanded {
+		left: -140px;
+		width: 200px;
+		box-shadow: 5px 25px 30px 10px black;
+		transition: left 300ms ease-in-out;
+	}
+
+	#secToolbar .effect {
+		display: none;
+		/* background-color: var(--blue-darkest); */
+		border-radius: 0;
+		margin: 0;
+		padding: 0;
+		flex-direction: column;
+		justify-content: flex-start;
+		align-items: stretch;
+		flex: 1;
+		overflow: hidden;
+		width: 100%;
+	}
+
+	#secToolbar.expanded .effect {
+		display: flex;
+		box-shadow: none;
+		margin: 0.1rem 0;
+		padding: 0.2rem 0.5rem;
+		flex: 0;
+		overflow: visible;
+	}
+
+	#secToolbar .effect input[name=rgEffects]+label {
+		background-color: var(--blue-dark);
+		padding: 1rem 0;
+		border-radius: 0.5rem;
+		border: 1px solid var(--blue-muted);
+		width: 100%;
+		text-align: center;
+	}
+
+	#secToolbar .effect input[name=rgEffects]:checked+label {
+		border: 1px solid var(--blue-light);
+	}
+
+	#secToolbar .effect.active {
+		background-color: transparent;
+		/* border: 1px solid var(--blue-light); */
+		display: flex;
+		box-shadow: none;
+		overflow: visible;
+	}
+
+	#secToolbar .effect.active input[name=rgEffects]:checked~.controllers {
+		max-height: 1000px;
+		padding-top: 0;
+		align-items: center;
+	}
+
+	#secToolbar .effect input[name=rgEffects]:checked+label span.rb-dot {
+		display: none;
+	}
+
+	#secToolbar.expanded .effect input[name=rgEffects]~.controllers {
+		transform: translate(150%, 0);
+	}
+
+	#secToolbar .effect.active input[name=rgEffects]~.controllers {
+		justify-content: center;
+		align-items: stretch;
+		overflow: visible;
+		flex: 1;
+		transform: translate(0, 0);
+		transition: transform 300ms ease-in-out;
+	}
+
+	#secToolbar.expanded .effect input[name=rgEffects]~.controllers .cont {
+		display: none;
+	}
+
+	#secToolbar .effect.active .controllers .cont {
+		margin: 0;
+		padding: 0;
+	}
+
+	#secToolbar .effect.active .controllers .cont.other {
+		flex-direction: column;
+		justify-content: stretch;
+		align-items: center;
+	}
+
+	/* All buttons in toolbar */
+	#secToolbar .effect.active .controllers .cont.other .btn {
+		border: none;
+	}
+
+	#secToolbar .effect.active .controllers .cont.other .btn.wOrH .arrow {
+		display: none;
+	}
+
+	#secToolbar .effect.active .controllers .cont.other .btn,
+	#secToolbar .effect.active .controllers .cont.slider {
+		border: 1px solid var(--blue-shade);
+		color: var(--blue-muted);
+		margin: 0.4rem 0;
+		padding: 0;
+		max-height: 45px;
+		min-height: 45px;
+		max-width: 45px;
+		min-width: 45px;
+		overflow: visible;
+		cursor: pointer;
+	}
+
+	#secToolbar .effect.active .controllers .cont.other .btn.color {
+		border-width: 2px;
+		overflow: hidden;
+	}
+
+	#secToolbar .effect.active input[name=rgEffects]:checked+label {
+		justify-content: center;
+	}
+
+	/* -------- */
+
+	#secToolbar .effect.active .controllers .cont.slider::after {
+		/* This is for the Content property on specific containers. */
+		width: 100%;
+		height: 100%;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	#secToolbar .effect.active .controllers .cont.slider:focus {
+		box-shadow: inset 0px 0px 1px 2px black;
+	}
+
+	#secToolbar .effect.active .controllers .cont.slider .wrapper {
+		position: absolute;
+		right: 115%;
+		width: 0;
+		padding: 0;
+		margin: 0;
+		height: 50px;
+		overflow: hidden;
+		display: flex;
+		justify-content: flex;
+		align-items: stretch;
+	}
+
+	#secToolbar .effect.active .controllers .cont.slider:focus .wrapper {
+		padding: 0;
+		width: 200px;
+		transition: width 300ms ease-in-out;
+	}
+
+	#secToolbar .effect.active .controllers .cont.slider .wrapper .slider {
+		overflow: hidden;
+	}
+
+
+	#secToolbar .effect.active .controllers .cont.slider:focus .wrapper .slider {
+		margin: 0;
+		width: 200px;
+	}
+
+	/* GRID */
+	#secToolbar .effect.active .controllers .cont.slider#gridAmtSqrs::after {
+		content: "Sqrs.";
+	}
+
+	#secToolbar .effect.active .controllers .cont.slider#gridLinew::after {
+		content: "Width";
+	}
+
+	#secToolbar .effect.active .controllers .cont.slider#pxltPixelated::after {
+		content: "Pxlt";
+	}
+
+	#secToolbar .effect.active .controllers .cont.slider#bwSensitivity::after {
+		content: "Sens.";
+	}
+
+	#secToolbar .effect.active .controllers .cont.slider#gsLevels::after {
+		content: "Levl.";
+	}
+
+	#secToolbar .effect.active .controllers .cont.slider#gsSensitivity::after {
+		content: "Sens.";
+	}
+}

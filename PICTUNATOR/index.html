@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>PICTUNATOR</title>
+	<!-- Google fonts. -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;600&display=swap" rel="stylesheet">
+	<!-- Stylesheets. -->
+	<link rel="stylesheet" href="RangeSlider.css">
+	<link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+	<nav class="top-nav">
+		<div class="logo">
+			<svg viewBox="0 0 170 74" id="dmfte">
+				<path fill="none" stroke="black" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" d="m 36 4 l 0 64 m -32 -16 a 16 16 0 0 0 32 0 a 16 16 0 0 0 -32 0 m 32 0 a 16 16 0 0 1 32 0 a 16 16 0 0 1 32 0 l 0 16 l 0 -48 a 16 16 0 0 1 32 0 l 0 32 m -40 -24 l 16 0 m 16 0 l 16 0 m -8 24 a 16 16 0 0 1 32 0 l -32 0 a 16 16 0 0 0 27.3 11.3"></path>
+			</svg>
+		</div>
+		<div class="nav-items">
+			<div class="nav-i" id="gaInfo">
+				<!-- See Dialog diagInfo at the bottom. -->
+				<svg viewBox="0 0 18 18">
+					<path fill="black" stroke="none" stroke-width="1" stroke-linejoin="round" d="M 9 1 A 1 1 0 0 0 9 17 A 1 1 0 0 0 9 1 M 9 3 A 1 1 0 0 1 9 7 A 1 1 0 0 1 9 3 M 7 8 L 11 8 L 11 15 L 7 15 Z"></path>
+				</svg>
+			</div>
+			<div class="nav-i" id="gaContactme">
+				<svg viewBox="0 0 18 18">
+					<path fill="none" stroke="black" stroke-width="1" stroke-linejoin="round" d="M 2 5 L 16 5 L 16 14 L 2 14 Z"></path>
+					<path fill="none" stroke="black" stroke-width="1" stroke-linejoin="round" d="M 2 14 L 5 7 M 16 14 L 13 7 M 2 5 L 9 10 L 16 5"></path>
+				</svg>
+			</div>
+		</div>
+	</nav>
+	<div class="not-nav">
+		<section id="secGlobalActions">
+			<div class="g-action" id="gaInputImage">
+				<input type="file" id="ifGaImage">
+				<label for="ifGaImage" id="ifGaImageName">Selec. Img.</label>
+			</div>
+			<div class="g-action" id="gaHorzVert">
+				<input type="checkbox" id="cbGaHorzVert" checked>
+				<label for="cbGaHorzVert">
+					<svg viewBox="0 0 18 18" id="svgHorzVert">
+						<path id="pathLeftSquare" fill="none" stroke="black" stroke-width="1" stroke-linejoin="round" d="M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z">
+							<animate attributeName="d" dur="0" data-dur="1.5s" keyTimes="0; 0.2; 0.5; 0.8; 1" repeatCount="indefinite" values="M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z; M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z; M 2 4 C 2 3 3 2 4 2 L 14 2 C 15 2 16 3 16 4 L 16 8 L 2 8 C 2 8 2 8 2 8 Z; M 2 4 C 2 3 3 2 4 2 L 14 2 C 15 2 16 3 16 4 L 16 8 L 2 8 C 2 8 2 8 2 8 Z; M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z"></animate>
+						</path>
+						<path id="pathRightSquare" fill="black" stroke="black" stroke-width="1" stroke-linejoin="round" d="M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 C 10 16 10 16 10 16 Z">
+							<animate attributeName="d" dur="0" data-dur="1.5s" keyTimes="0; 0.2; 0.5; 0.8; 1" repeatCount="indefinite" values="M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 C 10 16 10 16 10 16 Z; M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 C 10 16 10 16 10 16 Z; M 2 10 L 16 10 C 16 10 16 10 16 10 L 16 14 C 16 15 15 16 14 16 L 4 16 C 3 16 2 15 2 14 Z; M 2 10 L 16 10 C 16 10 16 10 16 10 L 16 14 C 16 15 15 16 14 16 L 4 16 C 3 16 2 15 2 14 Z; M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 C 10 16 10 16 10 16 Z"></animate>
+						</path>
+					</svg>
+				</label>
+			</div>
+			<div class="g-action" id="gaSmallFloat">
+				<input type="checkbox" for="gaSmallFloat" id="cbGaSmallFloat">
+				<label for="cbGaSmallFloat">
+					<svg viewBox="0 0 18 18" id="svgFloatSquare">
+						<path id="pathFloatSquare" fill="none" stroke="black" stroke-width="1" stroke-linejoin="round" d="M 2 2 C 2 2 2 2 2 2 L 7 2 C 7 2 7 2 7 2 L 7 7 L 2 7 C 2 7 2 7 2 7 Z">
+							<animate attributeName="d" dur="0" data-dur="1.5s"  keyTimes="0; 0.2; 0.5; 0.8; 1" repeatCount="indefinite" values="M 2 2 C 2 2 2 2 2 2 L 7 2 C 7 2 7 2 7 2 L 7 7 L 2 7 C 2 7 2 7 2 7 Z; M 2 2 C 2 2 2 2 2 2 L 7 2 C 7 2 7 2 7 2 L 7 7 L 2 7 C 2 7 2 7 2 7 Z; M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z; M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z; M 2 2 C 2 2 2 2 2 2 L 7 2 C 7 2 7 2 7 2 L 7 7 L 2 7 C 2 7 2 7 2 7 Z"></animate>
+						</path>
+						<path id="pathFixSquare" fill="black" stroke="black" stroke-width="1" stroke-linejoin="round" d="M 9 4 L 16 4 C 16 4 16 4 16 4 L 16 16 C 16 16 16 16 16 16 L 4 16 L 4 9 L 9 9 Z">							
+							<animate attributeName="d" dur="0" data-dur="1.5s" keyTimes="0; 0.2; 0.5; 0.8; 1" repeatCount="indefinite" values="M 9 4 L 16 4 C 16 4 16 4 16 4 L 16 16 C 16 16 16 16 16 16 L 4 16 L 4 9 L 9 9 Z; M 9 4 L 16 4 C 16 4 16 4 16 4 L 16 16 C 16 16 16 16 16 16 L 4 16 L 4 9 L 9 9 Z; M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 L 10 14 L 10 11 Z; M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 L 10 14 L 10 11 Z; M 9 4 L 16 4 C 16 4 16 4 16 4 L 16 16 C 16 16 16 16 16 16 L 4 16 L 4 9 L 9 9 Z;"></animate>
+						</path>
+					</svg>
+				</label>
+			</div>
+
+
+		</section>
+		<section id="secToolbar" class="expanded">
+			<div id="effectGrid" class="effect">
+				<input type="radio" name="rgEffects" id="rbGrid">
+				<label for="rbGrid"><span class="rb-dot"></span>Grid</label>
+				<div class="controllers">
+					<div class="cont other">
+						<div class="btn color">
+							<input type="color" id="icGridColor">
+							<label for="icGridColor"></label>
+						</div>
+						<div class="btn wOrH">
+							<input type="checkbox" id="cbGridWOrH" checked>
+							<label for="cbGridWOrH">
+								<span class="grid-by-w">By W</span><br>
+								<span class="grid-by-h">By H</span>
+								<span class="arrow">➜</span>
+							</label>
+						</div>
+					</div>
+					<div class="cont slider" id="gridAmtSqrs" tabindex="0">
+						<div class="wrapper"></div>
+					</div>
+					<div class="cont slider" id="gridLinew" tabindex="0">
+						<div class="wrapper"></div>
+					</div>
+				</div>
+			</div>
+			<!-- --------- -->
+			<div id="effectPixelate" class="effect">
+				<input type="radio" name="rgEffects" id="rbPixelate">
+				<label for="rbPixelate"><span class="rb-dot"></span>Pixelate</label>
+				<div class="controllers">
+					<div class="cont slider" id="pxltPixelated" tabindex="0">
+						<div class="wrapper"></div>
+					</div>
+				</div>
+			</div>
+			<!-- --------- -->
+			<div id="effectBwing" class="effect">
+				<input type="radio" name="rgEffects" id="rbBwing">
+				<label for="rbBwing"><span class="rb-dot"></span>Black and Whiting</label>
+				<div class="controllers">
+					<div class="cont slider" id="bwSensitivity" tabindex="0">
+						<div class="wrapper"></div>
+					</div>
+				</div>
+			</div>
+			<!-- --------- -->
+			<div id="effectGrayscaling" class="effect">
+				<input type="radio" name="rgEffects" id="rbGrayscaling">
+				<label for="rbGrayscaling"><span class="rb-dot"></span>Gray-scaling</label>
+				<div class="controllers">
+					<div class="cont other">
+						<div class="btn bnw">
+							<input type="checkbox" id="cbGrayscalingBnw" checked>
+							<label for="cbGrayscalingBnw">
+								<span class="stripe1"></span>
+								<span class="stripe2"></span>
+								<span class="stripe3"></span>
+							</label>
+						</div>
+					</div>
+					<div class="cont slider" id="gsLevels" tabindex="0">
+						<div class="wrapper"></div>
+					</div>
+					<div class="cont slider" id="gsSensitivity" tabindex="0">
+						<div class="wrapper"></div>
+					</div>
+				</div>
+			</div>
+			<!-- --------- -->
+			<div id="effectHatching" class="effect">
+				<input type="radio" name="rgEffects" id="rbHatching">
+				<label for="rbHatching"><span class="rb-dot"></span>Hatching</label>
+				<div class="controllers">
+					<div class="cont other">
+						<div class="btn with-submenu" id="currentdirection" tabindex="0" data-vb="0">
+							<svg id="svgdirections">
+								<path stroke-linecap="round" stroke="black" fill="none" stroke-width="1" d="
+                                        M 9 1 l -8 0 l 0 8 l 8 0 z M 7 3 l -4 4
+                                        M 19 1 l -8 0 l 0 8 l 8 0 z M 13 5 l 4 0
+                                        M 29 1 l -8 0 l 0 8 l 8 0 z M 23 3 l 4 4
+                                        M 39 1 l -8 0 l 0 8 l 8 0 z M 35 3 l 0 4"></path>
+							</svg>
+							<div class="submenu" id="rgdirections">
+								<div class="wrapper">
+									<input type="radio" id="DLUR" value="DLUR" name="rgHatchDir" data-vb="0" checked>
+									<label for="DLUR">
+										<svg viewBox="0 0 10 10">
+											<path stroke-linecap="round" stroke="black" fill="none" stroke-width="0.5" d="
+												M 9 1 l -8 0 l 0 8 l 8 0 z M 7 3 l -4 4"></path>
+										</svg>
+									</label>
+									<input type="radio" id="LR" value="LR" name="rgHatchDir" data-vb="10">
+									<label for="LR">
+										<svg viewBox="10 0 10 10">
+											<path stroke-linecap="round" stroke="black" fill="none" stroke-width="0.5" d="
+												M 19 1 l -8 0 l 0 8 l 8 0 z M 13 5 l 4 0"></path>
+										</svg>
+									</label>
+									<input type="radio" id="ULDR" value="ULDR" name="rgHatchDir" data-vb="20">
+									<label for="ULDR">
+										<svg viewBox="20 0 10 10">
+											<path stroke-linecap="round" stroke="black" fill="none" stroke-width="0.5" d="
+												M 29 1 l -8 0 l 0 8 l 8 0 z M 23 3 l 4 4"></path>
+										</svg>
+									</label>
+									<input type="radio" id="UD" value="UD" name="rgHatchDir" data-vb="30">
+									<label for="UD">
+										<svg viewBox="30 0 10 10">
+											<path stroke-linecap="round" stroke="black" fill="none" stroke-width="0.5" d="
+												M 39 1 l -8 0 l 0 8 l 8 0 z M 35 3 l 0 4"></path>
+										</svg>
+									</label>
+								</div>
+							</div>
+						</div>
+						<div class="btn color">
+							<input type="color" id="icHatchColor">
+							<label for="icHatchColor"></label>
+						</div>
+						<div class="btn color">
+							<input type="color" id="icHatchBgColor">
+							<label for="icHatchBgColor"></label>
+						</div>
+					</div>
+					<div class="cont slider" id="hatchHowmanyw">
+						<div class="wrapper"></div>
+					</div>
+
+					<div class="cont slider" id="hatchSeparation">
+						<div class="wrapper"></div>
+					</div>
+
+					<div class="cont slider" id="hatchLinewidth">
+						<div class="wrapper"></div>
+					</div>
+
+					<div class="cont slider" id="hatchSensitivity">
+						<div class="wrapper"></div>
+					</div>
+				</div>
+			</div>
+		</section>
+		<section class="horizontal" id="secDisplay">
+			<div class="disp left">
+				<canvas id="canvOriginal"></canvas>
+			</div>
+			<div class="disp right">
+				<canvas id="canvFinal" width="0" height="0"></canvas>
+			</div>
+		</section>
+		<section id="secDownloadBar">
+			<div class="d-bar d-button">
+				<button id="btnDownImg" class="bwing"><label for="btnDownImg">Download</label></button>
+			</div>
+		</section>
+	</div>
+
+	<dialog id="diagInfo">
+		<div class="body">
+			The image file is only loaded locally to the browser. It is not uploaded anywhere.
+		</div>
+	</dialog>
+
+	<script src="AutoDialog.js"></script>
+	<script src="RangeSlider.js"></script>
+	<script src="index.js"></script>
+</body>
+
+</html>
