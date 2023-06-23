@@ -50,6 +50,8 @@
 	/* PIXELS */
 	--nav-height-desk: 40px;
 	--nav-height-mob: 48px;
+	--toolbar-width: 200px;
+	--cont-sider-width: 200px;
 }
 
 /* General styles. */
@@ -189,7 +191,7 @@ nav.top-nav .nav-items .nav-i:active svg path {
 	background-color: lightgreen;
 	display: grid;
 	grid-template-areas: "global global" "toolbar display" "download download";
-	grid-template-columns: 200px 1fr;
+	grid-template-columns: var(--toolbar-width) 1fr;
 	grid-template-rows: 64px 1fr 36px;
 }
 
@@ -548,45 +550,51 @@ nav.top-nav .nav-items .nav-i:active svg path {
 	position: relative;
 	overflow: visible;
 	cursor: pointer;
+	outline: none;
 	z-index: 3;
-	/* width: 100%; */
-}
-
-#secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection {
-	display: flex;
-	justify-content: center;
-	align-items: center;
 }
 
 #secToolbar .effect .controllers .cont.other .btn.with-submenu .submenu {
-	background-color: green;
+	background-color: var(--blue-dark);
 	position: absolute;
 	top: 110%;
 	left: 0;
+	/* Width will be determined on specific submenu. */
 	width: 0;
+	height: 54px;
 	padding: 0;
+	display: flex;
+	flex-direction: row;
+	transition: width 300ms ease-in-out;
+	/* overflow: hidden; */
 }
 
-#secToolbar .effect .controllers .cont.other .btn.with-submenu:focus-within .submenu {
-	width: auto;
-	box-shadow: 0 0 30px 20px rgba(0, 0, 0, 0.7);
+#secToolbar .effect .controllers .cont.other .btn.with-submenu:focus .submenu {
+	box-shadow: 0 0 40px 30px rgba(0, 0, 0, 0.8);
 }
 
 #secToolbar .effect .controllers .cont.other .btn.with-submenu .submenu .wrapper {
+	width: 100%;
+	height: 100%;
+}
+
+#secToolbar .effect#effectHatching .controllers .cont.other .btn.with-submenu#currentdirection:focus .submenu {
+	width: calc(var(--cont-sider-width) - 20px);
+}
+
+#secToolbar .effect#effectHatching .controllers .cont.other .btn.with-submenu#currentdirection .submenu .wrapper {
+	padding: 0.2rem;
 	display: flex;
-	justify-content: center;
+	justify-content: space-between;
 	align-items: center;
 }
 
-#secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection .submenu#rgdirections .wrapper {
-	padding: 0.3rem;
-}
-
-#secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection .submenu#rgdirections .wrapper input[type=radio]+label {
-	width: 40px;
+#secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection .submenu#rgdirections .wrapper input[type=radio]~label {
+	height: 100%;
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	flex: 1;
 }
 
 #secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection .submenu#rgdirections .wrapper input[type=radio]:checked+label svg {
@@ -598,7 +606,7 @@ nav.top-nav .nav-items .nav-i:active svg path {
 }
 
 #secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection .submenu#rgdirections .wrapper input[type=radio]:not(:checked)+label:hover svg path {
-	stroke: var(--blue-muted);
+	stroke: var(--blue-shade);
 }
 
 /* ------ */
@@ -818,9 +826,16 @@ nav.top-nav .nav-items .nav-i:active svg path {
 		height: calc(100% - var(--nav-height-mob));
 		overflow: hidden;
 	}
-
+	
+	input~label{
+		font-family: outfit;
+		font-weight: 400;
+	}
+	.cont.slider{
+		font-family: outfit;
+		font-weight: 300;
+	}
 	#secToolbar {
-		/* background-color: transparent; */
 		left: 0;
 		width: 60px;
 		padding: 0.5rem 0 0 0;
@@ -829,14 +844,13 @@ nav.top-nav .nav-items .nav-i:active svg path {
 
 	#secToolbar.expanded {
 		left: -140px;
-		width: 200px;
+		width: var(--toolbar-width);
 		box-shadow: 5px 25px 30px 10px black;
 		transition: left 300ms ease-in-out;
 	}
 
 	#secToolbar .effect {
 		display: none;
-		/* background-color: var(--blue-darkest); */
 		border-radius: 0;
 		margin: 0;
 		padding: 0;
@@ -856,7 +870,7 @@ nav.top-nav .nav-items .nav-i:active svg path {
 		flex: 0;
 		overflow: visible;
 	}
-
+	
 	#secToolbar .effect input[name=rgEffects]+label {
 		background-color: var(--blue-dark);
 		padding: 1rem 0;
@@ -872,7 +886,6 @@ nav.top-nav .nav-items .nav-i:active svg path {
 
 	#secToolbar .effect.active {
 		background-color: transparent;
-		/* border: 1px solid var(--blue-light); */
 		display: flex;
 		box-shadow: none;
 		overflow: visible;
@@ -938,7 +951,10 @@ nav.top-nav .nav-items .nav-i:active svg path {
 		overflow: visible;
 		cursor: pointer;
 	}
-
+	#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw{
+		overflow: hidden;
+	}
+	
 	#secToolbar .effect.active .controllers .cont.other .btn.color {
 		border-width: 2px;
 		overflow: hidden;
@@ -960,7 +976,7 @@ nav.top-nav .nav-items .nav-i:active svg path {
 	}
 
 	#secToolbar .effect.active .controllers .cont.slider:focus {
-		box-shadow: inset 0px 0px 1px 2px black;
+		box-shadow: inset 0px 0px 6px 1px var(--blue-medium);
 	}
 
 	#secToolbar .effect.active .controllers .cont.slider .wrapper {
@@ -978,18 +994,12 @@ nav.top-nav .nav-items .nav-i:active svg path {
 
 	#secToolbar .effect.active .controllers .cont.slider:focus .wrapper {
 		padding: 0;
-		width: 200px;
+		width: var(--cont-sider-width);
 		transition: width 300ms ease-in-out;
 	}
 
 	#secToolbar .effect.active .controllers .cont.slider .wrapper .slider {
 		overflow: hidden;
-	}
-
-
-	#secToolbar .effect.active .controllers .cont.slider:focus .wrapper .slider {
-		margin: 0;
-		width: 200px;
 	}
 
 	/* GRID */
@@ -1014,6 +1024,26 @@ nav.top-nav .nav-items .nav-i:active svg path {
 	}
 
 	#secToolbar .effect.active .controllers .cont.slider#gsSensitivity::after {
+		content: "Sens.";
+	}
+	/* ------ */
+	/* Hatching */
+	#secToolbar .effect .controllers .cont.other .btn.with-submenu .submenu {
+		left: auto;
+		top: auto;
+		right: 110%;
+	}
+
+	#secToolbar .effect.active#effectHatching .controllers .cont.slider#hatchHowmanyw::after{
+		content: "Wdths.";
+	}
+	#secToolbar .effect.active#effectHatching .controllers .cont.slider#hatchSeparation::after{
+		content: "Sepr.";
+	}
+	#secToolbar .effect.active#effectHatching .controllers .cont.slider#hatchLinewidth::after{
+		content: "Line";
+	}
+	#secToolbar .effect.active#effectHatching .controllers .cont.slider#hatchSensitivity::after{
 		content: "Sens.";
 	}
 }

@@ -138,7 +138,8 @@ function svgAnimateStop(evt) {
 }
 // ---------
 //  TOOLBAR RADIO BUTTONS
-const arrRbEffect = document.querySelectorAll(".effect input[type='radio']");
+const arrRbEffect = document.querySelectorAll(".effect input[name=rgEffects]");
+
 const arrEffects = document.querySelectorAll(".effect");
 
 // Styling for when in desktop setting.
@@ -413,10 +414,10 @@ var paramsHatchSeparation = { label: "Separation", min: 2, step: 1, max: 4, def:
 //  Max will be changed to a fifth of the smallest image dimension when image is loaded.
 // Default value will be changed to a quarter of max.
 
-const contHatchHowmanyw = document.querySelector("#effectHatching .cont.slider#hatchHowmanyw");
-const contHatchSeparation = document.querySelector("#effectHatching .cont.slider#hatchSeparation");
-const contHatchLinewidth = document.querySelector("#effectHatching .cont.slider#hatchLinewidth");
-const contHatchSensitivity = document.querySelector("#effectHatching .cont.slider#hatchSensitivity");
+const contHatchHowmanyw = document.querySelector("#effectHatching .cont.slider#hatchHowmanyw .wrapper");
+const contHatchSeparation = document.querySelector("#effectHatching .cont.slider#hatchSeparation .wrapper");
+const contHatchLinewidth = document.querySelector("#effectHatching .cont.slider#hatchLinewidth .wrapper");
+const contHatchSensitivity = document.querySelector("#effectHatching .cont.slider#hatchSensitivity .wrapper");
 const icHatchColor = document.querySelector("#effectHatching .cont.other .btn.color #icHatchColor");
 const lbHatchColor = document.querySelector("#effectHatching .cont.other .btn.color #icHatchColor~label");
 icHatchColor.value = paramsHatch.color;

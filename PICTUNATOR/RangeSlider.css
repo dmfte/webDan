@@ -1,13 +1,13 @@
 @font-face {
-    font-family: "Mukta";
-    src: url(./Mukta-Bold.ttf);
+    font-family: "mono3x3";
+    src: url(../fonts/3x3mono.ttf);
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Mukta';
+    /* font-family: "mono3x3"; */
 }
 /* 
 body,
