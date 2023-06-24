@@ -14,12 +14,34 @@ var cf = canvFinal.getContext("2d", { willReadFrequently: true });
 var originalData;  // Image data.
 
 //   NAVBAR
-const btnInfo = document.querySelector(".nav-i#gaInfo");
+const navBtnInfo = document.querySelector(".nav-i#gaBtnInfo");
 const diagInfo = document.getElementById("diagInfo");
-const paramsDiagInfo = { trigger: btnInfo, title: "Information", dialog: diagInfo, glyph: "hercon", ok: false, cancel: false }
+const paramsDiagInfo = { trigger: navBtnInfo, title: "Information", dialog: diagInfo, glyph: "hercon", ok: false, cancel: false }
 const adInfo = new AutoDialog(paramsDiagInfo);
 
 // Mailto
+const navBtnContactme = document.getElementById("navBtnContactme");
+navBtnContactme.addEventListener("click", () => {
+    let ta = document.createElement("textarea");
+    ta.style.position = "absolute";
+    ta.style.transform = "scale(0)";
+    ta.innerText = "dmfte.dev@gmail.com";
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    document.execCommand("copy");
+    showTooltip(navBtnContactme, 2000);
+    document.body.removeChild(ta);
+});
+
+function showTooltip(elem, timeMs) {
+    // Will add the .active class to the already styled tooltip and remvoe it after the provided time in milisecons.
+    let tooltip = elem.querySelector(".tooltip");
+    tooltip.classList.add("active");
+    window.setTimeout(() => {
+        tooltip.classList.remove("active");
+    }, timeMs)
+}
 // ---------
 
 //  GLOBAL ACTIONS
@@ -153,10 +175,6 @@ arrRbEffect.forEach(rb => {
             effect.classList.add("active");
         }
         if (secToolbar.classList.contains("expanded")) {
-            // arrRbEffect.forEach(radioB => {
-            // let eachEffect = radioB.closest(".effect");
-            // });
-            // let thisEffect = rb.closest(".effect");
             secToolbar.classList.remove("expanded");
         } else {
             secToolbar.classList.add("expanded");
@@ -179,7 +197,7 @@ const icGridColor = document.getElementById("icGridColor");
 const lbGridColor = document.querySelector("label[for=icGridColor]");
 const rbGrid = document.getElementById("rbGrid");
 var rsGridAmtSqrs = new RangeSlider(contGridAmtSqrs, { label: "Number of squares", min: 2, step: 1, max: 30, def: 5, color1: "#2c5270", color2: "#DDE6ED" });
-var rsGridLinew = new RangeSlider(contGridLinew, { label: "Line width", min: 1, step: 1, max: 20, def: 2, color1: "#2c5270", color2: "#DDE6ED" });
+var rsGridLinew = new RangeSlider(contGridLinew, { label: "Line width", min: 1, step: 1, max: 30, def: 2, color1: "#2c5270", color2: "#DDE6ED" });
 
 rsGridAmtSqrs.onSliding(onGridSlide);
 rsGridLinew.onSliding(onGridSlide);
@@ -295,18 +313,15 @@ async function onPixelateSlide() {
 
 
 //  BLACK & WHITE EFFECT
-var paramsBwing = {
-    label: "Black & Whiteing",
-    min: 1,
-    max: 254,
-    step: 1,
-    def: 127,
-    color1: "#2c5270",
-    color2: "#DDE6ED"
+var paramsBnw = {
+    color: "#000000",
+    bg: "#FFFFFF",
+    sensitivity: 0
 }
-const contBwingSlider = document.querySelector("#effectBwing .cont.slider .wrapper");
+// var paramsBnwSensitivity = {label: "Sensitivity", min: -254, max: 254, step: 1, def: 0, color1: "#2c5270", color2: "#DDE6ED"}
+const contBwingSenitivity = document.querySelector("#effectBwing .cont.slider .wrapper");
 const rbBwing = document.getElementById("rbBwing");
-var rsBwing = new RangeSlider(contBwingSlider, paramsBwing);
+var rsBnwSensitivity = new RangeSlider(contBwingSenitivity, { label: "Sensitivity", min: -254, max: 254, step: 1, def: paramsBnw.sensitivity, color1: "#2c5270", color2: "#DDE6ED" });
 
 
 rbBwing.addEventListener("click", () => {
@@ -315,25 +330,89 @@ rbBwing.addEventListener("click", () => {
 
 // Functions
 async function onBwingSlide() {
-    let newImgData = await getBlackedImgData(originalData, rsBwing.val);
+    let newImgData = await getBlackedImgData(originalData, rsBnwSensitivity.val, paramsBnw.color, paramsBnw.bg);
     cf.putImageData(newImgData, 0, 0);
 }
 
-function getBlackedImgData(imgdat, lim) {
-    return new Promise((res, rej) => {
-        let newImgdat = structuredClone(imgdat);
-        for (let i = 0; i < imgdat.data.length; i += 4) {
-            let r = imgdat.data[i + 0];
-            let g = imgdat.data[i + 1];
-            let b = imgdat.data[i + 2];
-            // let a = imgdat.data[i + 3];
-            let grayScale = parseInt(r * 0.2426 + g * 0.7152 + b * 0.0822);
-            let bw = (grayScale <= lim) ? 0 : 255;
-            newImgdat.data[i + 0] = bw;
-            newImgdat.data[i + 1] = bw;
-            newImgdat.data[i + 2] = bw;
+function getBlackedImgData(imgdata, sensitivity, color, bg) {
+    return new Promise(async (res, rej) => {
+        //  Depending on grayscale value of one pixel (of every two pixels), the adjacent pixels in a 2x2 grid
+        //  will be all white, 1, 2, 3, or all 4 pixels black (5 buckets).
+        let canv0 = document.createElement("canvas");
+        canv0.width = Math.floor(imageOriginal.width / 2) * 2;
+        canv0.height = Math.floor(imageOriginal.height / 2) * 2;
+        let c0 = canv0.getContext("2d", { willReadFrequently: true });
+        c0.fillStyle = bg;
+        c0.strokeStyle = color;
+        let objRgb = await getObjRgb(color);
+        c0.fillRect(0, 0, canv0.width, canv0.height);
+        let newImgData = c0.getImageData(0, 0, canv0.width, canv0.height);
+        let buckets = await get255Buckets(5, sensitivity)
+        let pixels = [0, 0, (newImgData.width + 1) * 4, 1 * 4, newImgData.width * 4];  //  Analogus array to buckets. First value is 0 because first value of buckets will be ignored.
+        for (let i = 0; i < imgdata.data.length; i += 8) {  //  Itterating every two pixels.
+            let x = ((i / 4) % imgdata.width);
+            if (x == imgdata.width - 1) {
+                // If the current pixel is the very last at the right edge, it means the width is not an even number.
+                i = i - 4;
+                continue;
+            };
+            let y = Math.floor((i / 4) / imgdata.width);
+            if (y % 2 == 1) continue;  //  If it is an odd row, already drawn during the previous (even) row.
+            if (y == imgdata.height - 1) break;  // If the current pixel is the very last at the bottom  edge.
+
+            let r = imgdata.data[i + 0];
+            let g = imgdata.data[i + 1];
+            let b = imgdata.data[i + 2];
+            // let a = imgdata.data[i + 3];
+            let gs = parseInt(r * 0.2426 + g * 0.7152 + b * 0.0822);
+            for (let j = 1; j < buckets.length; j++) {
+                const b = buckets[j];
+                if (gs >= b[0] && gs <= b[1]) {
+                    for (let k = 1; k <= j; k++) {
+                        const px = pixels[k];
+                        newImgData.data[i + px + 0] = objRgb.r;
+                        newImgData.data[i + px + 1] = objRgb.g;
+                        newImgData.data[i + px + 2] = objRgb.b;
+                        // newImgData.data[i + px + 3] = 0;
+                    }
+                    break;
+                }
+            }
         }
-        res(newImgdat);
+        res(newImgData);
+    });
+}
+
+
+function getObjRgb(color) {
+    return new Promise((res, rej) => {
+        let element = document.createElement("div");
+        element.style.backgroundColor = color;
+        element.style.display = "none";
+        document.body.appendChild(element);
+        let rgbStr = window.getComputedStyle(element).backgroundColor;
+        // rgb(255, 255, 255)
+        document.body.removeChild(element);
+        rgb = rgbStr.split(",");
+        if (rgb.length > 3) {
+            // ['rgba(255', ' 255', ' 255', ' 255)']
+            rgb.splice(3, rgb.length);
+            // ['rgba(255', ' 255', ' 255']
+        }
+        let parenthesis = rgb[0].match(/\(/).index;
+        // 'rgba(255' index of '('.
+        rgb[0] = rgb[0].split("");
+        rgb[0].splice(0, parenthesis + 1);
+        rgb[0] = parseInt(rgb[0].join(""));
+        // ' 255'
+
+        rgb[1] = parseInt(rgb[1]);   // '  255'
+        rgb[2] = parseInt(rgb[2]);   // '  255)'
+        res({
+            r: rgb[0],
+            g: rgb[1],
+            b: rgb[2]
+        });
     });
 }
 
@@ -350,14 +429,14 @@ rbGrayscaling.addEventListener("click", () => {
 
 cbGrayscalingBnw.addEventListener("input", onGrayscalingSlide);
 
-//  More than 30 grayscale tones are barely distinguishable.
-var rsGrayscalingLevels = new RangeSlider(contGrayscalingLevels, { label: "Levels of gray", min: 2, max: 35, step: 1, def: 3 });
+var rsGrayscalingLevels = new RangeSlider(contGrayscalingLevels, { label: "Levels of gray", min: 2, max: 20, step: 1, def: 3 });
+//  More than 20 grayscale tones are barely distinguishable.
 var rsGrayScalingSensitivity = new RangeSlider(contGrayscalingSensitivity, { label: "Sensitivity", min: -254, step: 1, max: 254, def: 0 });
 rsGrayscalingLevels.onSliding(onGrayscalingSlide);
 rsGrayScalingSensitivity.onSliding(onGrayscalingSlide);
 
 async function onGrayscalingSlide() {
-    if (imageOriginal!== undefined) {
+    if (imageOriginal !== undefined) {
         let newImgData = await getGrayscalledImgData(rsGrayscalingLevels.val, rsGrayScalingSensitivity.val, cbGrayscalingBnw.checked);
         cf.putImageData(newImgData, 0, 0);
     }
@@ -378,12 +457,12 @@ function getGrayscalledImgData(howmany, sensitivity, boolBnw) {
             }
         }
 
-        let newImgdat = structuredClone(originalData);
-        for (let i = 0; i < newImgdat.data.length; i += 4) {
-            let r = newImgdat.data[i + 0];
-            let g = newImgdat.data[i + 1];
-            let b = newImgdat.data[i + 2];
-            // let a = newImgdat.data[i + 3];
+        let newImgdata = structuredClone(originalData);
+        for (let i = 0; i < newImgdata.data.length; i += 4) {
+            let r = newImgdata.data[i + 0];
+            let g = newImgdata.data[i + 1];
+            let b = newImgdata.daata[i + 2];
+            // let a = newImgdata.data[i + 3];
             let grayScale = parseInt(r * 0.299 + g * 0.587 + b * 0.114);
             let newGs = 0;
             for (let j = 0; j < arrValues.length; j++) {
@@ -393,11 +472,11 @@ function getGrayscalledImgData(howmany, sensitivity, boolBnw) {
                     break;
                 }
             }
-            newImgdat.data[i + 0] = newGs;
-            newImgdat.data[i + 1] = newGs;
-            newImgdat.data[i + 2] = newGs;
+            newImgdata.data[i + 0] = newGs;
+            newImgdata.data[i + 1] = newGs;
+            newImgdata.data[i + 2] = newGs;
         }
-        res(newImgdat);
+        res(newImgdata);
     });
 }
 
@@ -437,7 +516,7 @@ icHatchBgColor.addEventListener("input", () => {
     onHatchingSlide();
 });
 
-var rsHatchHowmanyw = new RangeSlider(contHatchHowmanyw, { label: "Different widths", min: 1, max: 10, step: 1, def: 3 });
+var rsHatchHowmanyw = new RangeSlider(contHatchHowmanyw, { label: "Different lines", min: 1, max: 10, step: 1, def: 3 });
 var rsHatchSeparation = new RangeSlider(contHatchSeparation, paramsHatchSeparation);
 var rsHatchLinewidth = new RangeSlider(contHatchLinewidth, { label: "Line width", min: 1, max: 10, step: 1, def: paramsHatch.linew });
 var rsHatchSensitivity = new RangeSlider(contHatchSensitivity, { label: "Sensitivity", min: -250, max: 250, step: 5, def: 0 });
@@ -450,7 +529,6 @@ rbHatching.addEventListener("click", () => {
 
 var strHatchDirection = "DLUR";
 const currentdirection = document.getElementById("currentdirection");
-// const ovHatchDirection = document.getElementById("ovHatchDirections");
 const svgCurrDir = currentdirection.querySelector("svg");
 const rbtnsHatchDirections = currentdirection.closest(".cont.other .btn.with-submenu").querySelectorAll("input[type=radio]");
 
@@ -495,64 +573,9 @@ async function onHatchingSlide() {
             });
         });
     }
-
-    // let canv0 = document.createElement("canvas");
-    // //  Original image's sizes  are divided by 3 so the hatching can be drawn at least in a 3x3px grid. 
-    // canv0.width = Math.floor(canvOriginal.width / 3);
-    // canv0.height = Math.floor(canvOriginal.height / 3);
-    // let c0 = canv0.getContext("2d", {
-    //     willReadFrequentdirectionY: true
-    // });
-    // c0.imageSmoothingEnabled = true;
-    // c0.drawImage(canvOriginal, 0, 0, canv0.width, canv0.height);
-    // //  Canvas 2 has to be resized. Otherwise there will be leftover blank pixesl at the right and bottom edges.
-    // canvFinal.width = canv0.width * 3;
-    // canvFinal.height = canv0.height * 3;
-
-    // cf.imageSmoothingEnabled = true;
-    // //  bg color, stroke color, line cap, can be changed for any selected color.
-    // cf.fillStyle = "white";
-    // cf.fillRect(0, 0, canvFinal.width, canvFinal.height);
-    // cf.strokeStyle = "black";
-    // cf.lineCap = "round";
-
-    // let gaesh = await getObjToStartHatching(canv0, strHatchDirection, rsHatchSeparation.val);
-    // let arrLimits = await get255Buckets(rsHatchHowmanyw.val + 1, rsHatchSensitivity.val); //  1 added to the amount of widths so there's an extra bucket that will be white.
-    // gahl = await getArrayHatchedLines(gaesh, canv0, arrLimits, rsHatchSensitivity.val);
-    // paramsHatch.gahl = gahl;
-    // hatchC2(paramsHatch);
 }
 
-// function hatchC2(params) {
-// cf.fillStyle = params.bg;
-// cf.fillRect(0, 0, canvFinal.width, canvFinal.height);
-// cf.strokeStyle = params.color;
-// params.gahl.forEach(ahl => {
-//     ahl.forEach(hl => {
-//         cf.save();
-//         cf.lineWidth = hl.width * params.linew;
-//         cf.translate(hl.movetoX * 3, hl.movetoY * 3);
-//         cf.beginPath();
-//         cf.moveTo(0, 0);
-//         cf.lineTo(hl.directionX * 3, hl.directionY * 3);
-//         cf.stroke();
-//         cf.restore();
-//     });
-// });
-// }
-
 function getArrayHatchedLines(direction, separation, howmany, sensitivity) {
-    // RECEIVES:
-    // obj{
-    //     dx: recurrent change in x,
-    //     dy: recurrent change in y,
-    //     arr[{
-    //         x: starting point in x,
-    //         y: starting point in y,
-    //         subLen: length before x and y reach the end of the image
-    //     }]
-    // }
-    // getArrayHatchedLines(strHatchDirection, rsHatchSeparation.val, rsHatchHowmanyw.val, rsHatchSensitivity.val);
     return new Promise(async (res, rej) => {
         let canv0 = document.createElement("canvas");
         //  Original image's sizes  are divided by 3 so the hatching can be drawn at least in a 3x3px grid. 
@@ -677,7 +700,6 @@ function getObjToStartHatching(canvasSource, strdirection, separation) {
                 for (let i = 0; i < h; i++) {
                     if ((i + leftover) % separation !== 0) continue;
                     obj.arr.push({
-                        // x: w + 2,
                         x: w,
                         y: i,
                         subLen: Math.min((h - i), w)
@@ -694,7 +716,6 @@ function getObjToStartHatching(canvasSource, strdirection, separation) {
                     if (i % separation !== 0) continue;
                     obj.arr.push({
                         x: 0,
-                        // y: i + 1,
                         y: i,
                         subLen: w
                     });
@@ -788,16 +809,14 @@ ifGaImage.addEventListener("input", async (evt) => {
     if (rbPixelate.checked) onGridSlide();
 
     // Black & White settings.
-    rsBwing.onSliding(onBwingSlide);
+    rsBnwSensitivity.onSliding(onBwingSlide);
     if (rbBwing.checked) onBwingSlide();
 
     // Gray-scaling settings.
-    // rsGrayscalingLevels.onSliding(onGrayscalingSlide);
-    // rsGrayScalingSensitivity.onSliding(onGrayscalingSlide);
     if (rbGrayscaling.checked) onGrayscalingSlide();
 
     //  Hatching settings.
-    paramsHatchSeparation.max = parseInt(smallestDim / 10);
+    paramsHatchSeparation.max = parseInt(smallestDim / 20);
     paramsHatchSeparation.def = Math.max(parseInt(paramsHatchSeparation.max / 10), 0);
     rsHatchSeparation = new RangeSlider(contHatchSeparation, paramsHatchSeparation);
     rsHatchSeparation.onSliding(async () => {
@@ -819,4 +838,3 @@ ifGaImage.addEventListener("input", async (evt) => {
     paramsHatch.gahl = await getArrayHatchedLines(strHatchDirection, rsHatchSeparation.val, rsHatchHowmanyw.val, rsHatchSensitivity.val);
     if (rbHatching.checked) onHatchingSlide();
 });
-

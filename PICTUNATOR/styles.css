@@ -118,6 +118,32 @@ input[type=radio],
 input[type=checkbox] {
 	display: none;
 }
+.tooltip{
+	position: absolute;
+	background-color: lightyellow;
+	/* 10px is the .tooltip::after border width. */
+	top: calc(100% + 10px);
+	right: calc(50% - 10px);
+	border-radius: 10px 0 10px 20px;
+	display: none;
+	justify-content: flex-start;
+	align-items: center;
+	padding: 5px 5px 10px 10px;
+	z-index: 4;
+}
+.tooltip.active{
+	display: block;
+}
+.tooltip::after{
+	content: "";
+	position: absolute;
+	bottom: 100%;
+	right: 0;
+	border-width: 10px;
+	border-color: transparent transparent lightyellow transparent;
+	border-style: solid;
+	z-index: 9999;
+}
 .g-action input~label,
 .btn input~label{
 	display: flex;
@@ -137,9 +163,16 @@ nav.top-nav {
 	align-items: stretch;
 	padding: 0.2rem 0.5rem;
 	width: 100%;
+	overflow: visible;
 }
 
 /* Logo. */
+nav.top-nav a#logoDmfte{
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+}
 nav.top-nav .logo {
 	background-color: white;
 	border-radius: calc(var(--nav-height-desk)/2);
@@ -170,6 +203,10 @@ nav.top-nav .nav-items .nav-i {
 	justify-content: center;
 	align-items: stretch;
 	cursor: pointer;
+}
+nav.top-nav .nav-items .nav-i#navBtnContactme{
+	position: relative;
+	/* For tooltip. */
 }
 
 nav.top-nav .nav-items .nav-i svg path {
@@ -565,7 +602,7 @@ nav.top-nav .nav-items .nav-i:active svg path {
 	padding: 0;
 	display: flex;
 	flex-direction: row;
-	transition: width 300ms ease-in-out;
+	transition: width 200ms ease-in-out;
 	/* overflow: hidden; */
 }
 
@@ -684,6 +721,7 @@ nav.top-nav .nav-items .nav-i:active svg path {
 }
 
 #secDisplay.float .disp.left {
+	touch-action: none;
 	bottom: auto;
 	right: auto;
 	padding: 0.5rem;
@@ -1033,15 +1071,18 @@ nav.top-nav .nav-items .nav-i:active svg path {
 		top: auto;
 		right: 110%;
 	}
+	#secToolbar .effect .controllers .cont.other .btn.with-submenu:focus .submenu{
+		box-shadow: 0 0 80px 20px var(--blue-dark);
+	}
 
 	#secToolbar .effect.active#effectHatching .controllers .cont.slider#hatchHowmanyw::after{
-		content: "Wdths.";
+		content: "Lines";
 	}
 	#secToolbar .effect.active#effectHatching .controllers .cont.slider#hatchSeparation::after{
 		content: "Sepr.";
 	}
 	#secToolbar .effect.active#effectHatching .controllers .cont.slider#hatchLinewidth::after{
-		content: "Line";
+		content: "Width";
 	}
 	#secToolbar .effect.active#effectHatching .controllers .cont.slider#hatchSensitivity::after{
 		content: "Sens.";
