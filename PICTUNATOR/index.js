@@ -173,6 +173,14 @@ arrRbEffect.forEach(rb => {
             });
             let effect = rb.closest(".effect");
             effect.classList.add("active");
+            if (effect.dataset.btnDown !== undefined) {
+                btnDownImg.setAttribute("class", "");
+                btnDownImg.classList.add("effect");
+                btnDownImg.classList.add(effect.dataset.btnDown);
+            } else {
+                btnDownImg.setAttribute("class", "");
+                btnDownImg.classList.add("effect");
+            }
         }
         if (secToolbar.classList.contains("expanded")) {
             secToolbar.classList.remove("expanded");
@@ -313,28 +321,28 @@ async function onPixelateSlide() {
 
 
 //  BLACK & WHITE EFFECT
-var paramsBnw = {
+var paramsMonochrom = {
     color: "#000000",
     bg: "#FFFFFF",
     sensitivity: 0
 }
-// var paramsBnwSensitivity = {label: "Sensitivity", min: -254, max: 254, step: 1, def: 0, color1: "#2c5270", color2: "#DDE6ED"}
-const contBwingSenitivity = document.querySelector("#effectBwing .cont.slider .wrapper");
-const rbBwing = document.getElementById("rbBwing");
-var rsBnwSensitivity = new RangeSlider(contBwingSenitivity, { label: "Sensitivity", min: -254, max: 254, step: 1, def: paramsBnw.sensitivity, color1: "#2c5270", color2: "#DDE6ED" });
+// var paramsmonoSensitivity = {label: "Sensitivity", min: -254, max: 254, step: 1, def: 0, color1: "#2c5270", color2: "#DDE6ED"}
+const contMonoSenitivity = document.querySelector("#effectMonochrom .cont.slider#monoSensitivity .wrapper");
+const rbMonochrom = document.getElementById("rbMonochrom");
+var rsMonoSensitivity = new RangeSlider(contMonoSenitivity, { label: "Sensitivity", min: -254, max: 254, step: 1, def: paramsMonochrom.sensitivity, color1: "#2c5270", color2: "#DDE6ED" });
 
 
-rbBwing.addEventListener("click", () => {
-    if (imageOriginal !== undefined) onBwingSlide();
+rbMonochrom.addEventListener("click", () => {
+    if (imageOriginal !== undefined) onMonochromSlide();
 });
 
 // Functions
-async function onBwingSlide() {
-    let newImgData = await getBlackedImgData(originalData, rsBnwSensitivity.val, paramsBnw.color, paramsBnw.bg);
+async function onMonochromSlide() {
+    let newImgData = await getMonochromImgData(originalData, rsMonoSensitivity.val, paramsMonochrom.color, paramsMonochrom.bg);
     cf.putImageData(newImgData, 0, 0);
 }
 
-function getBlackedImgData(imgdata, sensitivity, color, bg) {
+function getMonochromImgData(imgdata, sensitivity, color, bg) {
     return new Promise(async (res, rej) => {
         //  Depending on grayscale value of one pixel (of every two pixels), the adjacent pixels in a 2x2 grid
         //  will be all white, 1, 2, 3, or all 4 pixels black (5 buckets).
@@ -461,7 +469,7 @@ function getGrayscalledImgData(howmany, sensitivity, boolBnw) {
         for (let i = 0; i < newImgdata.data.length; i += 4) {
             let r = newImgdata.data[i + 0];
             let g = newImgdata.data[i + 1];
-            let b = newImgdata.daata[i + 2];
+            let b = newImgdata.data[i + 2];
             // let a = newImgdata.data[i + 3];
             let grayScale = parseInt(r * 0.299 + g * 0.587 + b * 0.114);
             let newGs = 0;
@@ -809,8 +817,8 @@ ifGaImage.addEventListener("input", async (evt) => {
     if (rbPixelate.checked) onGridSlide();
 
     // Black & White settings.
-    rsBnwSensitivity.onSliding(onBwingSlide);
-    if (rbBwing.checked) onBwingSlide();
+    rsMonoSensitivity.onSliding(onMonochromSlide);
+    if (rbMonochrom.checked) onMonochromSlide();
 
     // Gray-scaling settings.
     if (rbGrayscaling.checked) onGrayscalingSlide();

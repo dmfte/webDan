@@ -85,9 +85,11 @@ dialog {
 	& .wrapper {
 		& .container-title {
 			overflow: hidden;
-			& .title{
+
+			& .title {
 				user-select: text;
 			}
+
 			& .x-it {
 				display: inline-block;
 				rotate: 45deg;
@@ -108,44 +110,39 @@ dialog {
 		}
 	}
 }
-dialog::backdrop{
+
+dialog::backdrop {
 	background-color: rgb(0, 0, 0);
 	opacity: 0.5;
 }
+
 /* --------- */
 
 input[type=radio],
 input[type=checkbox] {
 	display: none;
 }
-.tooltip{
+
+.tooltip {
 	position: absolute;
 	background-color: lightyellow;
-	/* 10px is the .tooltip::after border width. */
-	top: calc(100% + 10px);
-	right: calc(50% - 10px);
-	border-radius: 10px 0 10px 20px;
 	display: none;
-	justify-content: flex-start;
 	align-items: center;
-	padding: 5px 5px 10px 10px;
 	z-index: 4;
 }
-.tooltip.active{
+
+.tooltip.active {
 	display: block;
 }
-.tooltip::after{
-	content: "";
+
+.tooltip::after {
 	position: absolute;
-	bottom: 100%;
-	right: 0;
-	border-width: 10px;
-	border-color: transparent transparent lightyellow transparent;
 	border-style: solid;
-	z-index: 9999;
+	z-index: 3;
 }
+
 .g-action input~label,
-.btn input~label{
+.btn input~label {
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -153,6 +150,7 @@ input[type=checkbox] {
 	height: 100%;
 	cursor: pointer;
 }
+
 /* --------- */
 nav.top-nav {
 	height: var(--nav-height-desk);
@@ -167,12 +165,6 @@ nav.top-nav {
 }
 
 /* Logo. */
-nav.top-nav a#logoDmfte{
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 100%;
-}
 nav.top-nav .logo {
 	background-color: white;
 	border-radius: calc(var(--nav-height-desk)/2);
@@ -181,6 +173,15 @@ nav.top-nav .logo {
 	align-items: center;
 	width: 100px;
 	cursor: pointer;
+	border: 1px solid green;
+	padding: 1%;
+}
+
+nav.top-nav .logo a#logoDmfte {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
 }
 
 nav.top-nav .logo svg {
@@ -204,9 +205,27 @@ nav.top-nav .nav-items .nav-i {
 	align-items: stretch;
 	cursor: pointer;
 }
-nav.top-nav .nav-items .nav-i#navBtnContactme{
+
+nav.top-nav .nav-items .nav-i#navBtnContactme {
 	position: relative;
 	/* For tooltip. */
+}
+
+nav.top-nav .nav-items .nav-i#navBtnContactme .tooltip {
+	/* 10px is the .tooltip::after border width. */
+	top: calc(100% + 10px);
+	right: calc(50% - 10px);
+	border-radius: 10px 0 10px 20px;
+	padding: 5px 5px 10px 10px;
+	justify-content: flex-start;
+}
+
+nav.top-nav .nav-items .nav-i#navBtnContactme .tooltip::after {
+	content: "";
+	bottom: 100%;
+	right: 0;
+	border-width: 10px;
+	border-color: transparent transparent lightyellow transparent;
 }
 
 nav.top-nav .nav-items .nav-i svg path {
@@ -326,7 +345,7 @@ nav.top-nav .nav-items .nav-i:active svg path {
 	position: relative;
 }
 
-#secGlobalActions #gaSmallFloat input[type=checkbox]~label{
+#secGlobalActions #gaSmallFloat input[type=checkbox]~label {
 	/* padding: 0.2rem; */
 }
 
@@ -437,7 +456,8 @@ nav.top-nav .nav-items .nav-i:active svg path {
 	height: 48px;
 	overflow: hidden;
 }
-#secToolbar .effect#effectHatching .controllers .cont.other .btn.btn.with-submenu{
+
+#secToolbar .effect#effectHatching .controllers .cont.other .btn.btn.with-submenu {
 	padding: 0 0.3rem;
 }
 
@@ -525,62 +545,79 @@ nav.top-nav .nav-items .nav-i:active svg path {
 #secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label {
 	display: flex;
 }
-#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label span{
+
+#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label span {
 	flex: 1;
 	height: 100%;
 }
-#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label span.stripe1{
+
+#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label span.stripe1 {
 	background-color: rgb(64, 64, 64);
 }
-#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label:hover span.stripe1{
+
+#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label:hover span.stripe1 {
 	animation: 700ms infinite alternate black-to-gray;
 }
-#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw input:checked~label span.stripe1{
+
+#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw input:checked~label span.stripe1 {
 	background-color: rgb(0, 0, 0);
 }
-#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label span.stripe2{
+
+#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label span.stripe2 {
 	background-color: rgb(127, 127, 127);
 }
-#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label span.stripe3{
+
+#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label span.stripe3 {
 	background-color: rgb(160, 160, 160);
 }
-#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label:hover span.stripe3{
+
+#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label:hover span.stripe3 {
 	animation: 700ms infinite alternate white-to-gray;
 }
-#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw input:checked~label span.stripe3{
+
+#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw input:checked~label span.stripe3 {
 	background-color: rgb(255, 255, 255);
 }
+
 /* rgb(64, 64, 64) */
 /* rgb(160, 160, 160) */
 
-@keyframes black-to-gray{
-	from{
+@keyframes black-to-gray {
+	from {
 		background-color: rgb(0, 0, 0);
 	}
-	35%{
+
+	35% {
 		background-color: rgb(0, 0, 0);
 	}
-	65%{
+
+	65% {
 		background-color: rgb(64, 64, 64);
 	}
-	to{
+
+	to {
 		background-color: rgb(64, 64, 64);
 	}
 }
-@keyframes white-to-gray{
-	from{
+
+@keyframes white-to-gray {
+	from {
 		background-color: rgb(255, 255, 255);
 	}
-	35%{
+
+	35% {
 		background-color: rgb(255, 255, 255);
 	}
-	60%{
+
+	60% {
 		background-color: rgb(160, 160, 160);
 	}
-	to{
+
+	to {
 		background-color: rgb(160, 160, 160);
 	}
 }
+
 /* ------ */
 /* HATCHING. For the button to change the direction of the Hatching. */
 #secToolbar .effect .controllers .cont.other .btn.with-submenu {
@@ -785,6 +822,10 @@ nav.top-nav .nav-items .nav-i:active svg path {
 }
 
 /* Grid button effect. */
+/* Vertical bars. */
+#secDownloadBar .d-bar.d-button button.grid{
+	overflow: visible;
+}
 #secDownloadBar .d-bar.d-button button.grid::before {
 	position: absolute;
 	content: "";
@@ -792,6 +833,7 @@ nav.top-nav .nav-items .nav-i:active svg path {
 	border-left: 1px solid red;
 	border-color: transparent;
 	left: 50%;
+	top: -10%;
 	transform: translate(-50%, 0);
 	width: 100%;
 	height: 125%;
@@ -802,15 +844,15 @@ nav.top-nav .nav-items .nav-i:active svg path {
 	border-color: red;
 	width: 40%;
 }
-
+/* Horizontal bars. */
 #secDownloadBar .d-bar.d-button button.grid::after {
 	position: absolute;
 	content: "";
 	border-top: 1px solid red;
 	border-bottom: 1px solid red;
 	border-color: transparent;
-	left: 50%;
-	transform: translate(-50%, 0);
+	top: 50%;
+	transform: translate(-50%, -50%);
 	width: 125%;
 	height: 110%;
 	transition: height 300ms;
@@ -837,16 +879,16 @@ nav.top-nav .nav-items .nav-i:active svg path {
 }
 
 /* Black and white button effect. */
-#secDownloadBar .d-bar.d-button button.bwing {
+#secDownloadBar .d-bar.d-button button.mono {
 	box-shadow: inset 0 0 0 0 black;
 	transition: box-shadow 500ms;
 }
 
-#secDownloadBar .d-bar.d-button button.bwing:hover {
+#secDownloadBar .d-bar.d-button button.mono:hover {
 	box-shadow: inset 75px 0 0px 0 black;
 }
 
-#secDownloadBar .d-bar.d-button button.bwing:hover label {
+#secDownloadBar .d-bar.d-button button.mono:hover label {
 	color: white;
 }
 
@@ -864,15 +906,17 @@ nav.top-nav .nav-items .nav-i:active svg path {
 		height: calc(100% - var(--nav-height-mob));
 		overflow: hidden;
 	}
-	
-	input~label{
+
+	input~label {
 		font-family: outfit;
 		font-weight: 400;
 	}
-	.cont.slider{
+
+	.cont.slider {
 		font-family: outfit;
 		font-weight: 300;
 	}
+
 	#secToolbar {
 		left: 0;
 		width: 60px;
@@ -908,7 +952,7 @@ nav.top-nav .nav-items .nav-i:active svg path {
 		flex: 0;
 		overflow: visible;
 	}
-	
+
 	#secToolbar .effect input[name=rgEffects]+label {
 		background-color: var(--blue-dark);
 		padding: 1rem 0;
@@ -989,10 +1033,11 @@ nav.top-nav .nav-items .nav-i:active svg path {
 		overflow: visible;
 		cursor: pointer;
 	}
-	#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw{
+
+	#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw {
 		overflow: hidden;
 	}
-	
+
 	#secToolbar .effect.active .controllers .cont.other .btn.color {
 		border-width: 2px;
 		overflow: hidden;
@@ -1064,6 +1109,7 @@ nav.top-nav .nav-items .nav-i:active svg path {
 	#secToolbar .effect.active .controllers .cont.slider#gsSensitivity::after {
 		content: "Sens.";
 	}
+
 	/* ------ */
 	/* Hatching */
 	#secToolbar .effect .controllers .cont.other .btn.with-submenu .submenu {
@@ -1071,20 +1117,24 @@ nav.top-nav .nav-items .nav-i:active svg path {
 		top: auto;
 		right: 110%;
 	}
-	#secToolbar .effect .controllers .cont.other .btn.with-submenu:focus .submenu{
+
+	#secToolbar .effect .controllers .cont.other .btn.with-submenu:focus .submenu {
 		box-shadow: 0 0 80px 20px var(--blue-dark);
 	}
 
-	#secToolbar .effect.active#effectHatching .controllers .cont.slider#hatchHowmanyw::after{
+	#secToolbar .effect.active#effectHatching .controllers .cont.slider#hatchHowmanyw::after {
 		content: "Lines";
 	}
-	#secToolbar .effect.active#effectHatching .controllers .cont.slider#hatchSeparation::after{
+
+	#secToolbar .effect.active#effectHatching .controllers .cont.slider#hatchSeparation::after {
 		content: "Sepr.";
 	}
-	#secToolbar .effect.active#effectHatching .controllers .cont.slider#hatchLinewidth::after{
+
+	#secToolbar .effect.active#effectHatching .controllers .cont.slider#hatchLinewidth::after {
 		content: "Width";
 	}
-	#secToolbar .effect.active#effectHatching .controllers .cont.slider#hatchSensitivity::after{
+
+	#secToolbar .effect.active#effectHatching .controllers .cont.slider#hatchSensitivity::after {
 		content: "Sens.";
 	}
 }

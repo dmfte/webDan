@@ -73,7 +73,7 @@
 
 		</section>
 		<section id="secToolbar" class="expanded">
-			<div id="effectGrid" class="effect">
+			<div id="effectGrid" class="effect" data-btn-down="grid">
 				<input type="radio" name="rgEffects" id="rbGrid">
 				<label for="rbGrid"><span class="rb-dot"></span>Grid</label>
 				<div class="controllers">
@@ -100,7 +100,7 @@
 				</div>
 			</div>
 			<!-- --------- -->
-			<div id="effectPixelate" class="effect">
+			<div id="effectPixelate" class="effect" data-btn-down="pixelate">
 				<input type="radio" name="rgEffects" id="rbPixelate">
 				<label for="rbPixelate"><span class="rb-dot"></span>Pixelate</label>
 				<div class="controllers">
@@ -110,11 +110,11 @@
 				</div>
 			</div>
 			<!-- --------- -->
-			<div id="effectBwing" class="effect">
-				<input type="radio" name="rgEffects" id="rbBwing">
-				<label for="rbBwing"><span class="rb-dot"></span>Black and Whiting</label>
+			<div id="effectMonochrom" class="effect" data-btn-down="mono">
+				<input type="radio" name="rgEffects" id="rbMonochrom">
+				<label for="rbMonochrom"><span class="rb-dot"></span>Mono-chroming</label>
 				<div class="controllers">
-					<div class="cont slider" id="bwSensitivity" tabindex="0">
+					<div class="cont slider" id="monoSensitivity" tabindex="0">
 						<div class="wrapper"></div>
 					</div>
 				</div>
@@ -214,6 +214,9 @@
 						<div class="wrapper"></div>
 					</div>
 				</div>
+			</div>
+			<div class="effect" id="effectCrossh">
+
 			</div>
 		</section>
 		<section class="horizontal" id="secDisplay">
