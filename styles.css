@@ -5,14 +5,9 @@
 }
 
 :root {
-    --top-padd: 100px;
+    --contflaps-y-padd: 100px;
     --flap-height: 75vh;
-}
-
-html,
-body {
-    /* width: 100%; */
-    /* height: 100%; */
+    --flaps-number: 4
 }
 
 .cont.flaps {
@@ -21,40 +16,49 @@ body {
     transform: translate(-50%, 0);
     background-color: lightgray;
     width: 70%;
-    /* height: calc((60vh * 4)*0.5 + var(--top-padd)); */
-    padding-top: 5rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
+    height: calc(
+            var(--contflaps-y-padd) + 
+            var(--flap-height) + 
+            var(--flap-height) * 0.2 * calc(var(--flaps-number) - 1) + 
+            var(--contflaps-y-padd)
+            );
 
     & .flap {
-        position: relative;
+        position: absolute;
         width: 80%;
         height: var(--flap-height);
+        /* Add transform: translate(-50%, x) with x being 20% times one less of the number of flaps. */
     }
 
     & #webClicker {
         background-color: lightgreen;
-        transform: translate(0, calc(-0.8 * var(--flap-height) * 0));
+        top: var(--contflaps-y-padd);
+        left: 50%;
+        transform: translate(-50%, 0);
         z-index: 4;
     }
 
     & #webSolar {
         background-color: aliceblue;
-        transform: translate(0, calc(-0.8 * var(--flap-height) * 1));
+        top: var(--contflaps-y-padd);
+        left: 50%;
+        transform: translate(-50%, 20%);
         z-index: 3;
     }
 
     & #webCsv {
         background-color: lightcoral;
-        transform: translate(0, calc(-0.8 * var(--flap-height) * 2));
+        top: var(--contflaps-y-padd);
+        left: 50%;
+        transform: translate(-50%, 40%);
         z-index: 2;
     }
 
     & #webPictunator {
         background-color: lightskyblue;
-        transform: translate(0, calc(-0.8 * var(--flap-height) * 3));
+        top: var(--contflaps-y-padd);
+        left: 50%;
+        transform: translate(-50%, 60%);
         z-index: 1;
     }
 }
