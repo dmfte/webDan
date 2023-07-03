@@ -4,61 +4,114 @@
     box-sizing: border-box;
 }
 
+body,
+html {
+    width: 100%;
+    height: 160vh;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+body::-webkit-scrollbar{
+    display: none;
+}
+
 :root {
-    --contflaps-y-padd: 100px;
-    --flap-height: 75vh;
-    --flaps-number: 4
+    --contflaps-y-padd: 50px;
+    --flap-height: 50vh;
+    --flaps-number: 4;
+    --flapable-a: calc(100vh - (var(--contflaps-y-padd) * 2));
+    --leftover: calc(var(--flapable-a) - var(--flap-height));
+    --overflap-h: var(--leftover) /(var(--flaps-number) - 1);
 }
 
 .cont.flaps {
-    position: relative;
+    position: fixed;
+    top: 0;
     left: 50%;
+    bottom: 0;
+    padding: var(--contflaps-y-padd) 0;
     transform: translate(-50%, 0);
     background-color: lightgray;
-    width: 70%;
-    height: calc(
-            var(--contflaps-y-padd) + 
-            var(--flap-height) + 
-            var(--flap-height) * 0.2 * calc(var(--flaps-number) - 1) + 
-            var(--contflaps-y-padd)
-            );
+    /* height: calc(var(--contflaps-y-padd) + var(--flap-height) + var(--flap-height) * 0.2 * calc(var(--flaps-number) - 1) + var(--contflaps-y-padd)); */
 
-    & .flap {
+    @media screen and (min-width: 801px) {
+        width: 50%;
+    }
+
+    @media screen and (max-width: 800px) {
+        width: 70%;
+    }
+
+    @media screen and (max-width: 600px) {
+        width: 90%;
+    }
+
+    @media screen and (max-width: 400px) {
+        width: 100%;
+    }
+
+    & .wrap-flap {
         position: absolute;
         width: 80%;
         height: var(--flap-height);
-        /* Add transform: translate(-50%, x) with x being 20% times one less of the number of flaps. */
+        left: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: transform 300ms;
+        transform: translate(-50%, 0);
+        perspective: 1000px;
+        perspective-origin: 50%;
+        transform-origin: bottom;
+        /* transform-origin will change on scroll via JS. */
+        
+        & .flap {
+            width: 90%;
+            height: 100%;
+            transform-origin: bottom;
+            /* transform-origin will change on scroll via JS. */
+            transition: scale 300ms;
+        }
     }
 
+    /* Add transform: translate(-50%, x) with x being 20% times one less of the number of flaps. */
     & #webClicker {
-        background-color: lightgreen;
-        top: var(--contflaps-y-padd);
-        left: 50%;
-        transform: translate(-50%, 0);
+        top: calc(var(--contflaps-y-padd) + (var(--overflap-h) * 0));
         z-index: 4;
+
+        & .flap {
+            background-color: lightgreen;
+            /* transform: rotateX(0deg); */
+        }
     }
 
     & #webSolar {
-        background-color: aliceblue;
-        top: var(--contflaps-y-padd);
-        left: 50%;
-        transform: translate(-50%, 20%);
+        top: calc(var(--contflaps-y-padd) + (var(--overflap-h) * 1));
         z-index: 3;
+
+        & .flap {
+            background-color: antiquewhite;
+            /* transform: rotateX(-25deg); */
+        }
     }
 
     & #webCsv {
-        background-color: lightcoral;
-        top: var(--contflaps-y-padd);
-        left: 50%;
-        transform: translate(-50%, 40%);
+        top: calc(var(--contflaps-y-padd) + (var(--overflap-h) * 2));
         z-index: 2;
+
+        & .flap {
+            background-color: lightcoral;
+            /* transform: rotateX(-50deg); */
+        }
     }
 
     & #webPictunator {
-        background-color: lightskyblue;
-        top: var(--contflaps-y-padd);
-        left: 50%;
-        transform: translate(-50%, 60%);
+        top: calc(var(--contflaps-y-padd) + (var(--overflap-h) * 3));
         z-index: 1;
+        
+        & .flap {
+            background-color: lightskyblue;
+            /* transform: rotateX(-75deg); */
+        }
     }
 }
