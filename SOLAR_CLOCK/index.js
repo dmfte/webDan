@@ -64,10 +64,6 @@ grad.addColorStop(0.85, 'rgba(4, 0, 58, 1)');
 
 var randStars = calcStars(maxSize);
 
-var img = new Image();
-img.src = "earth.png";
-
-
 window.requestAnimationFrame(draw);
 
 function draw() {
