@@ -321,25 +321,142 @@ async function onPixelateSlide() {
 
 
 //  BLACK & WHITE EFFECT
-var paramsMonochrom = {
-    color: "#000000",
-    bg: "#FFFFFF",
-    sensitivity: 0
-}
-// var paramsmonoSensitivity = {label: "Sensitivity", min: -254, max: 254, step: 1, def: 0, color1: "#2c5270", color2: "#DDE6ED"}
-const contMonoSenitivity = document.querySelector("#effectMonochrom .cont.slider#monoSensitivity .wrapper");
-const rbMonochrom = document.getElementById("rbMonochrom");
-var rsMonoSensitivity = new RangeSlider(contMonoSenitivity, { label: "Sensitivity", min: -254, max: 254, step: 1, def: paramsMonochrom.sensitivity, color1: "#2c5270", color2: "#DDE6ED" });
+const rbMonochrome = document.getElementById("rbMonochrome");
+rbMonochrome.addEventListener("click", onMonochromeSlide);
 
-
-rbMonochrom.addEventListener("click", () => {
-    if (imageOriginal !== undefined) onMonochromSlide();
+const icMonoColor = document.getElementById("icMonoColor");
+const lbMonoColor = document.querySelector("[for=icMonoColor]");
+icMonoColor.value = "#000000";
+lbMonoColor.style.backgroundColor = icMonoColor.value;
+var objMonoColorRgb = getObjRgb(icMonoColor.value);
+icMonoColor.addEventListener("input", () => {
+    lbMonoColor.style.backgroundColor = icMonoColor.value;
+    objMonoColorRgb = getObjRgb(icMonoColor.value);
+    onMonochromeSlide();
 });
 
+const icMonoBg = document.getElementById("icMonoBg");
+const lbMonoBg = document.querySelector("[for=icMonoBg]");
+icMonoBg.value = "#FFFFFF";
+lbMonoBg.style.backgroundColor = icMonoBg.value;
+icMonoBg.addEventListener("input", () => {
+    lbMonoBg.style.backgroundColor = icMonoBg.value;
+    onMonochromeSlide();
+});
+
+const contMonoSeparation = document.querySelector("#monoSeparation .wrapper");
+var rsMonoSeparation = new RangeSlider(contMonoSeparation, { label: "separation", min: 3, max: 50, step: 1, def: 10, color1: "#2c5270", color2: "#DDE6ED" });
+rsMonoSeparation.onSliding(onMonochromeSlide);
+
+const contMonoShades = document.querySelector("#monoShades .wrapper");
+var rsMonoShades = new RangeSlider(contMonoShades, { label: "Shades", min: 1, max: 20, step: 1, def: 3, color1: "#2c5270", color2: "#DDE6ED" });
+rsMonoShades.onSliding(onMonochromeSlide);
+
+const contMonoSizes = document.querySelector("#monoSize .wrapper");
+var rsMonoSize = new RangeSlider(contMonoSizes, { label: "Size", min: 1, max: 10, step: 1, color1: "#2c5270", color2: "#DDE6ED" });
+rsMonoSize.onSliding(onMonochromeSlide)
+
+const contMonoSenitivity = document.querySelector("#monoSensitivity .wrapper");
+var rsMonoSensitivity = new RangeSlider(contMonoSenitivity, { label: "Sensitivity", min: -250, max: 250, step: 5, def: 0, color1: "#2c5270", color2: "#DDE6ED" });
+rsMonoSensitivity.onSliding(onMonochromeSlide);
+
+
 // Functions
-async function onMonochromSlide() {
-    let newImgData = await getMonochromImgData(originalData, rsMonoSensitivity.val, paramsMonochrom.color, paramsMonochrom.bg);
-    cf.putImageData(newImgData, 0, 0);
+var msa = [], arrMonochromed = [];
+var finalData = new Object;
+async function onMonochromeSlide() {
+    if (imageOriginal !== undefined) {
+        let canvFinal = document.createElement("canvas");
+        canvFinal.width = canvOriginal.width;
+        canvFinal.height = canvOriginal.height;
+        cf.fillStyle = icMonoBg.value;
+        cf.fillRect(0, 0, canvFinal.width, canvFinal.height);
+        finalData = cf.getImageData(0, 0, canvFinal.width, canvFinal.height);
+        msa = await getMonoSeparationArray(originalData, rsMonoSeparation.val);
+        // let newData = await getMonocrhomedData(originalData, msa, icMonoColor.value, rsMonoShades.val, rsMonoSize.val, rsMonoSensitivity.val);
+        // cf.putImageData(newData, 0, 0);
+        arrMonochromed = await getMonocrhomedData();
+        // let bool = await paintArray();
+        // if (bool) cf.putImageData(finalData, 0, 0);
+        paintArray();
+        cf.putImageData(finalData, 0, 0);
+
+    }
+}
+
+async function paintArray() {
+    return new Promise((res, rej) => {
+        for (let i = 0; i < arrMonochromed.length; i++) {
+            const xy = arrMonochromed[i];
+            paintXy(xy[0], xy[1], finalData, objMonoColorRgb);
+        }
+        res(true);
+    });
+}
+
+async function getMonoSeparationArray() {
+    return new Promise((res, rej) => {
+        let arr = [];
+        for (let x = 0; x < originalData.width; x++) {
+            if (x % rsMonoSeparation.val !== 0) continue;
+            for (let y = 0; y < originalData.height; y++) {
+                if (y % rsMonoSeparation.val !== 0) continue;
+                arr.push([x, y]);
+            }
+        }
+        res(arr);
+    });
+}
+
+// async function getMonocrhomedData(data, separatedArray = [], color = "", shades = 0, size = 0, sensitivity = 0) {
+async function getMonocrhomedData() {
+    return new Promise(async (res, rej) => {
+        let width = originalData.width;
+        let height = originalData.height;
+        let buckets = await get255Buckets(rsMonoShades.val + 1, rsMonoSensitivity.val);
+        let arr = [];
+        for (let i = 0; i < msa.length; i++) {
+            const x = msa[i][0];
+            const y = msa[i][1];
+            let idx = getImagedataIndex(x, y, originalData.width);
+            let r = originalData.data[idx + 0];
+            let g = originalData.data[idx + 1];
+            let b = originalData.data[idx + 2];
+            let gs = getGrayscale(r, g, b);
+            for (let b = 1; b < buckets.length; b++) {
+                const buck = buckets[b];
+                if (gs >= buck[0] && gs <= buck[1]) {
+                    // Paint rhombus.
+                    // Paint center pixel.
+                    // paintXy(x, y, finalData, color);
+                    arr.push([x, y]);
+                    // Paint other pixes.
+                    for (let m = b * rsMonoSize.val; m > 0; m--) {
+                        for (let n = m; n > 0; n--) {
+                            let side1x = maxMin(x + m - n, [0, width - 1]);
+                            let side1y = maxMin(y - n, [0, height - 1]);
+                            // paintXy(side1x, side1y, finalData, color);
+                            arr.push([side1x, side1y]);
+                            let side2x = maxMin(x + n, [0, width - 1]);
+                            let side2y = maxMin(y + m - n, [0, height - 1]);
+                            // paintXy(side2x, side2y, finalData, color);
+                            arr.push([side2x, side2y]);
+                            let side3x = maxMin(x - (m - n), [0, width - 1]);
+                            let side3y = maxMin(y + n, [0, height - 1]);
+                            // paintXy(side3x, side3y, finalData, color);
+                            arr.push([side3x, side3y]);
+                            let side4x = maxMin(x - n, [0, width - 1]);
+                            let side4y = maxMin(y - (m - n), [0, height - 1]);
+                            // paintXy(side4x, side4y, finalData, color);
+                            arr.push([side4x, side4y]);
+                        }
+                    }
+                }
+            }
+        }
+        // res(finalData);
+        res(arr);
+    });
 }
 
 function getMonochromImgData(imgdata, sensitivity, color, bg) {
@@ -352,7 +469,7 @@ function getMonochromImgData(imgdata, sensitivity, color, bg) {
         let c0 = canv0.getContext("2d", { willReadFrequently: true });
         c0.fillStyle = bg;
         c0.strokeStyle = color;
-        let objRgb = await getObjRgb(color);
+        let objRgb = getObjRgb(color);
         c0.fillRect(0, 0, canv0.width, canv0.height);
         let newImgData = c0.getImageData(0, 0, canv0.width, canv0.height);
         let buckets = await get255Buckets(5, sensitivity)
@@ -372,7 +489,7 @@ function getMonochromImgData(imgdata, sensitivity, color, bg) {
             let g = imgdata.data[i + 1];
             let b = imgdata.data[i + 2];
             // let a = imgdata.data[i + 3];
-            let gs = parseInt(r * 0.2426 + g * 0.7152 + b * 0.0822);
+            let gs = getGrayscale(r, g, b);
             for (let j = 1; j < buckets.length; j++) {
                 const b = buckets[j];
                 if (gs >= b[0] && gs <= b[1]) {
@@ -393,7 +510,7 @@ function getMonochromImgData(imgdata, sensitivity, color, bg) {
 
 
 function getObjRgb(color) {
-    return new Promise((res, rej) => {
+    // return new Promise((res, rej) => {
         let element = document.createElement("div");
         element.style.backgroundColor = color;
         element.style.display = "none";
@@ -416,12 +533,17 @@ function getObjRgb(color) {
 
         rgb[1] = parseInt(rgb[1]);   // '  255'
         rgb[2] = parseInt(rgb[2]);   // '  255)'
-        res({
+        // res({
+        //     r: rgb[0],
+        //     g: rgb[1],
+        //     b: rgb[2]
+        // });
+    // });
+    return {
             r: rgb[0],
             g: rgb[1],
             b: rgb[2]
-        });
-    });
+        }
 }
 
 
@@ -437,9 +559,9 @@ rbGrayscaling.addEventListener("click", () => {
 
 cbGrayscalingBnw.addEventListener("input", onGrayscalingSlide);
 
-var rsGrayscalingLevels = new RangeSlider(contGrayscalingLevels, { label: "Levels of gray", min: 2, max: 20, step: 1, def: 3 });
+var rsGrayscalingLevels = new RangeSlider(contGrayscalingLevels, { label: "Levels of gray", min: 2, max: 20, step: 1, def: 3, color1: "#2c5270", color2: "#DDE6ED" });
 //  More than 20 grayscale tones are barely distinguishable.
-var rsGrayScalingSensitivity = new RangeSlider(contGrayscalingSensitivity, { label: "Sensitivity", min: -254, step: 1, max: 254, def: 0 });
+var rsGrayScalingSensitivity = new RangeSlider(contGrayscalingSensitivity, { label: "Sensitivity", min: -254, step: 1, max: 254, def: 0, color1: "#2c5270", color2: "#DDE6ED" });
 rsGrayscalingLevels.onSliding(onGrayscalingSlide);
 rsGrayScalingSensitivity.onSliding(onGrayscalingSlide);
 
@@ -488,11 +610,6 @@ function getGrayscalledImgData(howmany, sensitivity, boolBnw) {
     });
 }
 
-function getAllowedRange(num, min, max) {
-    if (num < min) return min;
-    if (num > max) return max;
-    return num;
-}
 // ---------
 
 // HATCHING
@@ -522,20 +639,20 @@ icHatchBg.addEventListener("input", () => {
 });
 
 const contHatchHowmanyw = document.querySelector("#hatchHowmanyw .wrapper");
-var rsHatchHowmanyw = new RangeSlider(contHatchHowmanyw, { label: "Lines", min: 3, max: 10, def: 3, step: 1 });
+var rsHatchHowmanyw = new RangeSlider(contHatchHowmanyw, { label: "Lines", min: 3, max: 10, def: 3, step: 1, color1: "#2c5270", color2: "#DDE6ED" });
 rsHatchHowmanyw.onSliding(onHatchSlide);
 
 const contHatchSeparation = document.querySelector("#hatchSeparation .wrapper");
-var paramsHatchSeparation = { label: "Separation", min: 2, max: 3, step: 1, def: 3 };
+var paramsHatchSeparation = { label: "Separation", min: 2, max: 3, step: 1, def: 3, color1: "#2c5270", color2: "#DDE6ED" };
 var rsHatchSeparation = new RangeSlider(contHatchSeparation, paramsHatchSeparation);  //  Will be reinitialized when image is loaded.
 rsHatchSeparation.onSliding(onHatchSlide);
 
 const contHatchLinewidth = document.querySelector("#hatchLinewidth .wrapper");
-var rsHatchLinewidth = new RangeSlider(contHatchLinewidth, { label: "Width", min: 1, max: 20, def: 2, step: 1 });
+var rsHatchLinewidth = new RangeSlider(contHatchLinewidth, { label: "Width", min: 1, max: 20, def: 2, step: 1, color1: "#2c5270", color2: "#DDE6ED" });
 rsHatchLinewidth.onSliding(onHatchSlide);
 
 const contHatchSensitivity = document.querySelector("#hatchSensitivity .wrapper");
-var rsHatchSensitivity = new RangeSlider(contHatchSensitivity, { label: "Sensitivity", min: -250, max: 250, step: 5, def: 0 });
+var rsHatchSensitivity = new RangeSlider(contHatchSensitivity, { label: "Sensitivity", min: -250, max: 250, step: 5, def: 0, color1: "#2c5270", color2: "#DDE6ED" });
 rsHatchSensitivity.onSliding(onHatchSlide);
 
 var strHatchDirection = "DLUR";
@@ -613,7 +730,7 @@ async function getHatchedData(otdh, data, how_many_buckets, sensitivity) {
         let data0 = c0.getImageData(0, 0, canv0.width, canv0.height);
         let buckets = await get255Buckets(how_many_buckets + 1, sensitivity);
         // let arr = [];
-        let objRgb = await getObjRgb(icHatchColor.value);
+        let objRgb = getObjRgb(icHatchColor.value);
         for (let h = 0; h < otdh.arrXyLim.length; h++) {
             const obj = otdh.arrXyLim[h];
             // arr.push([]);
@@ -626,7 +743,7 @@ async function getHatchedData(otdh, data, how_many_buckets, sensitivity) {
                 let g = data.data[idx + 1];
                 let b = data.data[idx + 2];
                 // let a = data.data[idx + 3];
-                let gs = parseInt(r * 0.2426 + g * 0.7152 + b * 0.0822);
+                let gs = getGrayscale(r, g, b);
                 // const last = arr.length - 1;
                 for (let j = 1; j < buckets.length; j++) {
                     const buck = buckets[j];
@@ -682,12 +799,12 @@ async function getHatchedData(otdh, data, how_many_buckets, sensitivity) {
     });
 }
 
-async function paintXy(x, y, data, color) {
+function paintXy(x, y, data, colorObj) {
     let idx = getImagedataIndex(x, y, data.width);
-    console.log(idx, await getObjRgb(color));
-    data.data[idx + 0] = await getObjRgb(color).r;
-    data.data[idx + 1] = await getObjRgb(color).g;
-    data.data[idx + 2] = await getObjRgb(color).b;
+    // let rgb = getObjRgb(color);
+    data.data[idx + 0] = colorObj.r;
+    data.data[idx + 1] = colorObj.g;
+    data.data[idx + 2] = colorObj.b;
 }
 
 function get255Buckets(how_many_buckets = 0, sensitivity = 0) {
@@ -843,8 +960,8 @@ ifGaImage.addEventListener("input", async (evt) => {
     if (rbPixelate.checked) onGridSlide();
 
     // Black & White settings.
-    rsMonoSensitivity.onSliding(onMonochromSlide);
-    if (rbMonochrom.checked) onMonochromSlide();
+    rsMonoSensitivity.onSliding(onMonochromeSlide);
+    if (rbMonochrome.checked) onMonochromeSlide();
 
     // Gray-scaling settings.
     if (rbGrayscaling.checked) onGrayscalingSlide();
@@ -857,3 +974,7 @@ ifGaImage.addEventListener("input", async (evt) => {
     rsHatchSeparation.onSliding(onHatchSlide);
     if (rbHatching.checked) onHatchSlide();
 });
+
+function getGrayscale(r, g, b) {
+    return parseInt(r * 0.2426 + g * 0.7152 + b * 0.0822);
+}

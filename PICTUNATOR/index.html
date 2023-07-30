@@ -111,10 +111,29 @@
 				</div>
 			</div>
 			<!-- --------- -->
-			<div id="effectMonochrom" class="effect" data-btn-down="mono">
-				<input type="radio" name="rgEffects" id="rbMonochrom">
-				<label for="rbMonochrom"><span class="rb-dot"></span>Mono-chroming</label>
+			<div id="effectMonochrome" class="effect" data-btn-down="mono">
+				<input type="radio" name="rgEffects" id="rbMonochrome">
+				<label for="rbMonochrome"><span class="rb-dot"></span>Mono-chroming</label>
 				<div class="controllers">
+					<div class="cont other">
+						<div class="btn color">
+							<input type="color"  id="icMonoColor">
+							<label for="icMonoColor"></label>
+						</div>
+						<div class="btn color">
+							<input type="color" id="icMonoBg">
+							<label for="icMonoBg"></label>
+						</div>
+					</div>
+					<div class="cont slider" id="monoSeparation" tabindex="0">
+						<div class="wrapper"></div>
+					</div>
+					<div class="cont slider" id="monoShades" tabindex="0">
+						<div class="wrapper"></div>
+					</div>
+					<div class="cont slider" id="monoSize" tabindex="0">
+						<div class="wrapper"></div>
+					</div>
 					<div class="cont slider" id="monoSensitivity" tabindex="0">
 						<div class="wrapper"></div>
 					</div>
