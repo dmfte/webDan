@@ -352,9 +352,9 @@ const contMonoShades = document.querySelector("#monoShades .wrapper");
 var rsMonoShades = new RangeSlider(contMonoShades, { label: "Shades", min: 1, max: 20, step: 1, def: 3, color1: "#2c5270", color2: "#DDE6ED" });
 rsMonoShades.onSliding(onMonochromeSlide);
 
-const contMonoSizes = document.querySelector("#monoSize .wrapper");
-var rsMonoSize = new RangeSlider(contMonoSizes, { label: "Size", min: 1, max: 10, step: 1, color1: "#2c5270", color2: "#DDE6ED" });
-rsMonoSize.onSliding(onMonochromeSlide)
+// const contMonoSize = document.querySelector("#monoSize .wrapper");
+// var rsMonoSize = new RangeSlider(contMonoSize, { label: "Size", min: 1, max: 10, step: 1, color1: "#2c5270", color2: "#DDE6ED" });
+// rsMonoSize.onSliding(onMonochromeSlide)
 
 const contMonoSenitivity = document.querySelector("#monoSensitivity .wrapper");
 var rsMonoSensitivity = new RangeSlider(contMonoSenitivity, { label: "Sensitivity", min: -250, max: 250, step: 5, def: 0, color1: "#2c5270", color2: "#DDE6ED" });
@@ -426,12 +426,14 @@ async function getMonocrhomedData() {
             for (let b = 1; b < buckets.length; b++) {
                 const buck = buckets[b];
                 if (gs >= buck[0] && gs <= buck[1]) {
+
+
+
                     // Paint rhombus.
-                    // Paint center pixel.
-                    // paintXy(x, y, finalData, color);
                     arr.push([x, y]);
                     // Paint other pixes.
-                    for (let m = b * rsMonoSize.val; m > 0; m--) {
+                    // for (let m = b * rsMonoSize.val; m > 0; m--) {
+                    for (let m = b; m > 0; m--) {
                         for (let n = m; n > 0; n--) {
                             let side1x = maxMin(x + m - n, [0, width - 1]);
                             let side1y = maxMin(y - n, [0, height - 1]);

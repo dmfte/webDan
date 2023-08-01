@@ -31,9 +31,9 @@ body::-webkit-scrollbar{
     top: 70px;
 } */
 
-.contslider#angle{
+/* .contslider#angle{
     top: 120px;
-}
+} */
 :root {
     --contflaps-y-padd: 60px;
     --flap-height: 40vh;
@@ -53,25 +53,29 @@ body::-webkit-scrollbar{
     background-color: rgb(0, 0, 80);
     /* height: calc(var(--contflaps-y-padd) + var(--flap-height) + var(--flap-height) * 0.2 * calc(var(--flaps-number) - 1) + var(--contflaps-y-padd)); */
 
-    @media screen and (min-width: 801px) {
-        width: 50%;
+    @media (min-width: 1001px) {
+        width: 600px;
     }
 
-    @media screen and (max-width: 800px) {
+    @media (max-width: 1000px) {
+        width: 60%;
+    }
+
+    @media (max-width: 800px) {
         width: 70%;
     }
 
-    @media screen and (max-width: 600px) {
+    @media (max-width: 600px) {
         width: 90%;
     }
 
-    @media screen and (max-width: 400px) {
+    /* @media (max-width: 400px) {
         width: 100%;
-    }
+    } */
 
     & .wrap-flap {
         position: absolute;
-        width: 80%;
+        width: 95%;
         height: var(--flap-height);
         left: 50%;
         display: flex;
@@ -101,7 +105,7 @@ body::-webkit-scrollbar{
                 right: 0;
                 bottom: 0;
                 left: 0;
-                transition: opacity 300ms ease-in-out
+                /* transition: opacity 300ms ease-in-out; */
             }
         }
     }

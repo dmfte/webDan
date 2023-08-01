@@ -67,7 +67,7 @@ function onScrolling() {
                 // Rotating flaps.
                 let perct = rangeMatch(sp - buck[0], 0, 0.25, 0.01, 0.99, 2);
                 // 3 is an arbitrary fator.
-                let angle = Math.min(parseInt(sp * 10 * (k + perct) * 3), 95);
+                let angle = Math.min(parseInt(sp * 10 * (k + perct) * 3), 70);
                 flap.style.transform = `rotateX(-${angle}deg)`;
             }
 
