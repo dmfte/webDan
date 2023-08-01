@@ -36,7 +36,7 @@ body::-webkit-scrollbar{
 }
 :root {
     --contflaps-y-padd: 60px;
-    --flap-height: 60vh;
+    --flap-height: 40vh;
     --flaps-number: 4;
     --flapable-a: calc(100vh - (var(--contflaps-y-padd) * 2));
     --leftover: calc(var(--flapable-a) - var(--flap-height));
