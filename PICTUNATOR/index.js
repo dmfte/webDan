@@ -320,7 +320,7 @@ async function onPixelateSlide() {
 }
 
 
-//  BLACK & WHITE EFFECT
+//  MONOCHROME EFFECT
 const rbMonochrome = document.getElementById("rbMonochrome");
 rbMonochrome.addEventListener("click", onMonochromeSlide);
 
@@ -328,10 +328,10 @@ const icMonoColor = document.getElementById("icMonoColor");
 const lbMonoColor = document.querySelector("[for=icMonoColor]");
 icMonoColor.value = "#000000";
 lbMonoColor.style.backgroundColor = icMonoColor.value;
-var objMonoColorRgb = getObjRgb(icMonoColor.value);
+var arrMonoColorRgb = getArrRgb(icMonoColor.value);
 icMonoColor.addEventListener("input", () => {
     lbMonoColor.style.backgroundColor = icMonoColor.value;
-    objMonoColorRgb = getObjRgb(icMonoColor.value);
+    arrMonoColorRgb = getArrRgb(icMonoColor.value);
     onMonochromeSlide();
 });
 
@@ -352,18 +352,10 @@ const contMonoShades = document.querySelector("#monoShades .wrapper");
 var rsMonoShades = new RangeSlider(contMonoShades, { label: "Shades", min: 1, max: 20, step: 1, def: 3, color1: "#2c5270", color2: "#DDE6ED" });
 rsMonoShades.onSliding(onMonochromeSlide);
 
-// const contMonoSize = document.querySelector("#monoSize .wrapper");
-// var rsMonoSize = new RangeSlider(contMonoSize, { label: "Size", min: 1, max: 10, step: 1, color1: "#2c5270", color2: "#DDE6ED" });
-// rsMonoSize.onSliding(onMonochromeSlide)
-
 const contMonoSenitivity = document.querySelector("#monoSensitivity .wrapper");
 var rsMonoSensitivity = new RangeSlider(contMonoSenitivity, { label: "Sensitivity", min: -250, max: 250, step: 5, def: 0, color1: "#2c5270", color2: "#DDE6ED" });
 rsMonoSensitivity.onSliding(onMonochromeSlide);
 
-
-// Functions
-var msa = [], arrMonochromed = [];
-var finalData = new Object;
 async function onMonochromeSlide() {
     if (imageOriginal !== undefined) {
         let canvFinal = document.createElement("canvas");
@@ -371,183 +363,65 @@ async function onMonochromeSlide() {
         canvFinal.height = canvOriginal.height;
         cf.fillStyle = icMonoBg.value;
         cf.fillRect(0, 0, canvFinal.width, canvFinal.height);
-        finalData = cf.getImageData(0, 0, canvFinal.width, canvFinal.height);
-        msa = await getMonoSeparationArray(originalData, rsMonoSeparation.val);
-        // let newData = await getMonocrhomedData(originalData, msa, icMonoColor.value, rsMonoShades.val, rsMonoSize.val, rsMonoSensitivity.val);
-        // cf.putImageData(newData, 0, 0);
-        arrMonochromed = await getMonocrhomedData();
-        // let bool = await paintArray();
-        // if (bool) cf.putImageData(finalData, 0, 0);
-        paintArray();
-        cf.putImageData(finalData, 0, 0);
-
+        let finalData = cf.getImageData(0, 0, canvFinal.width, canvFinal.height);
+        let atm = await getArrayToMonochrome(originalData, rsMonoSeparation.val);
+        let monoData = await getMonocrhomedData(atm, finalData, rsMonoShades.val, rsMonoSensitivity.val, arrMonoColorRgb);  //  Shape.
+        cf.putImageData(monoData, 0, 0);
     }
 }
 
-async function paintArray() {
-    return new Promise((res, rej) => {
-        for (let i = 0; i < arrMonochromed.length; i++) {
-            const xy = arrMonochromed[i];
-            paintXy(xy[0], xy[1], finalData, objMonoColorRgb);
-        }
-        res(true);
-    });
-}
-
-async function getMonoSeparationArray() {
+async function getArrayToMonochrome(data = new Object, separation = 0) {
     return new Promise((res, rej) => {
         let arr = [];
-        for (let x = 0; x < originalData.width; x++) {
-            if (x % rsMonoSeparation.val !== 0) continue;
-            for (let y = 0; y < originalData.height; y++) {
-                if (y % rsMonoSeparation.val !== 0) continue;
-                arr.push([x, y]);
+        for (let x = 0; x < data.width; x++) {
+            if (x % separation !== 0) continue;
+            for (let y = 0; y < data.height; y++) {
+                if (y % separation !== 0) continue;
+                let idx = getImagedataIndex(x, y, data.width);
+                let r = data.data[idx + 0];
+                let g = data.data[idx + 1];
+                let b = data.data[idx + 2];
+                let gs = getGrayscale(r, g, b);
+                arr.push([x, y, gs]);
             }
         }
         res(arr);
     });
 }
 
-// async function getMonocrhomedData(data, separatedArray = [], color = "", shades = 0, size = 0, sensitivity = 0) {
-async function getMonocrhomedData() {
+function getMonocrhomedData(atm = [], data = new Object, shades = 0, sensitivity = 0, colorArr = new Object) {
     return new Promise(async (res, rej) => {
-        let width = originalData.width;
-        let height = originalData.height;
-        let buckets = await get255Buckets(rsMonoShades.val + 1, rsMonoSensitivity.val);
-        let arr = [];
-        for (let i = 0; i < msa.length; i++) {
-            const x = msa[i][0];
-            const y = msa[i][1];
-            let idx = getImagedataIndex(x, y, originalData.width);
-            let r = originalData.data[idx + 0];
-            let g = originalData.data[idx + 1];
-            let b = originalData.data[idx + 2];
-            let gs = getGrayscale(r, g, b);
+        let buckets = await get255Buckets(shades + 1, sensitivity);
+        // let arr = [];
+        for (let i = 0; i < atm.length; i++) {
+            const x = atm[i][0];
+            const y = atm[i][1];
+            const gs = atm[i][2];
             for (let b = 1; b < buckets.length; b++) {
                 const buck = buckets[b];
                 if (gs >= buck[0] && gs <= buck[1]) {
-
-
-
-                    // Paint rhombus.
-                    arr.push([x, y]);
-                    // Paint other pixes.
-                    // for (let m = b * rsMonoSize.val; m > 0; m--) {
-                    for (let m = b; m > 0; m--) {
-                        for (let n = m; n > 0; n--) {
-                            let side1x = maxMin(x + m - n, [0, width - 1]);
-                            let side1y = maxMin(y - n, [0, height - 1]);
-                            // paintXy(side1x, side1y, finalData, color);
-                            arr.push([side1x, side1y]);
-                            let side2x = maxMin(x + n, [0, width - 1]);
-                            let side2y = maxMin(y + m - n, [0, height - 1]);
-                            // paintXy(side2x, side2y, finalData, color);
-                            arr.push([side2x, side2y]);
-                            let side3x = maxMin(x - (m - n), [0, width - 1]);
-                            let side3y = maxMin(y + n, [0, height - 1]);
-                            // paintXy(side3x, side3y, finalData, color);
-                            arr.push([side3x, side3y]);
-                            let side4x = maxMin(x - n, [0, width - 1]);
-                            let side4y = maxMin(y - (m - n), [0, height - 1]);
-                            // paintXy(side4x, side4y, finalData, color);
-                            arr.push([side4x, side4y]);
-                        }
+                    // Rhombus
+                    for (let m = 0; m <= b; m++) {
+                        let x1 = x - m;
+                        let x2 = x + m;
+                        let y1 = y - (b - m);
+                        let y2 = y - (b - m);
+                        purePxLine(x1, y1, x2, y2, data, colorArr);
+                        let y3 = y + (b - m);
+                        let y4 = y + (b - m);
+                        purePxLine(x1, y3, x2, y4, data, colorArr);
                     }
+
+                    // Circle
+                    // for (let m = 0; m <=b; m++) {
+                        
+                    // }
                 }
             }
         }
-        // res(finalData);
-        res(arr);
+        res(data);
     });
 }
-
-function getMonochromImgData(imgdata, sensitivity, color, bg) {
-    return new Promise(async (res, rej) => {
-        //  Depending on grayscale value of one pixel (of every two pixels), the adjacent pixels in a 2x2 grid
-        //  will be all white, 1, 2, 3, or all 4 pixels black (5 buckets).
-        let canv0 = document.createElement("canvas");
-        canv0.width = Math.floor(imageOriginal.width / 2) * 2;
-        canv0.height = Math.floor(imageOriginal.height / 2) * 2;
-        let c0 = canv0.getContext("2d", { willReadFrequently: true });
-        c0.fillStyle = bg;
-        c0.strokeStyle = color;
-        let objRgb = getObjRgb(color);
-        c0.fillRect(0, 0, canv0.width, canv0.height);
-        let newImgData = c0.getImageData(0, 0, canv0.width, canv0.height);
-        let buckets = await get255Buckets(5, sensitivity)
-        let pixels = [0, 0, (newImgData.width + 1) * 4, 1 * 4, newImgData.width * 4];  //  Analogus array to buckets. First value is 0 because first value of buckets will be ignored.
-        for (let i = 0; i < imgdata.data.length; i += 8) {  //  Itterating every two pixels.
-            let x = ((i / 4) % imgdata.width);
-            if (x == imgdata.width - 1) {
-                // If the current pixel is the very last at the right edge, it means the width is not an even number.
-                i = i - 4;
-                continue;
-            };
-            let y = Math.floor((i / 4) / imgdata.width);
-            if (y % 2 == 1) continue;  //  If it is an odd row, already drawn during the previous (even) row.
-            if (y == imgdata.height - 1) break;  // If the current pixel is the very last at the bottom  edge.
-
-            let r = imgdata.data[i + 0];
-            let g = imgdata.data[i + 1];
-            let b = imgdata.data[i + 2];
-            // let a = imgdata.data[i + 3];
-            let gs = getGrayscale(r, g, b);
-            for (let j = 1; j < buckets.length; j++) {
-                const b = buckets[j];
-                if (gs >= b[0] && gs <= b[1]) {
-                    for (let k = 1; k <= j; k++) {
-                        const px = pixels[k];
-                        newImgData.data[i + px + 0] = objRgb.r;
-                        newImgData.data[i + px + 1] = objRgb.g;
-                        newImgData.data[i + px + 2] = objRgb.b;
-                        // newImgData.data[i + px + 3] = 0;
-                    }
-                    break;
-                }
-            }
-        }
-        res(newImgData);
-    });
-}
-
-
-function getObjRgb(color) {
-    // return new Promise((res, rej) => {
-        let element = document.createElement("div");
-        element.style.backgroundColor = color;
-        element.style.display = "none";
-        document.body.appendChild(element);
-        let rgbStr = window.getComputedStyle(element).backgroundColor;
-        // rgb(255, 255, 255)
-        document.body.removeChild(element);
-        rgb = rgbStr.split(",");
-        if (rgb.length > 3) {
-            // ['rgba(255', ' 255', ' 255', ' 255)']
-            rgb.splice(3, rgb.length);
-            // ['rgba(255', ' 255', ' 255']
-        }
-        let parenthesis = rgb[0].match(/\(/).index;
-        // 'rgba(255' index of '('.
-        rgb[0] = rgb[0].split("");
-        rgb[0].splice(0, parenthesis + 1);
-        rgb[0] = parseInt(rgb[0].join(""));
-        // ' 255'
-
-        rgb[1] = parseInt(rgb[1]);   // '  255'
-        rgb[2] = parseInt(rgb[2]);   // '  255)'
-        // res({
-        //     r: rgb[0],
-        //     g: rgb[1],
-        //     b: rgb[2]
-        // });
-    // });
-    return {
-            r: rgb[0],
-            g: rgb[1],
-            b: rgb[2]
-        }
-}
-
 
 //   GRAYSCALING
 const rbGrayscaling = document.getElementById("rbGrayscaling");
@@ -732,7 +606,7 @@ async function getHatchedData(otdh, data, how_many_buckets, sensitivity) {
         let data0 = c0.getImageData(0, 0, canv0.width, canv0.height);
         let buckets = await get255Buckets(how_many_buckets + 1, sensitivity);
         // let arr = [];
-        let objRgb = getObjRgb(icHatchColor.value);
+        let arrRgb = getArrRgb(icHatchColor.value);
         for (let h = 0; h < otdh.arrXyLim.length; h++) {
             const obj = otdh.arrXyLim[h];
             // arr.push([]);
@@ -763,9 +637,9 @@ async function getHatchedData(otdh, data, how_many_buckets, sensitivity) {
                             for (let n = start; n <= offset; n++) {
                                 if (y + n < 0 || y + n >= data0.height) continue;
                                 let idx2 = getImagedataIndex(x + m, y + n, data.width);
-                                data0.data[idx2 + 0] = objRgb.r;
-                                data0.data[idx2 + 1] = objRgb.g;
-                                data0.data[idx2 + 2] = objRgb.b;
+                                data0.data[idx2 + 0] = arrRgb[0];
+                                data0.data[idx2 + 1] = arrRgb[1];
+                                data0.data[idx2 + 2] = arrRgb[2];
                             }
                         }
                         break;
@@ -799,14 +673,6 @@ async function getHatchedData(otdh, data, how_many_buckets, sensitivity) {
         }
         res(data0);
     });
-}
-
-function paintXy(x, y, data, colorObj) {
-    let idx = getImagedataIndex(x, y, data.width);
-    // let rgb = getObjRgb(color);
-    data.data[idx + 0] = colorObj.r;
-    data.data[idx + 1] = colorObj.g;
-    data.data[idx + 2] = colorObj.b;
 }
 
 function get255Buckets(how_many_buckets = 0, sensitivity = 0) {
@@ -977,6 +843,61 @@ ifGaImage.addEventListener("input", async (evt) => {
     if (rbHatching.checked) onHatchSlide();
 });
 
+// GENERAL FUNCTIONS
+
 function getGrayscale(r, g, b) {
     return parseInt(r * 0.2426 + g * 0.7152 + b * 0.0822);
+}
+
+function getArrRgb(color) {
+    let element = document.createElement("div");
+    element.style.backgroundColor = color;
+    element.style.display = "none";
+    document.body.appendChild(element);
+    let rgbStr = window.getComputedStyle(element).backgroundColor;
+    // rgb(255, 255, 255)
+    document.body.removeChild(element);
+    let rgb = rgbStr.split(",");
+    if (rgb.length > 3) {
+        // ['rgba(255', ' 255', ' 255', ' 255)']
+        rgb.splice(3, rgb.length);
+        // ['rgba(255', ' 255', ' 255']
+    }
+    let parenthesis = rgb[0].match(/\(/).index;
+    // 'rgba(255' index of '('.
+    let arr0 = rgb[0].split("");
+    arr0.splice(0, parenthesis + 1);
+    rgb[0] = parseInt(arr0.join(""));
+    // ' 255'
+
+    rgb[1] = parseInt(rgb[1]);   // '  255'
+    rgb[2] = parseInt(rgb[2]);   // '  255)'
+    return rgb;
+}
+
+function purePxLine(x1, y1, x2, y2, data, colorArr) {
+    return new Promise((res, rej) => {
+        let dx = x2 - x1;
+        let dy = y2 - y1;
+        let m = dy / dx || Infinity;
+        let b = y1 - m * x1;
+        for (let i = 0; i < Math.abs(dx) + 1; i++) {
+            let x = x1 + i * Math.sign(dx);
+            let prevX = x - Math.sign(dx);
+            let startY = parseInt(prevX * m + b) + Math.sign(dy);
+            let endY = parseInt(x * m + b);
+            if (m == Infinity) {
+                startY = y1;
+                endY = y2;
+            }
+
+            for (let y = startY; y <= endY; y++) {
+                let idx = (y * data.width + x) * 4;
+                data.data[idx + 0] = colorArr[0];
+                data.data[idx + 1] = colorArr[1];
+                data.data[idx + 2] = colorArr[2];
+            }
+        }
+        res(data);
+    });
 }
