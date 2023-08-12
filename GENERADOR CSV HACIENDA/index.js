@@ -294,6 +294,8 @@ function clearRow(row) {
 
 // INPUT ELEMENT BEHAVIOR
 function onInputInput(e) {
+  if (!checkRegex(e)) e.classList.add("wrong");
+  if (e.value.length == 0 && !e.classList.contains("addend")) e.classList.remove("wrong");
   let row = e.closest(".row"); //  Input's parent.
   if (e.classList.contains("first")) {
     // Hide/unhide the rest of inputs    
@@ -319,22 +321,20 @@ function onInputInput(e) {
       }
     }
   }
-  //  If it is a Date field.
-  if (e.classList.contains("date")) {
-    // Validate format
-    if (e.value.length > 0) {
-      if (validateDateFormat(e.value)) {
-        e.classList.remove("wrong");
-      } else {
-        e.classList.add("wrong");
-      }
-    } else {
+
+  //  Check if it is a Date field.
+  if (e.classList.contains("date") && checkRegex(e)) {
+    if (validateDateFormat(e.value)) {
       e.classList.remove("wrong");
+      console.log("removed");
+    } else {
+      e.classList.add("wrong");
+      console.log("added");
     }
   }
 
-  if (checkRegex(e) || e.value.length == 0) {  //  Is text is correctly formated or empty?
-    //  Calculate IVA where applicable.
+  // If it is a dolar amount whehter taxable or not.
+  if (e.classList.contains("addend") && checkRegex(e)) {
     if (e.classList.contains("taxable")) {
       let taxOn = row.querySelector("." + e.dataset.taxOn);
       let arrNodeTaxable = row.querySelectorAll("[data-tax-on='" + e.dataset.taxOn + "'");
@@ -345,18 +345,61 @@ function onInputInput(e) {
         return parseFloat(tot) + parseFloat(taxable);
       });
       taxOn.value = getTax(totTaxable, taxOn.dataset.perct);
-      // if (e.value.length > 0) {
-      //   taxOn.value = getTax(totTaxable, taxOn.dataset.perct);
-      // } else {
-      //   if (totTaxable == 0) taxOn.value = "0.00";
-      // }
     }
-    //  Calculate total of dolar amounts:
-    if (e.classList.contains("addend")) {
-      let totInput = row.querySelector(".total");
-      totInput.value = getTotal(e);
-    }
+
+    let totInput = row.querySelector(".total");
+    totInput.value = getTotal(e);
+    e.classList.remove("wrong");
   }
+  // Currency fields should not be empty.
+  if (e.classList.contains("addend") && e.value.length == 0) e.classList.add("wrong");
+
+  // if (e.classList.contains("taxable") && checkRegex(e)) {
+  //   let taxOn = row.querySelector("." + e.dataset.taxOn);
+  //   let arrNodeTaxable = row.querySelectorAll("[data-tax-on='" + e.dataset.taxOn + "'");
+  //   let arrTaxable = Array.prototype.slice.call(arrNodeTaxable).map(taxable => {
+  //     return taxable.value.length > 0 ? taxable.value : 0;
+  //   });
+  //   let totTaxable = arrTaxable.reduce((tot, taxable) => {
+  //     return parseFloat(tot) + parseFloat(taxable);
+  //   });
+  //   taxOn.value = getTax(totTaxable, taxOn.dataset.perct);
+  //   //  Calculate total of dolar amounts:
+  //   if (e.classList.contains("addend")) {
+  //     let totInput = row.querySelector(".total");
+  //     totInput.value = getTotal(e);
+  //   }
+  //   e.classList.remove("wrong");
+  // }
+
+  // if (checkRegex(e) || e.value.length == 0) {  //  Is text is correctly formated or empty?
+  //   //  Calculate IVA where applicable.
+  //   if (e.classList.contains("taxable")) {
+  //     let taxOn = row.querySelector("." + e.dataset.taxOn);
+  //     let arrNodeTaxable = row.querySelectorAll("[data-tax-on='" + e.dataset.taxOn + "'");
+  //     let arrTaxable = Array.prototype.slice.call(arrNodeTaxable).map(taxable => {
+  //       return taxable.value.length > 0 ? taxable.value : 0;
+  //     });
+  //     let totTaxable = arrTaxable.reduce((tot, taxable) => {
+  //       return parseFloat(tot) + parseFloat(taxable);
+  //     });
+  //     taxOn.value = getTax(totTaxable, taxOn.dataset.perct);
+
+
+  //     // if (e.value.length > 0) {
+  //     //   taxOn.value = getTax(totTaxable, taxOn.dataset.perct);
+  //     // } else {
+  //     //   if (totTaxable == 0) taxOn.value = "0.00";
+  //     // }
+
+
+  //   }
+  //   //  Calculate total of dolar amounts:
+  //   if (e.classList.contains("addend")) {
+  //     let totInput = row.querySelector(".total");
+  //     totInput.value = getTotal(e);
+  //   }
+  // }
   //  If this is the first input of the .default row, a new row  should be added with a button for first input.
   if (row.classList.contains("default") && e.classList.contains("first")) {
     let container = row.closest(".container-rows");
@@ -368,7 +411,22 @@ function onInputInput(e) {
       unmakeButton(lastFirst);
     }
   }
-  validateInputsRegexp(row);
+  // validateInputsRegexp(row);
+  if (e.id.includes("vtas_numCtrlInt") || e.id.includes("vtas_numRes")) {
+    let numCtrlInt, numRes;
+    let allInput = row.querySelectorAll("input");
+    for (let i = 0; i < allInput.length; i++) {
+      const input = allInput[i];
+      if (input.id.includes("vtas_numRes")) numRes = input;
+      if (input.id.includes("vtas_numCtrlInt")) numCtrlInt = input;
+    }
+    if (numRes.value.match(/dte/i).length > 0 && numCtrlInt.value.length !== 0) {
+      console.log("wrong");
+      numCtrlInt.classList.add("wrong");
+    } else {
+      numCtrlInt.classList.remove("wrong");
+    }
+  }
   autoSave();
 }
 
@@ -507,50 +565,50 @@ function checkRegex(e) {
   if (e.dataset.regex !== undefined) {
     regex = new RegExp(e.dataset.regex);
     if (regex.test(e.value) || e.value.length == 0) {
-      e.classList.remove("wrong");
+      // e.classList.remove("wrong");
       return true;
     } else {
-      e.classList.add("wrong");
+      // e.classList.add("wrong");
       return false;
     }
   } else {
-    e.classList.remove("wrong");
+    // e.classList.remove("wrong");
     return true;
   }
 }
 
 function validateDateFormat(txt) { //  Provided it is in the format "dd/mm/yyyy".
-  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(txt)) {
+  // if (!/^\d{2}\/\d{2}\/\d{4}$/.test(txt)) {
+  //   return false;
+  // } else {
+  let arrDate = txt.split("/");
+  let dd = parseInt(arrDate[0]);
+  let mm = parseInt(arrDate[1]);
+  let yyyy = parseInt(arrDate[2]);
+  let arrMonths = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]; //  Days of each month.
+  if (isLeapYear(yyyy)) {
+    arrMonths[1] = 29;
+  }
+  if (yyyy < 1) {
+    // Invalid year.
     return false;
   } else {
-    let arrDate = txt.split("/");
-    let dd = parseInt(arrDate[0]);
-    let mm = parseInt(arrDate[1]);
-    let yyyy = parseInt(arrDate[2]);
-    let arrMonths = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]; //  Days of each month.
-    if (isLeapYear(yyyy)) {
-      arrMonths[1] = 29;
-    }
-    if (yyyy < 1) {
-      // Invalid year.
+    // Valid year.
+    if (mm < 1 || mm > 12) {
+      // Invalid month.
       return false;
     } else {
-      // Valid year.
-      if (mm < 1 || mm > 12) {
-        // Invalid month.
+      // Valid month.
+      if (dd < 1 || dd > arrMonths[mm - 1]) {
+        // Invalid date-
         return false;
       } else {
-        // Valid month.
-        if (dd < 1 || dd > arrMonths[mm - 1]) {
-          // Invalid date-
-          return false;
-        } else {
-          // Valid date.
-          return true;
-        }
+        // Valid date.
+        return true;
       }
     }
   }
+  // }
 }
 
 function isLeapYear(intYear) {
@@ -676,17 +734,4 @@ function addZerosFirst(txtNum, intOfDigits) {
     txtNum = "0" + txtNum;
   }
   return txtNum;
-}
-
-function onInputFocus(e) {
-  let parent = e.closest(".container-rows");
-  let arrRows = parent.querySelectorAll(".row");
-  arrRows.forEach(row => {
-    row.style.borderBottom = "none";
-  });
-  let row = e.closest(".row");
-  let rn = rowNumber(row);
-  row.style.borderBottom = "5px solid orange";
-  // if (row !== rn.last) {
-  // }
 }
