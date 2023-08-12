@@ -41,13 +41,7 @@
         <div class="editor">
             <div class="cont edit">
                 <div class="write">
-                    <input type="text">
-                    <div contenteditable="true">
-                        <ul>
-                            <li id="li-01">Lorem, ipsum dolor.</li>
-                            <li id="li-02">sit amet consectetur.</li>
-                        </ul>
-                    </div>
+                    <textarea></textarea>
                 </div>
                 <div class="buttons">
                     <button class="pass">-></button>
@@ -60,6 +54,23 @@
             </div>
         </div>
     </div>
+
+    <svg class="svg-symbols">
+        <style>
+            symbol{
+                stroke:currentColor;
+                stroke-width: 1.5;
+                stroke-linejoin: miter;
+                stroke-linecap: round;
+                fill: none;
+            }
+        </style>
+        <defs>
+            <symbol id="chevDown" viewBox="0 0 10 10" >
+                <path d="M 1 2 L 5 5 L 9 2 M 1 6 L 5 9 L 9 6" />
+            </symbol>
+        </defs>
+    </svg>
     <script src="index.js"></script>
 </body>
 

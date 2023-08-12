@@ -1,94 +1,57 @@
-const editHeader = document.querySelector("input[type=text]");
-const editBody = document.querySelector("div[contenteditable=true]");
+const editBody = document.querySelector(".cont.edit .write textarea");
 const accordions = document.querySelector(".accordions");
+const btnPass = document.querySelector(".cont.edit .buttons .pass");
 
-var cs = {}  //  { startLine, startPos, endLine, endPos }
+btnPass.addEventListener("click", () => {
+    let txt1 = editBody.value;
+    let txt2 = txt1.split("\n");
+    let title = txt2.splice(0, 1);
 
-editBody.addEventListener("keyup", (evt) => {
-    cs = getCursorSelection(editBody);
+    let newAccordion = createAccordion(title, txt2);
+    accordions.appendChild(newAccordion);
 });
 
-editBody.addEventListener("pointerup", () => {
-    cs = getCursorSelection(editBody);
-});
-
-editBody.addEventListener("paste", (evt) => {
-    evt.preventDefault();
-    let pasted = (evt.clipboardData || window.clipboardData).getData("text");
-    let pastedN = pasted.split('\n');
-    if (pastedN.length > 1) {
-        for (let i = 1; i < pastedN.length - 1; i++) {
-            const p = pastedN[i];
-            pastedN[i] = `<li>${p}</li>`;
-        }
-    }
+function createAccordion(head = "", body = []) {
+    let contAccr = document.createElement("div");
+    contAccr.classList.add("cont-accr")
     
-    let pastedI = pastedN.splice(0, 1);
-    let pastedF = pastedN.splice(pastedN.length - 1, 1);
+    // Create accordion title.
+    let accrHead = document.createElement("div");
+    accrHead.classList.add("accr-head");
+    let spanTitle = document.createElement("span");
+    spanTitle.classList.add("accr-title");
+    spanTitle.innerText = head;
 
-    let preArr = getLiArr(editBody);
+    let spanArrow = document.createElement("span");
+    spanArrow.classList.add("accr-arrow");
+    let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 10 10");
+    let use = document.createElementNS("http://www.w3.org/2000/svg", "use");
+    use.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '#chevDown');
+    svg.appendChild(use);
+    spanArrow.appendChild(svg);
+    accrHead.appendChild(spanTitle);
+    accrHead.appendChild(spanArrow);
+    contAccr.appendChild(accrHead);
 
-    cs = getCursorSelection();
-    let startI = preArr.indexOf(cs.startLi);
-    for (let i = 0; i < preArr.length; i++) {
-        const li = preArr[i];
-        let count = 0;
-        if (li == cs.startLi) {
-            if (cs.startLi !== cs.endLi) {
-                let newLiI = li.innerText.substring(0, cs.startPos) + pastedI;
-                preArr[i] = newLiI;
-                for (let j = i; j < preArr.length; j++) {
-                    const toDel = preArr[j];
-                    if (toDel == cs.endLi) {
-                        if (cs.startLi == cs.endLi) {
-                            
-                         }
-                        let newLiF = pastedF + toDel.innerText.substring(cs.endPos, toDel.innerText.length);
-                        preArr[i] = newLiF;
-                        break;
-                    }
-                    count++;
-                }
-                preArr.splice(startI + 1, pastedN);
-                break;
-            }
+    // Create accordion body.
+    let wrapper = document.createElement("div");
+    wrapper.classList.add("accr-wrapper");
+    let accrBody = document.createElement("div");
+    accrBody.classList.add("accr-body");
+    let lis = body.map(line => {
+        return `<li>${line}</li>`;
+    });
+    let innerUl = lis.reduce((str, li) => {
+        return `${str}${li}`;
+    });
+    let ul = document.createElement("ul");
+    ul.innerHTML = innerUl;
+    accrBody.appendChild(ul);
+    wrapper.appendChild(accrBody);
+    contAccr.appendChild(wrapper);
 
-        }
-    }
-    
-    if (pastedN.length == 0) {
-        preArr.splice(startI + 1);
-    } else {
-        
-    }
-
-}
-
-    let txt1 = lcs.startLi.innerText.substring(0, lcs.startPos);
-let txt2 = lcs.endLi.innerText.substring(lcs.endPos, lcs.endLi.innerText.length);
-
-
-let newTextNode = document.createTextNode(p2);
-range.insertNode(newTextNode);
-
-let newTxt = editBody.innerText;
-console.log(p2);
-console.log(newTextNode);
-console.log(newTxt);
-
-});
-
-function getLiArr(div) {
-    let txt1 = div.innerText;
-    let txt2 = txt1.split('\n');
-    let arr = [];
-    for (let i = 0; i < txt2.length; i++) {
-        const txt = txt2[i];
-        let li = document.createElement("li");
-        li.innerText = txt;
-        arr.push(li);
-    }
-    return arr;
+    return contAccr;
 }
 
 function getCursorSelection() {

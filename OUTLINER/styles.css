@@ -16,6 +16,8 @@
     /* PIXELS */
     --nav-height-desk: 40px;
     --nav-height-mob: 48px;
+    --controls-height-desk: 64px;
+    --controls-height-mob: 48px;
 }
 
 body,
@@ -27,6 +29,9 @@ html {
 svg {
     max-width: 100%;
     max-height: 100%;
+}
+svg.svg-symbols{
+    display: none;
 }
 
 input[type=radio],
@@ -211,15 +216,16 @@ nav.top-nav .nav-items .nav-i:active svg path {
 
     & .controls {
         display: block;
-        height: 64px;
+        height: var(--controls-height-desk);
         background-color: navy;
     }
 
     & .editor {
         position: relative;
         display: flex;
-        height: 100%;
+        height: calc(100% - var(--controls-height-desk));
         flex-direction: row;
+        background-color: #6ba9cf;
 
         & .cont {
             height: 100%;
@@ -240,21 +246,12 @@ nav.top-nav .nav-items .nav-i:active svg path {
                 flex-direction: column;
                 justify-content: stretch;
 
-                & input[type=text] {
-                    height: 2rem;
-                    margin-bottom: 0.5rem;
-                }
-
-                & div[contenteditable=true] {
+                & textarea {
                     background-color: lightgray;
                     border: 1px solid black;
                     min-height: 200px;
                     padding: 0.5rem 1.5rem;
                     overflow-y: hidden;
-
-                    & ul{
-                        list-style: circle outside;
-                    }
                 }
             }
 
@@ -268,8 +265,42 @@ nav.top-nav .nav-items .nav-i:active svg path {
             background-color: bisque;
             padding: 0.5rem;
 
-            & .accordions{
+            & .accordions {
                 border: 1px solid red;
+
+                & .cont-accr {
+                    background-color: navy;
+
+                    & .accr-head {
+                        display: flex;
+                        align-items: stretch;
+                        background-color: orange;
+                        color: purple;
+                        font-size: 2rem;
+
+                        & .accr-title {
+                            flex: 1;
+                            background-color: aqua;
+                        }
+
+                        & .accr-arrow {
+                            display: flex;
+                            width: 1em;
+                            padding: 0.2rem;
+                            /* border: 1px solid green; */
+
+                        }
+                    }
+
+                    & .accr-wrapper{
+                        margin: 0;
+                        padding: 0;
+
+                        & .accr-body {
+                            border: 1px solid green;
+                        }
+                    }
+                }
             }
         }
     }
