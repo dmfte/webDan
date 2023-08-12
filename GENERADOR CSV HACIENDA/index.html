@@ -99,24 +99,24 @@
           <label>Núm. de Anx.</label>
         </div>
         <div class="row" data-row-num="0">
-          <input type="text" autocomplete="off" onfocus="onInputFocus(this)" class="first date" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" onkeyup="onDateKeyup(event)" placeholder="DD/MM/YYYY" maxlength="10" autofocus id="0-vtas_date">
-          <input type="text" autocomplete="off" onfocus="onInputFocus(this)" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^[12]$" placeholder="[1,2]" maxlength="1" id="0-vtas_classDoc">
-          <input type="text" autocomplete="off" onfocus="onInputFocus(this)" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^0[356]$" placeholder="[03,05,06]" maxlength="2" id="0-vtas_typeDoc">
-          <input type="text" autocomplete="off" onfocus="onInputFocus(this)" oninput="onInputInput(this)" data-regex="(\S)$" maxlength="100" id="0-vtas_numRes">
-          <input type="text" autocomplete="off" onfocus="onInputFocus(this)" oninput="onInputInput(this)" data-regex="(\S)$" maxlength="100" id="0-vtas_numSerDoc">
-          <input type="text" autocomplete="off" onfocus="onInputFocus(this)" oninput="onInputInput(this)" data-regex="(\S)$" maxlength="100" id="0-vtas_numDoc">
-          <input type="text" autocomplete="off" onfocus="onInputFocus(this)" oninput="onInputInput(this)" data-regex="(\S)$" maxlength="100" id="0-vtas_numCtrlInt">
-          <input type="text" autocomplete="off" onfocus="onInputFocus(this)" class="nit" oninput="onInputInput(this)" onkeydown="preventAlphabetKeydown(event)" data-regex="^(\d*)$" maxlength="14" id="0-vtas_nit">
-          <input type="text" autocomplete="off" onfocus="onInputFocus(this)" oninput="onInputInput(this)" data-regex="(\S)$" id="0-vtas_name">
-          <input type="text" autocomplete="off" onfocus="onInputFocus(this)" class="addend" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d+\.\d{2})$" maxlength="13" id="0-vtas_vtasExct">
-          <input type="text" autocomplete="off" onfocus="onInputFocus(this)" class="addend" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d+\.\d{2})$" maxlength="13" id="0-vtas_vtasNoSuj">
-          <input type="text" autocomplete="off" onfocus="onInputFocus(this)" class="addend taxable" data-tax-on="vtas-debt" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d+\.\d{2})$" maxlength="13" id="0-vtas_vtasGrabLoc">
-          <input type="text" autocomplete="off" onfocus="onInputFocus(this)" class="addend vtas-debt" data-perct="13" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d+\.\d{2})$" maxlength="13" id="0-vtas_debtFis">
-          <input type="text" autocomplete="off" onfocus="onInputFocus(this)" class="addend taxable" data-tax-on="vtas-cta-3os-debt" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d+\.\d{2})$" maxlength="13" id="0-vtas_vtasCta3NoDomic">
-          <input type="text" autocomplete="off" onfocus="onInputFocus(this)" class="addend vtas-cta-3os-debt" data-perct="13" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d+\.\d{2})$" maxlength="13" id="0-vtas_debtFiscVtaCta3">
-          <input type="text" autocomplete="off" onfocus="onInputFocus(this)" class="total" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d+\.\d{2})$" maxlength="13" id="0-vtas_totVtas">
-          <input type="text" autocomplete="off" onfocus="onInputFocus(this)" class="dui" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d{9})$" maxlength="9" id="0-vtas_dui">
-          <input type="text" autocomplete="off" onfocus="onInputFocus(this)" oninput="onInputInput(this)" data-regex="^\d{1,2}$" id="0-vtas_numAnx">
+          <input type="text" autocomplete="off" class="first date" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" onkeyup="onDateKeyup(event)" placeholder="DD/MM/YYYY" maxlength="10" autofocus id="0-vtas_date">
+          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^[12]$" placeholder="[1,2]" maxlength="1" id="0-vtas_classDoc">
+          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^0[356]$" placeholder="[03,05,06]" maxlength="2" id="0-vtas_typeDoc">
+          <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^[a-zA-Z0-9]+$" maxlength="100" id="0-vtas_numRes">
+          <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="(\S)$" maxlength="100" id="0-vtas_numSerDoc">
+          <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="(\S)$" maxlength="100" id="0-vtas_numDoc">
+          <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="(\S)$" maxlength="100" id="0-vtas_numCtrlInt">
+          <input type="text" autocomplete="off" class="nit" oninput="onInputInput(this)" onkeydown="preventAlphabetKeydown(event)" data-regex="^(\d*)$" maxlength="14" id="0-vtas_nit">
+          <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="(\S)$" id="0-vtas_name">
+          <input type="text" autocomplete="off" class="addend" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d+\.\d{2})$" maxlength="13" id="0-vtas_vtasExct">
+          <input type="text" autocomplete="off" class="addend" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d+\.\d{2})$" maxlength="13" id="0-vtas_vtasNoSuj">
+          <input type="text" autocomplete="off" class="addend taxable" data-tax-on="vtas-debt" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d+\.\d{2})$" maxlength="13" id="0-vtas_vtasGrabLoc">
+          <input type="text" autocomplete="off" class="addend vtas-debt" data-perct="13" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d+\.\d{2})$" maxlength="13" id="0-vtas_debtFis">
+          <input type="text" autocomplete="off" class="addend taxable" data-tax-on="vtas-cta-3os-debt" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d+\.\d{2})$" maxlength="13" id="0-vtas_vtasCta3NoDomic">
+          <input type="text" autocomplete="off" class="addend vtas-cta-3os-debt" data-perct="13" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d+\.\d{2})$" maxlength="13" id="0-vtas_debtFiscVtaCta3">
+          <input type="text" autocomplete="off" class="total" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d+\.\d{2})$" maxlength="13" id="0-vtas_totVtas">
+          <input type="text" autocomplete="off" class="dui" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d{9})$" maxlength="9" id="0-vtas_dui">
+          <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^\d{1,2}$" id="0-vtas_numAnx">
         </div>
       </div>
     </div>

@@ -413,14 +413,6 @@ body.retencion .container #container-retencion {
   align-items: center;
 }
 
-/* #container-ventas .container-rows .row{
-  display: grid;
-  grid-template-columns: 3.5fr 2fr 3fr 6fr 4fr 2fr 2fr 4fr 8fr repeat(8, 3fr) 2fr;
-  grid-gap: 2px;
-  padding: 2px 2px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-} */
 .container-tab .container-rows .row {
   display: grid;
   grid-gap: 2px;
@@ -428,7 +420,9 @@ body.retencion .container #container-retencion {
   border-radius: 4px;
   font-size: 0.8rem;
 }
-
+.container-tab .container-rows .row:focus-within{
+  border-bottom: 5px solid orange;
+}
 #container-ventas .container-rows .row {
   grid-template-columns: 3.5fr 2fr 3fr 6fr 4fr 2fr 2fr 4fr 8fr repeat(8, 3fr) 2fr;
 }
