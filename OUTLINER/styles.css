@@ -12,12 +12,27 @@
     --nav-dialog-body: #6ba9cf;
 
     /* FOR WEB TOOL */
-
+    --controls-bg: rgb(97, 103, 122);
+    --controls-color: rgb(216, 217, 218);
+    --cont-write-bg: rgb(34, 65, 112);
+    --write-btn-bg:  rgb(137, 163, 205);
+    --write-btn-bg-active:  rgb(159, 195, 249);
+    --write-btn-bg-hover:  rgb(102, 139, 195);
+    --write-btn-color:  rgb(39, 40, 41);
+    --write-bg: rgb(39, 40, 41);
+    --write-color: rgb(255, 246, 224);
+    --cont-edit-bg: rgb(8, 26, 74);
+    --accr-bg: rgb(58, 76, 124);
+    --accr-border: rgb(98, 116, 164);
+    --accr-border-lit: rgb(178, 196, 244);
+    --accr-head-color: rgb(158, 186, 224);
+    --accr-body-color: rgb(8, 26, 74);
     /* PIXELS */
     --nav-height-desk: 40px;
     --nav-height-mob: 48px;
     --controls-height-desk: 64px;
     --controls-height-mob: 48px;
+    --accr-padding: 5px;
 }
 
 body,
@@ -30,7 +45,8 @@ svg {
     max-width: 100%;
     max-height: 100%;
 }
-svg.svg-symbols{
+
+svg.svg-symbols {
     display: none;
 }
 
@@ -66,7 +82,7 @@ dialog {
             & .x-it {
                 display: inline-block;
                 rotate: 45deg;
-                transition: rotate 300ms ease-in-out;
+                transition: rotate 500ms ease-in-out;
             }
 
             & .x-it:hover {
@@ -130,94 +146,104 @@ nav.top-nav {
     padding: 0.2rem 0.5rem;
     width: 100%;
     overflow: visible;
+
+    @media screen and (max-width: 600px) {
+        height: var(--nav-height-mob);
+    }
+
+    & .logo {
+        background-color: white;
+        border-radius: calc(var(--nav-height-desk)/2);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100px;
+        cursor: pointer;
+        border: 1px solid green;
+        padding: 1%;
+
+        & a#logoDmfte {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        & svg {
+            max-width: 80%;
+            max-height: 80%;
+        }
+
+    }
+
+    & .nav-items {
+        padding: 0;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        align-items: stretch;
+        flex: 1;
+
+        & .nav-i {
+            margin: 0 0.2rem;
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            cursor: pointer;
+
+            & svg path {
+                fill: var(--nav-icon-bg);
+            }
+        }
+
+        & .nav-i:hover svg path {
+            fill: var(--nav-icon);
+        }
+
+        & .nav-i:active svg path {
+            fill: var(--nav-icon);
+        }
+
+        & #navBtnContactme {
+            position: relative;
+            /* For tooltip. */
+
+            & .tooltip {
+                /* 10px is the .tooltip::after border width. */
+                top: calc(100% + 10px);
+                right: calc(50% - 10px);
+                border-radius: 10px 0 10px 20px;
+                padding: 5px 5px 10px 10px;
+                justify-content: flex-start;
+            }
+
+            & .tooltip::after {
+                content: "";
+                bottom: 100%;
+                right: 0;
+                border-width: 10px;
+                border-color: transparent transparent lightyellow transparent;
+            }
+        }
+    }
 }
 
-/* Logo. */
-nav.top-nav .logo {
-    background-color: white;
-    border-radius: calc(var(--nav-height-desk)/2);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100px;
-    cursor: pointer;
-    border: 1px solid green;
-    padding: 1%;
-}
-
-nav.top-nav .logo a#logoDmfte {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-}
-
-nav.top-nav .logo svg {
-    max-width: 80%;
-    max-height: 80%;
-}
-
-nav.top-nav .nav-items {
-    padding: 0;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-    align-items: stretch;
-    flex: 1;
-}
-
-nav.top-nav .nav-items .nav-i {
-    margin: 0 0.2rem;
-    display: flex;
-    justify-content: center;
-    align-items: stretch;
-    cursor: pointer;
-}
-
-nav.top-nav .nav-items .nav-i#navBtnContactme {
-    position: relative;
-    /* For tooltip. */
-}
-
-nav.top-nav .nav-items .nav-i#navBtnContactme .tooltip {
-    /* 10px is the .tooltip::after border width. */
-    top: calc(100% + 10px);
-    right: calc(50% - 10px);
-    border-radius: 10px 0 10px 20px;
-    padding: 5px 5px 10px 10px;
-    justify-content: flex-start;
-}
-
-nav.top-nav .nav-items .nav-i#navBtnContactme .tooltip::after {
-    content: "";
-    bottom: 100%;
-    right: 0;
-    border-width: 10px;
-    border-color: transparent transparent lightyellow transparent;
-}
-
-nav.top-nav .nav-items .nav-i svg path {
-    fill: var(--nav-icon-bg);
-}
-
-nav.top-nav .nav-items .nav-i:hover svg path {
-    fill: var(--nav-icon);
-}
-
-nav.top-nav .nav-items .nav-i:active svg path {
-    fill: var(--nav-icon);
-}
+/* ------------ */
 
 .container-all {
     position: relative;
     display: block;
     height: calc(100% - var(--nav-height-desk));
-    background-color: lightgreen;
+
+    @media screen and (max-width: 600px) {
+        height: calc(100% - var(--nav-height-mob));
+    }
 
     & .controls {
         display: block;
         height: var(--controls-height-desk);
-        background-color: navy;
+        background-color: var(--controls-bg);
+        color: var(--controls-color)
     }
 
     & .editor {
@@ -225,96 +251,167 @@ nav.top-nav .nav-items .nav-i:active svg path {
         display: flex;
         height: calc(100% - var(--controls-height-desk));
         flex-direction: row;
-        background-color: #6ba9cf;
 
-        & .cont {
+        & .wrapper {
+            display: flex;
             height: 100%;
             flex: 1;
             padding: 0;
+            padding: 0;
+            margin: 0;
 
-        }
-
-        & .cont.edit {
-            background-color: azure;
-            display: flex;
-
-            & .write {
-                background-color: violet;
-                flex: 1;
+            & .cont {
                 display: flex;
+                flex: 1;
+                /* height: 100%; */
+            }
+
+
+            & .cont.edit {
+                background-color: var(--cont-write-bg);
                 padding: 1rem 0.5rem;
-                flex-direction: column;
-                justify-content: stretch;
 
-                & textarea {
-                    background-color: lightgray;
-                    border: 1px solid black;
-                    min-height: 200px;
-                    padding: 0.5rem 1.5rem;
-                    overflow-y: hidden;
+                & .write {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: stretch;
+                    align-items: stretch;
+
+                    & textarea {
+                        resize: none;
+                        background-color: var(--write-bg);
+                        border: 1px solid var(--write-color);
+                        color: var(--write-color);
+                        /* min-height: 200px; */
+                        height: 100%;
+                        padding: 1rem;
+                    }
+                }
+
+                & .buttons {
+                    width: 80px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: stretch;
+                    padding-left: 0.5rem;
+
+                    & button:hover{
+                        background-color: var(--write-btn-bg-hover);
+                    }
+
+                    & button:active{
+                        background-color: var(--write-btn-bg-active);
+                    }
+
+                    & button{
+                        border: none;
+                        height: 2rem;
+                        background-color: var(--write-btn-bg);
+                        color: var(--write-btn-color);
+                        border-radius: 0.2rem;
+                        margin-bottom: 4px;
+                        cursor: pointer;
+                    }
                 }
             }
 
-            & .buttons {
-                background-color: lime;
-                width: 50px;
-            }
-        }
+            & .cont.preview {
+                background-color: var(--cont-edit-bg);
+                padding: 1.5rem 2rem;
 
-        & .cont.preview {
-            background-color: bisque;
-            padding: 0.5rem;
+                & .accordions {
+                    display: block;
+                    width: 100%;
+                    overflow-y: auto;
 
-            & .accordions {
-                border: 1px solid red;
+                    & .cont-accr::before {
+                        pointer-events: none;
+                        content: "";
+                        position: absolute;
+                        border-width: 3px;
+                        border-style: solid;
+                        border-color: var(--accr-border);
+                        border-radius: 1rem;
+                        top: var(--accr-padding);
+                        right: var(--accr-padding);
+                        bottom: var(--accr-padding);
+                        left: var(--accr-padding);
+                    }
 
-                & .cont-accr {
-                    background-color: navy;
+                    
+                    & .cont-accr.active::before {
+                        border-color: var(--accr-border-lit);
+                        transition: border-color 500ms ease-in-out;
+                    }
 
-                    & .accr-head {
-                        display: flex;
-                        align-items: stretch;
-                        background-color: orange;
-                        color: purple;
-                        font-size: 2rem;
+                    & .cont-accr.active{
 
-                        & .accr-title {
-                            flex: 1;
-                            background-color: aqua;
+                        & .accr-wrapper-body{
+                            /* max-height: 1000px; */
+                            max-height: 500px;
+                            transition: max-height 500ms ease-in-out;
+
+                            & .accr-body {
+                                background-color: var(--accr-border-lit);
+                                transition: background-color 500ms ease-in-out;
+                            }
                         }
+                    }
 
-                        & .accr-arrow {
+
+                    & .cont-accr {
+                        position: relative;
+                        background-color: var(--accr-bg);
+                        border-radius: 1rem;
+                        padding: var(--accr-padding);
+                        margin-bottom: 2px;
+
+                        & .accr-head {
                             display: flex;
-                            width: 1em;
-                            padding: 0.2rem;
-                            /* border: 1px solid green; */
+                            align-items: stretch;
+                            padding: 0.5rem;
+                            font-size: 2rem;
+                            color: var(--accr-head-color);
+                            cursor: pointer;
 
+                            & .accr-title {
+                                text-align: center;
+                                flex: 1;
+                            }
+
+                            & .accr-arrow {
+                                display: flex;
+                                width: 0.7em;
+                                padding: 0.2rem;
+
+                            }
                         }
-                    }
 
-                    & .accr-wrapper{
-                        margin: 0;
-                        padding: 0;
+                        & .accr-wrapper-body {
+                            margin: 0;
+                            padding: 0;
+                            overflow: hidden;
+                            max-height: 0;
+                            
 
-                        & .accr-body {
-                            border: 1px solid green;
+                            
+
+                            & .accr-body {
+                                padding: 0.7rem 2rem;
+                                border-radius: 0 0 1.1rem 1.1rem;
+                                color: var(--accr-body-color);
+                                background-color: var(--accr-border);
+
+                                & li {
+                                    list-style: circle outside;
+                                    /* margin-left: 1rem; */
+                                }
+                            }                            
                         }
                     }
                 }
             }
         }
-    }
-}
-
-
-
-
-@media screen and (max-width: 600px) {
-    nav.top-nav {
-        height: var(--nav-height-mob);
-    }
-
-    .container-all {
-        height: calc(100% - var(--nav-height-mob));
     }
 }

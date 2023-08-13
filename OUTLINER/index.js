@@ -14,7 +14,7 @@ btnPass.addEventListener("click", () => {
 function createAccordion(head = "", body = []) {
     let contAccr = document.createElement("div");
     contAccr.classList.add("cont-accr")
-    
+
     // Create accordion title.
     let accrHead = document.createElement("div");
     accrHead.classList.add("accr-head");
@@ -35,8 +35,8 @@ function createAccordion(head = "", body = []) {
     contAccr.appendChild(accrHead);
 
     // Create accordion body.
-    let wrapper = document.createElement("div");
-    wrapper.classList.add("accr-wrapper");
+    let accrWrapperBody = document.createElement("div");
+    accrWrapperBody.classList.add("accr-wrapper-body");
     let accrBody = document.createElement("div");
     accrBody.classList.add("accr-body");
     let lis = body.map(line => {
@@ -48,35 +48,55 @@ function createAccordion(head = "", body = []) {
     let ul = document.createElement("ul");
     ul.innerHTML = innerUl;
     accrBody.appendChild(ul);
-    wrapper.appendChild(accrBody);
-    contAccr.appendChild(wrapper);
+    accrWrapperBody.appendChild(accrBody);
+    contAccr.appendChild(accrWrapperBody);
 
+    accrHead.addEventListener("pointerup", async () => {
+        let accordions = accrHead.closest(".accordions");
+        let arrAccr = accordions.querySelectorAll(".cont-accr");
+        for (let i = 0; i < arrAccr.length; i++) {
+            const accr = arrAccr[i];
+            accr.classList.remove("active");
+        }
+        accrHead.closest(".cont-accr").classList.add("active");
+        // window.setTimeout(() => {
+        // }, 300);
+    });
     return contAccr;
 }
 
-function getCursorSelection() {
-    let sel = window.getSelection();
-    let range = sel.getRangeAt(0);
-    let startLi = range.startContainer.parentElement;
-    let startPos = range.startOffset;
-    let endLi = range.endContainer.parentElement;
-    let endPos = range.endOffset;
-    return ({ startLi, startPos, endLi, endPos });
+// FUNCTIONS
+function getAddedRGB(colorStr, int) {
+    let obj = getRGBcolorObj(colorStr);
+    obj.r = add255Range(obj.r, int);
+    obj.g = add255Range(obj.g, int);
+    obj.b = add255Range(obj.b, int);
+    return `rgb(${obj.r}, ${obj.g}, ${obj.b})`;
 }
 
-function setCursorPosition(editableDiv, line, pos) {
-    let sel = window.getSelection();
-
-    let range = sel.getRangeAt(0);
-    let childNodes = editableDiv.childNodes;
-    let textNodes = [];
-    for (let i = 0; i < childNodes.length; i++) {
-        const node = childNodes[i];
-        if (node.nodeType == 3) textNodes.push(node);
+function getArrRgb(color) {
+    let element = document.createElement("div");
+    element.style.backgroundColor = color;
+    element.style.display = "none";
+    document.body.appendChild(element);
+    let rgbStr = window.getComputedStyle(element).backgroundColor;
+    // rgb(255, 255, 255)
+    document.body.removeChild(element);
+    let r, g, b;
+    let rgb = rgbStr.split(",");
+    if (rgb.length > 3) {
+        // ['rgba(255', ' 255', ' 255', ' 255)']
+        rgb.splice(3, rgb.length);
+        // ['rgba(255', ' 255', ' 255']
     }
-    console.log(textNodes[line]);
-    range.setStart(textNodes[line], 0);
-    range.setEnd(textNodes[line], pos);
-    window.getSelection().removeAllRanges();
-    window.getSelection().addRange(range);
+    let parenthesis = rgb[0].match(/\(/).index;
+    // 'rgba(255' index of '('.
+    let arr0 = rgb[0].split("");
+    arr0.splice(0, parenthesis + 1);
+    r = parseInt(arr0.join(""));
+    // ' 255'
+
+    g = parseInt(rgb[1]);   // '  255'
+    b = parseInt(rgb[2]);   // '  255)'
+    return { r, g, b };
 }
