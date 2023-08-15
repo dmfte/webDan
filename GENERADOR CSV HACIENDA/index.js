@@ -308,8 +308,8 @@ function onInputInput(e) {
   let row = e.closest(".row"); //  Input's parent.
   let containerTab = row.closest(".container-tab");
 
+  // Hide/unhide the rest of inputs    
   if (e.classList.contains("first")) {
-    // Hide/unhide the rest of inputs    
     let parent = row.parentElement;
     let rn = rowNumber(row);
     if (rn.i == rn.l - 1 && e.value.length > 0) { // If the current row is the last one and input is not empty.
@@ -358,10 +358,11 @@ function onInputInput(e) {
 
     let totInput = row.querySelector(".total");
     totInput.value = getTotal(e);
+    totInput.classList.remove("wrong");
     e.classList.remove("wrong");
   }
   // Currency fields should not be empty.
-  if (e.classList.contains("addend") && e.value.length == 0) e.classList.add("wrong");
+  if ((e.classList.contains("addend") || e.classList.contains("total")) && e.value.length == 0) e.classList.add("wrong");
 
   //  If this is the first input of the .default row, a new row  should be added with a button for first input.
   if (row.classList.contains("default") && e.classList.contains("first")) {
@@ -633,7 +634,7 @@ function onDateKeyup(event) { //  Automatically converts text to the format dd/m
 }
 
 function preventAlphabetKeydown(event) {
-  if (/^[a-zA-Z ]$/.test(event.key)) {
+  if (/^[a-zA-Z ]$/.test(event.key) && event.ctrlKey == false) {
     event.preventDefault();
   }
 }
