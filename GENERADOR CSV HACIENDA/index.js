@@ -156,6 +156,11 @@ function onModalOkBtnClick(element) { //  This button already closes the modal.
           break;
       }
       break;
+    // TO DELTE STORED VALUES.
+    case "modcontentClearStoredData":
+      window.localStorage.removeItem("CSVnator");
+      location.reload();
+      break;
     default:
       break;
   }
@@ -294,9 +299,12 @@ function clearRow(row) {
 
 // INPUT ELEMENT BEHAVIOR
 function onInputInput(e) {
+
   if (!checkRegex(e)) e.classList.add("wrong");
   if (e.value.length == 0 && !e.classList.contains("addend")) e.classList.remove("wrong");
   let row = e.closest(".row"); //  Input's parent.
+  let containerTab = row.closest(".container-tab");
+
   if (e.classList.contains("first")) {
     // Hide/unhide the rest of inputs    
     let parent = row.parentElement;
@@ -326,10 +334,8 @@ function onInputInput(e) {
   if (e.classList.contains("date") && checkRegex(e)) {
     if (validateDateFormat(e.value)) {
       e.classList.remove("wrong");
-      console.log("removed");
     } else {
       e.classList.add("wrong");
-      console.log("added");
     }
   }
 
@@ -354,52 +360,6 @@ function onInputInput(e) {
   // Currency fields should not be empty.
   if (e.classList.contains("addend") && e.value.length == 0) e.classList.add("wrong");
 
-  // if (e.classList.contains("taxable") && checkRegex(e)) {
-  //   let taxOn = row.querySelector("." + e.dataset.taxOn);
-  //   let arrNodeTaxable = row.querySelectorAll("[data-tax-on='" + e.dataset.taxOn + "'");
-  //   let arrTaxable = Array.prototype.slice.call(arrNodeTaxable).map(taxable => {
-  //     return taxable.value.length > 0 ? taxable.value : 0;
-  //   });
-  //   let totTaxable = arrTaxable.reduce((tot, taxable) => {
-  //     return parseFloat(tot) + parseFloat(taxable);
-  //   });
-  //   taxOn.value = getTax(totTaxable, taxOn.dataset.perct);
-  //   //  Calculate total of dolar amounts:
-  //   if (e.classList.contains("addend")) {
-  //     let totInput = row.querySelector(".total");
-  //     totInput.value = getTotal(e);
-  //   }
-  //   e.classList.remove("wrong");
-  // }
-
-  // if (checkRegex(e) || e.value.length == 0) {  //  Is text is correctly formated or empty?
-  //   //  Calculate IVA where applicable.
-  //   if (e.classList.contains("taxable")) {
-  //     let taxOn = row.querySelector("." + e.dataset.taxOn);
-  //     let arrNodeTaxable = row.querySelectorAll("[data-tax-on='" + e.dataset.taxOn + "'");
-  //     let arrTaxable = Array.prototype.slice.call(arrNodeTaxable).map(taxable => {
-  //       return taxable.value.length > 0 ? taxable.value : 0;
-  //     });
-  //     let totTaxable = arrTaxable.reduce((tot, taxable) => {
-  //       return parseFloat(tot) + parseFloat(taxable);
-  //     });
-  //     taxOn.value = getTax(totTaxable, taxOn.dataset.perct);
-
-
-  //     // if (e.value.length > 0) {
-  //     //   taxOn.value = getTax(totTaxable, taxOn.dataset.perct);
-  //     // } else {
-  //     //   if (totTaxable == 0) taxOn.value = "0.00";
-  //     // }
-
-
-  //   }
-  //   //  Calculate total of dolar amounts:
-  //   if (e.classList.contains("addend")) {
-  //     let totInput = row.querySelector(".total");
-  //     totInput.value = getTotal(e);
-  //   }
-  // }
   //  If this is the first input of the .default row, a new row  should be added with a button for first input.
   if (row.classList.contains("default") && e.classList.contains("first")) {
     let container = row.closest(".container-rows");
@@ -411,22 +371,50 @@ function onInputInput(e) {
       unmakeButton(lastFirst);
     }
   }
-  // validateInputsRegexp(row);
-  if (e.id.includes("vtas_numCtrlInt") || e.id.includes("vtas_numRes")) {
-    let numCtrlInt, numRes;
+
+
+  // ------ VENTAS ------
+  if (containerTab.id == "container-ventas") {
+    let VtasClassDoc, vtasNumDoc, vtasTotInput, vtasNumCtrlInt, vtasNumRes;
     let allInput = row.querySelectorAll("input");
     for (let i = 0; i < allInput.length; i++) {
       const input = allInput[i];
-      if (input.id.includes("vtas_numRes")) numRes = input;
-      if (input.id.includes("vtas_numCtrlInt")) numCtrlInt = input;
+      if (input.id.includes("vtas_numRes")) vtasNumRes = input;
+      if (input.id.includes("vtas_numCtrlInt")) vtasNumCtrlInt = input;
+      if (input.id.includes("vtas_classDoc")) VtasClassDoc = input;
+      if (input.id.includes("vtas_numDoc")) vtasNumDoc = input;
+      if (input.id.includes("vtas_totVtas")) vtasTotInput = input;
     }
-    if (numRes.value.match(/dte/i).length > 0 && numCtrlInt.value.length !== 0) {
-      console.log("wrong");
-      numCtrlInt.classList.add("wrong");
-    } else {
-      numCtrlInt.classList.remove("wrong");
+
+
+    // Si Numero Resolucion contiene "dte" (Dcumento Tributario Electronico) Numero Ctrl Interno debe estar vacio.
+    if (e == vtasNumCtrlInt || e == vtasNumRes) {
+      if (vtasNumRes.value.match(/^(dte)/i) !== null && vtasNumCtrlInt.value.length !== 0) {
+        vtasNumCtrlInt.classList.add("wrong");
+      } else {
+        vtasNumCtrlInt.classList.remove("wrong");
+        if (checkRegex(vtasNumCtrlInt)) vtasNumCtrlInt.classList.remove("wrong");
+      }
     }
+
+    // Si Clase Documento es 2, Numero Ctrl Interno debe ser igual a Numero Documento.
+    if (e == VtasClassDoc || e == vtasNumDoc || e == vtasNumCtrlInt) {
+      if (VtasClassDoc.value == "2" && vtasNumDoc.value !== vtasNumCtrlInt.value) {
+        vtasNumCtrlInt.classList.add("wrong");
+      } else {
+        vtasNumCtrlInt.classList.remove("wrong");
+        if (checkRegex(vtasNumCtrlInt)) vtasNumCtrlInt.classList.remove("wrong");
+      }
+    }
+    if (e == vtasNumDoc && VtasClassDoc.value == "2") {
+      vtasNumCtrlInt.value = e.value;
+      vtasNumCtrlInt.classList.remove("wrong");
+    }
+
+    // ------ COMPRAS ------
+    let compClasDoc;
   }
+
   autoSave();
 }
 

@@ -68,15 +68,15 @@
           <input type="text" autocomplete="off" oninput="autoSave()" id="vta_defNumCtrlInt">
           <input type="text" autocomplete="off" oninput="autoSave()" id="vta_defNit">
           <input type="text" autocomplete="off" oninput="autoSave()" id="vta_defName">
-          <input type="text" autocomplete="off" oninput="autoSave()" id="vta_defVtasExct">
-          <input type="text" autocomplete="off" oninput="autoSave()" id="vta_defVtasNoSuj">
-          <input type="text" autocomplete="off" oninput="autoSave()" id="vta_defVtasGrabLoc">
-          <input type="text" autocomplete="off" oninput="autoSave()" id="vta_defDebtFis">
-          <input type="text" autocomplete="off" oninput="autoSave()" id="vta_defVtasCta3NoDomic">
-          <input type="text" autocomplete="off" oninput="autoSave()" id="vta_defDebtFiscVtaCta3">
-          <input type="text" autocomplete="off" oninput="autoSave()" id="vta_defTotVtas">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="vta_defVtasExct" value="0.00">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="vta_defVtasNoSuj" value="0.00">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="vta_defVtasGrabLoc" value="0.00">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="vta_defDebtFis" value="0.00">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="vta_defVtasCta3NoDomic" value="0.00">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="vta_defDebtFiscVtaCta3" value="0.00">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="vta_defTotVtas" value="0.00">
           <input type="text" autocomplete="off" oninput="autoSave()" id="vta_defDUI">
-          <input type="text" autocomplete="off" oninput="autoSave()" id="vta_defNumAnx">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="vta_defNumAnx" value="1">
         </div>
         <div class="row labels">
           <label>Fecha</label>
@@ -131,17 +131,17 @@
           <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defNumDoc">
           <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defNit">
           <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defNombPov">
-          <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defCompsIntrExntNoSuj">
-          <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defIntrnExntNoSuj">
-          <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defImprtExntNoSuj">
-          <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defCompsIntrnGrav">
-          <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defIntrnGravBienes">
-          <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defImprtGravBienes">
-          <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defImprtGravServcs">
-          <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defCredtFisc">
-          <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defTotComps">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defCompsIntrExntNoSuj" value="0.00">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defIntrnExntNoSuj" value="0.00">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defImprtExntNoSuj" value="0.00">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defCompsIntrnGrav" value="0.00">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defIntrnGravBienes" value="0.00">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defImprtGravBienes" value="0.00">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defImprtGravServcs" value="0.00">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defCredtFisc" value="0.00">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defTotComps" value="0.00">
           <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defDui">
-          <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defNumAnx">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defNumAnx" value="3">
         </div>
         <div class="row labels">
           <label>Fecha</label>
@@ -164,8 +164,8 @@
         </div>
         <div class="row" data-row-num="0">
           <input type="text" autocomplete="off" class="first date" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="\d{2}\/\d{2}\/\d{4}" onkeyup="onDateKeyup(event)" placeholder="DD/MM/YYYY" maxlength="10" autofocus id="0-comps_date">
-          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^[12]$" placeholder="[1,2]" maxlength="1" id="0-comps_classDoc">
-          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^03|05|06|1[1-3]$" maxlength="2" id="0-comps_typeDoc">
+          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^[1234]$" placeholder="[1,2,3,4]" maxlength="1" id="0-comps_classDoc">
+          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^03$|^05$|^06$|^11$|^12$|^13$" maxlength="2" id="0-comps_typeDoc">
           <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^[a-zA-Z0-9]+$" maxlength="100" id="0-comps_numDoc">
           <input type="text" autocomplete="off" class="nit" oninput="onInputInput(this)" onkeydown="preventAlphabetKeydown(event)" data-regex="^(\d*)$" maxlength="14" id="0-comps_nit">
           <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^[a-zA-Z0-9]+$" id="0-comps_nombPov">
@@ -196,7 +196,7 @@
           <input type="text" autocomplete="off" oninput="autoSave()" id="rtcn_defMontSuj">
           <input type="text" autocomplete="off" oninput="autoSave()" id="rtcn_defMontRtcn1">
           <input type="text" autocomplete="off" oninput="autoSave()" id="rtcn_defDUI">
-          <input type="text" autocomplete="off" oninput="autoSave()" id="rtcn_defNumAnx">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="rtcn_defNumAnx" value="7">
         </div>
         <div class="row labels">
           <label>NIT Agente</label>
