@@ -11,6 +11,19 @@ btnPass.addEventListener("click", () => {
     accordions.appendChild(newAccordion);
 });
 
+accordions.addEventListener("pointerup", () => {
+    let sel = window.getSelection();
+    let range = sel.getRangeAt(0);
+    let startLi = range.startContainer.parentElement;
+    let endLi = range.endContainer.parentElement;
+    console.log(startLi);
+    console.log(endLi);
+    if (startLi === endLi && range.startOffset !== range.endOffset) {
+        range.surroundContents(document.createElement("strong"));
+
+    }
+});
+
 function createAccordion(head = "", body = []) {
     let contAccr = document.createElement("div");
     contAccr.classList.add("cont-accr")
@@ -42,9 +55,7 @@ function createAccordion(head = "", body = []) {
     let lis = body.map(line => {
         return `<li>${line}</li>`;
     });
-    let innerUl = lis.reduce((str, li) => {
-        return `${str}${li}`;
-    });
+    let innerUl = lis.join("");
     let ul = document.createElement("ul");
     ul.innerHTML = innerUl;
     accrBody.appendChild(ul);
@@ -59,8 +70,6 @@ function createAccordion(head = "", body = []) {
             accr.classList.remove("active");
         }
         accrHead.closest(".cont-accr").classList.add("active");
-        // window.setTimeout(() => {
-        // }, 300);
     });
     return contAccr;
 }

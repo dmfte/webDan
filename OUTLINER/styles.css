@@ -235,7 +235,7 @@ nav.top-nav {
     display: block;
     height: calc(100% - var(--nav-height-desk));
 
-    @media screen and (max-width: 600px) {
+    @media (max-width: 600px) {
         height: calc(100% - var(--nav-height-mob));
     }
 

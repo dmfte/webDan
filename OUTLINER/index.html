@@ -61,18 +61,34 @@
 
     <svg class="svg-symbols">
         <style>
-            symbol {
+            g.ico-btn symbol {
                 stroke: currentColor;
                 stroke-width: 1.5;
                 stroke-linejoin: miter;
                 stroke-linecap: round;
                 fill: none;
             }
+
+            g.ico-actions symbol{
+
+            }
+            @media (max-width: 600px){
+                g.ico-btn symbol .gone{
+                    display: none;
+                }
+            }
         </style>
         <defs>
-            <symbol id="chevDown" viewBox="0 0 10 10">
-                <path d="M 1 2 L 5 5 L 9 2 M 1 6 L 5 9 L 9 6" />
-            </symbol>
+            <g class="ico-btn">
+                <symbol id="chevDown" viewBox="0 0 10 10">
+                    <path class="stay" d="M 1 2 L 5 5 L 9 2" />
+                    <path class="gone" d="M 1 6 L 5 9 L 9 6" />
+                </symbol>
+                <symbol id="chevUp" viewBox="0 0 10 10">
+                    <path class="stay" d="M 1 5 L 5 2 L 9 5" />
+                    <path class="gone" d="M 1 9 L 5 6 L 9 9" />
+                </symbol>
+            </g>
         </defs>
     </svg>
     <script src="index.js"></script>
