@@ -299,8 +299,11 @@ function clearRow(row) {
 
 // INPUT ELEMENT BEHAVIOR
 function onInputInput(e) {
-
-  if (!checkRegex(e)) e.classList.add("wrong");
+  if (checkRegex(e)) {
+    e.classList.remove("wrong");
+  } else {
+    e.classList.add("wrong");
+  }
   if (e.value.length == 0 && !e.classList.contains("addend")) e.classList.remove("wrong");
   let row = e.closest(".row"); //  Input's parent.
   let containerTab = row.closest(".container-tab");

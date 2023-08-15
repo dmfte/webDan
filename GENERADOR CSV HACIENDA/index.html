@@ -100,8 +100,8 @@
         </div>
         <div class="row" data-row-num="0">
           <input type="text" autocomplete="off" class="first date" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="\d{2}\/\d{2}\/\d{4}" onkeyup="onDateKeyup(event)" placeholder="DD/MM/YYYY" maxlength="10" autofocus id="0-vtas_date">
-          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^[12]$" placeholder="[1,2]" maxlength="1" id="0-vtas_classDoc">
-          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^0[356]$" placeholder="[03,05,06]" maxlength="2" id="0-vtas_typeDoc">
+          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^[124]$" placeholder="[1,2,4]" maxlength="1" id="0-vtas_classDoc">
+          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^03$|^05$|^06$" placeholder="[03,05,06]" maxlength="2" id="0-vtas_typeDoc">
           <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^[a-zA-Z0-9]+$" maxlength="100" id="0-vtas_numRes">
           <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^[a-zA-Z0-9]+$" maxlength="100" id="0-vtas_numSerDoc">
           <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^[a-zA-Z0-9]+$" maxlength="100" id="0-vtas_numDoc">
