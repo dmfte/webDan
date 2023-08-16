@@ -31,6 +31,7 @@
           <li id="tab-ventas" data-tab="ventas">VENTAS</li>
           <li id="tab-compras" data-tab="compras">COMPRAS</li>
           <li id="tab-retencion" data-tab="retencion">RETENCION</li>
+          <li id="tab-percepcion" data-tab="percepcion">PERCEPCION</li>
         </ul>
       </div>
     </div>
@@ -47,7 +48,7 @@
           <li id="clear-default">Limpiar valores por defecto</li>
           <li id="clear-stored-data">Limpiar todo &#9760;<span class="tooltip" id="ttDeleteEverything">Si la página funciona mal, pruebe <br>esta opción para eliminar todos los datos <br>y empezar de cero.</span></li>
           <li id="disclaimer">Info &#8505;</li>
-          <li id="contact">Contactarme &#9993;</li>
+          <li id="contactme">Contactarme &#9993;</li>
         </ul>
       </div>
     </div>
@@ -211,18 +212,59 @@
         </div>
         <div class="row" data-row-num="0">
           <input type="text" autocomplete="off" class="nit first" oninput="onInputInput(this)" onkeydown="preventAlphabetKeydown(event)" data-regex="^(\d*)$" maxlength="14" id="0-rtcn_nit" autofocus>
-          <input type="text" autocomplete="off" class="date" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" onkeyup="onDateKeyup(event)" placeholder="DD/MM/YYYY" maxlength="10" id="0-rtcn_date">
-          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^0[567]$" placeholder="[05, 06, 07]" maxlength="2" id="0-rtcn_typeDoc">
-          <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^[a-zA-Z0-9]+$" maxlength="100" id="0-rtcn_serie">
-          <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^[a-zA-Z0-9]+$" maxlength="100" id="0-rtcn_numDoc">
+          <input type="text" autocomplete="off" class="date" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" onkeyup="onDateKeyup(event)" data-regex="\d{2}\/\d{2}\/\d{4}" placeholder="DD/MM/YYYY" maxlength="10" id="0-rtcn_date">
+          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^05$|^06$|^07$" placeholder="[05, 06, 07]" maxlength="2" id="0-rtcn_typeDoc">
+          <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^[a-zA-Z0-9]*$" maxlength="100" id="0-rtcn_serie">
+          <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^[a-zA-Z0-9]*$" maxlength="100" id="0-rtcn_numDoc">
           <input type="text" autocomplete="off" class="taxable" data-tax-on="mont-rtcn-1" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d+\.\d{2})$" maxlength="10" id="0-rtcn_montSuj">
-          <input type="text" autocomplete="off" class="mont-rtcn-1" data-perct="1" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d+\.\d{2})$" maxlength="10" id="0-rtcn_montSuj">
+          <input type="text" autocomplete="off" class="mont-rtcn-1" data-perct="1" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d+\.\d{2})$" maxlength="10" id="0-rtcn_monRtcn">
           <input type="text" autocomplete="off" class="dui" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d{9})$" maxlength="9" id="0-rtcn_dui">
           <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^\d{1,2}$" id="0-rtcn_numAnx">
         </div>
       </div>
     </div>
+
+    <div class="container-tab" id="container-percepcion" data-mark="percp">
+      <div class="container-rows">
+        <div class="tab-header">Aplicar valores por defecto</div>
+        <div class="row default active">
+
+          <input type="text" autocomplete="off" class="first" oninput="onInputInput(this)" id="percp_defNit">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="percp_defDate">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="percp_defTypeDoc">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="percp_defSerie">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="percp_defNumDoc">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="percp_defMontSuj">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="percp_defMontPercp1">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="percp_defDUI">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="percp_defNumAnx" value="8">
+        </div>
+        <div class="row labels">
+          <label>NIT Agente</label>
+          <label>Fecha Emisión</label>
+          <label>Tipo Doc.</label>
+          <label>Serie</label>
+          <label>Núm. Doc.</label>
+          <label>Monto Suj.</label>
+          <label>Monto Percp. 1%</label>
+          <label>DUI Agente</label>
+          <label>Núm. de Anx.</label>
+        </div>
+        <div class="row" data-row-num="0">
+          <input type="text" autocomplete="off" class="nit first" oninput="onInputInput(this)" onkeydown="preventAlphabetKeydown(event)" data-regex="^(\d*)$" maxlength="14" id="0-percp_nit" autofocus>
+          <input type="text" autocomplete="off" class="date" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" onkeyup="onDateKeyup(event)" data-regex="\d{2}\/\d{2}\/\d{4}" placeholder="DD/MM/YYYY" maxlength="10" id="0-percp_date">
+          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^03$|^05$|^06$|^12$" placeholder="[03,05,06,12]" maxlength="2" id="0-percp_typeDoc">
+          <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^[a-zA-Z0-9]*$" maxlength="100" id="0-percp_serie">
+          <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^[a-zA-Z0-9]*$" maxlength="100" id="0-percp_numDoc">
+          <input type="text" autocomplete="off" class="taxable" data-tax-on="mont-rtcn-1" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d+\.\d{2})$" maxlength="10" id="0-percp_montSuj">
+          <input type="text" autocomplete="off" class="mont-rtcn-1" data-perct="1" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d+\.\d{2})$" maxlength="10" id="0-percp_monPercp">
+          <input type="text" autocomplete="off" class="dui" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d{9})$" maxlength="9" id="0-percp_dui">
+          <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^\d{1,2}$" id="0-percp_numAnx">
+        </div>
+      </div>
+    </div>
   </div>
+
   <div class="container-buttons">
     <button id="generateCSV" onclick="generateCSV(this)">Generar CSV</button>
   </div>
@@ -234,10 +276,12 @@
 
   <div class="modal-content" id="modcontentCleartabs">
     <div class="content-input">
-      <input type="radio" name="clear-tabs" id="rbtnClrAll" value="delete_all_tabs" onclick="enableBtnOk(this)"><label for="rbtnClrAll">Todas las pestañas</label>
+      <input type="radio" name="clear-tabs" id="rbtnClrAll" value="delete_all_tabs" onclick="enableBtnOk(this)">
+      <label for="rbtnClrAll">Todas las pestañas</label>
     </div>
     <div class="content-input">
-      <input type="radio" name="clear-tabs" id="rbtnClrCurrentTab" value="delete_current_tab" onclick="enableBtnOk(this)"><label for="rbtnClrCurrentTab">Pestaña actual</label>
+      <input type="radio" name="clear-tabs" id="rbtnClrCurrentTab" value="delete_current_tab" onclick="enableBtnOk(this)">
+      <label for="rbtnClrCurrentTab">Pestaña actual</label>
     </div>
   </div>
 
@@ -254,7 +298,11 @@
     <div class="text">¿Está seguro que desea eliminar todos los datos guardados en su dispositivo?</div>
   </div>
 
+  <div class="modal-content" id="modcontentDisclaimer">
+    <div class="text">La información es guardada localmente en el explorador. No es subida ni enviada a ningún sitio.</div>
   </div>
+
+  <!-- </div> -->
 
   <dialog>
     <div class="title"></div>

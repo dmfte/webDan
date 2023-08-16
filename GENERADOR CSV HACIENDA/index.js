@@ -6,7 +6,7 @@ const navOverlay = document.querySelector(".nav-overlay");
 const arrNavTabs = document.querySelectorAll(".nav-menu .container-menu li");
 const navHamb = document.querySelector(".nav-hamb");
 const navSubmenu = document.querySelector(".nav-hamb .nav-submenu");
-
+const arrSubmenuLi = navSubmenu.querySelectorAll("li");
 arrNavTabs.forEach((li, i) => {
   li.addEventListener("click", function () {
     document.body.setAttribute("class", li.dataset.tab);
@@ -20,48 +20,65 @@ const modcontentSeparatorChar = document.getElementById("modcontentSeparatorChar
 const modcontentCleartabs = document.getElementById("modcontentCleartabs");
 const modcontentClearDefaultVals = document.getElementById("modcontentClearDefaultVals");
 const modcontentClearStoredData = document.getElementById("modcontentClearStoredData");
-navSubmenu.addEventListener("click", evt => {
-  let params = {};
-  switch (evt.target.id) {
-    case "separator":
-      modcontentSeparatorChar.querySelector("#itSeparatorChar").value = CSVnator.separator;
-      params = {
-        title: "Caracter separador",
-        content: modcontentSeparatorChar,
-        okEnabled: false
-      }
-      break;
-    case "clear-data":
-      modcontentCleartabs.querySelectorAll("[type='radio']").forEach(rbtn => {
-        rbtn.checked = false;
-      });
-      params = {
-        title: "Limpiar datos",
-        content: modcontentCleartabs,
-        okEnabled: false
-      }
-      break;
-    case "clear-default":
-      modcontentClearDefaultVals.querySelectorAll("[type='radio']").forEach(rbtn => {
-        rbtn.checked = false;
-      });
-      params = {
-        title: "Limpiar valores por defecto.",
-        content: modcontentClearDefaultVals,
-        okEnabled: false
-      }
-      break;
-    case "clear-stored-data":
-      params = {
-        title: "Limpiar datos guardados.",
-        content: modcontentClearStoredData,
-        okEnabled: true
-      }
-      break;
-    default:
-      break;
-  }
-  showDialog(dialog, params);
+const modcontentDisclaimer = document.getElementById("modcontentDisclaimer");
+
+arrSubmenuLi.forEach(li => {
+  li.addEventListener("click", evt => {
+    let params = {};
+    switch (evt.currentTarget.id) {
+      case "separator":
+        modcontentSeparatorChar.querySelector("#itSeparatorChar").value = CSVnator.separator;
+        params = {
+          title: "Caracter separador",
+          content: modcontentSeparatorChar,
+          okEnabled: false
+        }
+        break;
+      case "clear-data":
+        modcontentCleartabs.querySelectorAll("[type='radio']").forEach(rbtn => {
+          rbtn.checked = false;
+        });
+        params = {
+          title: "Limpiar datos",
+          content: modcontentCleartabs,
+          okEnabled: false
+        }
+        break;
+      case "clear-default":
+        modcontentClearDefaultVals.querySelectorAll("[type='radio']").forEach(rbtn => {
+          rbtn.checked = false;
+        });
+        params = {
+          title: "Limpiar valores por defecto.",
+          content: modcontentClearDefaultVals,
+          okEnabled: false
+        }
+        break;
+      case "clear-stored-data":
+        params = {
+          title: "Limpiar datos guardados.",
+          content: modcontentClearStoredData,
+          okEnabled: true
+        }
+        break;
+      case "disclaimer":
+        params = {
+          title: "Aclaración",
+          content: modcontentDisclaimer,
+          okEnabled: false
+        }
+        break;
+      
+      case "contactme":
+
+        break;
+      
+      default:
+        break;
+    }
+    showDialog(dialog, params);
+  });
+  
 });
 
 //  Body keys listener.
@@ -174,7 +191,11 @@ function clearDefaultValues(tab) {
 function showDialog(dialog, params) {
   dialog.querySelector(".title").innerText = params.title;
   dialog.querySelector("form .body").appendChild(params.content);
-  if (!params.okEnabled) dialog.querySelector("#btnOk").disabled = true;
+  if (params.okEnabled) {
+    dialog.querySelector("#btnOk").disabled = false;
+  } else {
+    dialog.querySelector("#btnOk").disabled = true;
+  }
   dialog.showModal();
 }
 
@@ -342,25 +363,34 @@ function onInputInput(e) {
     }
   }
 
-  // If it is a dolar amount whehter taxable or not.
+  // If it is a dolar amount to be added.
   if (e.classList.contains("addend") && checkRegex(e)) {
-    if (e.classList.contains("taxable")) {
-      let taxOn = row.querySelector("." + e.dataset.taxOn);
-      let arrNodeTaxable = row.querySelectorAll("[data-tax-on='" + e.dataset.taxOn + "'");
-      let arrTaxable = Array.prototype.slice.call(arrNodeTaxable).map(taxable => {
-        return taxable.value.length > 0 ? taxable.value : 0;
-      });
-      let totTaxable = arrTaxable.reduce((tot, taxable) => {
-        return parseFloat(tot) + parseFloat(taxable);
-      });
-      taxOn.value = getTax(totTaxable, taxOn.dataset.perct);
-    }
-
     let totInput = row.querySelector(".total");
     totInput.value = getTotal(e);
     totInput.classList.remove("wrong");
     e.classList.remove("wrong");
   }
+  // Si es una cantidad sujeta a impuesto.
+  if (e.classList.contains("taxable") && checkRegex(e)) {
+    let taxOn = row.querySelector("." + e.dataset.taxOn);
+    let arrNodeTaxable = row.querySelectorAll("[data-tax-on='" + e.dataset.taxOn + "'");
+    let arrTaxable = Array.prototype.slice.call(arrNodeTaxable).map(taxable => {
+      return taxable.value.length > 0 ? taxable.value : 0;
+    });
+    let totTaxable = arrTaxable.reduce((tot, taxable) => {
+      return parseFloat(tot) + parseFloat(taxable);
+    });
+    taxOn.value = getTax(totTaxable, taxOn.dataset.perct);
+    taxOn.classList.remove("wrong");
+    // Calcular total otra vez.
+    let totInput = row.querySelector(".total");
+    if (totInput !== null) {
+      totInput.value = getTotal(e);
+      totInput.classList.remove("wrong");
+      e.classList.remove("wrong");
+    }
+  }
+
   // Currency fields should not be empty.
   if ((e.classList.contains("addend") || e.classList.contains("total")) && e.value.length == 0) e.classList.add("wrong");
 
@@ -376,6 +406,16 @@ function onInputInput(e) {
     }
   }
 
+  //  DUI and NIT have to be mutually exclusive.
+  let nit = row.querySelector(".nit");
+  let dui = row.querySelector(".dui");
+  if (nit.value.length > 0 && dui.value.length > 0) {
+    nit.classList.add("wrong");
+    dui.classList.add("wrong");
+  } else {
+    nit.classList.remove("wrong");
+    dui.classList.remove("wrong");
+  }
 
   // ------ VENTAS ------
   if (containerTab.id == "container-ventas") {
@@ -542,13 +582,6 @@ function validateInputsRegexp() {
           }
         }
       });
-      //  DUI and NIT have to be mutually exclusive.
-      let nit = row.querySelector(".nit");
-      let dui = row.querySelector(".dui");
-      if (nit.value.length > 0 && dui.value.length > 0) {
-        nit.classList.add("wrong");
-        dui.classList.add("wrong");
-      }
     });
   });
 }
@@ -657,6 +690,7 @@ function getCurrentTab() {
 }
 //  GENERATE CSV FILE
 function generateCSV() {
+  if (window.localStorage.getItem("CSVnator") == null) return;
   let tabName = document.body.classList[0];
   //  Get the array of data from the current tab.
   let arrRows = [];
@@ -682,7 +716,6 @@ function generateCSV() {
 
   //  Get the first part of the file name.
   let docFileName = "";
-  console.log(tabName);
   switch (tabName) {
     case "ventas":
       docFileName = "Detalle de Ventas "
@@ -692,6 +725,9 @@ function generateCSV() {
       break;
     case "retencion":
       docFileName = "Detalle de Retencion ";
+      break;
+    case "percepcion":
+      docFileName = "Detalle de Percepcion ";
       break;
     default:
       break;
