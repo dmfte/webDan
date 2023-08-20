@@ -1,7 +1,12 @@
 const editBody = document.querySelector(".cont.edit .write textarea");
 const accordions = document.querySelector(".accordions");
 const btnPass = document.querySelector(".cont.edit .buttons .pass");
+const cmSelection = document.querySelector(".context-menu.selection");
 
+const elementDiagAddPopup = document.getElementById("modAddPopup");
+console.log(elementDiagAddPopup);
+
+var rangeEditor;
 btnPass.addEventListener("click", () => {
     let txt1 = editBody.value;
     let txt2 = txt1.split("\n");
@@ -11,18 +16,84 @@ btnPass.addEventListener("click", () => {
     accordions.appendChild(newAccordion);
 });
 
-accordions.addEventListener("pointerup", () => {
+accordions.addEventListener("pointerup", (evt) => {
     let sel = window.getSelection();
     let range = sel.getRangeAt(0);
-    let startLi = range.startContainer.parentElement;
-    let endLi = range.endContainer.parentElement;
-    console.log(startLi);
-    console.log(endLi);
-    if (startLi === endLi && range.startOffset !== range.endOffset) {
-        range.surroundContents(document.createElement("strong"));
+    let start = range.startContainer;
+    let end = range.endContainer;
+    if (start == end && range.startOffset !== range.endOffset) {
+        rangeEditor = range;
+        cmSelection.style.left = `${evt.clientX}px`;
+        cmSelection.style.top = `${evt.clientY - 32}px`;
+        cmSelection.classList.add("active");
 
+        document.body.addEventListener("pointerdown", (evt) => {
+            let e = evt.target;
+            let parent = e.closest(".context-menu.selection");
+            if (parent !== cmSelection) {
+                cmSelection.classList.remove("active");
+                // rangeEditor = null;
+            }
+        }, { once: true });
+    } else {
+        rangeEditor = null;
     }
 });
+
+let arrSelectionBtns = cmSelection.querySelectorAll(".btn");
+arrSelectionBtns.forEach(btn => {
+    btn.addEventListener("pointerup", async () => {
+        if (rangeEditor == null) return;
+        // Listener from accordios has already made sure there's a selection within the same line.
+        if (btn.classList.contains("style")) {
+            let tag = await createTagToSurround(btn.dataset.tag);
+            rangeEditor.surroundContents(tag);
+            cmSelection.classList.remove("active");
+            return;
+        }
+        if (btn.id == "btnAddModal") {
+            const diagAddPopup = new AutoDialog({ dialog: elementDiagAddPopup, title: "Add a popup", trigger: btn });
+        }
+    });
+});
+
+function createTagToSurround(strTag) {
+    return new Promise((res, rej) => {
+        let tag = document.createElement(strTag);
+        tag.style.cursor = "pointer";
+        tag.addEventListener("click", () => {
+            let txt = tag.innerText;
+            let txtNode = document.createTextNode(txt);
+            let li = tag.closest("li");
+            li.insertBefore(txtNode, tag);
+            let liNodes = li.childNodes;
+            for (let i = 0; i < liNodes.length; i++) {
+                const node = liNodes[i];
+                if (node == tag) {
+                    li.removeChild(tag);
+                    mergeTextNodes(li);
+                    break;
+                }
+            }
+        });
+        res(tag);
+    });
+}
+
+function mergeTextNodes(element) {
+    let arrNodes = element.childNodes;
+    for (let i = 1; i < arrNodes.length; i++) {
+        const node = arrNodes[i];
+        if (node.nodeType === arrNodes[i - 1].nodeType) {
+            arrNodes[i - 1].nodeValue += node.nodeValue;
+            element.removeChild(node);
+            // Get array of nodes again since one node has been removed.
+            arrNodes = element.childNodes;
+            // Reducing i so itteraction does not skip one due to the removed node.
+            i--;
+        }
+    }
+}
 
 function createAccordion(head = "", body = []) {
     let contAccr = document.createElement("div");

@@ -17,7 +17,7 @@
 
 // JS ➔ Use this parameters when creating a new instance of the AutoDialog class.
 // params = {
-//     dialog: dialogModal01,
+//     dialog: dialogModal01,  //  Dialog element.
 //     title: "The title of the modal",
 //     trigger: btnToShowModal,
 //     ok: false, //  Button OK will be disabled. true by defaul.

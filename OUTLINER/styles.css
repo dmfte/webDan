@@ -15,10 +15,10 @@
     --controls-bg: rgb(97, 103, 122);
     --controls-color: rgb(216, 217, 218);
     --cont-write-bg: rgb(34, 65, 112);
-    --write-btn-bg:  rgb(137, 163, 205);
-    --write-btn-bg-active:  rgb(159, 195, 249);
-    --write-btn-bg-hover:  rgb(102, 139, 195);
-    --write-btn-color:  rgb(39, 40, 41);
+    --write-btn-bg: rgb(137, 163, 205);
+    --write-btn-bg-active: rgb(159, 195, 249);
+    --write-btn-bg-hover: rgb(102, 139, 195);
+    --write-btn-color: rgb(39, 40, 41);
     --write-bg: rgb(39, 40, 41);
     --write-color: rgb(255, 246, 224);
     --cont-edit-bg: rgb(8, 26, 74);
@@ -27,6 +27,8 @@
     --accr-border-lit: rgb(178, 196, 244);
     --accr-head-color: rgb(158, 186, 224);
     --accr-body-color: rgb(8, 26, 74);
+
+    --menu-selection-bg: rgb(231, 220, 192);
     /* PIXELS */
     --nav-height-desk: 40px;
     --nav-height-mob: 48px;
@@ -296,15 +298,15 @@ nav.top-nav {
                     align-items: stretch;
                     padding-left: 0.5rem;
 
-                    & button:hover{
+                    & button:hover {
                         background-color: var(--write-btn-bg-hover);
                     }
 
-                    & button:active{
+                    & button:active {
                         background-color: var(--write-btn-bg-active);
                     }
 
-                    & button{
+                    & button {
                         border: none;
                         height: 2rem;
                         background-color: var(--write-btn-bg);
@@ -339,15 +341,15 @@ nav.top-nav {
                         left: var(--accr-padding);
                     }
 
-                    
+
                     & .cont-accr.active::before {
                         border-color: var(--accr-border-lit);
                         transition: border-color 500ms ease-in-out;
                     }
 
-                    & .cont-accr.active{
+                    & .cont-accr.active {
 
-                        & .accr-wrapper-body{
+                        & .accr-wrapper-body {
                             /* max-height: 1000px; */
                             max-height: 500px;
                             transition: max-height 500ms ease-in-out;
@@ -393,9 +395,9 @@ nav.top-nav {
                             padding: 0;
                             overflow: hidden;
                             max-height: 0;
-                            
 
-                            
+
+
 
                             & .accr-body {
                                 padding: 0.7rem 2rem;
@@ -405,13 +407,65 @@ nav.top-nav {
 
                                 & li {
                                     list-style: circle outside;
-                                    /* margin-left: 1rem; */
+                                    
+                                    & strong:hover{
+                                        text-decoration: line-through red;
+                                    }
+                                    & em:hover{
+                                        text-decoration: line-through red;
+                                    }
+                                    & u:hover{
+                                        text-decoration-line: line-through underline;
+                                        text-decoration-color: red;
+                                    }
                                 }
-                            }                            
+                            }
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+.context-menu {
+    position: absolute;
+    border: none;
+    padding: 0;
+    overflow: hidden;
+}
+
+.context-menu.selection.active {
+    max-width: 200px;
+}
+
+.context-menu.selection {
+    max-width: 0;
+    transition: max-width 300ms ease-in-out;
+
+    & .cont.buttons {
+        display: flex;
+        align-items: stretch;
+        border-radius: 7px;
+        background-color: var(--menu-selection-bg);
+
+        & .btn:hover {
+            background-color: rgb(255, 255, 255);
+            color: var(--write-bg);
+        }
+
+        & .btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--controls-bg);
+            border: 1px solid var(--controls-bg);
+            border-radius: 5px;
+            width: 30px;
+            height: 30px;
+            margin: 2px;
+            user-select: none;
+            cursor: pointer;
         }
     }
 }

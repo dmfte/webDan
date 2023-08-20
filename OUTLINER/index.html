@@ -59,6 +59,25 @@
         </div>
     </div>
 
+    <div class="context-menu selection">
+        <div class="cont buttons">
+            <div class="btn style" data-tag="strong">
+                <strong>N</strong>
+            </div>
+            <div class="btn style" data-tag="em">
+                <em>I</em>
+            </div>
+            <div class="btn style" data-tag="u">
+                <u>U</u>
+            </div>
+            <div class="btn" id="btnAddModal">
+                <svg viewBox="0 0 32 32">
+                    <use xlink:href="#symbolModal"></use>
+                </svg>
+            </div>
+        </div>
+    </div>
+
     <svg class="svg-symbols">
         <style>
             g.ico-btn symbol {
@@ -66,14 +85,12 @@
                 stroke-width: 1.5;
                 stroke-linejoin: miter;
                 stroke-linecap: round;
-                fill: none;
             }
 
-            g.ico-actions symbol{
+            g.ico-actions symbol {}
 
-            }
-            @media (max-width: 600px){
-                g.ico-btn symbol .gone{
+            @media (max-width: 600px) {
+                g.ico-btn symbol .gone {
                     display: none;
                 }
             }
@@ -81,16 +98,33 @@
         <defs>
             <g class="ico-btn">
                 <symbol id="chevDown" viewBox="0 0 10 10">
-                    <path class="stay" d="M 1 2 L 5 5 L 9 2" />
-                    <path class="gone" d="M 1 6 L 5 9 L 9 6" />
+                    <path class="stay" fill="none" d="M 1 2 L 5 5 L 9 2" />
+                    <path class="gone" fill="none" d="M 1 6 L 5 9 L 9 6" />
                 </symbol>
                 <symbol id="chevUp" viewBox="0 0 10 10">
-                    <path class="stay" d="M 1 5 L 5 2 L 9 5" />
-                    <path class="gone" d="M 1 9 L 5 6 L 9 9" />
+                    <path class="stay" fill="none" d="M 1 5 L 5 2 L 9 5" />
+                    <path class="gone" fill="none" d="M 1 9 L 5 6 L 9 9" />
+                </symbol>
+                <symbol id="symbolModal" viewBox="0 0 32 32">
+                    <path fill="currentColor" stroke="none" d="M 2 9 Q 2 6 5 6 L 21 6 L 22 8 L 24 10 L 22 12 L 23 13 L 25 11 L 27 13 L 28 12 L 26 10 L 28 8 L 27 7 L 25 9 L 23 7 L 22 8 L 21 6 L 27 6 Q 30 6 30 9 V 14 H 2 Z" />
+                    <path fill="none" stroke="currentColor" stroke-width="2" d="M 27 6 Q 30 6 30 9 V 23 Q 30 26 27 26 H 5 Q 2 26 2 23 L 2 9 Q 2 6 5 6 Z" />
                 </symbol>
             </g>
         </defs>
     </svg>
+
+    <dialog id="modAddPopup">
+        <div class="body">
+            <div class="subtitle">
+                <label for="lbSubtitle">Subtítulo</label>
+                <input type="text" id="itSubtitle">
+            </div>
+            <div class="content">
+                <textarea></textarea>
+            </div>
+        </div>
+    </dialog>
+    <script src="AutoDialog.js"></script>
     <script src="index.js"></script>
 </body>
 
