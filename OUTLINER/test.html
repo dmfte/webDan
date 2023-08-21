@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outliner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@100;400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <div class="controls"></div>
+        <!-- ------ content from .wrapper -->
+        <div class="accordions">
+            <div class="cont-accr">
+                <div class="accr-head"><span class="accr-title">asdfadfa</span><span class="accr-arrow"><svg viewBox="0 0 10 10">
+                            <use xlink:href="#chevDown"></use>
+                        </svg></span></div>
+                <div class="accr-wrapper-body">
+                    <div class="accr-body">
+                        <ul>
+                            <li>qrqwerqwe</li>
+                            <li>32452345234</li>
+                            <li>xzcvzxcv</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="cont-accr">
+                <div class="accr-head"><span class="accr-title">asdfadfa</span><span class="accr-arrow"><svg viewBox="0 0 10 10">
+                            <use xlink:href="#chevDown"></use>
+                        </svg></span></div>
+                <div class="accr-wrapper-body">
+                    <div class="accr-body">
+                        <ul>
+                            <li>qrqwerqwe</li>
+                            <li>32452345234</li>
+                            <li>xzcvzxcv</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="cont-accr">
+                <div class="accr-head"><span class="accr-title">asdfadfa</span><span class="accr-arrow"><svg viewBox="0 0 10 10">
+                            <use xlink:href="#chevDown"></use>
+                        </svg></span></div>
+                <div class="accr-wrapper-body">
+                    <div class="accr-body">
+                        <ul>
+                            <li>qrqwerqwe</li>
+                            <li>32452345234</li>
+                            <li>xzcvzxcv</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ------ -->
+
+    <svg class="svg-symbols">
+        <style>
+            g.ico symbol {
+                stroke: currentColor;
+                stroke-width: 1.5;
+                stroke-linejoin: miter;
+                stroke-linecap: round;
+            }
+
+            g.ico-actions symbol {}
+
+            @media (max-width: 600px) {
+                g.ico symbol .gone {
+                    display: none;
+                }
+            }
+        </style>
+        <defs>
+            <g class="ico">
+                <symbol id="chevDown" viewBox="0 0 10 10">
+                    <path class="stay" fill="none" d="M 1 2 L 5 5 L 9 2" />
+                    <path class="gone" fill="none" d="M 1 6 L 5 9 L 9 6" />
+                </symbol>
+                <symbol id="chevUp" viewBox="0 0 10 10">
+                    <path class="stay" fill="none" d="M 1 5 L 5 2 L 9 5" />
+                    <path class="gone" fill="none" d="M 1 9 L 5 6 L 9 9" />
+                </symbol>
+            </g>
+        </defs>
+    </svg>
+
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Lato", sans-serif;
+            /* Imported weights: 100, 400, 700. */
+            font-weight: 400;
+        }
+
+        strong {
+            font-weight: 700;
+        }
+
+        :root {
+            /* FOR NAVIGATION BAR */
+            --nav-bg: rgb(26, 26, 46);
+            --nav-icon: rgb(233, 69, 96);
+            --nav-icon-bg: rgb(67, 101, 139);
+
+            /* FOR WEB TOOL */
+            --dialog-body: rgb(159, 195, 249);
+            --controls-bg: rgb(97, 103, 122);
+            --controls-color: rgb(216, 217, 218);
+
+            --accr-bg: rgb(58, 76, 124);
+            --accr-border: rgb(98, 116, 164);
+            --accr-border-lit: rgb(178, 196, 244);
+            --accr-head-color: rgb(158, 186, 224);
+            --accr-body-color: rgb(8, 26, 74);
+            --container-bg: rgb(8, 26, 74);
+
+            /* PIXELS */
+            --controls-height-desk: 64px;
+            --controls-height-mob: 48px;
+            --accr-padding: 5px;
+        }
+
+        body,
+        html {
+            width: 100%;
+            height: 100%;
+        }
+
+        svg {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        dialog {
+            border-width: 3px;
+            max-width: 60vw;
+
+            @media (max-width: 600px) {
+                border-width: 2px;
+                max-width: 80vw;
+            }
+
+            @media (max-width: 250px) {
+                border-width: 1px;
+                min-width: calc(100vw - 3px);
+                max-width: calc(100vw - 3px);
+            }
+
+            & .body {
+                background-color: var(--dialog-body);
+                padding: 0.5rem;
+
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+
+                & .body-cont {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    margin: 0.2rem 0;
+                }
+
+                & .subtitle {
+                    font-size: 0.8rem;
+
+                    & label {
+                        margin-right: 0.3rem;
+                    }
+
+                    & input {
+                        font-size: 1rem;
+                        flex: 1;
+                    }
+                }
+
+                & .content {
+
+                    & textarea {
+                        resize: none;
+                        width: 400px;
+                        height: 6rem;
+                        overflow-y: auto;
+                    }
+                }
+            }
+        }
+
+        dialog::backdrop {
+            background-color: rgb(0, 0, 0);
+            opacity: 0.5;
+        }
+
+
+        .container {
+            background-color: var(--container-bg);
+            padding: 0;
+            position: relative;
+            display: block;
+            height: 100%;
+
+            & .controls {
+                display: block;
+                height: var(--controls-height-desk);
+                background-color: var(--controls-bg);
+                color: var(--controls-color);
+                display: flex;
+                align-items: stretch;
+                padding: 0.3rem 1rem;
+
+            }
+
+            & .accordions {
+                display: block;
+                width: calc(100% - 2rem);
+                margin: 0.5rem 1rem;
+                overflow-y: auto;
+
+                & .cont-accr::before {
+                    pointer-events: none;
+                    content: "";
+                    position: absolute;
+                    border-width: 3px;
+                    border-style: solid;
+                    border-color: var(--accr-border);
+                    border-radius: 1rem;
+                    top: var(--accr-padding);
+                    right: var(--accr-padding);
+                    bottom: var(--accr-padding);
+                    left: var(--accr-padding);
+                }
+
+
+                & .cont-accr.active::before {
+                    border-color: var(--accr-border-lit);
+                    transition: border-color 500ms ease-in-out;
+                }
+
+                & .cont-accr.active {
+
+                    & .accr-wrapper-body {
+                        /* max-height: 1000px; */
+                        max-height: 500px;
+                        transition: max-height 500ms ease-in-out;
+
+                        & .accr-body {
+                            background-color: var(--accr-border-lit);
+                            transition: background-color 500ms ease-in-out;
+                        }
+                    }
+                }
+
+
+                & .cont-accr {
+                    position: relative;
+                    background-color: var(--accr-bg);
+                    border-radius: 1rem;
+                    padding: var(--accr-padding);
+                    margin-bottom: 2px;
+
+                    & .accr-head {
+                        display: flex;
+                        align-items: stretch;
+                        padding: 0.5rem;
+                        font-size: 2rem;
+                        color: var(--accr-head-color);
+                        cursor: pointer;
+
+                        & .accr-title {
+                            text-align: center;
+                            flex: 1;
+                        }
+
+                        & .accr-arrow {
+                            display: flex;
+                            width: 0.7em;
+                            padding: 0.2rem;
+
+                        }
+                    }
+
+                    & .accr-wrapper-body {
+                        margin: 0;
+                        padding: 0;
+                        overflow: hidden;
+                        max-height: 0;
+
+
+
+
+                        & .accr-body {
+                            padding: 0.7rem 2rem;
+                            border-radius: 0 0 1.1rem 1.1rem;
+                            color: var(--accr-body-color);
+                            background-color: var(--accr-border);
+
+                            & li {
+                                list-style: circle outside;
+
+                                & strong:hover {
+                                    text-decoration: line-through red;
+                                }
+
+                                & em:hover {
+                                    text-decoration: line-through red;
+                                }
+
+                                & u:hover {
+                                    text-decoration-line: line-through underline;
+                                    text-decoration-color: red;
+                                }
+
+                                & span.show-popup {
+                                    text-decoration: underline;
+                                    color: rgb(0, 0, 255);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    </style>
+
+    <script>
+        const accordions = document.querySelectorAll(".cont-accr");
+        accordions.forEach(header => {
+            let accrHead = header.querySelector(".accr-head");
+            accrHead.addEventListener("pointerup", async () => {
+                let accordions = accrHead.closest(".accordions");
+                let arrAccr = accordions.querySelectorAll(".cont-accr");
+                for (let i = 0; i < arrAccr.length; i++) {
+                    const accr = arrAccr[i];
+                    accr.classList.remove("active");
+                }
+                accrHead.closest(".cont-accr").classList.add("active");
+            });
+        });
+    </script>
+</body>

@@ -3,21 +3,91 @@ const accordions = document.querySelector(".accordions");
 const btnPass = document.querySelector(".cont.edit .buttons .pass");
 const cmSelection = document.querySelector(".context-menu.selection");
 
-const elementDiagAddPopup = document.getElementById("modAddPopup");
-console.log(elementDiagAddPopup);
+const arrContextMenuBtns = cmSelection.querySelectorAll(".btn");
+const arrSelectionStyleBtns = cmSelection.querySelectorAll(".btn.style");
+const elementModAddPopup = document.getElementById("modAddPopup");
+const btnAddModal = cmSelection.querySelector("#btnAddModal");
+
+const modAddPopup = new AutoDialog({ dialog: elementModAddPopup, title: "Add a popup", trigger: btnAddModal, backdropclose: false});
+
+const edapSubtitle = elementModAddPopup.querySelector("#itSubtitle");
+const edapBody = elementModAddPopup.querySelector("textarea");
+const modPopup = document.getElementById("modPopup");
+
+const btnDownload = document.getElementById("btnDownload");
+btnDownload.addEventListener("click", () => {
+    let wrapper = accordions.closest(".wrapper");
+    let html = '';
+    let css = '';
+    let js = '';
+});
+arrContextMenuBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+        cmSelection.classList.remove("active");
+        cursorCont = rangeEditor.endContainer;
+        cursorPos = rangeEditor.endOffset;
+        window.getSelection().removeAllRanges();
+    });
+});
+
+modAddPopup.onOk(async () => {
+    if (rangeEditor == null) return;
+    // Listener from accordios has already made sure there's a selection within the same line.
+    let span = createTagToSurround("span");
+    span.classList.add("show-popup");
+    span.dataset.title = edapSubtitle.value;
+    span.dataset.body = edapBody.value;
+    span.addEventListener("click", () => {
+        let popup = new AutoDialog({ dialog: modPopup, title: edapSubtitle.value});
+        popup.body.innerText = edapBody.value;
+        popup.show();
+    });
+    rangeEditor.surroundContents(span);
+});
+
+arrSelectionStyleBtns.forEach(btn => {
+    // This is for buttons on context menu that add N, I, U style to the highlighted text.
+    btn.addEventListener("pointerup", async () => {
+        if (rangeEditor == null) return;
+        // Listener from accordios has already made sure there's a selection within the same line.
+        let tag = createTagToSurround(btn.dataset.tag);
+
+        tag.addEventListener("click", () => {
+            let txt = tag.innerText;
+            let txtNode = document.createTextNode(txt);
+            let li = tag.closest("li");
+            li.insertBefore(txtNode, tag);
+            let liNodes = li.childNodes;
+            for (let i = 0; i < liNodes.length; i++) {
+                const node = liNodes[i];
+                if (node == tag) {
+                    li.removeChild(tag);
+                    mergeTextNodes(li);
+                    break;
+                }
+            }
+        });
+
+
+        rangeEditor.surroundContents(tag);
+    });
+});
+
+
 
 var rangeEditor;
-btnPass.addEventListener("click", () => {
+btnPass.addEventListener("click", async () => {
     let txt1 = editBody.value;
     let txt2 = txt1.split("\n");
     let title = txt2.splice(0, 1);
 
-    let newAccordion = createAccordion(title, txt2);
+    let newAccordion = await createAccordion(title, txt2);
     accordions.appendChild(newAccordion);
 });
 
 accordions.addEventListener("pointerup", (evt) => {
     let sel = window.getSelection();
+    if (sel.anchorNode == null) return;
     let range = sel.getRangeAt(0);
     let start = range.startContainer;
     let end = range.endContainer;
@@ -37,47 +107,15 @@ accordions.addEventListener("pointerup", (evt) => {
         }, { once: true });
     } else {
         rangeEditor = null;
+        cmSelection.classList.remove("active");
     }
 });
 
-let arrSelectionBtns = cmSelection.querySelectorAll(".btn");
-arrSelectionBtns.forEach(btn => {
-    btn.addEventListener("pointerup", async () => {
-        if (rangeEditor == null) return;
-        // Listener from accordios has already made sure there's a selection within the same line.
-        if (btn.classList.contains("style")) {
-            let tag = await createTagToSurround(btn.dataset.tag);
-            rangeEditor.surroundContents(tag);
-            cmSelection.classList.remove("active");
-            return;
-        }
-        if (btn.id == "btnAddModal") {
-            const diagAddPopup = new AutoDialog({ dialog: elementDiagAddPopup, title: "Add a popup", trigger: btn });
-        }
-    });
-});
 
 function createTagToSurround(strTag) {
-    return new Promise((res, rej) => {
-        let tag = document.createElement(strTag);
-        tag.style.cursor = "pointer";
-        tag.addEventListener("click", () => {
-            let txt = tag.innerText;
-            let txtNode = document.createTextNode(txt);
-            let li = tag.closest("li");
-            li.insertBefore(txtNode, tag);
-            let liNodes = li.childNodes;
-            for (let i = 0; i < liNodes.length; i++) {
-                const node = liNodes[i];
-                if (node == tag) {
-                    li.removeChild(tag);
-                    mergeTextNodes(li);
-                    break;
-                }
-            }
-        });
-        res(tag);
-    });
+    let tag = document.createElement(strTag);
+    tag.style.cursor = "pointer";
+    return tag;
 }
 
 function mergeTextNodes(element) {
@@ -96,53 +134,56 @@ function mergeTextNodes(element) {
 }
 
 function createAccordion(head = "", body = []) {
-    let contAccr = document.createElement("div");
-    contAccr.classList.add("cont-accr")
+    // Returns a container with the title and the collapsible content.
+    return new Promise((res, rej) => {
+        let contAccr = document.createElement("div");
+        contAccr.classList.add("cont-accr")
 
-    // Create accordion title.
-    let accrHead = document.createElement("div");
-    accrHead.classList.add("accr-head");
-    let spanTitle = document.createElement("span");
-    spanTitle.classList.add("accr-title");
-    spanTitle.innerText = head;
+        // Create accordion title.
+        let accrHead = document.createElement("div");
+        accrHead.classList.add("accr-head");
+        let spanTitle = document.createElement("span");
+        spanTitle.classList.add("accr-title");
+        spanTitle.innerText = head;
 
-    let spanArrow = document.createElement("span");
-    spanArrow.classList.add("accr-arrow");
-    let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("viewBox", "0 0 10 10");
-    let use = document.createElementNS("http://www.w3.org/2000/svg", "use");
-    use.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '#chevDown');
-    svg.appendChild(use);
-    spanArrow.appendChild(svg);
-    accrHead.appendChild(spanTitle);
-    accrHead.appendChild(spanArrow);
-    contAccr.appendChild(accrHead);
+        let spanArrow = document.createElement("span");
+        spanArrow.classList.add("accr-arrow");
+        let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("viewBox", "0 0 10 10");
+        let use = document.createElementNS("http://www.w3.org/2000/svg", "use");
+        use.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '#chevDown');
+        svg.appendChild(use);
+        spanArrow.appendChild(svg);
+        accrHead.appendChild(spanTitle);
+        accrHead.appendChild(spanArrow);
+        contAccr.appendChild(accrHead);
 
-    // Create accordion body.
-    let accrWrapperBody = document.createElement("div");
-    accrWrapperBody.classList.add("accr-wrapper-body");
-    let accrBody = document.createElement("div");
-    accrBody.classList.add("accr-body");
-    let lis = body.map(line => {
-        return `<li>${line}</li>`;
+        // Create accordion body.
+        let accrWrapperBody = document.createElement("div");
+        accrWrapperBody.classList.add("accr-wrapper-body");
+        let accrBody = document.createElement("div");
+        accrBody.classList.add("accr-body");
+        let lis = body.map(line => {
+            return `<li>${line}</li>`;
+        });
+        let innerUl = lis.join("");
+        let ul = document.createElement("ul");
+        ul.innerHTML = innerUl;
+        accrBody.appendChild(ul);
+        accrWrapperBody.appendChild(accrBody);
+        contAccr.appendChild(accrWrapperBody);
+
+        accrHead.addEventListener("pointerup", async () => {
+            let accordions = accrHead.closest(".accordions");
+            let arrAccr = accordions.querySelectorAll(".cont-accr");
+            for (let i = 0; i < arrAccr.length; i++) {
+                const accr = arrAccr[i];
+                accr.classList.remove("active");
+            }
+            accrHead.closest(".cont-accr").classList.add("active");
+        });
+        res(contAccr);
     });
-    let innerUl = lis.join("");
-    let ul = document.createElement("ul");
-    ul.innerHTML = innerUl;
-    accrBody.appendChild(ul);
-    accrWrapperBody.appendChild(accrBody);
-    contAccr.appendChild(accrWrapperBody);
-
-    accrHead.addEventListener("pointerup", async () => {
-        let accordions = accrHead.closest(".accordions");
-        let arrAccr = accordions.querySelectorAll(".cont-accr");
-        for (let i = 0; i < arrAccr.length; i++) {
-            const accr = arrAccr[i];
-            accr.classList.remove("active");
-        }
-        accrHead.closest(".cont-accr").classList.add("active");
-    });
-    return contAccr;
 }
 
 // FUNCTIONS
