@@ -1,4 +1,4 @@
-const editBody = document.querySelector(".cont.edit .write textarea");
+const editBody = document.querySelector(".cont.edit .collapsible #taCollapsible");
 const accordions = document.querySelector(".accordions");
 const btnPass = document.querySelector(".cont.edit .buttons .pass");
 const cmSelection = document.querySelector(".context-menu.selection");
@@ -38,11 +38,13 @@ modAddPopup.onOk(async () => {
     span.dataset.title = edapSubtitle.value;
     span.dataset.body = edapBody.value;
     span.addEventListener("click", () => {
-        let popup = new AutoDialog({ dialog: modPopup, title: edapSubtitle.value});
-        popup.body.innerText = edapBody.value;
+        let popup = new AutoDialog({ dialog: modPopup, title: span.dataset.title, ok: false, cancel: false});
+        popup.body.innerText = span.dataset.body;
         popup.show();
     });
     rangeEditor.surroundContents(span);
+    edapSubtitle.value = "";
+    edapBody.value = "";
 });
 
 arrSelectionStyleBtns.forEach(btn => {

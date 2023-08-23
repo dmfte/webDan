@@ -84,6 +84,9 @@ class AutoDialog {
         wrapper.classList.add("wrapper");
         wrapper.style.margin = "0";
         wrapper.style.position = "relative";
+        wrapper.style.display = "flex";
+        wrapper.style.flexDirection = "column";
+        wrapper.style.justifyContent = "stretch";
         wrapper.appendChild(divBody);
 
         boolOk = (typeof params.ok == "boolean") ? params.ok : true;
@@ -133,8 +136,9 @@ class AutoDialog {
             glyph = (params.glyph !== undefined) ? params.glyph : "times";
             divTitle = document.createElement("div");
             divTitle.classList.add("container-title");
-            divTitle.style.width = "100%";
+            // divTitle.style.width = "100%";
             divTitle.style.display = "flex";
+            divTitle.style.flex = "1";
             divTitle.style.justifyContent = "flex-start";
             divTitle.style.alignItems = "stretch";
             divTitle.style.overflow = "hidden";  //  So span does not exit the title when rotates.
@@ -178,8 +182,9 @@ class AutoDialog {
         if (boolCancel || boolOk) {
             divFooter = document.createElement("div");
             divFooter.classList.add("footer");
-            divFooter.style.width = "100%";
+            // divFooter.style.width = "100%";
             divFooter.style.display = "flex";
+            divFooter.style.flex = "1";
             divFooter.style.alignItems = "stretch";
 
             if (boolCancel) {
@@ -212,10 +217,10 @@ class AutoDialog {
             }
             wrapper.appendChild(divFooter);
         }
-        wrapper.style.display = "flex";
-        wrapper.style.flexDirection = "column";
-        wrapper.style.justifyContent = "stretch";
-        wrapper.style.alignItems = "flex-start";
+        // wrapper.style.display = "flex";
+        // wrapper.style.flexDirection = "column";
+        // wrapper.style.justifyContent = "stretch";
+        // wrapper.style.alignItems = "flex-start";
 
         this.dialog.innerHTML = "";
         this.dialog.appendChild(wrapper);

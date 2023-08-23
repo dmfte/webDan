@@ -6,7 +6,8 @@
     /* Imported weights: 100, 400, 700. */
     font-weight: 400;
 }
-strong{
+
+strong {
     font-weight: 700;
 }
 
@@ -66,56 +67,22 @@ input[type=checkbox] {
 /* Styles for the dynamically added dialog with AutoDialog.js */
 dialog {
     border-width: 3px;
-    max-width: 60vw;
+    /* max-width: 60vw; */
 
-    @media (max-width: 600px) {
+    /* @media (max-width: 600px) {
         border-width: 2px;
         max-width: 80vw;
-    }
+    } */
 
-    @media (max-width: 250px) {
+    /* @media (max-width: 250px) {
         border-width: 1px;
         min-width: calc(100vw - 3px);
         max-width: calc(100vw - 3px);
-    }
+    } */
 
     & .body {
         background-color: var(--dialog-body);
         padding: 0.5rem;
-
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-
-        & .body-cont{
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0.2rem 0;
-        }
-
-        & .subtitle{
-            font-size: 0.8rem;
-            
-            & label{
-                margin-right: 0.3rem;
-            }
-
-            & input{
-                font-size: 1rem;
-                flex: 1;
-            }
-        }
-        
-        & .content{
-            
-            & textarea{
-                resize: none;
-                width: 400px;
-                height: 6rem;
-                overflow-y: auto;
-            }
-        }
     }
 }
 
@@ -125,6 +92,61 @@ dialog::backdrop {
 }
 
 /* --------- */
+
+/* Dialog to add a popup. */
+#modAddPopup {
+
+    & .body {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+
+        & .body-cont {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0.2rem 0;
+        }
+
+        & .subtitle {
+            font-size: 0.8rem;
+
+            & label {
+                margin-right: 0.3rem;
+            }
+
+            & input {
+                font-size: 1rem;
+                flex: 1;
+            }
+        }
+
+        & .content {
+
+            & textarea {
+                resize: none;
+                width: 400px;
+                height: 6rem;
+                overflow-y: auto;
+            }
+        }
+    }
+}
+
+/* Dialog to show the popup. */
+
+#modPopup{
+
+    & .title{
+        font-weight: 700;
+    }
+
+    & .body{
+        padding: 1rem;
+        min-width: 50vw;
+        max-width: 90vw;
+    }
+}
 
 .tooltip {
     position: absolute;
@@ -143,6 +165,7 @@ dialog::backdrop {
     border-style: solid;
     z-index: 3;
 }
+
 /* 
 .g-action input~label,
 .btn input~label {
@@ -267,7 +290,7 @@ nav.top-nav {
         align-items: stretch;
         padding: 0.3rem 1rem;
 
-        & #btnDownload{
+        & #btnDownload {
             width: 2rem;
             font-size: 2rem;
         }
@@ -295,17 +318,36 @@ nav.top-nav {
 
 
             & .cont.edit {
+                position: relative;
                 background-color: var(--cont-write-bg);
                 padding: 1rem 0.5rem;
+                display: grid;
+                grid-template-areas: "title title" "collapsibles buttons";
+                grid-template-columns: 1fr 80px;
+                grid-template-rows: 2.5rem 1fr;
 
-                & .write {
-                    flex: 1;
+                & .title {
+                    /* background-color: purple; */
+                    grid-area: title;
+
+                    & #itTitle {
+                        display: block;
+                        width: 100%;
+                        outline: none;
+                        padding: 0.2rem 0.5rem;
+                        height: 2rem;
+                        font-size: 1.5rem;
+                    }
+                }
+
+                & .collapsible {
+                    grid-area: collapsibles;
                     display: flex;
                     flex-direction: column;
                     justify-content: stretch;
                     align-items: stretch;
 
-                    & textarea {
+                    & #taCollapsible {
                         resize: none;
                         background-color: var(--write-bg);
                         border: 1px solid var(--write-color);
@@ -317,11 +359,12 @@ nav.top-nav {
                 }
 
                 & .buttons {
-                    width: 80px;
+                    grid-area: buttons;
                     display: flex;
                     flex-direction: column;
                     align-items: stretch;
                     padding-left: 0.5rem;
+                    overflow: hidden;
 
                     & button:hover {
                         background-color: var(--write-btn-bg-hover);
@@ -330,7 +373,7 @@ nav.top-nav {
 
                     & button:active {
                         background-color: var(--write-btn-bg-active);
-                        
+
                     }
 
                     & button {
@@ -400,7 +443,7 @@ nav.top-nav {
                             display: flex;
                             align-items: stretch;
                             padding: 0.5rem;
-                            font-size: 2rem;
+                            font-size: 1.5rem;
                             color: var(--accr-head-color);
                             cursor: pointer;
 
@@ -448,7 +491,7 @@ nav.top-nav {
                                         text-decoration-color: red;
                                     }
 
-                                    & span.show-popup{
+                                    & span.show-popup {
                                         text-decoration: underline;
                                         color: rgb(0, 0, 255);
                                     }
