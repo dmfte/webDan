@@ -17,7 +17,9 @@ const modPopup = document.getElementById("modPopup");
 const btnDownload = document.getElementById("btnDownload");
 btnDownload.addEventListener("click", () => {
     let wrapper = accordions.closest(".wrapper");
-    let html = '';
+    let html1 = '<!DOCTYPE html><html lang="en"><head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Outliner</title> <link rel="preconnect" href="https://fonts.googleapis.com"> <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <link href="https://fonts.googleapis.com/css2?family=Lato:wght@100;400;700&display=swap" rel="stylesheet"></head><body>'
+        + wrapper.innerHTML
+        + "";
     let css = '';
     let js = '';
 });
@@ -116,7 +118,7 @@ accordions.addEventListener("pointerup", (evt) => {
 
 function createTagToSurround(strTag) {
     let tag = document.createElement(strTag);
-    tag.style.cursor = "pointer";
+    // tag.style.cursor = "pointer";
     return tag;
 }
 

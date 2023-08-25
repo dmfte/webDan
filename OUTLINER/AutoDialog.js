@@ -293,9 +293,4 @@ class AutoDialog {
     onClose(fx) {
         if (fx !== undefined) fxClose = fx;
     }
-
-
 }
-
-
-

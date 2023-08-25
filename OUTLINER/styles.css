@@ -136,6 +136,7 @@ dialog::backdrop {
 /* Dialog to show the popup. */
 
 #modPopup{
+    width: 60vw;
 
     & .title{
         font-weight: 700;
@@ -143,8 +144,8 @@ dialog::backdrop {
 
     & .body{
         padding: 1rem;
-        min-width: 50vw;
-        max-width: 90vw;
+        /* min-width: 50vw;
+        max-width: 90vw; */
     }
 }
 
@@ -324,17 +325,23 @@ nav.top-nav {
                 display: grid;
                 grid-template-areas: "title title" "collapsibles buttons";
                 grid-template-columns: 1fr 80px;
-                grid-template-rows: 2.5rem 1fr;
+                grid-template-rows: 3.5rem 1fr;
 
                 & .title {
                     /* background-color: purple; */
                     grid-area: title;
 
                     & #itTitle {
-                        display: block;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
                         width: 100%;
                         outline: none;
-                        padding: 0.2rem 0.5rem;
+                        border-width: 1px;
+                        border-style: none solid solid none;
+                        border-color: var(--write-color);
+                        background-color: var(--write-bg);
+                        padding: 1.5rem 0.8rem;
                         height: 2rem;
                         font-size: 1.5rem;
                     }
@@ -352,7 +359,7 @@ nav.top-nav {
                         background-color: var(--write-bg);
                         border: 1px solid var(--write-color);
                         color: var(--write-color);
-                        /* min-height: 200px; */
+                        outline: none;
                         height: 100%;
                         padding: 1rem;
                     }
@@ -477,6 +484,10 @@ nav.top-nav {
 
                                 & li {
                                     list-style: circle outside;
+
+                                    & strong, em, u{
+                                        cursor: pointer;
+                                    }
 
                                     & strong:hover {
                                         text-decoration: line-through red;
