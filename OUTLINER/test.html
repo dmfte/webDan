@@ -13,13 +13,19 @@
 <body>
     <div class="container">
         <div class="bar">
+            <div class="btn fontsize" tabindex="0">
+                A
+                <div class="cont rs" id="contRsFontsize">
+                    <div class="wrapper"></div>
+                </div>
+            </div>
             <div class="title">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Consequuntur voluptas alias eos neque ipsum iure!</div>
             <div class="stopwatch">
                 <svg viewBox="0 0 32 16" xmlns="http://www.w3.org/1999/xhtml" xmlns:svg="http://www.w3.org/2000/svg">
                     <filter id="blur">
                         <feGaussianBlur in="SourceGraphic" stdDeviation="0.5" />
-                      </filter>
-                    <g id="hrsd" class="stopw d8">
+                    </filter>
+                    <g id="minsd" class="d8">
                         <path id="m1" d="M 2 3 V 7 "></path>
                         <path id="m2" d="M 2 9 V 13"></path>
                         <path id="m3" d="M 3 14 H 6"></path>
@@ -28,7 +34,7 @@
                         <path id="m6" d="M 3 2 H 6"></path>
                         <path id="m7" d="M 3 8 H 6"></path>
                     </g>
-                    <g id="hrsu" class="stopw d8">
+                    <g id="minsu" class="d8">
                         <path id="m1" d="M 9 3 V 7"></path>
                         <path id="m2" d="M 9 9 V 13"></path>
                         <path id="m3" d="M 10 14 H 13"></path>
@@ -37,10 +43,10 @@
                         <path id="m6" d="M 10 2 H 13"></path>
                         <path id="m7" d="M 10 8 H 13"></path>
                     </g>
-                    <g id="colon" class="stopw">
+                    <g id="colon">
                         <path d="M 16 7 V 5 M 16 9 V 11"></path>
                     </g>
-                    <g id="mind" class="stopw d8">
+                    <g id="secsd" class="d8">
                         <path id="m1" d="M 18 3 V 7"></path>
                         <path id="m2" d="M 18 9 V 13"></path>
                         <path id="m3" d="M 19 14 H 22"></path>
@@ -49,7 +55,7 @@
                         <path id="m6" d="M 19 2 H 22"></path>
                         <path id="m7" d="M 19 8 H 22"></path>
                     </g>
-                    <g id="minu" class="stopw d8">
+                    <g id="secsu" class="d8">
                         <path id="m1" d="M 25 3 V 7"></path>
                         <path id="m2" d="M 25 9 V 13"></path>
                         <path id="m3" d="M 26 14 H 29"></path>
@@ -63,9 +69,11 @@
         </div>
         <div class="accordions">
             <div class="cont-accr">
-                <div class="accr-head"><span class="accr-title">dadfadfad</span><span class="accr-arrow"><svg viewBox="0 0 10 10">
+                <div class="accr-head">
+                    <h2 class="accr-title">dadfadfad</h2><span class="accr-arrow"><svg viewBox="0 0 10 10">
                             <use xlink:href="#chevDown"></use>
-                        </svg></span></div>
+                        </svg></span>
+                </div>
                 <div class="accr-wrapper-body">
                     <div class="accr-body">
                         <ul>
@@ -106,22 +114,6 @@
     <!-- ------ -->
 
     <svg class="svg-symbols">
-        <style>
-            g.ico symbol {
-                stroke: currentColor;
-                stroke-width: 1.5;
-                stroke-linejoin: miter;
-                stroke-linecap: round;
-            }
-
-            g.ico-actions symbol {}
-
-            @media (max-width: 600px) {
-                g.ico symbol .gone {
-                    display: none;
-                }
-            }
-        </style>
         <defs>
             <g class="ico">
                 <symbol id="chevDown" viewBox="0 0 10 10">
@@ -171,6 +163,8 @@
             --accr-head-color: rgb(158, 186, 224);
             --accr-body-color: rgb(8, 26, 74);
             --container-bg: rgb(8, 26, 74);
+            --fontsize-bg: rgb(188, 181, 112);
+            --fontsize-color: rgb(67, 74, 143);
 
             /* PIXELS */
             --accr-padding: 5px;
@@ -188,144 +182,125 @@
             max-height: 100%;
         }
 
-        /* Stopwatch SVG styles */
-        g.stopw {
+        /* SVG styles */
+        .svg-symbols {
+            display: none;
+        }
+
+        g.ico symbol {
+            stroke: currentColor;
+            stroke-width: 1.5;
+            stroke-linejoin: miter;
+            stroke-linecap: round;
+        }
+
+        @media (max-width: 600px) {
+            g.ico symbol .gone {
+                display: none;
+            }
+        }
+
+        .stopwatch svg g {
             fill: none;
             stroke-linecap: round;
             stroke-width: 1.2;
             /* filter: url(#blur); */
         }
 
-        g.stopw#colon {
+        .stopwatch svg g#colon {
             stroke: currentColor;
         }
 
-        g.stopw.d0 #m1,
-        g.stopw.d0 #m2,
-        g.stopw.d0 #m3,
-        g.stopw.d0 #m4,
-        g.stopw.d0 #m5,
-        g.stopw.d0 #m6 {
+        .stopwatch g.d0 #m1,
+        .stopwatch g.d0 #m2,
+        .stopwatch g.d0 #m3,
+        .stopwatch g.d0 #m4,
+        .stopwatch g.d0 #m5,
+        .stopwatch g.d0 #m6 {
             stroke: currentColor;
         }
 
-        g.stopw.d1 #m4,
-        g.stopw.d1 #m5 {
+        .stopwatch g.d1 #m4,
+        .stopwatch g.d1 #m5 {
             stroke: currentColor;
         }
 
-        g.stopw.d2 #m6,
-        g.stopw.d2 #m5,
-        g.stopw.d2 #m7,
-        g.stopw.d2 #m2,
-        g.stopw.d2 #m3 {
+        .stopwatch g.d2 #m6,
+        .stopwatch g.d2 #m5,
+        .stopwatch g.d2 #m7,
+        .stopwatch g.d2 #m2,
+        .stopwatch g.d2 #m3 {
             stroke: currentColor;
         }
 
-        g.stopw.d3 #m6,
-        g.stopw.d3 #m5,
-        g.stopw.d3 #m7,
-        g.stopw.d3 #m4,
-        g.stopw.d3 #m3 {
+        .stopwatch g.d3 #m6,
+        .stopwatch g.d3 #m5,
+        .stopwatch g.d3 #m7,
+        .stopwatch g.d3 #m4,
+        .stopwatch g.d3 #m3 {
             stroke: currentColor;
         }
 
-        g.stopw.d4 #m1,
-        g.stopw.d4 #m7,
-        g.stopw.d4 #m5,
-        g.stopw.d4 #m4 {
+        .stopwatch g.d4 #m1,
+        .stopwatch g.d4 #m7,
+        .stopwatch g.d4 #m5,
+        .stopwatch g.d4 #m4 {
             stroke: currentColor;
         }
 
-        g.stopw.d5 #m6,
-        g.stopw.d5 #m1,
-        g.stopw.d5 #m7,
-        g.stopw.d5 #m4,
-        g.stopw.d5 #m3 {
+        .stopwatch g.d5 #m6,
+        .stopwatch g.d5 #m1,
+        .stopwatch g.d5 #m7,
+        .stopwatch g.d5 #m4,
+        .stopwatch g.d5 #m3 {
             stroke: currentColor;
         }
 
-        g.stopw.d6 #m6,
-        g.stopw.d6 #m1,
-        g.stopw.d6 #m2,
-        g.stopw.d6 #m3,
-        g.stopw.d6 #m4,
-        g.stopw.d6 #m7 {
+        .stopwatch g.d6 #m6,
+        .stopwatch g.d6 #m1,
+        .stopwatch g.d6 #m2,
+        .stopwatch g.d6 #m3,
+        .stopwatch g.d6 #m4,
+        .stopwatch g.d6 #m7 {
             stroke: currentColor;
         }
 
-        g.stopw.d7 #m6,
-        g.stopw.d7 #m5,
-        g.stopw.d7 #m4 {
+        .stopwatch g.d7 #m6,
+        .stopwatch g.d7 #m5,
+        .stopwatch g.d7 #m4 {
             stroke: currentColor;
         }
 
-        g.stopw.d8 {
+        .stopwatch g.d8 {
             stroke: currentColor;
         }
 
-        g.stopw.d9 #m7,
-        g.stopw.d9 #m1,
-        g.stopw.d9 #m6,
-        g.stopw.d9 #m5,
-        g.stopw.d9 #m4,
-        g.stopw.d9 #m3 {
+        .stopwatch g.d9 #m7,
+        .stopwatch g.d9 #m1,
+        .stopwatch g.d9 #m6,
+        .stopwatch g.d9 #m5,
+        .stopwatch g.d9 #m4,
+        .stopwatch g.d9 #m3 {
             stroke: currentColor;
         }
 
         /* ------ */
         dialog {
             border-width: 3px;
-            max-width: 60vw;
             box-shadow: 0 0 15px 2px var(--dialog-body);
+            min-height: 60vh;
+            max-height: 80vh;
+            min-width: 70vw;
+            max-width: 90vw;
 
-            @media (max-width: 600px) {
-                border-width: 2px;
-                max-width: 80vw;
-            }
+            .wrapper {
+                /* Wrapper is display flex by JS. */
 
-            @media (max-width: 250px) {
-                border-width: 1px;
-                min-width: calc(100vw - 3px);
-                max-width: calc(100vw - 3px);
-            }
-
-            & .body {
-                background-color: var(--dialog-body);
-                padding: 0.5rem;
-
-                display: flex;
-                flex-direction: column;
-                align-items: stretch;
-
-                & .body-cont {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    margin: 0.2rem 0;
-                }
-
-                & .subtitle {
-                    font-size: 0.8rem;
-
-                    & label {
-                        margin-right: 0.3rem;
-                    }
-
-                    & input {
-                        font-size: 1rem;
-                        flex: 1;
-                    }
-                }
-
-                & .content {
-
-                    & textarea {
-                        resize: none;
-                        width: 400px;
-                        height: 6rem;
-                        overflow-y: auto;
-                    }
+                & .body {
+                    background-color: var(--dialog-body);
+                    padding: 0.5rem;
+                    flex: 1;
+                    overflow-y: auto;
                 }
             }
         }
@@ -335,7 +310,7 @@
             opacity: 0.5;
         }
 
-
+/* Styles for accordion. */
         .container {
             position: relative;
             background-color: var(--container-bg);
@@ -347,9 +322,52 @@
                 position: fixed;
                 top: 0;
                 display: flex;
-                align-items: stretch;
+                align-items: center;
                 background-color: var(--controls-bg);
                 height: var(--bar-height);
+                z-index: 2;
+
+                & .btn {
+                    position: relative;
+                    background-color: var(--fontsize-bg);
+                    color: var(--fontsize-color);
+                    border-radius: 0.5rem;
+                    width: 40px;
+                    height: 40px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    margin-left: 0.5rem;
+                    overflow: hidden;
+                    cursor: pointer;
+
+                    & .cont.rs {
+                        background-color: slateblue;
+                        position: absolute;
+                        top: 100%;
+                        left: 0;
+                        display: flex;
+                        align-items: stretch;
+                        width: 0;
+                        height: 50px;
+                        transition: width 300ms ease-in-out;
+
+                    }
+                }
+
+                & .btn:focus-within {
+                    outline: 1px solid black;
+                    overflow: visible;
+
+                    & .cont.rs {
+                        width: 250px;
+                        cursor: default;
+
+                        & .wrapper {
+                            flex: 1;
+                        }
+                    }
+                }
 
                 & .title {
                     display: flex;
@@ -358,14 +376,32 @@
                     display: flex;
                     align-items: center;
                     padding: 0.3rem 1rem;
-                    font-size: 1rem;
+                    font-size: 0.8rem;
+                    overflow-y: auto;
                 }
 
                 & .stopwatch {
                     background-color: rgb(26, 8, 8);
-                    color: rgb(183, 1, 1);
+                    color: rgb(85, 27, 27);
                     width: 150px;
+                    height: 100%;
                     text-align: center;
+                    display: flex;
+                    justify-content: center;
+                    align-items: stretch;
+                    cursor: pointer;
+
+                    & svg {
+                        pointer-events: none;
+                    }
+                }
+
+                & .stopwatch.active{
+                    color: rgb(183, 1, 1);
+                }
+
+                & .stopwatch.paused{
+                    color: rgb(183, 1, 1);
                 }
             }
 
@@ -423,7 +459,7 @@
                         display: flex;
                         align-items: stretch;
                         padding: 0.5rem;
-                        font-size: 2rem;
+                        /* font-size: 2rem; */
                         color: var(--accr-head-color);
                         cursor: pointer;
 
@@ -434,7 +470,7 @@
 
                         & .accr-arrow {
                             display: flex;
-                            width: 0.7em;
+                            width: 1em;
                             padding: 0.2rem;
                         }
                     }
@@ -446,7 +482,7 @@
                         max-height: 0;
 
                         & .accr-body {
-                            padding: 0.7rem 2rem;
+                            padding: 0.7em 2em;
                             border-radius: 0 0 1.1rem 1.1rem;
                             color: var(--accr-body-color);
                             background-color: var(--accr-border);
@@ -466,12 +502,138 @@
             }
         }
     </style>
+    <!-- Styles for RangeSlider. -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .slider {
+            display: grid;
+            grid-template-areas: "name  name name" "min track max";
+            grid-template-columns: 1fr 7fr 1fr;
+            grid-template-rows: auto auto;
+            border-radius: 0.5rem;
+            width: 100%;
+            height: 100%;
+            padding: 0.2rem;
+        }
+
+        .label {
+            grid-area: name;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding-left: 1rem;
+        }
+
+        .min-container {
+            grid-area: min;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .min-container .min {
+            /* background-color: var(--color1-variation); */
+            border-radius: 50% 0 0 50%;
+            height: 75%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+            font-size: 0.9em;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        .min-container .min:active {
+            transform: scale(0.8);
+        }
+
+        .max-container {
+            grid-area: max;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .max-container .max {
+            background-color: var(--color1-variation);
+            border-radius: 0 50% 50% 0;
+            height: 75%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+            font-size: 0.9em;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        .max-container .max:active {
+            transform: scale(0.8);
+        }
+
+        .track-container {
+            margin: 0 0.3rem;
+            grid-area: track;
+            display: flex;
+            align-items: center;
+        }
+
+        .track-container .track {
+            position: relative;
+            width: 100%;
+            height: 75%;
+            user-select: none;
+            cursor: pointer;
+            touch-action: none;
+        }
+
+        .track-container .track .tooltip {
+            display: none;
+            position: absolute;
+            border: none;
+            border-radius: 30% 30% 0 0;
+            padding: 0.2rem 0.4rem;
+            min-width: 2.5rem;
+            height: 1.5rem;
+            background-color: lightyellow;
+            transform: translate(-50%, -120%);
+            /* Positioned at 0% */
+            display: flex;
+            opacity: 0;
+            justify-content: center;
+            align-items: center;
+            z-index: 99;
+        }
+
+        .track-container .track .tooltip::before {
+            content: "";
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-width: 10px;
+            /* Half of tooltip width. */
+            border-style: solid;
+            border-color: lightyellow transparent transparent transparent;
+            top: 95%;
+        }
+    </style>
 
     <script>
+        class AutoDialog { constructor(e) { this.dialog = e.dialog, this.backdropclose = void 0 == e.backdropclose || e.backdropclose; let t, n, s, o, r, l, i, a, d, c, y, g, p, h, u, m, $, b, v; v = e.trigger, this.dialog.style.position = "absolute", this.dialog.style.top = "50vh", this.dialog.style.left = "50vw", this.dialog.style.transform = "translate(-50%, -50%)", this.dialog.style.padding = "0", this.dialog.style.borderRadius = "0.5rem", this.dialog.style.overflow = "hidden", s = this.dialog.querySelector(".body"), (t = document.createElement("div")).classList.add("wrapper"), t.style.position = "absolute", t.style.width = "100%", t.style.height = "100%", t.style.margin = "0", t.style.display = "flex", t.style.flexDirection = "column", a = "boolean" != typeof e.ok || e.ok, c = "boolean" != typeof e.cancel || e.cancel; let f = e => { if (e.currentTarget.classList.contains("modFootBtn")) { e.currentTarget.style.backgroundColor = g, e.currentTarget.addEventListener("pointerleave", e => { e.currentTarget.style.backgroundColor = "transparent" }, { once: !0 }); return } if (e.currentTarget.classList.contains("x-it")) { e.currentTarget.style.scale = "1.5", e.currentTarget.style.rotate = "360deg", e.currentTarget.style.fontWeight = "bold", e.currentTarget.addEventListener("pointerleave", e => { e.currentTarget.style.scale = "1", e.currentTarget.style.rotate = "0deg", e.currentTarget.style.fontWeight = "regular" }, { once: !0 }); return } }, L = e => { if (e.currentTarget.classList.contains("modFootBtn")) { e.currentTarget.style.backgroundColor = u, e.currentTarget.addEventListener("pointerup", e => { e.currentTarget.style.backgroundColor = "transparent" }, { once: !0 }); return } if (e.currentTarget.classList.contains("x-it")) { e.currentTarget.style.fontWeight = "bolder", e.currentTarget.addEventListener("pointerup", e => { e.currentTarget.style.fontWeight = "normal" }, { once: !0 }); return } }; void 0 !== e.title && (i = void 0 !== e.glyph ? e.glyph : "times", (n = document.createElement("div")).classList.add("container-title"), n.style.display = "flex", n.style.justifyContent = "flex-start", n.style.alignItems = "stretch", n.style.overflow = "hidden", (r = document.createElement("h2")).classList.add("title"), r.style.paddingTop = "0.3rem", r.style.paddingBottom = "0.3rem", r.style.display = "flex", r.style.justifyContent = "center", r.style.alignItems = "center", r.style.flex = "1", r.style.fontSize = "1em", r.innerText = e.title, (l = document.createElement("span")).classList.add("x-it"), l.style.marginLeft = "auto", l.style.width = "2rem", l.style.display = "flex", l.style.justifyContent = "center", l.style.alignItems = "center", l.style.fontFamily = "'Times New Roman', Times, serif", l.style.transition = "rotate 800ms ease-in-out", l.innerHTML = `    &${i};`, l.style.cursor = "pointer", l.addEventListener("click", () => { this.dialog.close() }), l.addEventListener("pointermove", f), l.addEventListener("pointerdown", L), n.appendChild(r), n.appendChild(l), t.appendChild(n)), t.appendChild(s), (c || a) && ((o = document.createElement("div")).classList.add("footer"), o.style.display = "flex", o.style.alignItems = "stretch", o.style.height = "1.5em", c && ((y = document.createElement("button")).classList.add("modFootBtn"), y.innerText = "Cancel", y.style.flex = "1", y.style.cursor = "pointer", y.style.paddingTop = "0.5rem", y.style.paddingBottom = "0.5rem", y.addEventListener("click", () => { this.dialog.close() }), o.appendChild(y)), a && ((d = document.createElement("button")).classList.add("modFootBtn"), d.innerText = "OK", d.style.flex = "1", d.style.cursor = "pointer", d.style.paddingTop = "0.5rem", d.style.paddingBottom = "0.5rem", d.addEventListener("click", () => { this.dialog.close() }), o.appendChild(d)), t.appendChild(o)), this.dialog.innerHTML = "", this.dialog.appendChild(t), void 0 !== v && v.addEventListener("pointerup", () => { this.show() }), "rgba(0, 0, 0, 0)" !== (g = window.getComputedStyle(s).backgroundColor) && (m = parseInt(g.split(",")[0].split("(")[1]), p = `rgb(${Math.max(m - 40, 0)}, ${Math.max(($ = parseInt(g.split(",")[1])) - 40, 0)}, ${Math.max((b = parseInt(g.split(",")[2])) - 40, 0)})`, h = `rgb(${Math.max(m - 80, 0)}, ${Math.max($ - 80, 0)}, ${Math.max(b - 80, 0)})`, u = `rgb(${Math.min(m + 50, 255)}, ${Math.min($ + 50, 255)}, ${Math.min(b + 50, 255)})`, this.dialog.style.borderColor = h, this.dialog.style.outline = "none", n.style.backgroundColor = u, (a || c) && (n.style.borderBottom = `2px solid ${h}`, o.style.backgroundColor = p, o.style.borderTop = `2px solid ${h}`), c && (y.style.border = "none", y.style.backgroundColor = "transparent", y.style.outline = "none", a && (y.style.borderRight = `1px solid ${h}`), y.addEventListener("pointermove", f), y.addEventListener("pointerdown", L)), a && (d.style.border = "none", d.style.backgroundColor = "transparent", d.style.outline = "none", c && (d.style.borderLeft = `1px solid ${h}`), d.addEventListener("pointermove", f), d.addEventListener("pointerdown", L))), this.body = s, this.btnOk = d, this.btnCancel = y } show() { if (this.dialog.showModal(), this.backdropclose) { let e = t => { "DIALOG" == t.target.tagName && (this.dialog.close(), document.body.removeEventListener("click", e)) }; document.body.addEventListener("pointerdown", e.bind(this)) } } close() { this.dialog.close() } onOk(e) { void 0 !== e && void 0 !== this.btnOk && this.btnOk.addEventListener("click", e) } onCancel(e) { void 0 !== e && void 0 !== this.btnCancel && this.btnCancel.addEventListener("click", e) } onClose(e) { void 0 !== e && (fxClose = e) } }
+        class RangeSlider { constructor(t, e) { this.f, this.label = e.label, this.min = Number(e.min), this.max = Number(e.max), this.step = Number(e.step), this.max1 = this.max + this.step, this.def = Number(e.def), this.prevVal = Number(e.def), this.val, this.color1 = void 0 !== e.color1 ? e.color1 : "rgb(45, 110, 115)", this.color2 = void 0 !== e.color2 ? e.color2 : "rgb(120, 185, 200)"; let i = getAddedRGB(this.color1, -100), l = getAddedRGB(this.color2, 0), s = getAddedRGB(this.color1, -150), n = getAddedRGB(this.color1, 30), a = getAddedRGB(this.color1, 50); this.el = { container: t, slider: document.createElement("div"), label: document.createElement("div"), minContainer: document.createElement("div"), min: document.createElement("div"), maxContainer: document.createElement("div"), max: document.createElement("div"), trackContainer: document.createElement("div"), track: document.createElement("div"), tooltip: document.createElement("div") }, this.el.slider.classList.add("slider"), this.el.label.classList.add("label"), this.el.minContainer.classList.add("min-container"), this.el.maxContainer.classList.add("max-container"), this.el.trackContainer.classList.add("track-container"), this.el.min.classList.add("min"), this.el.max.classList.add("max"), this.el.track.classList.add("track"), this.el.tooltip.classList.add("tooltip"), this.el.label.innerText = `${this.label}:`, this.el.min.innerText = this.min.toFixed(getDecimalOrder(this.step)), this.el.max.innerText = this.max.toFixed(getDecimalOrder(this.step)), this.el.tooltip.innerText = this.max.toFixed(getDecimalOrder(this.step)), this.el.slider.style.backgroundColor = i, this.el.label.style.color = l, this.el.min.style.backgroundColor = n, this.el.min.style.color = s, this.el.min.style.fontWeight = "bold", this.el.max.style.backgroundColor = n, this.el.max.style.color = s, this.el.max.style.fontWeight = "bold", this.el.track.appendChild(this.el.tooltip), this.el.trackContainer.appendChild(this.el.track), this.el.minContainer.appendChild(this.el.min), this.el.maxContainer.appendChild(this.el.max), this.el.slider.appendChild(this.el.label), this.el.slider.appendChild(this.el.minContainer), this.el.slider.appendChild(this.el.maxContainer), this.el.slider.appendChild(this.el.trackContainer), this.el.container.innerHTML = "", this.el.container.appendChild(this.el.slider), this.def <= this.max && this.def >= this.min ? (this.def, this.min, this.max1, this.min, this.val = this.def, setValuesInTrack(this.val, this), this.prevVal = this.val) : (this.val = this.min, setValuesInTrack(this.val, this), this.prevVal = this.min); let r = onClicking.bind(this); this.el.track.addEventListener("pointerdown", r); let o = onMoving.bind(this); this.el.track.addEventListener("pointermove", o), this.el.track.addEventListener("pointerenter", () => { this.el.tooltip.style.display = "flex", this.el.tooltip.style.opacity = 1 }), this.el.track.addEventListener("pointerleave", () => { this.el.tooltip.style.display = "none" }); let h = this.stepDown.bind(this); this.el.min.addEventListener("pointerdown", h), this.el.min.addEventListener("pointerdown", () => { this.el.min.style.scale = .9 }), this.el.min.addEventListener("pointerup", () => { this.el.min.style.scale = 1 }), this.el.min.addEventListener("pointerenter", () => { this.el.min.style.backgroundColor = a }), this.el.min.addEventListener("pointerleave", () => { this.el.min.style.backgroundColor = n }); let d = this.stepUp.bind(this); this.el.max.addEventListener("pointerdown", d), this.el.max.addEventListener("pointerdown", () => { this.el.max.style.scale = .9 }), this.el.max.addEventListener("pointerup", () => { this.el.max.style.scale = 1 }), this.el.max.addEventListener("pointerenter", () => { this.el.max.style.backgroundColor = a }), this.el.max.addEventListener("pointerleave", () => { this.el.max.style.backgroundColor = n }) } onSliding(t) { this.f = t } stepDown() { this.val > this.min && (this.val -= this.step, setValuesInTrack(this.val, this), void 0 !== this.f && this.f(), this.prevVal = this.val) } stepUp() { this.val < this.max && (this.val += this.step, setValuesInTrack(this.val, this), void 0 !== this.f && this.f(), this.prevVal = this.val) } } function onClicking(t) { let e = getTrackPositionPerct(t); if (e <= 1 && e >= 0) { this.el.track.setPointerCapture(t.pointerId), this.val = getStepValueFromPerct(e, this), this.val !== this.prevVal && (setValuesInTrack(this.val, this), void 0 !== this.f && this.f(), this.prevVal = this.val); let i = onDragging.bind(this); this.el.track.addEventListener("pointermove", i), this.el.track.addEventListener("pointerup", () => { this.el.track.removeEventListener("pointermove", i), this.el.track.releasePointerCapture(t.pointerId) }, { once: !0 }) } } function setValuesInTrack(t, e) { if (t <= e.max && t >= e.min) { let i = t.toFixed(getDecimalOrder(e.step)), l = parseInt(100 * e.step / (e.max1 - e.min)), s = parseInt(100 * ((t - e.min) / (e.max1 - e.min))); e.el.track.style.background = `linear-gradient(90deg, ${e.color1} ${s + l}%, ${e.color2} ${s + l + 2}%)`, e.el.tooltip.style.left = `${s}%`, e.el.tooltip.innerText = i, e.el.label.innerText = `${e.label}: ${i}` } } function onMoving(t) { let e = getTrackPositionPerct(t); if (e <= 1 && e >= 0) { let i = getStepValueFromPerct(e, this); this.el.tooltip.style.left = `${100 * e}%`, this.el.tooltip.innerText = i.toFixed(getDecimalOrder(this.step)) } } function onDragging(t) { let e = getTrackPositionPerct(t); e <= 1 && e >= 0 && (this.val = getStepValueFromPerct(e, this), this.val !== this.prevVal && (setValuesInTrack(this.val, this), void 0 !== this.f && this.f(), this.prevVal = this.val)) } function getTrackPositionPerct(t) { let e = t.target.closest(".slider").querySelector(".track"), i = parseInt(window.getComputedStyle(e).width), l = e.getBoundingClientRect().left, s; return Number(((t.clientX - l) / i).toFixed(2)) } function getStepValueFromPerct(t, e) { let i = getSteppedValue(t * (e.max1 - e.min) + e.min, e.step); return i > e.max ? i - e.step : i < e.min ? i + e.step : i } function getSteppedValue(t, e) { return stepNetVal = Math.floor(t / e) * e, forceDecimals(stepNetVal, getDecimalOrder(e)) } function forceDecimals(t, e) { let i = 1; for (let l = 0; l < e; l++)i *= 10; return parseInt(t * i) / i } function getDecimalOrder(t) { return t.toString().split(".").length <= 1 ? 0 : t.toString().split(".")[1].length } function getRGBcolorObj(t) { let e = document.createElement("div"); e.style.backgroundColor = t, e.style.display = "none", document.body.appendChild(e); let i = window.getComputedStyle(e).backgroundColor; document.body.removeChild(e), (rgb = i.split(",")).length > 3 && rgb.splice(3, rgb.length); let l = rgb[0].match(/\(/).index; if (rgb[0] = rgb[0].split(""), rgb[0].splice(0, l + 1), rgb[0] = parseInt(rgb[0].join("")), rgb[1] = parseInt(rgb[1]), null !== rgb[2].match(/\)/)) { let s = rgb[2].match(/\)/).index; rgb[2] = rgb[2].split(""), rgb[2].splice(s, rgb[2].length), rgb[2] = parseInt(rgb[2].join("")) } else rgb[2] = parseInt(rgb[2]); return { r: rgb[0], g: rgb[1], b: rgb[2] } } function getAddedRGB(t, e) { let i = getRGBcolorObj(t); return i.r = add255Range(i.r, e), i.g = add255Range(i.g, e), i.b = add255Range(i.b, e), `rgb(${i.r}, ${i.g}, ${i.b})` } function add255Range(t, e) { return t + e >= 0 ? t + e <= 255 ? t + e : 255 : 0 }
 
-        class AutoDialog { constructor(e) { this.dialog = e.dialog, this.backdropclose = void 0 == e.backdropclose || e.backdropclose; let t, n, s, r, l, o, i, a, d, c, y, g, p, u, h, m, $, b, v; v = e.trigger, this.dialog.style.position = "absolute", this.dialog.style.padding = "0", this.dialog.style.margin = "0", this.dialog.style.borderRadius = "0.5rem", this.dialog.style.overflow = "hidden", this.dialog.style.top = "50vh", this.dialog.style.left = "50vw", this.dialog.style.transform = "translate(-50%, -50%)", s = this.dialog.querySelector(".body"), (t = document.createElement("div")).classList.add("wrapper"), t.style.margin = "0", t.style.position = "relative", t.style.display = "flex", t.style.flexDirection = "column", t.style.justifyContent = "stretch", t.appendChild(s), a = "boolean" != typeof e.ok || e.ok, c = "boolean" != typeof e.cancel || e.cancel; let f = e => { if (e.currentTarget.classList.contains("modFootBtn")) { e.currentTarget.style.backgroundColor = g, e.currentTarget.addEventListener("pointerleave", e => { e.currentTarget.style.backgroundColor = "transparent" }, { once: !0 }); return } if (e.currentTarget.classList.contains("x-it")) { e.currentTarget.style.scale = "1.5", e.currentTarget.style.rotate = "360deg", e.currentTarget.style.fontWeight = "bold", e.currentTarget.addEventListener("pointerleave", e => { e.currentTarget.style.scale = "1", e.currentTarget.style.rotate = "0deg", e.currentTarget.style.fontWeight = "regular" }, { once: !0 }); return } }, L = e => { if (e.currentTarget.classList.contains("modFootBtn")) { e.currentTarget.style.backgroundColor = h, e.currentTarget.addEventListener("pointerup", e => { e.currentTarget.style.backgroundColor = "transparent" }, { once: !0 }); return } if (e.currentTarget.classList.contains("x-it")) { e.currentTarget.style.fontWeight = "bolder", e.currentTarget.addEventListener("pointerup", e => { e.currentTarget.style.fontWeight = "normal" }, { once: !0 }); return } }; void 0 !== e.title && (i = void 0 !== e.glyph ? e.glyph : "times", (n = document.createElement("div")).classList.add("container-title"), n.style.display = "flex", n.style.flex = "1", n.style.justifyContent = "flex-start", n.style.alignItems = "stretch", n.style.overflow = "hidden", (l = document.createElement("span")).classList.add("title"), l.style.paddingTop = "0.3rem", l.style.paddingBottom = "0.3rem", l.style.display = "flex", l.style.justifyContent = "center", l.style.alignItems = "center", l.style.flex = "1", l.innerText = e.title, (o = document.createElement("span")).classList.add("x-it"), o.style.marginLeft = "auto", o.style.width = "2rem", o.style.display = "flex", o.style.justifyContent = "center", o.style.alignItems = "center", o.style.fontFamily = "'Times New Roman', Times, serif", o.style.transition = "rotate 800ms ease-in-out", o.innerHTML = `    &${i};`, o.style.cursor = "pointer", o.addEventListener("click", () => { this.dialog.close() }), o.addEventListener("pointermove", f), o.addEventListener("pointerdown", L), n.appendChild(l), n.appendChild(o), t.appendChild(n)), t.appendChild(s), (c || a) && ((r = document.createElement("div")).classList.add("footer"), r.style.display = "flex", r.style.flex = "1", r.style.alignItems = "stretch", c && ((y = document.createElement("button")).classList.add("modFootBtn"), y.innerText = "Cancel", y.style.flex = "1", y.style.cursor = "pointer", y.style.paddingTop = "0.5rem", y.style.paddingBottom = "0.5rem", y.addEventListener("click", () => { this.dialog.close() }), r.appendChild(y)), a && ((d = document.createElement("button")).classList.add("modFootBtn"), d.innerText = "OK", d.style.flex = "1", d.style.cursor = "pointer", d.style.paddingTop = "0.5rem", d.style.paddingBottom = "0.5rem", d.addEventListener("click", () => { this.dialog.close() }), r.appendChild(d)), t.appendChild(r)), this.dialog.innerHTML = "", this.dialog.appendChild(t), void 0 !== v && v.addEventListener("pointerup", () => { this.show() }), "rgba(0, 0, 0, 0)" !== (g = window.getComputedStyle(s).backgroundColor) && (m = parseInt(g.split(",")[0].split("(")[1]), p = `rgb(${Math.max(m - 40, 0)}, ${Math.max(($ = parseInt(g.split(",")[1])) - 40, 0)}, ${Math.max((b = parseInt(g.split(",")[2])) - 40, 0)})`, u = `rgb(${Math.max(m - 80, 0)}, ${Math.max($ - 80, 0)}, ${Math.max(b - 80, 0)})`, h = `rgb(${Math.min(m + 50, 255)}, ${Math.min($ + 50, 255)}, ${Math.min(b + 50, 255)})`, this.dialog.style.borderColor = u, this.dialog.style.outline = "none", n.style.backgroundColor = h, (a || c) && (n.style.borderBottom = `2px solid ${u}`, r.style.backgroundColor = p, r.style.borderTop = `2px solid ${u}`), c && (y.style.border = "none", y.style.backgroundColor = "transparent", y.style.outline = "none", a && (y.style.borderRight = `1px solid ${u}`), y.addEventListener("pointermove", f), y.addEventListener("pointerdown", L)), a && (d.style.border = "none", d.style.backgroundColor = "transparent", d.style.outline = "none", c && (d.style.borderLeft = `1px solid ${u}`), d.addEventListener("pointermove", f), d.addEventListener("pointerdown", L))), this.body = s, this.btnOk = d, this.btnCancel = y } show() { if (this.dialog.showModal(), this.backdropclose) { let e = t => { "DIALOG" == t.target.tagName && (this.dialog.close(), document.body.removeEventListener("click", e)) }; document.body.addEventListener("pointerdown", e.bind(this)) } } close() { this.dialog.close() } onOk(e) { void 0 !== e && void 0 !== this.btnOk && this.btnOk.addEventListener("click", e) } onCancel(e) { void 0 !== e && void 0 !== this.btnCancel && this.btnCancel.addEventListener("click", e) } onClose(e) { void 0 !== e && (fxClose = e) } }
-
+        // COLLAPSIBLE BEHAVIOR
         const accordions = document.querySelectorAll(".cont-accr");
+        var fontS = window.localStorage.getItem("outlinerFontSize") || 16;
+
+        setFontSize(fontS);
+
         accordions.forEach(header => {
             let accrHead = header.querySelector(".accr-head");
             accrHead.addEventListener("pointerup", async () => {
@@ -485,16 +647,101 @@
             });
         });
 
+        // DIALOG
         const popupLinks = document.querySelectorAll("span.show-popup");
         const diag = document.getElementById("modPopup");
         popupLinks.forEach(link => {
             link.addEventListener("click", () => {
-                console.log("show");
                 let popup = new AutoDialog({ dialog: diag, title: link.dataset.title, trigger: link, ok: false, cancel: false });
                 popup.dialog.querySelector(".body").innerText = link.dataset.body;
                 popup.show();
             });
         });
 
+        // FONT SIZE
+        const contRsFontsize = document.querySelector("#contRsFontsize .wrapper");
+        let docCS = window.getComputedStyle(document.body) || window.getComputedStyle(document.documentElement);
+        var rsFontsize = new RangeSlider(contRsFontsize, { label: "Tamaño", min: 4, max: 40, def: fontS, step: 1, color2: docCS.getPropertyValue("--fontsize-bg"), color1: docCS.getPropertyValue("--fontsize-color") });
+        rsFontsize.onSliding(() => {
+            fontS = rsFontsize.val;
+            window.localStorage.setItem("outlinerFontSize", fontS);
+            setFontSize(fontS);
+        });
+
+        function setFontSize(numSize) {
+            document.querySelector(".accordions").style.fontSize = `${fontS}px`;
+            document.querySelector("dialog").style.fontSize = `${fontS}px`;
+        }
+
+        // STOPWATCH
+        const stopwatch = document.querySelector(".stopwatch");
+        const svgMinsD = stopwatch.querySelector("#minsd");
+        const svgMinsU = stopwatch.querySelector("#minsu");
+        const svgSecsD = stopwatch.querySelector("#secsd");
+        const svgSecsU = stopwatch.querySelector("#secsu");
+
+        var startDate = 0, pauseDate = 0, offset = 0;
+        var startStopwatch;
+
+        stopwatch.addEventListener("pointerdown", () => {
+            let startHold = Date.now();
+            let holdDuration = 0;
+
+            // Start/pause stopwatch.
+            if (!stopwatch.classList.contains("active")) {
+                stopwatch.classList.remove("paused");
+                stopwatch.classList.add("active");
+                if (startDate == 0) startDate = Date.now();
+                if (pauseDate !== 0) offset = Date.now() - pauseDate;
+                startStopwatch = window.setInterval(() => {
+                    let mins = (parseInt((Date.now() - startDate - offset) / (1000 * 60)) % 99).toString().padStart(2, "0");
+                    let minsd = mins.split("")[0];
+                    let minsu = mins.split("")[1];
+                    let secs = (parseInt((Date.now() - startDate - offset) / 1000) % 59).toString().padStart(2, "0");
+                    let secsd = secs.split("")[0];
+                    let secsu = secs.split("")[1];
+
+                    svgMinsD.setAttribute("class", "");
+                    svgMinsD.classList.add(`d${minsd}`);
+                    svgMinsU.setAttribute("class", "");
+                    svgMinsU.classList.add(`d${minsu}`);
+                    svgSecsD.setAttribute("class", "");
+                    svgSecsD.classList.add(`d${secsd}`);
+                    svgSecsU.setAttribute("class", "");
+                    svgSecsU.classList.add(`d${secsu}`);
+                }, 1000);
+            } else {
+                pauseDate = Date.now();
+                window.clearInterval(startStopwatch);
+                stopwatch.classList.replace("active", "paused");
+            }
+
+            // Listen for longpress to reset.
+            let heldInterval = window.setInterval(() => {
+                holdDuration = Date.now() - startHold;
+                console.log(holdDuration);
+                if (holdDuration > 1300) {
+                    window.clearInterval(startStopwatch);
+                    window.clearInterval(heldInterval);
+                    pauseDate = 0;
+                    startDate = 0;
+                    offset = 0;
+                    stopwatch.classList.remove("active", "paused");
+                    stopwatch.querySelectorAll("g").forEach(g => {
+                        g.setAttribute("class", "d8");
+                    });
+                }
+            }, 100);
+            stopwatch.addEventListener("pointerup", () => {
+                window.clearInterval(heldInterval);
+                holdDuration = 0;
+                startHold = 0;
+            });
+            stopwatch.addEventListener("pointerleave", () => {
+                window.clearInterval(heldInterval);
+                holdDuration = 0;
+                startHold = 0;
+            });
+        });
     </script>
 </body>

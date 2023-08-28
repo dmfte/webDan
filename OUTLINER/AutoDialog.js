@@ -33,28 +33,20 @@
 /* Styles for the dynamically added dialog with AutoDialog.js */
 // dialog {
 //     border-width: 3px;
-//     max-width: 60vw;
+//     min-height: 60vh;
+//     max-height: 80vh;
 
 //     @media (max-width: 600px) {
 //         border-width: 2px;
-//         max-width: 80vw;
-//     }
-
-//     @media (max-width: 250px) {
-//         border-width: 1px;
-//         min-width: calc(100vw - 3px);
-//         max-width: calc(100vw - 3px);
+//         min-width: 80vw;
+//         max-height: 95vh;
 //     }
 
 //     & .body {
 //         background-color: var(--dialog-body);
-//         padding: 0.5rem 1rem;
-
 //     }
 // }
 // ---------
-
-
 
 // params: dialog, title, ok, cancel 
 class AutoDialog {
@@ -63,31 +55,30 @@ class AutoDialog {
         this.backdropclose = (params.backdropclose == undefined) ? true : params.backdropclose;
 
         let wrapper, divTitle, divBody, divFooter;
-        let spanTitle, spanX, glyph;
+        let h2Title, spanX, glyph;
         let boolOk, btnOk, boolCancel, btnCancel;
         let color, colorDarker, colorDarkest, colorLigher, r, g, b;
         let btnTrigger;
         btnTrigger = params.trigger;
 
         this.dialog.style.position = "absolute";
-        this.dialog.style.padding = "0";
-        this.dialog.style.margin = "0";
-        this.dialog.style.borderRadius = "0.5rem";
-        this.dialog.style.overflow = "hidden";
         this.dialog.style.top = "50vh";
         this.dialog.style.left = "50vw";
         this.dialog.style.transform = "translate(-50%, -50%)";
+        this.dialog.style.padding = "0";
+        this.dialog.style.borderRadius = "0.5rem";
+        this.dialog.style.overflow = "hidden";
 
         divBody = this.dialog.querySelector(".body");
 
         wrapper = document.createElement("div");
         wrapper.classList.add("wrapper");
+        wrapper.style.position = "absolute";
+        wrapper.style.width = "100%";
+        wrapper.style.height = "100%";
         wrapper.style.margin = "0";
-        wrapper.style.position = "relative";
         wrapper.style.display = "flex";
         wrapper.style.flexDirection = "column";
-        wrapper.style.justifyContent = "stretch";
-        wrapper.appendChild(divBody);
 
         boolOk = (typeof params.ok == "boolean") ? params.ok : true;
         boolCancel = (typeof params.cancel == "boolean") ? params.cancel : true;
@@ -111,7 +102,6 @@ class AutoDialog {
                 }, { once: true });
                 return;
             }
-
         }
         let onActive = (evt) => {
             if (evt.currentTarget.classList.contains("modFootBtn")) {
@@ -129,29 +119,28 @@ class AutoDialog {
                 }, { once: true });
                 return;
             }
-
         }
 
         if (params.title !== undefined) {
             glyph = (params.glyph !== undefined) ? params.glyph : "times";
             divTitle = document.createElement("div");
             divTitle.classList.add("container-title");
-            // divTitle.style.width = "100%";
             divTitle.style.display = "flex";
-            divTitle.style.flex = "1";
             divTitle.style.justifyContent = "flex-start";
             divTitle.style.alignItems = "stretch";
             divTitle.style.overflow = "hidden";  //  So span does not exit the title when rotates.
 
-            spanTitle = document.createElement("span");
-            spanTitle.classList.add("title");
-            spanTitle.style.paddingTop = "0.3rem";
-            spanTitle.style.paddingBottom = "0.3rem";
-            spanTitle.style.display = "flex";
-            spanTitle.style.justifyContent = "center";
-            spanTitle.style.alignItems = "center";
-            spanTitle.style.flex = "1";
-            spanTitle.innerText = params.title;
+            h2Title = document.createElement("h2");
+            h2Title.classList.add("title");
+            h2Title.style.paddingTop = "0.3rem";
+            h2Title.style.paddingBottom = "0.3rem";
+            h2Title.style.display = "flex";
+            h2Title.style.justifyContent = "center";
+            h2Title.style.alignItems = "center";
+            h2Title.style.flex = "1";
+            // h2Title.style.height = "1.5em";
+            h2Title.style.fontSize = "1em";
+            h2Title.innerText = params.title;
 
             spanX = document.createElement("span");
             spanX.classList.add("x-it");
@@ -162,7 +151,6 @@ class AutoDialog {
             spanX.style.alignItems = "center";
             spanX.style.fontFamily = "'Times New Roman', Times, serif";  //  For the 'times' character to rotate exactly by the center.
             spanX.style.transition = "rotate 800ms ease-in-out";
-
             spanX.innerHTML = `    &${glyph};`;
             spanX.style.cursor = "pointer";
             spanX.addEventListener("click", () => {
@@ -171,21 +159,18 @@ class AutoDialog {
             spanX.addEventListener("pointermove", onHover);
             spanX.addEventListener("pointerdown", onActive);
 
-            divTitle.appendChild(spanTitle);
+            divTitle.appendChild(h2Title);
             divTitle.appendChild(spanX);
-
             wrapper.appendChild(divTitle);
         }
-
         wrapper.appendChild(divBody);
 
         if (boolCancel || boolOk) {
             divFooter = document.createElement("div");
             divFooter.classList.add("footer");
-            // divFooter.style.width = "100%";
             divFooter.style.display = "flex";
-            divFooter.style.flex = "1";
             divFooter.style.alignItems = "stretch";
+            divFooter.style.height = "1.5em";
 
             if (boolCancel) {
                 btnCancel = document.createElement("button");
@@ -198,7 +183,6 @@ class AutoDialog {
                 btnCancel.addEventListener("click", () => {
                     this.dialog.close();
                 });
-
                 divFooter.appendChild(btnCancel);
             }
             if (boolOk) {
@@ -217,10 +201,6 @@ class AutoDialog {
             }
             wrapper.appendChild(divFooter);
         }
-        // wrapper.style.display = "flex";
-        // wrapper.style.flexDirection = "column";
-        // wrapper.style.justifyContent = "stretch";
-        // wrapper.style.alignItems = "flex-start";
 
         this.dialog.innerHTML = "";
         this.dialog.appendChild(wrapper);
@@ -264,8 +244,6 @@ class AutoDialog {
             }
         }
         this.body = divBody;
-        // this.title = spanTitle;
-        // this.xit = spanX;
         this.btnOk = btnOk;
         this.btnCancel = btnCancel;
     }
