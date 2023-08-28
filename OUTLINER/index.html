@@ -60,12 +60,18 @@
                                 <use xlink:href="#symbolArrowPass"></use>
                             </svg>
                         </button>
+                        <button class="edit">
+                            <svg viewBox="0 0 16 10">
+                                <use xlink:href="#symbolArrowEdit"></use>
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </div>
             <div class="wrapper">
                 <div class="cont preview">
                     <div class="accordions">
+                        <div class="overlay"></div>
                     </div>
                 </div>
             </div>
@@ -118,6 +124,10 @@
                     <path fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-dasharray="0.2 1.4" d="M 2 5 H 7" />
                     <path fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" d="M 9 5 H 14 L 11 2 M 14 5 L 11 8" />
                 </symbol>
+                <symbol id="symbolArrowEdit" viewBox="0 0 16 10">
+                    <path fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-dasharray="0.2 1.4" d="M 14 5 H 9" />
+                    <path fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" d="M 7 5 H 2 L 5 2 M 2 5 L 5 8" />
+                </symbol>
             </g>
             <g class="ico outline">
                 <symbol id="chevDown" viewBox="0 0 10 10">
@@ -134,11 +144,11 @@
 
     <dialog id="modAddPopup">
         <div class="body">
-            <div class="body-cont subtitle">
+            <div class="subtitle">
                 <label for="lbSubtitle">Subtítulo</label>
                 <input type="text" id="itSubtitle">
             </div>
-            <div class="body-cont content">
+            <div class="body-cont">
                 <textarea></textarea>
             </div>
         </div>

@@ -70,6 +70,7 @@ class AutoDialog {
         this.dialog.style.overflow = "hidden";
 
         divBody = this.dialog.querySelector(".body");
+        divBody.style.flex = "1";
 
         wrapper = document.createElement("div");
         wrapper.classList.add("wrapper");
@@ -170,7 +171,7 @@ class AutoDialog {
             divFooter.classList.add("footer");
             divFooter.style.display = "flex";
             divFooter.style.alignItems = "stretch";
-            divFooter.style.height = "1.5em";
+            divFooter.style.height = "2em";
 
             if (boolCancel) {
                 btnCancel = document.createElement("button");

@@ -1,6 +1,56 @@
 const editBody = document.querySelector(".cont.edit .collapsible #taCollapsible");
 const accordions = document.querySelector(".accordions");
 const btnPass = document.querySelector(".cont.edit .buttons .pass");
+const btnEdit = document.querySelector(".cont.edit .buttons .edit");
+
+btnPass.addEventListener("click", async () => {
+    if (editBody.value == "") return;
+    let txt1 = editBody.value;
+    let txt2 = txt1.split("\n");
+    let title = txt2.splice(0, 1);
+    let newAccordion = await createAccordion(title, txt2);
+
+    if (accordions.classList.contains("edit")) {
+        let accrActive = accordions.querySelector(".cont-accr.active");
+        accrActive.querySelector(".accr-title").innerText = newAccordion.querySelector(".accr-title").innerText;
+        accrActive.querySelector(".accr-body").innerHTML = newAccordion.querySelector(".accr-body").innerHTML;
+        accordions.classList.remove("edit");
+    } else {
+        accordions.appendChild(newAccordion);
+    }
+
+    editBody.value = "";
+    editBody.focus();
+});
+
+function onKeyDuringEdit(keydown) {
+    if (keydown.key == "Escape") {
+        accordions.classList.remove("edit");
+        editBody.value = "";
+        editBody.focus();
+        editBody.removeEventListener("keydown", onKeyDuringEdit);
+    }
+}
+function onClickDuringEdit() {
+    accordions.classList.remove("edit");
+    editBody.value = "";
+    editBody.focus();
+    accordions.querySelector(".overlay").removeEventListener("click", onClickDuringEdit);
+}
+btnEdit.addEventListener("click", () => {
+    let accrActive = accordions.querySelector(".cont-accr.active");
+    if (accrActive == null) return;
+    accordions.classList.add("edit");
+    document.body.addEventListener("keydown", onKeyDuringEdit);
+    accordions.querySelector(".overlay").addEventListener("click", onClickDuringEdit);
+    let strBody = "";
+    accrActive.querySelectorAll(".accr-body li").forEach(li => {
+        strBody += "\n" + li.innerText;
+    });
+    let str = accrActive.querySelector(".accr-title").innerText + strBody;
+    editBody.value = str;
+});
+
 const cmSelection = document.querySelector(".context-menu.selection");
 
 const arrContextMenuBtns = cmSelection.querySelectorAll(".btn");
@@ -8,7 +58,7 @@ const arrSelectionStyleBtns = cmSelection.querySelectorAll(".btn.style");
 const elementModAddPopup = document.getElementById("modAddPopup");
 const btnAddModal = cmSelection.querySelector("#btnAddModal");
 
-const modAddPopup = new AutoDialog({ dialog: elementModAddPopup, title: "Add a popup", trigger: btnAddModal, backdropclose: false});
+const modAddPopup = new AutoDialog({ dialog: elementModAddPopup, title: "Add a popup", trigger: btnAddModal, backdropclose: false });
 
 const edapSubtitle = elementModAddPopup.querySelector("#itSubtitle");
 const edapBody = elementModAddPopup.querySelector("textarea");
@@ -23,6 +73,8 @@ btnDownload.addEventListener("click", () => {
     let css = '';
     let js = '';
 });
+
+var rangeEditor;
 arrContextMenuBtns.forEach(btn => {
     btn.addEventListener("click", () => {
         cmSelection.classList.remove("active");
@@ -40,7 +92,7 @@ modAddPopup.onOk(async () => {
     span.dataset.title = edapSubtitle.value;
     span.dataset.body = edapBody.value;
     span.addEventListener("click", () => {
-        let popup = new AutoDialog({ dialog: modPopup, title: span.dataset.title, ok: false, cancel: false});
+        let popup = new AutoDialog({ dialog: modPopup, title: span.dataset.title, ok: false, cancel: false });
         popup.body.innerText = span.dataset.body;
         popup.show();
     });
@@ -79,17 +131,10 @@ arrSelectionStyleBtns.forEach(btn => {
 
 
 
-var rangeEditor;
-btnPass.addEventListener("click", async () => {
-    let txt1 = editBody.value;
-    let txt2 = txt1.split("\n");
-    let title = txt2.splice(0, 1);
 
-    let newAccordion = await createAccordion(title, txt2);
-    accordions.appendChild(newAccordion);
-});
 
 accordions.addEventListener("pointerup", (evt) => {
+    console.log("up");
     let sel = window.getSelection();
     if (sel.anchorNode == null) return;
     let range = sel.getRangeAt(0);
@@ -146,9 +191,9 @@ function createAccordion(head = "", body = []) {
         // Create accordion title.
         let accrHead = document.createElement("div");
         accrHead.classList.add("accr-head");
-        let spanTitle = document.createElement("span");
-        spanTitle.classList.add("accr-title");
-        spanTitle.innerText = head;
+        let h3Title = document.createElement("h3");
+        h3Title.classList.add("accr-title");
+        h3Title.innerText = head;
 
         let spanArrow = document.createElement("span");
         spanArrow.classList.add("accr-arrow");
@@ -158,7 +203,7 @@ function createAccordion(head = "", body = []) {
         use.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '#chevDown');
         svg.appendChild(use);
         spanArrow.appendChild(svg);
-        accrHead.appendChild(spanTitle);
+        accrHead.appendChild(h3Title);
         accrHead.appendChild(spanArrow);
         contAccr.appendChild(accrHead);
 
