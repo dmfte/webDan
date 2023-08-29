@@ -335,6 +335,7 @@ nav.top-nav {
                         border-style: none solid solid none;
                         border-color: var(--write-color);
                         background-color: var(--write-bg);
+                        color: var(--write-color);
                         padding: 1.5rem 0.8rem;
                         height: 2rem;
                         font-size: 1.5rem;

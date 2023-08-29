@@ -53,6 +53,7 @@ class AutoDialog {
     constructor(params) {
         this.dialog = params.dialog;
         this.backdropclose = (params.backdropclose == undefined) ? true : params.backdropclose;
+        this.fx = params.fx;
 
         let wrapper, divTitle, divBody, divFooter;
         let h2Title, spanX, glyph;
@@ -150,7 +151,6 @@ class AutoDialog {
             spanX.style.display = "flex";
             spanX.style.justifyContent = "center";
             spanX.style.alignItems = "center";
-            spanX.style.fontFamily = "'Times New Roman', Times, serif";  //  For the 'times' character to rotate exactly by the center.
             spanX.style.transition = "rotate 800ms ease-in-out";
             spanX.innerHTML = `    &${glyph};`;
             spanX.style.cursor = "pointer";
@@ -249,6 +249,7 @@ class AutoDialog {
         this.btnCancel = btnCancel;
     }
     show() {
+        if (this.fx !== undefined) this.fx();
         this.dialog.showModal();
         if (this.backdropclose) {
             let toCloseDialog = (evt) => {
