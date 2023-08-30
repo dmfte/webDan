@@ -284,7 +284,7 @@ function getRGBcolorObj(txt) {
     };
     // ['rgb(255', ' 255', ' 255)']
 
-    let regexParenthI = /\)/;
+    let regexParenthI = /\(/;
     let parenthI = rgb[0].match(regexParenthI).index;
     // 'rgba(255'
     rgb[0] = rgb[0].split("");
