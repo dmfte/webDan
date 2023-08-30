@@ -92,7 +92,7 @@ class AutoDialog {
                     leaveEvt.currentTarget.style.backgroundColor = "transparent";
                 }, { once: true });
                 return;
-            }
+            };
             if (evt.currentTarget.classList.contains("x-it")) {
                 evt.currentTarget.style.scale = "1.5";
                 evt.currentTarget.style.rotate = "360deg";
@@ -104,16 +104,15 @@ class AutoDialog {
                 }, { once: true });
                 return;
             }
-        }
+        };
         let onActive = (evt) => {
             if (evt.currentTarget.classList.contains("modFootBtn")) {
                 evt.currentTarget.style.backgroundColor = colorLigher;
                 evt.currentTarget.addEventListener("pointerup", (leaveEvt) => {
                     leaveEvt.currentTarget.style.backgroundColor = "transparent";
-                    // leaveEvt.currentTarget.removeEventListener(onHover, { once: true });
                 }, { once: true });
                 return;
-            }
+            };
             if (evt.currentTarget.classList.contains("x-it")) {
                 evt.currentTarget.style.fontWeight = "bolder";
                 evt.currentTarget.addEventListener("pointerup", (leaveEvt) => {
@@ -121,7 +120,7 @@ class AutoDialog {
                 }, { once: true });
                 return;
             }
-        }
+        };
 
         if (params.title !== undefined) {
             glyph = (params.glyph !== undefined) ? params.glyph : "times";
@@ -140,7 +139,6 @@ class AutoDialog {
             h2Title.style.justifyContent = "center";
             h2Title.style.alignItems = "center";
             h2Title.style.flex = "1";
-            // h2Title.style.height = "1.5em";
             h2Title.style.fontSize = "1em";
             h2Title.innerText = params.title;
 
@@ -185,7 +183,7 @@ class AutoDialog {
                     this.dialog.close();
                 });
                 divFooter.appendChild(btnCancel);
-            }
+            };
             if (boolOk) {
                 btnOk = document.createElement("button");
                 btnOk.classList.add("modFootBtn");
@@ -201,7 +199,7 @@ class AutoDialog {
                 divFooter.appendChild(btnOk);
             }
             wrapper.appendChild(divFooter);
-        }
+        };
 
         this.dialog.innerHTML = "";
         this.dialog.appendChild(wrapper);
@@ -226,7 +224,7 @@ class AutoDialog {
                 divTitle.style.borderBottom = `2px solid ${colorDarkest}`;
                 divFooter.style.backgroundColor = colorDarker;
                 divFooter.style.borderTop = `2px solid ${colorDarkest}`;
-            }
+            };
             if (boolCancel) {
                 btnCancel.style.border = "none";
                 btnCancel.style.backgroundColor = "transparent";
@@ -234,7 +232,7 @@ class AutoDialog {
                 if (boolOk) btnCancel.style.borderRight = `1px solid ${colorDarkest}`;
                 btnCancel.addEventListener("pointermove", onHover);
                 btnCancel.addEventListener("pointerdown", onActive);
-            }
+            };
             if (boolOk) {
                 btnOk.style.border = "none";
                 btnOk.style.backgroundColor = "transparent";
@@ -243,7 +241,7 @@ class AutoDialog {
                 btnOk.addEventListener("pointermove", onHover);
                 btnOk.addEventListener("pointerdown", onActive);
             }
-        }
+        };
         this.body = divBody;
         this.btnOk = btnOk;
         this.btnCancel = btnCancel;
@@ -257,7 +255,7 @@ class AutoDialog {
                     this.dialog.close();
                     document.body.removeEventListener("click", toCloseDialog);
                 }
-            }
+            };
             document.body.addEventListener("pointerdown", toCloseDialog.bind(this));
         }
     }

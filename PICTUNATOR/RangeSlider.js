@@ -28,7 +28,7 @@ class RangeSlider {
             trackContainer: document.createElement("div"),
             track: document.createElement("div"),
             tooltip: document.createElement("div")
-        }
+        };
         // ELEMENT'S CLASSES
         this.el.slider.classList.add("slider");
         this.el.label.classList.add("label");
@@ -83,7 +83,7 @@ class RangeSlider {
         // this.el.max.style.width = `${sidesW}px`;
         // this.el.min.style.padding = "0 0.3rem";
         // this.el.max.style.padding = "0 0.3rem";
-        
+
         // this.el.slider.style.gridTemplateColumns = `${sidesW}px auto ${sidesW}px`;
 
         // this.el.tooltip.style.width = `${this.el.tooltip.scrollWidth}px`;
@@ -101,7 +101,7 @@ class RangeSlider {
             this.val = this.min;
             setValuesInTrack(this.val, this);
             this.prevVal = this.min;
-        }
+        };
         // LISTENERS
         let thisOnClicking = onClicking.bind(this);
         this.el.track.addEventListener("pointerdown", thisOnClicking);
@@ -166,16 +166,6 @@ class RangeSlider {
             this.prevVal = this.val;
         }
     }
-    // collapse() {
-    //     this.el.container.style.maxHeight = 0;
-    //     this.el.container.style.overflow = "hidden";
-    // }
-    // expand() {
-    //     this.el.container.style.maxHeight = `${this.el.container.scrollHeight}px`;
-    //     window.setTimeout(() => {
-    //         this.el.container.style.overflow = "visible";
-    //     }, 300);
-    // }
 }
 
 function onClicking(evt) {
@@ -187,7 +177,7 @@ function onClicking(evt) {
             setValuesInTrack(this.val, this);
             if (this.f !== undefined) this.f();
             this.prevVal = this.val;
-        }
+        };
 
         let thisOnDragging = onDragging.bind(this); //  Otherwise, the "this" on OnMove() would be the event's this instead of the class' this.
         this.el.track.addEventListener("pointermove", thisOnDragging);
@@ -291,10 +281,11 @@ function getRGBcolorObj(txt) {
     if (rgb.length > 3) {
         rgb.splice(3, rgb.length);
         // ['rgba(255', ' 255', ' 255']
-    }
+    };
     // ['rgb(255', ' 255', ' 255)']
 
-    let parenthI = rgb[0].match(/\(/).index;
+    let regexParenthI = /\)/;
+    let parenthI = rgb[0].match(regexParenthI).index;
     // 'rgba(255'
     rgb[0] = rgb[0].split("");
     rgb[0].splice(0, parenthI + 1);
@@ -303,9 +294,10 @@ function getRGBcolorObj(txt) {
     // ' 255'
     rgb[1] = parseInt(rgb[1]);
 
-    if (rgb[2].match(/\)/) !== null) {
+    let regexParenthF = /\)/;
+    if (rgb[2].match(regexParenthF) !== null) {
         // '  255)'
-        let parenthF = rgb[2].match(/\)/).index;
+        let parenthF = rgb[2].match(regexParenthF).index;
         rgb[2] = rgb[2].split("");
         rgb[2].splice(parenthF, rgb[2].length);
         rgb[2] = parseInt(rgb[2].join(""));
