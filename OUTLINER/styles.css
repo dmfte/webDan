@@ -456,7 +456,8 @@ nav.top-nav {
 
                         & .accr-wrapper-body {
                             /* max-height: 1000px; */
-                            max-height: 500px;
+                            max-height: 50vh;
+                            overflow-y: auto;
                             transition: max-height 500ms ease-in-out;
 
                             & .accr-body {
