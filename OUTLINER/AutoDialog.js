@@ -53,7 +53,7 @@ class AutoDialog {
     constructor(params) {
         this.dialog = params.dialog;
         this.backdropclose = (params.backdropclose == undefined) ? true : params.backdropclose;
-        this.fx = params.fx;
+        this.onopen = params.onopen;
 
         let wrapper, divTitle, divBody, divFooter;
         let h2Title, spanX, glyph;
@@ -247,7 +247,7 @@ class AutoDialog {
         this.btnCancel = btnCancel;
     }
     show() {
-        if (this.fx !== undefined) this.fx();
+        if (this.onopen !== undefined) this.onopen();
         this.dialog.showModal();
         if (this.backdropclose) {
             let toCloseDialog = (evt) => {

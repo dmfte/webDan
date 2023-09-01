@@ -53,25 +53,6 @@ btnEdit.addEventListener("click", () => {
     editBody.value = str;
 });
 
-const cmSelection = document.querySelector(".context-menu.selection");
-
-const arrContextMenuBtns = cmSelection.querySelectorAll(".btn");
-const arrSelectionStyleBtns = cmSelection.querySelectorAll(".btn.style");
-const elementModAddPopup = document.getElementById("modAddPopup");
-
-const btnAddModal = cmSelection.querySelector("#btnAddModal");
-
-const modAddPopup = new AutoDialog({ dialog: elementModAddPopup, title: "Agregar ventana emergente", trigger: btnAddModal, fx: passSelectedText, backdropclose: false });
-
-function passSelectedText() {
-    // This will only happen when a text is selected.
-    modAddPopup.dialog.querySelector("#itSubtitle").value = rangeEditor.toString();
-    modAddPopup.dialog.querySelector("textarea").focus();
-}
-
-const edapSubtitle = elementModAddPopup.querySelector("#itSubtitle");
-const edapBody = elementModAddPopup.querySelector("textarea");
-const modPopup = document.getElementById("modPopup");
 
 const btnDownload = document.getElementById("btnDownload");
 btnDownload.addEventListener("click", () => {
@@ -112,6 +93,35 @@ btnDownload.addEventListener("click", () => {
     document.body.removeChild(a);
 });
 
+
+// SELECTED TEXT CONTEXT MENU BUTTONs
+const cmSelection = document.querySelector(".context-menu.selection");
+
+// For all buttons: if there's no selected text, the context menu should hide.
+const arrContextMenuBtns = cmSelection.querySelectorAll(".btn");
+arrContextMenuBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+        if (rangeEditor == null) {
+            cmSelection.classList.remove("active");
+            return;
+        }
+    });
+});
+
+// This is for buttons on context menu that add N, I, U style to the selected text.
+const arrSelectionStyleBtns = cmSelection.querySelectorAll(".btn.style");
+arrSelectionStyleBtns.forEach(btn => {
+    btn.addEventListener("pointerup", async () => {
+        // Listener from accordios has already made sure theres a selection within the same line.
+        let tag = document.createElement(btn.dataset.tag);
+        tag.addEventListener("click", listenerToRemoveTag);
+        rangeEditor.surroundContents(tag);
+        rangeEditor = null;
+        window.getSelection().removeAllRanges();
+    });
+});
+
+// Highlight selected text with color.
 const btnHighlightBg = document.getElementById("btnHighlightBg");
 const icHighlightBg = document.getElementById("highlight-bg");
 icHighlightBg.value = "#ff0000";
@@ -130,47 +140,49 @@ btnHighlightBg.addEventListener("click", () => {
     span.addEventListener("click", listenerToRemoveTag);
     //  Range selection has already been made.
     rangeEditor.surroundContents(span);
+    rangeEditor = null;
+    window.getSelection().removeAllRanges();
     icHighlightBg.addEventListener("input", inputSpanColor);
     icHighlightBg.addEventListener("change", changeSpanColor);
 });
 
-arrContextMenuBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-        cmSelection.classList.remove("active");
-        // cursorCont = rangeEditor.endContainer;
-        // cursorPos = rangeEditor.endOffset;
-        window.getSelection().removeAllRanges();
-        rangeEditor = null;
-    });
-});
+//  Adding a popup to the selected text.
+const elementModAddPopup = document.getElementById("modAddPopup");
+const btnAddModal = cmSelection.querySelector("#btnAddModal");
+const modAddPopup = new AutoDialog({ dialog: elementModAddPopup, title: "Agregar ventana emergente", trigger: btnAddModal, onopen: passSelectedText, backdropclose: false });
+const emapSubtitle = elementModAddPopup.querySelector("#itSubtitle");
+const emapBody = elementModAddPopup.querySelector("textarea");
+const modPopup = document.getElementById("modPopup");
+
+function passSelectedText() {
+    // This should only happen when a text is selected. Trigger butotn will only show if theres a range selected.
+    modAddPopup.dialog.querySelector("#itSubtitle").value = rangeEditor.toString();
+    modAddPopup.dialog.querySelector("textarea").focus();
+}
 
 modAddPopup.onOk(async () => {
+    cmSelection.classList.remove("active");
     if (rangeEditor == null) return;
     // Listener from accordios has already made sure theres a selection within the same line.
     let span = document.createElement("span");
     span.classList.add("show-popup");
-    span.dataset.title = edapSubtitle.value;
-    span.dataset.body = edapBody.value;
+    span.dataset.title = emapSubtitle.value;
+    span.dataset.body = emapBody.value;
     span.addEventListener("click", () => {
         let popup = new AutoDialog({ dialog: modPopup, title: span.dataset.title, ok: false, cancel: false });
         popup.body.innerText = span.dataset.body;
         popup.show();
     });
     rangeEditor.surroundContents(span);
-    edapSubtitle.value = "";
-    edapBody.value = "";
+    rangeEditor = null;
+    window.getSelection().removeAllRanges();
+    emapSubtitle.value = "";
+    emapBody.value = "";
 });
+// ---------
 
-arrSelectionStyleBtns.forEach(btn => {
-    // This is for buttons on context menu that add N, I, U style to the highlighted text.
-    btn.addEventListener("pointerup", async () => {
-        if (rangeEditor == null) return;
-        // Listener from accordios has already made sure theres a selection within the same line.
-        let tag = document.createElement(btn.dataset.tag);
-        tag.addEventListener("click", listenerToRemoveTag);
-        rangeEditor.surroundContents(tag);
-    });
-});
+
+
 
 function listenerToRemoveTag(evt) {
     let element = evt.currentTarget;
