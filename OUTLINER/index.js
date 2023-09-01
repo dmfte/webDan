@@ -58,6 +58,7 @@ const cmSelection = document.querySelector(".context-menu.selection");
 const arrContextMenuBtns = cmSelection.querySelectorAll(".btn");
 const arrSelectionStyleBtns = cmSelection.querySelectorAll(".btn.style");
 const elementModAddPopup = document.getElementById("modAddPopup");
+
 const btnAddModal = cmSelection.querySelector("#btnAddModal");
 
 const modAddPopup = new AutoDialog({ dialog: elementModAddPopup, title: "Agregar ventana emergente", trigger: btnAddModal, fx: passSelectedText, backdropclose: false });
@@ -111,19 +112,42 @@ btnDownload.addEventListener("click", () => {
     document.body.removeChild(a);
 });
 
+const btnHighlightBg = document.getElementById("btnHighlightBg");
+const icHighlightBg = document.getElementById("highlight-bg");
+icHighlightBg.value = "#ff0000";
+
+btnHighlightBg.addEventListener("click", () => {
+    if (rangeEditor == null) return;
+    let inputSpanColor = () => { span.style.backgroundColor = icHighlightBg.value };
+    let changeSpanColor = () => {
+        cmSelection.classList.remove("active");
+        icHighlightBg.removeEventListener("input", inputSpanColor);
+        icHighlightBg.removeEventListener("change", changeSpanColor)
+    };
+    let span = document.createElement("span");
+    span.classList.add("higlight");
+    inputSpanColor();
+    span.addEventListener("click", listenerToRemoveTag);
+    //  Range selection has already been made.
+    rangeEditor.surroundContents(span);
+    icHighlightBg.addEventListener("input", inputSpanColor);
+    icHighlightBg.addEventListener("change", changeSpanColor);
+});
+
 arrContextMenuBtns.forEach(btn => {
     btn.addEventListener("click", () => {
         cmSelection.classList.remove("active");
-        cursorCont = rangeEditor.endContainer;
-        cursorPos = rangeEditor.endOffset;
+        // cursorCont = rangeEditor.endContainer;
+        // cursorPos = rangeEditor.endOffset;
         window.getSelection().removeAllRanges();
+        rangeEditor = null;
     });
 });
 
 modAddPopup.onOk(async () => {
     if (rangeEditor == null) return;
     // Listener from accordios has already made sure theres a selection within the same line.
-    let span = createTagToSurround("span");
+    let span = document.createElement("span");
     span.classList.add("show-popup");
     span.dataset.title = edapSubtitle.value;
     span.dataset.body = edapBody.value;
@@ -142,30 +166,28 @@ arrSelectionStyleBtns.forEach(btn => {
     btn.addEventListener("pointerup", async () => {
         if (rangeEditor == null) return;
         // Listener from accordios has already made sure theres a selection within the same line.
-        let tag = createTagToSurround(btn.dataset.tag);
-
-        tag.addEventListener("click", () => {
-            let txt = tag.innerText;
-            let txtNode = document.createTextNode(txt);
-            let li = tag.closest("li");
-            li.insertBefore(txtNode, tag);
-            let liNodes = li.childNodes;
-            for (let i = 0; i < liNodes.length; i++) {
-                const node = liNodes[i];
-                if (node == tag) {
-                    li.removeChild(tag);
-                    mergeTextNodes(li);
-                    break;
-                }
-            }
-        });
-
-
+        let tag = document.createElement(btn.dataset.tag);
+        tag.addEventListener("click", listenerToRemoveTag);
         rangeEditor.surroundContents(tag);
     });
 });
 
-
+function listenerToRemoveTag(evt) {
+    let element = evt.currentTarget;
+    let txt = element.innerText;
+    let txtNode = document.createTextNode(txt);
+    let li = element.closest("li") || element.closest("h3");
+    li.insertBefore(txtNode, element);
+    let liNodes = li.childNodes;
+    for (let i = 0; i < liNodes.length; i++) {
+        const node = liNodes[i];
+        if (node == element) {
+            li.removeChild(element);
+            mergeTextNodes(li);
+            break;
+        }
+    }
+}
 
 
 
@@ -177,8 +199,15 @@ accordions.addEventListener("pointerup", (evt) => {
     let end = range.endContainer;
     if (start == end && range.startOffset !== range.endOffset) {
         rangeEditor = range;
-        cmSelection.style.left = `${evt.clientX}px`;
-        cmSelection.style.top = `${evt.clientY - 32}px`;
+        let btnWdith = parseInt((window.getComputedStyle(document.body) || window.getComputedStyle(document.documentElement)).getPropertyValue("--contextmenu-btn-dim"));
+        let cmSelectionWidth = btnWdith * (cmSelection.querySelectorAll(".btn").length + 1);
+        // console.log(window.innerWidth , evt.clientX, cmSelectionWidth);
+        if (window.innerWidth - evt.clientX < cmSelectionWidth) {
+            cmSelection.style.left = `${evt.clientX - cmSelectionWidth}px`;
+        } else {
+            cmSelection.style.left = `${evt.clientX}px`;
+        }
+        cmSelection.style.top = `${evt.clientY - 40}px`;
         cmSelection.classList.add("active");
 
         document.body.addEventListener("pointerdown", (evt) => {
@@ -186,7 +215,6 @@ accordions.addEventListener("pointerup", (evt) => {
             let parent = e.closest(".context-menu.selection");
             if (parent !== cmSelection) {
                 cmSelection.classList.remove("active");
-                // rangeEditor = null;
             }
         }, { once: true });
     } else {
@@ -196,11 +224,10 @@ accordions.addEventListener("pointerup", (evt) => {
 });
 
 
-function createTagToSurround(strTag) {
-    let tag = document.createElement(strTag);
-    // tag.style.cursor = "pointer";
-    return tag;
-}
+// function createTagToSurround(strTag) {
+//     let tag = document.createElement(strTag);
+//     return tag;
+// }
 
 function mergeTextNodes(element) {
     let arrNodes = element.childNodes;

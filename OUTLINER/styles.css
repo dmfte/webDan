@@ -39,9 +39,10 @@ strong {
     /* PIXELS */
     --nav-height-desk: 40px;
     --nav-height-mob: 48px;
-    --controls-height-desk: 64px;
+    --controls-height-desk: 2.5rem;
     --controls-height-mob: 48px;
     --accr-padding: 5px;
+    --contextmenu-btn-dim: 30px;
 }
 
 body,
@@ -285,9 +286,17 @@ nav.top-nav {
         align-items: stretch;
         padding: 0.3rem 1rem;
 
-        & #btnDownload {
+        & .btn{
             width: 2rem;
-            font-size: 2rem;
+            cursor: pointer;
+            margin: 0 0.3rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        & #btnDownload {
+            line-height: 1;
+            font-size: 1.5rem;
         }
     }
 
@@ -514,30 +523,33 @@ nav.top-nav {
                                 & li {
                                     list-style: circle outside;
 
-                                    & strong,
-                                    em,
-                                    u {
+                                    & strong, em, u, span{
                                         cursor: pointer;
                                     }
 
-                                    & strong:hover {
-                                        text-decoration: line-through red;
-                                    }
-
-                                    & em:hover {
-                                        text-decoration: line-through red;
+                                    & strong:hover, em:hover, u:hover, span.highlight:hover {
+                                        text-decoration: line-through rgb(255, 0, 0);
                                     }
 
                                     & u:hover {
                                         text-decoration-line: line-through underline;
-                                        text-decoration-color: red;
+                                        /* text-decoration-color: red; */
                                     }
-
+                                    
                                     & span.show-popup {
                                         text-decoration: underline;
                                         color: rgb(0, 0, 255);
-                                        cursor: pointer;
                                     }
+
+                                    /* & em:hover {
+                                        text-decoration: line-through red;
+                                    }
+
+
+                                    & span.highlight:hover{
+                                        text-decoration: line-through red;
+                                    } */
+
                                 }
                             }
                         }
@@ -582,11 +594,26 @@ nav.top-nav {
             color: var(--controls-bg);
             border: 1px solid var(--controls-bg);
             border-radius: 5px;
-            width: 30px;
-            height: 30px;
+            width: var(--contextmenu-btn-dim);
+            height: var(--contextmenu-btn-dim);
             margin: 2px;
             user-select: none;
             cursor: pointer;
+
+            & .colorlabel{
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 100%;
+                height: 100%;
+            }
+            & .colorlabel~input[type=color]{
+                width: 0;
+                height: 0;
+                border: none;
+                opacity: 0;
+            }
+
         }
     }
 }
