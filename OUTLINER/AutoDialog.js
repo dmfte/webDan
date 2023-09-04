@@ -173,6 +173,7 @@ class AutoDialog {
 
             if (boolCancel) {
                 btnCancel = document.createElement("button");
+                btnCancel.classList.add("btnCancel");
                 btnCancel.classList.add("modFootBtn");
                 btnCancel.innerText = "Cancel";
                 btnCancel.style.flex = "1";
@@ -186,6 +187,7 @@ class AutoDialog {
             };
             if (boolOk) {
                 btnOk = document.createElement("button");
+                btnOk.classList.add("btnOk");
                 btnOk.classList.add("modFootBtn");
                 btnOk.innerText = "OK";
                 btnOk.style.flex = "1";

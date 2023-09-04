@@ -19,6 +19,7 @@ strong {
 
     /* FOR WEB TOOL */
     --dialog-body: rgb(159, 195, 249);
+    --dialog-color: rgb(8, 26, 74);
     --controls-bg: rgb(97, 103, 122);
     --controls-color: rgb(216, 217, 218);
     --cont-write-bg: rgb(34, 65, 112);
@@ -28,11 +29,13 @@ strong {
     --write-btn-color: rgb(39, 40, 41);
     --write-bg: rgb(39, 40, 41);
     --write-color: rgb(255, 246, 224);
-    --cont-edit-bg: rgb(8, 26, 74);
+    --accr-preview-bg: rgb(8, 26, 74);
+
     --accr-bg: rgb(58, 76, 124);
     --accr-border: rgb(98, 116, 164);
     --accr-border-lit: rgb(178, 196, 244);
     --accr-head-color: rgb(158, 186, 224);
+    --accr-head-lit-color: rgb(158, 186, 224);
     --accr-body-color: rgb(8, 26, 74);
 
     --menu-selection-bg: rgb(231, 220, 192);
@@ -49,6 +52,7 @@ body,
 html {
     width: 100%;
     height: 100%;
+    overscroll-behavior: none;
 }
 
 svg {
@@ -268,6 +272,17 @@ nav.top-nav {
 
 /* ------------ */
 
+label~input[type=color] {
+    width: 0;
+    height: 0;
+    border: none;
+    opacity: 0;
+}
+
+label~input[type=file] {
+    display: none;
+}
+
 .container-all {
     position: relative;
     display: block;
@@ -286,15 +301,17 @@ nav.top-nav {
         align-items: stretch;
         padding: 0.3rem 1rem;
 
-        & .btn{
+        & .btn {
             width: 2rem;
+            background-color: lightgray;
+            border: 1px solid white;
+            color: black;
+            border-radius: 0.4rem;
             cursor: pointer;
             margin: 0 0.3rem;
             display: flex;
             justify-content: center;
             align-items: center;
-        }
-        & #btnDownload {
             line-height: 1;
             font-size: 1.5rem;
         }
@@ -400,7 +417,7 @@ nav.top-nav {
             }
 
             & .cont.preview {
-                background-color: var(--cont-edit-bg);
+                background-color: var(--accr-preview-bg);
                 padding: 1.5rem 2rem;
 
                 & .accordions.edit {
@@ -464,10 +481,14 @@ nav.top-nav {
                         z-index: 1;
 
                         & .accr-wrapper-body {
-                            /* max-height: 1000px; */
                             max-height: 50vh;
                             overflow-y: auto;
                             transition: max-height 500ms ease-in-out;
+                            border-radius: 0 0 13px 13px;
+
+                            & .accr-head {
+                                color: var(--accr-head-lit-color);
+                            }
 
                             & .accr-body {
                                 background-color: var(--accr-border-lit);
@@ -484,13 +505,34 @@ nav.top-nav {
                         padding: var(--accr-padding);
                         margin-bottom: 2px;
 
+                        & .accr-head:hover svg.trash {
+                            display: inline-block;
+                        }
+
                         & .accr-head {
+                            position: relative;
                             display: flex;
                             align-items: stretch;
                             padding: 0.5rem;
                             font-size: 1.5rem;
                             color: var(--accr-head-color);
                             cursor: pointer;
+
+                            & svg.trash:hover {
+                                border: 1px solid rgb(255, 0, 0);
+                                border-radius: 0.3rem;
+                            }
+
+                            & svg.trash {
+                                display: none;
+                                width: 2rem;
+                                height: 2rem;
+                                position: absolute;
+                                top: 0.5rem;
+                                left: 0.5rem;
+                                padding: 0;
+                                line-height: 0;
+                            }
 
                             & .accr-title {
                                 text-align: center;
@@ -511,9 +553,6 @@ nav.top-nav {
                             overflow: hidden;
                             max-height: 0;
 
-
-
-
                             & .accr-body {
                                 padding: 0.7rem 2rem;
                                 border-radius: 0 0 1.1rem 1.1rem;
@@ -523,11 +562,17 @@ nav.top-nav {
                                 & li {
                                     list-style: circle outside;
 
-                                    & strong, em, u, span{
+                                    & strong,
+                                    em,
+                                    u,
+                                    span {
                                         cursor: pointer;
                                     }
 
-                                    & strong:hover, em:hover, u:hover, span.highlight:hover {
+                                    & strong:hover,
+                                    em:hover,
+                                    u:hover,
+                                    span.highlight:hover {
                                         text-decoration: line-through rgb(255, 0, 0);
                                     }
 
@@ -535,21 +580,11 @@ nav.top-nav {
                                         text-decoration-line: line-through underline;
                                         /* text-decoration-color: red; */
                                     }
-                                    
+
                                     & span.show-popup {
                                         text-decoration: underline;
                                         color: rgb(0, 0, 255);
                                     }
-
-                                    /* & em:hover {
-                                        text-decoration: line-through red;
-                                    }
-
-
-                                    & span.highlight:hover{
-                                        text-decoration: line-through red;
-                                    } */
-
                                 }
                             }
                         }
@@ -600,18 +635,12 @@ nav.top-nav {
             user-select: none;
             cursor: pointer;
 
-            & .colorlabel{
+            & .colorlabel {
                 display: flex;
                 justify-content: center;
                 align-items: center;
                 width: 100%;
                 height: 100%;
-            }
-            & .colorlabel~input[type=color]{
-                width: 0;
-                height: 0;
-                border: none;
-                opacity: 0;
             }
 
         }
