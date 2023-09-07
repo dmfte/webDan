@@ -411,7 +411,8 @@ function createAccordion(head = "", body = []) {
         accrWrapperBody.appendChild(accrBody);
         contAccr.appendChild(accrWrapperBody);
 
-        accrHead.addEventListener("click", () => {
+        accrHead.addEventListener("click", (evt) => {
+            if (evt.target.classList.contains("trash")) return;
             let accordions = accrHead.closest(".accordions");
             let arrAccr = accordions.querySelectorAll(".cont-accr");
             for (let i = 0; i < arrAccr.length; i++) {
