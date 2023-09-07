@@ -414,7 +414,7 @@ function getMonocrhomedData(atm = [], data = new Object, shades = 0, sensitivity
 
                     // Circle
                     // for (let m = 0; m <=b; m++) {
-                        
+
                     // }
                 }
             }
@@ -784,7 +784,59 @@ async function getObjectToStartHatching(dir = "", width = 0, height = 0, separat
     });
 }
 
+//  CROSSHATCHING
+// ---------
 
+//  DECOLORATE
+
+const contDecolorTolerance = document.querySelector("#decolorHowmany .wrapper");
+const rsDecolorTolerance = new RangeSlider(contDecolorTolerance, { label: "Tolerancy", min: 5, max: 100, def: 30, step: 5 });
+rsDecolorTolerance.onSliding(onDecolorate);
+
+const rbDecolor = document.getElementById("rbDecolorate");
+rbDecolor.addEventListener("click", () => {
+    if (rbDecolor.checked) onDecolorate();
+});
+
+var temp = 30;
+
+async function onDecolorate() {
+    if (imageOriginal == null) return;
+    console.log("decolor");
+    let ap = await getArrPalette();
+    console.log(ap);
+}
+
+function getArrPalette() {
+    return new Promise((res, rej) => {
+        let arrPalette = [];
+        let gotit = [];
+        for (let i = 0; i < originalData.data.length; i += 4) {
+            if (gotit.includes(i)) continue;
+            gotit.push(i);
+            arrPalette.push([
+                originalData.data[i + 0],
+                originalData.data[i + 1],
+                originalData.data[i + 2]
+            ]);
+            let lastone = arrPalette.length - 1;
+            let refR = originalData.data[i + 0];
+            let refG = originalData.data[i + 1];
+            let refB = originalData.data[i + 2];
+            for (let j = i + 4; j < originalData.data.length; j += 4) {
+                if (originalData.data[j + 0] < refR + temp && originalData.data[j + 0] > refR - temp &&
+                    originalData.data[j + 1] < refG + temp && originalData.data[j + 1] > refG - temp &&
+                    originalData.data[j + 2] < refB + temp && originalData.data[j + 2] > refB - temp) {
+                    arrPalette[lastone].push(j)  //  Last one of the last one.
+                    gotit.push(j);
+                }
+            }
+        }
+        res(arrPalette);
+    });
+}
+
+// ---------
 // ---------
 //  DOWNLOAD BAR
 const btnDownImg = document.getElementById("btnDownImg");
@@ -841,6 +893,11 @@ ifGaImage.addEventListener("input", async (evt) => {
     rsHatchSeparation.onSliding(onHatchSlide);
     rsHatchSeparation.onSliding(onHatchSlide);
     if (rbHatching.checked) onHatchSlide();
+
+    //  Crosshatching settings.
+
+    //  Decolorate settings.
+    if (rbDecolor.checked) onDecolorate();
 });
 
 // GENERAL FUNCTIONS
