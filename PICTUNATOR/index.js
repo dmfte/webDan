@@ -802,32 +802,62 @@ var temp = 30;
 
 async function onDecolorate() {
     if (imageOriginal == null) return;
-    console.log("decolor");
+    canvFinal.width = canvOriginal.width;
+    canvFinal.height = canvOriginal.height;
+    cf.fillStyle = "red";
+    cf.fillRect(0, 0, canvFinal.width, canvFinal.height);
+    let finalData = cf.getImageData(0, 0, canvFinal.width, canvFinal.height);
     let ap = await getArrPalette();
     console.log(ap);
+    let newImgData = await getDecoloratedImageData(ap, finalData);
+    console.log(newImgData);
+    cf.putImageData(newImgData, 0, 0);
+}
+
+function getDecoloratedImageData(arrPalete, imagedata) {
+    return new Promise((res, rej) => {
+        for (let i = 0; i < arrPalete.length; i++) {
+            const palette = arrPalete[i];
+            for (let j = 4; j < palette.length; j++) {
+                const idx = palette[j];
+                imagedata.data[idx + 0] = palette[0];  //  R
+                imagedata.data[idx + 1] = palette[1];  //  G
+                imagedata.data[idx + 2] = palette[2];  //  B
+            }
+        }
+        res(imagedata);
+    });
 }
 
 function getArrPalette() {
     return new Promise((res, rej) => {
         let arrPalette = [];
         let gotit = [];
-        for (let i = 0; i < originalData.data.length; i += 4) {
+        let length;
+        for (let i = 0; i < length; i += 4) {
             if (gotit.includes(i)) continue;
             gotit.push(i);
-            arrPalette.push([
-                originalData.data[i + 0],
-                originalData.data[i + 1],
-                originalData.data[i + 2]
-            ]);
-            let lastone = arrPalette.length - 1;
-            let refR = originalData.data[i + 0];
-            let refG = originalData.data[i + 1];
-            let refB = originalData.data[i + 2];
-            for (let j = i + 4; j < originalData.data.length; j += 4) {
-                if (originalData.data[j + 0] < refR + temp && originalData.data[j + 0] > refR - temp &&
-                    originalData.data[j + 1] < refG + temp && originalData.data[j + 1] > refG - temp &&
-                    originalData.data[j + 2] < refB + temp && originalData.data[j + 2] > refB - temp) {
-                    arrPalette[lastone].push(j)  //  Last one of the last one.
+            const refR = originalData.data[i + 0];
+            const refG = originalData.data[i + 1];
+            const refB = originalData.data[i + 2];
+            const sublen = originalData.data.length;
+            arrPalette.push([refR, refG, refB, i]);
+            for (let j = i + 4; j < sublen; j += 4) {
+                // if (originalData.data[j + 0] > originalData.data[i + 0] + temp) continue;
+                // if (originalData.data[j + 0] < originalData.data[i + 0] - temp) continue;
+                // if (originalData.data[j + 1] > originalData.data[i + 1] + temp) continue;
+                // if (originalData.data[j + 1] < originalData.data[i + 1] - temp) continue;
+                // if (originalData.data[j + 2] > originalData.data[i + 2] + temp) continue;
+                // if (originalData.data[j + 2] < originalData.data[i + 2] - temp) continue;
+                const r = originalData.data[j + 0];
+                const g = originalData.data[j + 1];
+                const b = originalData.data[j + 2];
+
+                if (
+                    r <= refR + temp && r >= refR - temp &&
+                    g <= refG + temp && g >= refG - temp &&
+                    b <= refB + temp && b >= refB - temp) {
+                    arrPalette[arrPalette.length - 1].push(j)  //  Last one of the last one.
                     gotit.push(j);
                 }
             }
