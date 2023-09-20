@@ -111,7 +111,7 @@
 				</div>
 			</div>
 			<!-- --------- -->
-			<div id="effectMonochrome" class="effect" data-btn-down="mono">
+			<div id="effectMonochrome" class="effect" data-btn-down="mono" style="display: none;">
 				<input type="radio" name="rgEffects" id="rbMonochrome">
 				<label for="rbMonochrome"><span class="rb-dot"></span>Mono-chroming</label>
 				<div class="controllers">
@@ -230,10 +230,44 @@
 					</div>
 				</div>
 			</div>
-			<div class="effect" id="effectCrossh">
-
+			<div class="effect" id="effectCrossh" style="display: none;">
+				<input type="radio" name="rgEffects" id="rbCrosshatch">
+				<label for="rbCrosshatch">Crosshatching</label>
+				<div class="controllers">
+					<div class="cont other">
+						<div class="btn" id="crosshDirections"></div>
+					</div>
+					<div class="cont slider" id="crosshSeparation">
+						<div class="wrapper"></div>
+					</div>
+					<div class="cont slider" id="crosshLinew">
+						<div class="wrapper"></div>
+					</div>
+					<div class="cont slider" id="crosshSensitivity">
+						<div class="wrapper"></div>
+					</div>
+				</div>
 			</div>
-			<div class="effect" id="effectDecolorate">
+			<svg style="width: 0; height: 0">
+				<defs>
+					<symbol viewBox="0 0 10 10" id="alldirections">
+						<path stroke-linecap="round" stroke-width="0.5" stroke="black" fill="none" d="M 0 0 H 56 V 14 V 14 H 0 V 0 M 14 0 V 14 M 28 0 V 14 M 42 0 V 14 M 0 0 M 2 2 L 12 12 M 16 7 H 26 M 30 12 L 40 2 m 9 0 l 0 10"></path>
+					</symbol>
+					<symbol viewBox="0 0 10 10" id="ULDR">
+						<path stroke-linecap="round" stroke-width="0.5" stroke="black" fill="none" d="M 0 0 H 14 V 14 V 14 H 0 V 0 M 2 2 L 12 12"></path>
+					</symbol>
+					<symbol viewBox="0 0 10 10" id="LR">
+						<path stroke-linecap="round" stroke-width="0.5" stroke="black" fill="none" d="M 0 0 H 14 V 14 V 14 H 0 V 0 M 2 7 L 12 7"></path>
+					</symbol>
+					<symbol viewBox="0 0 10 10" id="DLUP">
+						<path stroke-linecap="round" stroke-width="0.5" stroke="black" fill="none" d="M 0 0 H 14 V 14 V 14 H 0 V 0 M 2 12 L 12 2"></path>
+					</symbol>
+					<symbol viewBox="0 0 10 10" id="UD">
+						<path stroke-linecap="round" stroke-width="0.5" stroke="black" fill="none" d="M 0 0 H 14 V 14 V 14 H 0 V 0 M 7 2 L 7 12"></path>
+					</symbol>
+				</defs>
+			</svg>
+			<div class="effect" id="effectDecolorate" style="display: none;">
 				<input type="radio" name="rgEffects" id="rbDecolorate">
 				<label for="rbDecolorate"><span class="rb-dot"></span>Decolorate</label>
 				<div class="controllers">

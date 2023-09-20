@@ -32,6 +32,7 @@
 #39F8A4 */
 
 :root {
+	--test: rgb(59, 0, 25);
 	/* FOR NAVIGATION BAR */
 	--nav-bg: rgb(26, 26, 46);
 	--nav-icon: rgb(233, 69, 96);
@@ -50,8 +51,8 @@
 	/* PIXELS */
 	--nav-height-desk: 40px;
 	--nav-height-mob: 48px;
-	--toolbar-width: 200px;
-	--cont-sider-width: 200px;
+	--toolbar-width: 300px;
+	--cont-sider-width: 300px;
 }
 
 /* General styles. */
@@ -823,9 +824,10 @@ nav.top-nav .nav-items .nav-i:active svg path {
 
 /* Grid button effect. */
 /* Vertical bars. */
-#secDownloadBar .d-bar.d-button button.grid{
+#secDownloadBar .d-bar.d-button button.grid {
 	overflow: visible;
 }
+
 #secDownloadBar .d-bar.d-button button.grid::before {
 	position: absolute;
 	content: "";
@@ -844,6 +846,7 @@ nav.top-nav .nav-items .nav-i:active svg path {
 	border-color: red;
 	width: 40%;
 }
+
 /* Horizontal bars. */
 #secDownloadBar .d-bar.d-button button.grid::after {
 	position: absolute;
