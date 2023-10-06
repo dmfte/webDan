@@ -493,13 +493,14 @@ var paramsHatch = {
     bg: "#FFFFFF",
     color: "#000000",
     linew: 2,
+    buckets: [[192, 255], [128, 191], [64, 127], [0, 63]],  //  This is what get255Buckets will return with default how_many lines value of 3 + 1.
     atdh: undefined
 }
 
 const rbHatching = document.getElementById("rbHatching");
 rbHatching.addEventListener("click", async () => {
     if (imageOriginal == undefined) return;
-    paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, rsHatchHowmanyw.val, rsHatchSensitivity.val);
+    paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, paramsHatch.buckets);
     onHatchSlide(paramsHatch);
 });
 
@@ -528,14 +529,23 @@ icHatchBg.addEventListener("input", () => {
 const contHatchHowmanyw = document.querySelector("#hatchHowmanyw .wrapper");
 var rsHatchHowmanyw = new RangeSlider(contHatchHowmanyw, { label: "Lines", min: 1, max: 10, def: 3, step: 1, color1: "#2c5270", color2: "#DDE6ED" });
 rsHatchHowmanyw.onSliding(async () => {
-    paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, rsHatchHowmanyw.val, rsHatchSensitivity.val);
+    paramsHatch.buckets = await get255Buckets(rsHatchHowmanyw.val + 1, rsHatchSensitivity.val);
+    paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, paramsHatch.buckets);
+    onHatchSlide(paramsHatch);
+});
+const contHatchSensitivity = document.querySelector("#hatchSensitivity .wrapper");
+var rsHatchSensitivity = new RangeSlider(contHatchSensitivity, { label: "Sensitivity", min: -250, max: 250, step: 5, def: 0, color1: "#2c5270", color2: "#DDE6ED" });
+rsHatchSensitivity.onSliding(async () => {
+    paramsHatch.buckets = await get255Buckets(rsHatchHowmanyw.val + 1, rsHatchSensitivity.val);
+    paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, paramsHatch.buckets);
     onHatchSlide(paramsHatch);
 });
 
 const contHatchSeparation = document.querySelector("#hatchSeparation .wrapper");
 var rsHatchSeparation = new RangeSlider(contHatchSeparation, { label: "Separation", min: 2, max: 3, step: 1, def: 3, color1: "#2c5270", color2: "#DDE6ED" });  //  Will be reinitialized when image is loaded.
 rsHatchSeparation.onSliding(async () => {
-    paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, rsHatchHowmanyw.val, rsHatchSensitivity.val);
+    console.log(paramsHatch.atdh);
+    paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, paramsHatch.buckets);
     onHatchSlide(paramsHatch);
 });
 
@@ -546,12 +556,6 @@ rsHatchLinewidth.onSliding(() => {
     onHatchSlide(paramsHatch);
 });
 
-const contHatchSensitivity = document.querySelector("#hatchSensitivity .wrapper");
-var rsHatchSensitivity = new RangeSlider(contHatchSensitivity, { label: "Sensitivity", min: -250, max: 250, step: 5, def: 0, color1: "#2c5270", color2: "#DDE6ED" });
-rsHatchSensitivity.onSliding(async () => {
-    paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, rsHatchHowmanyw.val, rsHatchSensitivity.val);
-    onHatchSlide(paramsHatch);
-});
 
 var strHatchDir = "DLUR";
 const currentdirection = document.getElementById("currentdirection");
@@ -573,7 +577,8 @@ rbtnsHatchDirections.forEach(bthd => {
         }
         interval = window.setInterval(fx, 50);
         strHatchDir = bthd.value;
-        paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, rsHatchHowmanyw.val, rsHatchSensitivity.val);
+        console.log(strHatchDir);
+        paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, paramsHatch.buckets);
         onHatchSlide(paramsHatch);
     });
 });
@@ -598,7 +603,7 @@ async function onHatchSlide(params) {
 }
 
 function returnsDrawnImagedataWithATDH(imagedatafinal, params) {
-    return new Promise(async (res, rej) => {
+    return new Promise((res, rej) => {
         let arrRGB = getarrRGB(params.color);
         for (let i = 0; i < params.atdh.length; i++) {
             const subArr = params.atdh[i];
@@ -610,6 +615,7 @@ function returnsDrawnImagedataWithATDH(imagedatafinal, params) {
                 getPurePxDrawnData(obj.x, obj.y, obj.lx, obj.ly, imagedatafinal, linew, arrRGB);
             }
         }
+        // console.log(imagedatafinal);
         res(imagedatafinal);
     });
 }
@@ -693,7 +699,7 @@ function getImagedataIndex(x, y, width) {
     return (y * width + x) * 4;
 }
 
-async function getObjectToStartHatching(dir = "", width = 0, height = 0, separation = 0) {
+async function getObjectToStartHatching(dir = "", separation = 0) {
     return new Promise((res, rej) => {
         // Returns:
         // obj = {
@@ -710,6 +716,8 @@ async function getObjectToStartHatching(dir = "", width = 0, height = 0, separat
             dirx: 0,
             diry: 0
         }
+        let width = originalData.width;
+        let height = originalData.height;
         let leftover;
         switch (dir) {
             case "DLUR":
@@ -780,94 +788,140 @@ async function getObjectToStartHatching(dir = "", width = 0, height = 0, separat
 }
 
 //  CROSSHATCHING
+var paramsCrossh = {
+    linew: 2,
+    bg: "white",
+    color: "black",
+    atdh: undefined
+}
+
+var paramsCrossh = { bg: "#FFFFFF", color: "#000000", linew: 2, atdh: undefined }  //  Buckets will be defined on onCrosshSlide depending on amount of directions.
+var strCrosshDirections = ["ULDR", "LR", "DLUR", "UD"];
+
+// const bucketCrossh = [[0, 255], [0, 204], [0, 153], [0, 102], [0, 51]];
+
 const rbCrosshatch = document.getElementById("rbCrosshatch");
 rbCrosshatch.addEventListener("input", () => {
-    if (rbCrosshatch.checked) onCrosshatching();
+    if (rbCrosshatch.checked) onCrosshSlide();
 });
 
 const contCroshSeparation = document.getElementById("crosshSeparation");
 var rsCrosshSeparation = new RangeSlider(contCroshSeparation, { label: "Separation", min: 3, max: 4, step: 1, color1: "#2c5270", color2: "#DDE6ED" });
-rsCrosshSeparation.onSliding(onCrosshatching);
+rsCrosshSeparation.onSliding(onCrosshSlide);
+
 const contCrosshLinew = document.getElementById("crosshLinew");
-const rsCrosshLinew = new RangeSlider(contCrosshLinew, { label: "Width", min: 1, max: 10, step: 1, color1: "#2c5270", color2: "#DDE6ED" });
-rsCrosshLinew.onSliding(onCrosshatching);
+const rsCrosshLinew = new RangeSlider(contCrosshLinew, { label: "Width", min: 1, max: 10, def: 2, step: 1, color1: "#2c5270", color2: "#DDE6ED" });
+rsCrosshLinew.onSliding(() => {
+    paramsCrossh.linew = rsCrosshLinew.val;
+    onCrosshSlide();
+});
 const contCrosshSensitivity = document.getElementById("crosshSensitivity");
 const rsCrosshSensitivity = new RangeSlider(contCrosshSensitivity, { label: "Sensitivity", min: -250, max: 250, def: 0, step: 5, color1: "#2c5270", color2: "#DDE6ED" });
-rsCrosshSensitivity.onSliding(onCrosshatching);
+rsCrosshSensitivity.onSliding(onCrosshSlide);
 
-var paramsCrossh = {
-    directions: ["ULDR", "LR", "DLUR", "UD"],
-    separation: rsCrosshSeparation.val,
-    linew: rsCrosshLinew.val,
-    sensitivity: rsCrosshSensitivity.val,
-    // bg: icCrosshBg.value,
-    bg: "white",
-    // color: icCrosshColor.value
-    color: "black"
-}
+var objForSvg = {};
+var downloadSvg = true;
 
-async function onCrosshatching() {
+async function onCrosshSlide() {
     if (imageOriginal == undefined) return;
-    let aotsch = await getArrObjToStartCrossh(paramsCrossh.directions, paramsCrossh.separation, imageOriginal.width, imageOriginal.height);
-    let arrBuckets = await getArrbucketsToCrosshatch(paramsCrossh.directions.length, rsCrosshSensitivity.val);
-    let aotdch = await getArrObjToDrawCrossh(aotsch, arrBuckets, dataI);
-    //  TEST getArrToDrawHatch ON Hatching, with purePixel().
+    canvFinal.imageSmoothingEnabled = false;
+    canvFinal.width = canvOriginal.width;
+    canvFinal.height = canvOriginal.height;
+    cf = canvFinal.getContext("2d", { willReadFrequently: true });
+    cf.fillStyle = paramsCrossh.bg;
+    cf.fillRect(0, 0, canvFinal.width, canvFinal.height);
+    // cf.strokeStyle = params.color;
+
+    let blankImagedata = cf.getImageData(0, 0, canvFinal.width, canvFinal.height);
+    objForSvg = {};
+    for (let i = 0; i < strCrosshDirections.length; i++) {
+        const dir = strCrosshDirections[i];
+        const blankLimit = maxMin((255 - (i + 1) * 51) + 1 + rsCrosshSensitivity.val, [0, 255]);
+        const buck = [[blankLimit, 255], [0, Math.max(blankLimit - 1, 0)]];
+        paramsCrossh.atdh = await getArrToDrawHatch(dir, rsCrosshSeparation.val, buck);
+        console.log(paramsCrossh.atdh);
+        // let diwATDH = await returnsDrawnImagedataWithATDH(blankImagedata, paramsCrossh);
+        // cf.putImageData(diwATDH, 0, 0);
+    }
+    //  20, 5, -20
 }
 
-function getArrObjToStartCrossh(directions = [], separation = 0, width = 0, height = 0) {
-    return new Promise(async (res, rej) => {
-        let arr = [];
-        for (let i = 0; i < directions.length; i++) {
-            const dir = directions[i];
-            let otsh = await getObjectToStartHatching(dir, width, height, separation);
-            arr.push(otsh);
-
+function getSerializedSvg(objforsvg) {
+    return new Promise((res) => {
+        let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("viewBox", `0 0 ${canvFinal.width} ${canvFinal.height}`);
+        for (const direction in objforsvg) {
+            let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("fill", "none");
+            path.setAttribute("stroke", "black");
+            path.setAttribute("stroke-width", rsCrosshLinew.val);
+            path.classList.add(direction);
+            let d = "";
+            if (Object.hasOwnProperty.call(objforsvg, direction)) {
+                const dir = objforsvg[direction];
+                for (let i = 0; i < dir.length; i++) {
+                    const obj = dir[i];
+                    d += `M ${obj.x} ${obj.y} L ${obj.lx} ${obj.ly} `;
+                }
+            }
+            path.setAttribute("d", d);
+            svg.appendChild(path);
         }
-        res(arr);
+        res(svg);
     });
 }
 
-function getArrObjToDrawCrossh(aotsch, arrBuckets, data) {
-    return new Promise(async (res, rej) => {
-        let arr = [];
-        for (let i = 0; i < aotsch.length; i++) {
-            const otsch = aotsch[i];
-            const buckets = arrBuckets[i];
-            let otdch = await getArrToDrawHatch(otsch, imageOriginal.width, data, buckets);
-            arr.push(otdch);
-        }
-        res(arr);
-    });
-}
+// function getArrToDrawCrossh(directions, separation) {
+//     return new Promise(async (res, rej) => {
+//         let arr = [];
+//         for (let i = 0; i < directions.length; i++) {
+//             const dir = directions[i];
+//             let otsh = await getObjectToStartHatching(dir, separation);
+//             arr.push(otsh);
+//         }
+//         res(arr);
+//     });
+// }
+// async function onCrosshatching() {
+//     if (imageOriginal == undefined) return;
+//     let aotdch = await getArrObjToDrawCrossh()
+//     //  TEST getArrToDrawHatch ON Hatching, with purePixel().
+// }
 
-function getArrbucketsToCrosshatch(how_many, sensitivity) {
-    return new Promise(async (res, rej) => {
-        let arr = [];
-        let every = parseInt(255 / (how_many + 1)); //  +1 because the first bucket will not be hatched, as it is the brightest area. 
-        for (let i = 1; i < how_many + 1; i++) {
-            let lim = maxMin((255 - (every * i) + sensitivity), [0, 255]);
-            let unhatched = [lim + 1, 255];
-            let hatched = [0, lim];
-            arr.push([unhatched, hatched]);
-        }
-        res(arr);
-    });
-}
+// function getArrObjToDrawCrossh(arrDirections, separation, how_many, sensitivity) {
+//     return new Promise(async (res, rej) => {
+//         let arr = [];
+//         for (let i = 0; i < arrDirections.length; i++) {
+//             const dir = arrDirections[i];
+//             let otdch = await getArrToDrawHatch(dir, separation, how_many, sensitivity);
+//             arr.push(otdch);
+//         }
+//         res(arr);
+//     });
+// }
+
+// function getArrbucketsToCrosshatch(how_many, sensitivity) {
+//     return new Promise(async (res, rej) => {
+//         let arr = [];
+//         let every = parseInt(255 / (how_many + 1)); //  +1 because the first bucket will not be hatched, as it is the brightest area. 
+//         for (let i = 1; i < how_many + 1; i++) {
+//             let lim = maxMin((255 - (every * i) + sensitivity), [0, 255]);
+//             let unhatched = [lim + 1, 255];
+//             let hatched = [0, lim];
+//             arr.push([unhatched, hatched]);
+//         }
+//         res(arr);
+//     });
+// }
 
 // function getArrToDrawHatch(otsh, imagedata, buckets) {
-async function getArrToDrawHatch(direction, separation, how_many, sens) {
-
-    let width = originalData.width;
-    let height = originalData.height;
-    let data = originalData.data;
-    let otsh = await getObjectToStartHatching(direction, width, height, separation);
-    let buckets = await get255Buckets(how_many + 1, sens);
-    // let atdh = await getArrToDrawHatch(otsh, imagedata, buckets);
-
-
+async function getArrToDrawHatch(direction, separation, buckets) {
     return new Promise(async (res, rej) => {
+        let width = originalData.width;
+        let data = originalData.data;
+        let otsh = await getObjectToStartHatching(direction, separation);
         let arr = [];
-
+        if (!objForSvg[direction]) objForSvg[direction] = [];
         for (let h = 0; h < otsh.arrXyLim.length; h++) {
             const obj = otsh.arrXyLim[h];
             arr.push([]);
@@ -891,6 +945,7 @@ async function getArrToDrawHatch(direction, separation, how_many, sens) {
                         }
                         // This generates an array with each x, y coord, its length and width.
                         if (j !== linewidth) {  //  The j counter for buckets[] is equal to the linewidth, that's why it it skips it if it is zero.
+                            // if(i < 100) console.log("pushed");
                             arr[last].push({
                                 x: x,
                                 y: y,
@@ -899,18 +954,23 @@ async function getArrToDrawHatch(direction, separation, how_many, sens) {
                                 linew: j
                             });
                             linewidth = j;
+                            objForSvg[direction].push({ x: x, y: y, lx: x, ly: y, linew: j });
                         } else {  //  It means j == the previous linewidth.
                             arr[last][arr[last].length - 1].lx += otsh.dirx;
                             arr[last][arr[last].length - 1].ly += otsh.diry;
+                            objForSvg[direction][objForSvg[direction].length - 1].lx += otsh.dirx;
+                            objForSvg[direction][objForSvg[direction].length - 1].ly += otsh.diry;
                         }
                         break;
                     }
                 }
+
             }
         }
         let cleanArr = arr.filter(ar => {  //  Remove lines in which there was no hatching at all.
             return ar.length > 0;
         });
+        // console.log(cleanArr);
         res(cleanArr);
     });
 }
@@ -1044,17 +1104,43 @@ function getArrWithObjRgbCount(data) {
 // ---------
 // ---------
 //  DOWNLOAD BAR
+const cbDownImgSvg = document.getElementById("cbDownImgSvg");
+cbDownImgSvg.addEventListener("click", () => {
+    if (cbDownImgSvg.checked) {
+        downloadSvg = true;
+    } else {
+        downloadSvg = false;
+    }
+});
+
 const btnDownImg = document.getElementById("btnDownImg");
-btnDownImg.addEventListener("click", () => {
-    let link = document.createElement("a");
+btnDownImg.addEventListener("click", async () => {
+    if (downloadSvg) {
+        let svg = await getSerializedSvg(objForSvg);
+        let serializer = new XMLSerializer();
+        let str = serializer.serializeToString(svg);
+        let dataUri = `data:image/svg+xml;base64,${btoa(str)}`;
+        let a = document.createElement("a");
+        a.style.display = "none";
+        a.href = dataUri;
+        a.download = getName("svg");
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    } else {
+        let link = document.createElement("a");
+        link.download = getName("png");
+        link.href = canvFinal.toDataURL();
+        link.click();
+    }
+});
+
+function getName(strExt) {
     let now = new Date();
     let date = `${now.getFullYear()}-${now.getMonth()}-${(now.getDate() < 10) ? "0" + now.getDate() : now.getDate()}`;
     let time = `${now.getHours()}.${now.getMinutes()}.${(now.getMilliseconds()).toFixed(2)}`;
-    link.download = `Pictunator ${date} ${time}.png`;
-    link.href = canvFinal.toDataURL();
-    link.click();
-});
-
+    return `Pictunator ${date} ${time}.${strExt}`;
+}
 
 // ---------
 // LOADING IMAGE
@@ -1101,18 +1187,23 @@ ifGaImage.addEventListener("input", async (evt) => {
     let newDef = parseInt(newMax / 3);
     rsHatchSeparation = new RangeSlider(contHatchSeparation, { label: "Separation", min: 2, max: newMax, step: 1, def: newDef, color1: "#2c5270", color2: "#DDE6ED" });
     rsHatchSeparation.onSliding(async () => {
-        paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, rsHatchHowmanyw.val, rsHatchSensitivity.val);
+        paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, paramsHatch.buckets);
         onHatchSlide(paramsHatch);
     });
 
     if (rbHatching.checked) {
-        paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, rsHatchHowmanyw.val, rsHatchSensitivity.val);
+        paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, paramsHatch.buckets);
         onHatchSlide(paramsHatch);
     }
 
     //  Crosshatching settings.
-    paramsCrossh.separation = parseInt(smallestDim / (10 * 4));
-    rsCrosshSeparation = new RangeSlider(contCroshSeparation, { label: "Separation", min: 3, max: parseInt(smallestDim / 10), step: 1, def: paramsCrossh.separation, color1: "#2c5270", color2: "#DDE6ED" });
+    let crosshSepMax = parseInt(smallestDim / (10));
+    let crosshSepDef = parseInt(crosshSepMax / 10 * 4);
+    rsCrosshSeparation = new RangeSlider(contCroshSeparation, { label: "Separation", min: 3, max: crosshSepMax, step: 1, def: crosshSepDef, color1: "#2c5270", color2: "#DDE6ED" });
+    rsCrosshSeparation.onSliding(() => {
+        onCrosshSlide(paramsCrossh);
+    });
+    if (rbCrosshatch.checked) onCrosshSlide(paramsCrossh);
 
     //  Decolorate settings.
     if (rbDecolor.checked) onDecolorate();

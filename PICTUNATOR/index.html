@@ -230,12 +230,20 @@
 					</div>
 				</div>
 			</div>
-			<div class="effect" id="effectCrossh" style="display: none;">
+			<div class="effect" id="effectCrossh">
 				<input type="radio" name="rgEffects" id="rbCrosshatch">
 				<label for="rbCrosshatch">Crosshatching</label>
 				<div class="controllers">
 					<div class="cont other">
 						<div class="btn" id="crosshDirections"></div>
+						<div class="btn color">
+							<input type="color" id="icCrosshColor">
+							<label for="icCrosshColor"></label>
+						</div>
+						<div class="btn color">
+							<input type="color" id="icCrosshBg">
+							<label for="icCrosshBg"></label>
+						</div>
 					</div>
 					<div class="cont slider" id="crosshSeparation">
 						<div class="wrapper"></div>
@@ -286,6 +294,9 @@
 			</div>
 		</section>
 		<section id="secDownloadBar">
+			<div class="d-bar">
+				<input type="checkbox" id="cbDownImgSvg" style="width: 40px; cursor: pointer; background-color: orange; display: inline">
+			</div>
 			<div class="d-bar d-button">
 				<button id="btnDownImg" class="bwing"><label for="btnDownImg">Download</label></button>
 			</div>
