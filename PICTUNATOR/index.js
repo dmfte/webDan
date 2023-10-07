@@ -544,7 +544,6 @@ rsHatchSensitivity.onSliding(async () => {
 const contHatchSeparation = document.querySelector("#hatchSeparation .wrapper");
 var rsHatchSeparation = new RangeSlider(contHatchSeparation, { label: "Separation", min: 2, max: 3, step: 1, def: 3, color1: "#2c5270", color2: "#DDE6ED" });  //  Will be reinitialized when image is loaded.
 rsHatchSeparation.onSliding(async () => {
-    console.log(paramsHatch.atdh);
     paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, paramsHatch.buckets);
     onHatchSlide(paramsHatch);
 });
@@ -577,7 +576,6 @@ rbtnsHatchDirections.forEach(bthd => {
         }
         interval = window.setInterval(fx, 50);
         strHatchDir = bthd.value;
-        console.log(strHatchDir);
         paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, paramsHatch.buckets);
         onHatchSlide(paramsHatch);
     });
@@ -615,7 +613,6 @@ function returnsDrawnImagedataWithATDH(imagedatafinal, params) {
                 getPurePxDrawnData(obj.x, obj.y, obj.lx, obj.ly, imagedatafinal, linew, arrRGB);
             }
         }
-        // console.log(imagedatafinal);
         res(imagedatafinal);
     });
 }
@@ -824,22 +821,32 @@ var downloadSvg = true;
 
 async function onCrosshSlide() {
     if (imageOriginal == undefined) return;
-    canvFinal.imageSmoothingEnabled = false;
+    canvFinal.imageSmoothingEnabled = true;
     canvFinal.width = canvOriginal.width;
     canvFinal.height = canvOriginal.height;
     cf = canvFinal.getContext("2d", { willReadFrequently: true });
     cf.fillStyle = paramsCrossh.bg;
     cf.fillRect(0, 0, canvFinal.width, canvFinal.height);
-    // cf.strokeStyle = params.color;
+    cf.strokeStyle = paramsCrossh.color;
+    cf.lineWidth = rsCrosshLinew.val;
 
-    let blankImagedata = cf.getImageData(0, 0, canvFinal.width, canvFinal.height);
+    // let blankImagedata = cf.getImageData(0, 0, canvFinal.width, canvFinal.height);
     objForSvg = {};
     for (let i = 0; i < strCrosshDirections.length; i++) {
         const dir = strCrosshDirections[i];
         const blankLimit = maxMin((255 - (i + 1) * 51) + 1 + rsCrosshSensitivity.val, [0, 255]);
         const buck = [[blankLimit, 255], [0, Math.max(blankLimit - 1, 0)]];
         paramsCrossh.atdh = await getArrToDrawHatch(dir, rsCrosshSeparation.val, buck);
-        console.log(paramsCrossh.atdh);
+        paramsCrossh.atdh.forEach(tdh => {
+            tdh.forEach(dh => {
+                cf.save();
+                cf.beginPath();
+                cf.moveTo(dh.x, dh.y);
+                cf.lineTo(dh.lx, dh.ly);
+                cf.stroke();
+                cf.restore();
+            });
+        });
         // let diwATDH = await returnsDrawnImagedataWithATDH(blankImagedata, paramsCrossh);
         // cf.putImageData(diwATDH, 0, 0);
     }
@@ -945,7 +952,6 @@ async function getArrToDrawHatch(direction, separation, buckets) {
                         }
                         // This generates an array with each x, y coord, its length and width.
                         if (j !== linewidth) {  //  The j counter for buckets[] is equal to the linewidth, that's why it it skips it if it is zero.
-                            // if(i < 100) console.log("pushed");
                             arr[last].push({
                                 x: x,
                                 y: y,
@@ -970,7 +976,6 @@ async function getArrToDrawHatch(direction, separation, buckets) {
         let cleanArr = arr.filter(ar => {  //  Remove lines in which there was no hatching at all.
             return ar.length > 0;
         });
-        // console.log(cleanArr);
         res(cleanArr);
     });
 }
@@ -1115,7 +1120,7 @@ cbDownImgSvg.addEventListener("click", () => {
 
 const btnDownImg = document.getElementById("btnDownImg");
 btnDownImg.addEventListener("click", async () => {
-    if (downloadSvg) {
+    if (cbDownImgSvg.checked) {
         let svg = await getSerializedSvg(objForSvg);
         let serializer = new XMLSerializer();
         let str = serializer.serializeToString(svg);
