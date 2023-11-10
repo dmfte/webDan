@@ -788,7 +788,7 @@ async function getObjectToStartHatching(dir = "", separation = 0) {
 var paramsCrossh = {
     linew: 2,
     bg: "white",
-    color: "black",
+    color: "#000000",
     atdh: undefined
 }
 
@@ -802,17 +802,37 @@ rbCrosshatch.addEventListener("input", () => {
     if (rbCrosshatch.checked) onCrosshSlide();
 });
 
-const contCroshSeparation = document.getElementById("crosshSeparation");
+const icCrosshColor = document.getElementById("icCrosshColor");
+icCrosshColor.value = paramsCrossh.color;
+const lbCrosshColor = document.querySelector("[for=icCrosshColor");
+lbCrosshColor.style.backgroundColor = paramsCrossh.color;
+icCrosshColor.addEventListener("input", () => {
+    lbCrosshColor.style.backgroundColor = icCrosshColor.value;
+    paramsCrossh.color = icCrosshColor.value;
+    onCrosshSlide(paramsCrossh);
+});
+
+const icCrosshBg = document.getElementById("icCrosshBg");
+icCrosshBg.value = paramsCrossh.bg;
+const lbCrosshBg = document.querySelector("[for=icCrosshBg]");
+lbCrosshBg.style.backgroundColor = paramsCrossh.bg;
+icCrosshBg.addEventListener("input", () => {
+    lbCrosshBg.style.backgroundColor = icCrosshBg.value;
+    paramsCrossh.bg = icCrosshBg.value;
+    onCrosshSlide(paramsCrossh);
+});
+
+const contCroshSeparation = document.querySelector("#crosshSeparation .wrapper");
 var rsCrosshSeparation = new RangeSlider(contCroshSeparation, { label: "Separation", min: 3, max: 4, step: 1, color1: "#2c5270", color2: "#DDE6ED" });
 rsCrosshSeparation.onSliding(onCrosshSlide);
 
-const contCrosshLinew = document.getElementById("crosshLinew");
+const contCrosshLinew = document.querySelector("#crosshLinew .wrapper");
 const rsCrosshLinew = new RangeSlider(contCrosshLinew, { label: "Width", min: 1, max: 10, def: 2, step: 1, color1: "#2c5270", color2: "#DDE6ED" });
 rsCrosshLinew.onSliding(() => {
     paramsCrossh.linew = rsCrosshLinew.val;
     onCrosshSlide();
 });
-const contCrosshSensitivity = document.getElementById("crosshSensitivity");
+const contCrosshSensitivity = document.querySelector("#crosshSensitivity .wrapper");
 const rsCrosshSensitivity = new RangeSlider(contCrosshSensitivity, { label: "Sensitivity", min: -250, max: 250, def: 0, step: 5, color1: "#2c5270", color2: "#DDE6ED" });
 rsCrosshSensitivity.onSliding(onCrosshSlide);
 
@@ -1109,14 +1129,39 @@ function getArrWithObjRgbCount(data) {
 // ---------
 // ---------
 //  DOWNLOAD BAR
+const lbDownImgSvg = document.querySelector("[for=cbDownImgSvg]");
+const pathLbDownImgSvg = lbDownImgSvg.querySelector("path");
+const m_pathLbDownImgSvg = new MorphPath({
+    path: path1,
+    arrayd: ["M 2 11 L 5 11 L 5 8 L 8 8 L 8 5 L 11 5 L 11 2 C 12 2 13 2 14 2 L 14 5 L 11 5 L 11 8 L 8 8 L 8 11 L 5 11 L 5 14 L 5 14 L 2 14 C 2 13 2 12 2 11",
+        "M 2 11 L 5 11 L 5 8 L 8 8 L 8 5 L 11 5 L 11 2 C 12 2 13 2 14 2 L 14 5 L 11 5 L 11 8 L 8 8 L 8 11 L 5 11 L 5 14 L 5 14 L 2 14 C 2 13 2 12 2 11",
+        "M 2 11 L 4 9 L 5 8 L 7 6 L 8 5 L 10 3 L 11 2 C 13 0 16 3 14 5 L 14 5 L 13 6 L 11 8 L 10 9 L 8 11 L 7 12 L 5 14 L 5 14 L 5 14 C 3 16 0 13 2 11",
+        "M 2 11 L 4 9 L 5 8 L 7 6 L 8 5 L 10 3 L 11 2 C 13 0 16 3 14 5 L 14 5 L 13 6 L 11 8 L 10 9 L 8 11 L 7 12 L 5 14 L 5 14 L 5 14 C 3 16 0 13 2 11",
+        "M 2 11 L 5 11 L 5 8 L 8 8 L 8 5 L 11 5 L 11 2 C 12 2 13 2 14 2 L 14 5 L 11 5 L 11 8 L 8 8 L 8 11 L 5 11 L 5 14 L 5 14 L 2 14 C 2 13 2 12 2 11"
+    ],
+    dur: 900,
+    keytimes: [0, 0.2, 0.5, 0.7, 1],
+    repeatcount: Infinity
+})
+lbDownImgSvg.addEventListener("pointerenter", () => {
+    m_pathLbDownImgSvg.start();
+    lbDownImgSvg.addEventListener("pointerleave", () => {
+        let step = (downloadSvg) ? 2 : 0;
+        m_pathLbDownImgSvg.stop(step);
+    });
+});
+
 const cbDownImgSvg = document.getElementById("cbDownImgSvg");
 cbDownImgSvg.addEventListener("click", () => {
     if (cbDownImgSvg.checked) {
         downloadSvg = true;
+        // pathLbDownImgSvg.setAttribute("d", "M 2 11 L 4 9 L 5 8 L 7 6 L 8 5 L 10 3 L 11 2 C 13 0 16 3 14 5 L 14 5 L 13 6 L 11 8 L 10 9 L 8 11 L 7 12 L 5 14 L 5 14 L 5 14 C 3 16 0 13 2 11");
     } else {
         downloadSvg = false;
+        // pathLbDownImgSvg.setAttribute("d", "M 2 11 L 5 11 L 5 8 L 8 8 L 8 5 L 11 5 L 11 2 C 12 2 13 2 14 2 L 14 5 L 11 5 L 11 8 L 8 8 L 8 11 L 5 11 L 5 14 L 5 14 L 2 14 C 2 13 2 12 2 11");
     }
 });
+
 
 const btnDownImg = document.getElementById("btnDownImg");
 btnDownImg.addEventListener("click", async () => {

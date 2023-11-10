@@ -83,7 +83,7 @@
 							<input type="color" id="icGridColor">
 							<label for="icGridColor"></label>
 						</div>
-						<div class="btn wOrH">
+						<div class="btn" id="wOrH">
 							<input type="checkbox" id="cbGridWOrH" checked>
 							<label for="cbGridWOrH">
 								<span class="grid-by-w">By W</span><br>
@@ -175,32 +175,28 @@
 							</svg>
 							<div class="submenu" id="rgdirections">
 								<div class="wrapper">
-									<input type="radio" id="DLUR" value="DLUR" name="rgHatchDir" data-vb="0" checked>
-									<label for="DLUR">
+									<input type="radio" id="rbDLUR" value="DLUR" name="rgHatchDir" data-vb="0" checked>
+									<label for="rbDLUR">
 										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
-											<path stroke-linecap="round" stroke="black" fill="none" stroke-width="0.5" d="
-												M 9 1 l -8 0 l 0 8 l 8 0 z M 7 3 l -4 4"></path>
+											<use xlink:href="#DLUR" class="usesymbol-hatchdirection"></use>
 										</svg>
 									</label>
-									<input type="radio" id="LR" value="LR" name="rgHatchDir" data-vb="10">
-									<label for="LR">
-										<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 0 10 10">
-											<path stroke-linecap="round" stroke="black" fill="none" stroke-width="0.5" d="
-												M 19 1 l -8 0 l 0 8 l 8 0 z M 13 5 l 4 0"></path>
+									<input type="radio" id="rbLR" value="LR" name="rgHatchDir" data-vb="10">
+									<label for="rbLR">
+										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+											<use xlink:href="#LR" class="usesymbol-hatchdirection"></use>
 										</svg>
 									</label>
-									<input type="radio" id="ULDR" value="ULDR" name="rgHatchDir" data-vb="20">
-									<label for="ULDR">
-										<svg xmlns="http://www.w3.org/2000/svg" viewBox="20 0 10 10">
-											<path stroke-linecap="round" stroke="black" fill="none" stroke-width="0.5" d="
-												M 29 1 l -8 0 l 0 8 l 8 0 z M 23 3 l 4 4"></path>
+									<input type="radio" id="rbULDR" value="ULDR" name="rgHatchDir" data-vb="20">
+									<label for="rbULDR">
+										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+											<use xlink:href="#ULDR" class="usesymbol-hatchdirection"></use>
 										</svg>
 									</label>
-									<input type="radio" id="UD" value="UD" name="rgHatchDir" data-vb="30">
-									<label for="UD">
-										<svg xmlns="http://www.w3.org/2000/svg" viewBox="30 0 10 10">
-											<path stroke-linecap="round" stroke="black" fill="none" stroke-width="0.5" d="
-												M 39 1 l -8 0 l 0 8 l 8 0 z M 35 3 l 0 4"></path>
+									<input type="radio" id="rbUD" value="UD" name="rgHatchDir" data-vb="30">
+									<label for="rbUD">
+										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+											<use xlink:href="#UD" class="usesymbol-hatchdirection"></use>
 										</svg>
 									</label>
 								</div>
@@ -232,7 +228,7 @@
 			</div>
 			<div class="effect" id="effectCrossh">
 				<input type="radio" name="rgEffects" id="rbCrosshatch">
-				<label for="rbCrosshatch">Crosshatching</label>
+				<label for="rbCrosshatch"><span class="rb-dot"></span>Crosshatching</label>
 				<div class="controllers">
 					<div class="cont other">
 						<div class="btn" id="crosshDirections"></div>
@@ -245,13 +241,13 @@
 							<label for="icCrosshBg"></label>
 						</div>
 					</div>
-					<div class="cont slider" id="crosshSeparation">
+					<div class="cont slider" id="crosshSeparation" tabindex="0">
 						<div class="wrapper"></div>
 					</div>
-					<div class="cont slider" id="crosshLinew">
+					<div class="cont slider" id="crosshLinew" tabindex="0">
 						<div class="wrapper"></div>
 					</div>
-					<div class="cont slider" id="crosshSensitivity">
+					<div class="cont slider" id="crosshSensitivity" tabindex="0">
 						<div class="wrapper"></div>
 					</div>
 				</div>
@@ -262,16 +258,16 @@
 						<path stroke-linecap="round" stroke-width="0.5" stroke="black" fill="none" d="M 0 0 H 56 V 14 V 14 H 0 V 0 M 14 0 V 14 M 28 0 V 14 M 42 0 V 14 M 0 0 M 2 2 L 12 12 M 16 7 H 26 M 30 12 L 40 2 m 9 0 l 0 10"></path>
 					</symbol>
 					<symbol viewBox="0 0 10 10" id="ULDR">
-						<path stroke-linecap="round" stroke-width="0.5" stroke="black" fill="none" d="M 0 0 H 14 V 14 V 14 H 0 V 0 M 2 2 L 12 12"></path>
+						<path d="M 9 1 L 1 1 L 1 9 L 9 9 Z M 3 3 L 7 7"></path>
 					</symbol>
 					<symbol viewBox="0 0 10 10" id="LR">
-						<path stroke-linecap="round" stroke-width="0.5" stroke="black" fill="none" d="M 0 0 H 14 V 14 V 14 H 0 V 0 M 2 7 L 12 7"></path>
+						<path d="M 9 1 L 1 1 L 1 9 L 9 9 Z M 3 5 L 7 5"></path>
 					</symbol>
-					<symbol viewBox="0 0 10 10" id="DLUP">
-						<path stroke-linecap="round" stroke-width="0.5" stroke="black" fill="none" d="M 0 0 H 14 V 14 V 14 H 0 V 0 M 2 12 L 12 2"></path>
+					<symbol viewBox="0 0 10 10" id="DLUR">
+						<path d="M 9 1 L 1 1 L 1 9 L 9 9 Z M 7 3 L 3 7"></path>
 					</symbol>
 					<symbol viewBox="0 0 10 10" id="UD">
-						<path stroke-linecap="round" stroke-width="0.5" stroke="black" fill="none" d="M 0 0 H 14 V 14 V 14 H 0 V 0 M 7 2 L 7 12"></path>
+						<path d="M 9 1 L 1 1 L 1 9 L 9 9 Z M 5 3 L 5 7"></path>
 					</symbol>
 				</defs>
 			</svg>
@@ -294,8 +290,13 @@
 			</div>
 		</section>
 		<section id="secDownloadBar">
-			<div class="d-bar">
-				<input type="checkbox" id="cbDownImgSvg" style="width: 40px; cursor: pointer; background-color: orange; display: inline">
+			<div class="d-bar svg-cb">
+				<input type="checkbox" id="cbDownImgSvg">
+				<label for="cbDownImgSvg">
+					<svg viewBox="0 0 16 16">
+						<path id="path1" stroke="none" fill="black" d="M 2 11 L 5 11 L 5 8 L 8 8 L 8 5 L 11 5 L 11 2 C 12 2 13 2 14 2 L 14 5 L 11 5 L 11 8 L 8 8 L 8 11 L 5 11 L 5 14 L 5 14 L 2 14 C 2 13 2 12 2 11"></path>
+					</svg>
+				</label>
 			</div>
 			<div class="d-bar d-button">
 				<button id="btnDownImg" class="bwing"><label for="btnDownImg">Download</label></button>
@@ -311,6 +312,7 @@
 
 	<script src="AutoDialog.js"></script>
 	<script src="RangeSlider.js"></script>
+	<script src="MorphPath.js"></script>
 	<script src="index.js"></script>
 </body>
 

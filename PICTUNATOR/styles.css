@@ -67,6 +67,7 @@ svg {
 	max-height: 100%;
 }
 
+
 /* Styles for the dynamically added dialog with AutoDialog.js */
 dialog {
 	border-width: 3px;
@@ -144,12 +145,12 @@ input[type=checkbox] {
 
 .g-action input~label,
 .btn input~label {
-	display: flex;
+	/* display: flex;
 	justify-content: center;
 	align-items: center;
 	width: 100%;
 	height: 100%;
-	cursor: pointer;
+	cursor: pointer; */
 }
 
 /* --------- */
@@ -261,9 +262,37 @@ nav.top-nav .nav-items .nav-i:active svg path {
 	justify-content: flex-start;
 	align-items: center;
 	z-index: 1;
+
+	& .g-action {
+		position: relative;
+		border-radius: 0.7rem;
+		border: 2px solid var(--blue-dark);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: 0.1rem;
+		margin: 0 0.2rem;
+		background-color: var(--blue-medium);
+		width: 58px;
+		height: 58px;
+
+		& label {
+			cursor: pointer;
+			width: 100%;
+			height: 100%;
+		}
+	}
+
+	& #gaInputImage {
+		padding: 0;
+		align-items: stretch;
+		width: auto;
+		max-width: 150px;
+		margin-right: 2rem;
+	}
 }
 
-#secGlobalActions .g-action {
+/* #secGlobalActions .g-action {
 	position: relative;
 	border-radius: 0.7rem;
 	border: 2px solid var(--blue-dark);
@@ -271,11 +300,10 @@ nav.top-nav .nav-items .nav-i:active svg path {
 	justify-content: center;
 	align-items: stretch;
 	margin: 0 0.2rem;
-	/* padding: 0.4rem; */
 	background-color: var(--blue-medium);
 	width: 58px;
 	height: 58px;
-}
+} */
 
 #secGlobalActions .g-action input~label {
 	/* padding: 0.2rem;
@@ -287,13 +315,13 @@ nav.top-nav .nav-items .nav-i:active svg path {
 }
 
 /* Input file button. */
-#secGlobalActions #gaInputImage {
+/* #secGlobalActions #gaInputImage {
 	padding: 0;
 	align-items: stretch;
 	width: auto;
 	max-width: 150px;
 	margin-right: 2rem;
-}
+} */
 
 #secGlobalActions #gaInputImage::before {
 	position: absolute;
@@ -362,186 +390,172 @@ nav.top-nav .nav-items .nav-i:active svg path {
 	align-items: stretch;
 	overflow-y: auto;
 	z-index: 3;
+
+	& .effect {
+		border: none;
+		border-radius: 1rem;
+		margin: 0.7rem 0.3rem;
+		padding: 0.4rem 0.2rem;
+		box-shadow: 0px -9px 15px -6px var(--blue-medium), 0px 6px 19px -7px black;
+		display: flex;
+		flex-direction: column;
+		justify-content: start;
+		align-items: stretch;
+
+		& input[name=rgEffects] {
+			display: none;
+		}
+
+		& input[name=rgEffects]+label {
+			padding: 0 0.2rem;
+			display: flex;
+			justify-content: flex-start;
+			align-items: center;
+			cursor: pointer;
+			color: var(--blue-muted);
+
+			& span.rb-dot {
+				background: var(--blue-muted);
+				border-radius: 50%;
+				margin-right: 0.4em;
+				width: 0.7em;
+				height: 0.7em;
+				transform: scale(0);
+			}
+		}
+
+		& .controllers {
+			position: relative;
+			margin: 0;
+			padding: 0;
+			max-height: 0;
+			display: flex;
+			flex-direction: column;
+			justify-content: flex-start;
+			align-items: stretch;
+			overflow: hidden;
+
+			& .cont {
+				margin: 0.1rem 0;
+			}
+
+			& .cont.other {
+				display: flex;
+				flex-direction: row;
+				justify-content: flex-start;
+				align-items: stretch;
+
+				& .btn {
+					cursor: pointer;
+					border-radius: 20%;
+					border: 2px solid var(--blue-darkest);
+					margin: 0 0.2rem;
+					padding: 0;
+					color: var(--blue-dark);
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					width: 48px;
+					height: 48px;
+					overflow: hidden;
+
+					& input[type=color] {
+						width: 0;
+						height: 0;
+						border: none;
+						transform: scale(0);
+					}
+
+					& input[type=color]~label,
+					& input[type=checkbox]~label {
+						cursor: pointer;
+						width: 100%;
+						height: 100%;
+						/* Label BG color will be set in JS when inputColor is initialized. */
+					}
+				}
+
+				& #wOrH {
+
+					& label {
+						margin: 0.1rem;
+						display: grid;
+						grid-template-areas: "arrowUp width" "arrowDown height";
+						align-items: center;
+
+						& span {
+							color: var(--blue-muted);
+							font-weight: 400;
+						}
+
+						& span.arrow {
+							grid-area: arrowUp;
+						}
+
+						& span:not(.arrow) {
+							font-size: 0.8rem;
+							line-height: 1.5;
+							white-space: nowrap;
+						}
+
+						& span.grid-by-w {
+							grid-area: width;
+							color: var(--blue-muted);
+						}
+
+						& span.grid-by-h {
+							grid-area: height;
+							color: var(--blue-shade);
+						}
+					}
+
+					& input[type=checkbox]:checked~label {
+
+						& span.arrow {
+							grid-area: arrowDown;
+						}
+
+						& span.grid-by-w {
+							color: var(--blue-shade);
+						}
+
+						& span.grid-by-h {
+							color: var(--blue-muted);
+						}
+					}
+
+				}
+			}
+
+		}
+	}
+
+	& .effect.active {
+		box-shadow: inset 0px 5px 10px -5px black, inset 0px -5px 15px -4px var(--blue-light);
+		background-color: var(--blue-dark);
+
+		& input[name=rgEffects]+label {
+			transform-origin: center;
+			transform: scale(0.9);
+			color: var(--blue-light);
+
+			& span.rb-dot {
+				transform: scale(1);
+			}
+		}
+
+		& .controllers {
+			max-height: 1000px;
+			padding-top: 0.8rem;
+			transition: max-height 1s ease-in;
+
+		}
+
+	}
+
+
 }
 
-#secToolbar .effect {
-	border: none;
-	border-radius: 1rem;
-	margin: 0.7rem 0.3rem;
-	padding: 0.4rem 0.2rem;
-	box-shadow: 0px -9px 15px -6px var(--blue-medium), 0px 6px 19px -7px black;
-	display: flex;
-	flex-direction: column;
-	justify-content: start;
-	align-items: stretch;
-}
-
-#secToolbar .effect.active {
-	box-shadow: inset 0px 5px 10px -5px black, inset 0px -5px 15px -4px var(--blue-light);
-	background-color: var(--blue-dark);
-}
-
-#secToolbar .effect input[name=rgEffects] {
-	display: none;
-}
-
-#secToolbar .effect input[name=rgEffects]+label {
-	padding: 0 0.2rem;
-	display: flex;
-	justify-content: flex-start;
-	align-items: center;
-	cursor: pointer;
-	color: var(--blue-muted)
-}
-
-#secToolbar .effect input[name=rgEffects]:checked+label {
-	transform-origin: center;
-	transform: scale(0.9);
-	color: var(--blue-light);
-}
-
-#secToolbar .effect input[name=rgEffects]+label span.rb-dot {
-	background: var(--blue-muted);
-	border-radius: 50%;
-	margin-right: 0.4em;
-	width: 0.7em;
-	height: 0.7em;
-	/* opacity: 0.6; */
-	transform: scale(0);
-}
-
-#secToolbar .effect input[name=rgEffects]:checked+label span.rb-dot {
-	transform: scale(1);
-}
-
-#secToolbar .effect .controllers {
-	position: relative;
-	margin: 0;
-	padding: 0;
-	max-height: 0;
-	display: flex;
-	flex-direction: column;
-	justify-content: flex-start;
-	align-items: stretch;
-	overflow: hidden;
-}
-
-#secToolbar .effect input[name=rgEffects]:checked~.controllers {
-	max-height: 1000px;
-	padding-top: 0.8rem;
-	transition: max-height 1s ease-in;
-}
-
-#secToolbar .effect .controllers .cont {
-	margin: 0.1rem 0;
-}
-
-#secToolbar .effect .controllers .cont.other {
-	display: flex;
-	flex-direction: row;
-	justify-content: flex-start;
-	align-items: stretch;
-}
-
-#secToolbar .effect .controllers .cont.other .btn {
-	border-radius: 20%;
-	border: 1px solid var(--blue-darkest);
-	margin: 0 0.2rem;
-	/* padding: 0 0.3rem; */
-	padding: 0;
-	color: var(--blue-dark);
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 48px;
-	height: 48px;
-	overflow: hidden;
-}
-
-#secToolbar .effect#effectHatching .controllers .cont.other .btn.btn.with-submenu {
-	padding: 0 0.3rem;
-}
-
-#secToolbar .effect .controllers .cont.other .btn input,
-#secToolbar .effect .controllers .cont.other .btn label {
-	cursor: pointer;
-	width: 100%;
-	height: 100%;
-}
-
-/* Colorpickers in toolbar */
-#secToolbar .effect.active .controllers .cont.other .btn.color {
-	display: flex;
-	justify-content: center;
-	align-items: stretch;
-	border-width: 3px;
-	padding: 0;
-	/* Default color will be set as label's background-color on JS. */
-}
-
-#secToolbar .effect.active .controllers .cont.other .btn input[type=color] {
-	width: 0;
-	border: none;
-}
-
-/* -------- */
-/* To display grid either by width or height. */
-#secToolbar .effect .controllers .cont.other .wOrH {
-	display: flex;
-	justify-content: center;
-	align-items: stretch;
-}
-
-#secToolbar .effect .controllers .cont.other .wOrH input[type=checkbox] {
-	display: none;
-}
-
-#secToolbar .effect .controllers .cont.other .wOrH input[type=checkbox]~label {
-	display: grid;
-	grid-template-areas: "arrowUp width" "arrowDown height";
-	align-items: center;
-
-}
-
-#secToolbar .effect .controllers .cont.other .wOrH input[type=checkbox]~label span:not(.arrow) {
-	font-size: 0.8rem;
-	line-height: 1.5;
-	white-space: nowrap;
-}
-
-#secToolbar .effect .controllers .cont.other .wOrH input[type=checkbox]~label span {
-	color: var(--blue-muted);
-	font-weight: 400;
-
-}
-
-#secToolbar .effect .controllers .cont.other .wOrH input[type=checkbox]~label span.arrow {
-	grid-area: arrowUp;
-}
-
-#secToolbar .effect .controllers .cont.other .wOrH input[type=checkbox]:checked~label span.arrow {
-	grid-area: arrowDown;
-}
-
-#secToolbar .effect .controllers .cont.other .wOrH input[type=checkbox]~label span.grid-by-w {
-	grid-area: width;
-	color: var(--blue-muted);
-}
-
-#secToolbar .effect .controllers .cont.other .wOrH input[type=checkbox]:checked~label span.grid-by-w {
-	color: var(--blue-shade);
-}
-
-#secToolbar .effect .controllers .cont.other .wOrH input[type=checkbox]~label span.grid-by-h {
-	grid-area: height;
-	color: var(--blue-shade);
-}
-
-#secToolbar .effect .controllers .cont.other .wOrH input[type=checkbox]:checked~label span.grid-by-h {
-	color: var(--blue-muted);
-}
-
-/* ------ */
 /* GRAYSCALING. For the button to switch between including-black-and-white and only-grays. */
 #secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label {
 	display: flex;
@@ -670,17 +684,30 @@ nav.top-nav .nav-items .nav-i:active svg path {
 	justify-content: center;
 	align-items: center;
 	flex: 1;
+	cursor: pointer;
+}
+
+#secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection .submenu#rgdirections .wrapper input[type=radio]+label svg {
+	pointer-events: none;
+}
+
+#secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection .submenu#rgdirections .wrapper input[type=radio]+label svg .usesymbol-hatchdirection {
+	stroke-linecap: round;
+	stroke-width: 0.5;
+	stroke: black;
+	fill: none;
 }
 
 #secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection .submenu#rgdirections .wrapper input[type=radio]:checked+label svg {
 	scale: 0.9;
 }
 
-#secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection .submenu#rgdirections .wrapper input[type=radio]:checked+label svg path {
+#secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection .submenu#rgdirections .wrapper input[type=radio]:checked+label svg .usesymbol-hatchdirection {
 	stroke: var(--blue-light);
 }
 
-#secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection .submenu#rgdirections .wrapper input[type=radio]:not(:checked)+label:hover svg path {
+
+#secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection .submenu#rgdirections .wrapper input[type=radio]:not(:checked)+label:hover svg .usesymbol-hatchdirection {
 	stroke: var(--blue-shade);
 }
 
@@ -791,36 +818,100 @@ nav.top-nav .nav-items .nav-i:active svg path {
 	justify-content: flex-end;
 	align-items: stretch;
 	z-index: 4;
+
+	& .d-bar {
+		position: relative;
+		margin: 0.1rem 1rem;
+		border: 1px solid blue;
+		max-width: 100px;
+		display: flex;
+		justify-content: center;
+		align-items: stretch;
+
+		& input {
+			display: none;
+		}
+
+		& input~label {
+			display: flex;
+			border-radius: 7px;
+			padding: 0.1rem;
+			cursor: pointer;
+
+		}
+
+		& input~label[for=cbDownImgSvg] {
+			background-color: white;
+
+		}
+	}
+
+	& .d-bar:active::after {
+		pointer-events: none;
+		position: absolute;
+		content: "";
+		top: -2px;
+		left: -2px;
+		bottom: -2px;
+		right: -2px;
+		border: 1px solid #FFFFFF;
+		border-radius: 5px;
+	}
+
+	& .d-bar.d-button {
+		display: flex;
+		justify-content: center;
+		align-items: stretch;
+		margin: 0.3rem 0.5rem;
+
+		& button {
+			position: relative;
+			border: none;
+			border-radius: 0.5rem;
+			margin: 0;
+			padding: 0;
+			width: 75px;
+
+			& label {
+				cursor: pointer;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				width: 100%;
+				height: 100%;
+			}
+		}
+	}
 }
 
-#secDownloadBar .d-bar {
+/* #secDownloadBar .d-bar {
 	margin: 0.1rem 0.2rem;
-}
+} */
 
-#secDownloadBar .d-bar.d-button {
+/* #secDownloadBar .d-bar.d-button {
 	display: flex;
 	justify-content: center;
 	align-items: stretch;
 	margin: 0.3rem 0.5rem;
-}
+} */
 
-#secDownloadBar .d-bar.d-button button {
+/* #secDownloadBar .d-bar.d-button button {
 	position: relative;
 	border: none;
 	border-radius: 0.5rem;
 	margin: 0;
 	padding: 0;
 	width: 75px;
-}
+} */
 
-#secDownloadBar .d-bar.d-button button label {
+/* #secDownloadBar .d-bar.d-button button label {
 	cursor: pointer;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	width: 100%;
 	height: 100%;
-}
+} */
 
 /* Grid button effect. */
 /* Vertical bars. */
@@ -1140,4 +1231,20 @@ nav.top-nav .nav-items .nav-i:active svg path {
 	#secToolbar .effect.active#effectHatching .controllers .cont.slider#hatchSensitivity::after {
 		content: "Sens.";
 	}
+
+	/* ------ */
+	/* CROSSHATCHING */
+	#secToolbar .effect.active#effectCrossh .controllers .cont.slider#crosshSeparation::after {
+		content: "Sepr.";
+	}
+
+	#secToolbar .effect.active#effectCrossh .controllers .cont.slider#crosshLinew::after {
+		content: "Width";
+	}
+
+	#secToolbar .effect.active#effectCrossh .controllers .cont.slider#crosshSensitivity::after {
+		content: "Sens.";
+	}
+
+	/* ------ */
 }
