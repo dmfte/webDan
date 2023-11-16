@@ -475,7 +475,7 @@ nav.top-nav .nav-items .nav-i:active svg path {
 					}
 				}
 
-				& #wOrH {
+				& .btn#wOrH {
 
 					& label {
 						margin: 0.1rem;
@@ -525,6 +525,106 @@ nav.top-nav .nav-items .nav-i:active svg path {
 					}
 
 				}
+
+				& .btn.bnw {
+
+					/* GRAYSCALING. For the button to switch between including-black-and-white and only-grays. */
+					& label {
+						display: flex;
+
+						& span {
+							flex: 1;
+						}
+
+						& span.stripe1 {
+							background-color: rgb(64, 64, 64);
+						}
+
+						& span.stripe2 {
+							background-color: rgb(160, 160, 160);
+						}
+
+						& span.stripe3 {
+							background-color: rgb(127, 127, 127);
+						}
+					}
+
+					& input[type=checkbox]:checked~label {
+
+						& span.stripe1 {
+							background-color: rgb(0, 0, 0);
+						}
+
+						& span.stripe3 {
+							background-color: rgb(255, 255, 255);
+						}
+					}
+
+					& input[type=checkbox]:hover~label {
+
+						& span.stripe1 {
+							animation: 700ms infinite alternate black-to-gray;
+						}
+
+						& span.stripe3 {
+							animation: 700ms infinite alternate white-to-gray;
+						}
+					}
+				}
+
+				& .btn.submenuer#crosshDirections {
+					display: flex;
+					position: relative;
+					overflow: visible;
+
+					& svg {
+
+						& .usesymbol-hatchdirection {
+							stroke-linecap: round;
+							stroke-width: 0.5;
+							stroke: black;
+							fill: none;
+						}
+					}
+
+					& .submenuee {
+						width: 0;
+					}
+
+				}
+
+				& .btn.submenuer#crosshDirections:focus-within {
+					/* & .btn.submenuer#crosshDirections { */
+					z-index: 2;
+					background-color: var(--blue-medium);
+
+
+					& .submenuee {
+						position: absolute;
+						top: 100%;
+						left: 0;
+						background-color: var(--blue-shade);
+						width: 240px;
+						height: 60px;
+						display: flex;
+						justify-content: space-between;
+						align-items: stretch;
+
+						& label svg use {
+							stroke: #575757;
+						}
+
+						& label.checked svg use {
+							stroke: var(--blue-darkest);
+						}
+
+						& label:hover svg use {
+							stroke: var(--blue-light)
+						}
+					}
+				}
+
+
 			}
 
 		}
@@ -556,46 +656,6 @@ nav.top-nav .nav-items .nav-i:active svg path {
 
 }
 
-/* GRAYSCALING. For the button to switch between including-black-and-white and only-grays. */
-#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label {
-	display: flex;
-}
-
-#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label span {
-	flex: 1;
-	height: 100%;
-}
-
-#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label span.stripe1 {
-	background-color: rgb(64, 64, 64);
-}
-
-#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label:hover span.stripe1 {
-	animation: 700ms infinite alternate black-to-gray;
-}
-
-#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw input:checked~label span.stripe1 {
-	background-color: rgb(0, 0, 0);
-}
-
-#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label span.stripe2 {
-	background-color: rgb(127, 127, 127);
-}
-
-#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label span.stripe3 {
-	background-color: rgb(160, 160, 160);
-}
-
-#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw label:hover span.stripe3 {
-	animation: 700ms infinite alternate white-to-gray;
-}
-
-#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw input:checked~label span.stripe3 {
-	background-color: rgb(255, 255, 255);
-}
-
-/* rgb(64, 64, 64) */
-/* rgb(160, 160, 160) */
 
 @keyframes black-to-gray {
 	from {
@@ -1234,8 +1294,11 @@ nav.top-nav .nav-items .nav-i:active svg path {
 
 	/* ------ */
 	/* CROSSHATCHING */
-	#secToolbar .effect.active#effectCrossh .controllers .cont.slider#crosshSeparation::after {
-		content: "Sepr.";
+	#effectCrosshactive {
+
+		& .controllers .cont.slider#crosshSeparation::after {
+			content: "Sepr.";
+		}
 	}
 
 	#secToolbar .effect.active#effectCrossh .controllers .cont.slider#crosshLinew::after {

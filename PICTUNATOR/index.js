@@ -797,6 +797,27 @@ var strCrosshDirections = ["ULDR", "LR", "DLUR", "UD"];
 
 // const bucketCrossh = [[0, 255], [0, 204], [0, 153], [0, 102], [0, 51]];
 
+const crosshSubmenuer = document.querySelector("#effectCrossh .submenuer");
+const crosshDirectionsSubmenuee = document.querySelector("#crosshDirections .submenuee");
+const cbgrpCrosshDirection = crosshDirectionsSubmenuee.querySelectorAll("[name=cbgrpCrosshDirection]");
+cbgrpCrosshDirection.forEach(cb => {
+    cb.addEventListener("change", function (evt) {
+        let label = document.querySelector(`[for=${cb.id}]`);
+        let use = crosshSubmenuer.querySelector(`#usefor${cb.dataset.dir}`);
+        if (cb.checked) {
+            strCrosshDirections.push(cb.dataset.dir);
+            label.classList.add("checked");
+            use.style.display = "inline";
+        } else {
+            idx = strCrosshDirections.indexOf(cb.dataset.dir);
+            strCrosshDirections.splice(idx, 1);
+            label.classList.remove("checked");
+            use.style.display = "none";
+        }
+        onCrosshSlide();
+    });
+});
+
 const rbCrosshatch = document.getElementById("rbCrosshatch");
 rbCrosshatch.addEventListener("input", () => {
     if (rbCrosshatch.checked) onCrosshSlide();

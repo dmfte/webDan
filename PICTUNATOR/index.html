@@ -231,7 +231,40 @@
 				<label for="rbCrosshatch"><span class="rb-dot"></span>Crosshatching</label>
 				<div class="controllers">
 					<div class="cont other">
-						<div class="btn" id="crosshDirections"></div>
+						<div class="btn submenuer" id="crosshDirections" tabindex="0">
+							<svg viewBox="0 0 10 10">
+								<use xlink:href="#ULDR" class="usesymbol-hatchdirection" id="useforULDR"></use>
+								<use xlink:href="#UD" class="usesymbol-hatchdirection" id="useforUD"></use>
+								<use xlink:href="#DLUR" class="usesymbol-hatchdirection" id="useforDLUR"></use>
+								<use xlink:href="#LR" class="usesymbol-hatchdirection" id="useforLR"></use>
+							</svg>
+							<div class="submenuee">
+								<input type="checkbox" name="cbgrpCrosshDirection" id="cbCrosshULDR" data-dir="ULDR" checked>
+								<label for="cbCrosshULDR" class="checked">
+									<svg viewBox="0 0 10 10">
+										<use xlink:href="#ULDR" class="usesymbol-hatchdirection"></use>
+									</svg>
+								</label>
+								<input type="checkbox" name="cbgrpCrosshDirection" id="cbCrosshUD" data-dir="UD" checked>
+								<label for="cbCrosshUD" class="checked">
+									<svg viewBox="0 0 10 10">
+										<use xlink:href="#UD" class="usesymbol-hatchdirection"></use>
+									</svg>
+								</label>
+								<input type="checkbox" name="cbgrpCrosshDirection" id="cbCrosshDLUR" data-dir="DLUR" checked>
+								<label for="cbCrosshDLUR" class="checked">
+									<svg viewBox="0 0 10 10">
+										<use xlink:href="#DLUR" class="usesymbol-hatchdirection"></use>
+									</svg>
+								</label>
+								<input type="checkbox" name="cbgrpCrosshDirection" id="cbCrosshLR" data-dir="LR" checked>
+								<label for="cbCrosshLR" class="checked">
+									<svg viewBox="0 0 10 10">
+										<use xlink:href="#LR" class="usesymbol-hatchdirection"></use>
+									</svg>
+								</label>
+							</div>
+						</div>
 						<div class="btn color">
 							<input type="color" id="icCrosshColor">
 							<label for="icCrosshColor"></label>
