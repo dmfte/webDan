@@ -69,6 +69,7 @@ function onScrolling() {
                 // 3 is an arbitrary fator.
                 let angle = Math.min(parseInt(sp * 10 * (k + perct) * 3), 70);
                 flap.style.transform = `rotateX(-${angle}deg)`;
+                flap.style.boxShadow = "none";
             }
 
             // Setting the current flap on top of the others.
@@ -79,6 +80,7 @@ function onScrolling() {
 
             let flap = wrapFlap.querySelector(".flap");
             flap.style.transform = `rotateX(0deg)`;
+            flap.style.boxShadow = `inset 0 10px 30px -14px #FFFFFF, inset 0 -10px 30px 1px #000000`;
 
             flap.querySelector(".overlay").style.opacity = 0;
 
@@ -98,7 +100,7 @@ function onScrolling() {
                 wrapFlap.style.transform = `translate(-50%, ${zIndex * 5}%) scale(${scale})`;
 
                 // Changing opacity on overlay.
-                let opacity = 1- (zIndex / 4 - 0.2);
+                let opacity = 1 - (zIndex / 4 - 0.2);
                 flap.querySelector(".overlay").style.opacity = opacity;
 
                 // Rotating flaps.
@@ -106,6 +108,7 @@ function onScrolling() {
                 // 3 is an arbitrary fator.
                 let angle = Math.min(parseInt((1 - sp) * 10 * (k + perct) * 3), 95);
                 flap.style.transform = `rotateX(${angle}deg)`;
+                flap.style.boxShadow = "none";
             }
 
 

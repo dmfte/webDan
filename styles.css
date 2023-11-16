@@ -4,14 +4,18 @@
     box-sizing: border-box;
 }
 
+
 body,
 html {
     width: 100%;
-    height: 180vh;
+    height: 280vh;
+    font-family: 'Cousine', monospace;
+    background-color: rgb(0, 0, 25);
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
-body::-webkit-scrollbar{
+
+body::-webkit-scrollbar {
     display: none;
 }
 
@@ -50,7 +54,7 @@ body::-webkit-scrollbar{
     bottom: 0;
     padding: var(--contflaps-y-padd) 0;
     transform: translate(-50%, 0);
-    background-color: rgb(0, 0, 80);
+    /* background-color: rgb(0, 0, 25); */
     /* height: calc(var(--contflaps-y-padd) + var(--flap-height) + var(--flap-height) * 0.2 * calc(var(--flaps-number) - 1) + var(--contflaps-y-padd)); */
 
     @media (min-width: 1001px) {
@@ -87,17 +91,57 @@ body::-webkit-scrollbar{
         perspective-origin: 50%;
         transform-origin: bottom;
         /* transform-origin will change on scroll via JS. */
-        
+
         & .flap {
-            width: 90%;
+            width: 100%;
             height: 100%;
+            background-color: #1b3d50;
             transform-origin: bottom;
             /* transform-origin will change on scroll via JS. */
             transition-property: scale, rotation;
             transition-duration: 300ms;
             transition-timing-function: ease-in-out;
+            color: rgb(190, 51, 0);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
 
-            & .overlay{
+            & .title {
+                margin-bottom: 1rem;
+                text-align: center;
+                font-size: 2rem;
+
+
+            }
+
+            & .description {
+                max-width: 100%;
+                max-height: 100%;
+
+                & .text {
+                    font-size: 1.1rem;
+
+                }
+
+                & img {
+                    max-width: 50%;
+                    max-height: 80%;
+                    margin: 0.5rem 1rem
+                }
+
+                & img.floatleft {
+                    float: left;
+                }
+
+                & img.floatright {
+                    float: right;
+                }
+
+            }
+
+
+            & .overlay {
                 pointer-events: none;
                 background-color: black;
                 position: fixed;
@@ -114,40 +158,29 @@ body::-webkit-scrollbar{
     & #webClicker {
         top: calc(var(--contflaps-y-padd) + (var(--overflap-h) * 0));
         z-index: 4;
+        /* border: 3px solid red; */
 
         & .flap {
-            background-color: lightgreen;
-            /* transform: rotateX(0deg); */
+            /* box-shadow: inset 0 10px 30px -12px white, inset 0 -10px 30px 1px black; */
         }
+
     }
 
     & #outliner {
         top: calc(var(--contflaps-y-padd) + (var(--overflap-h) * 1));
         z-index: 3;
 
-        & .flap {
-            background-color: antiquewhite;
-            /* transform: rotateX(-25deg); */
-        }
     }
 
     & #webCsv {
         top: calc(var(--contflaps-y-padd) + (var(--overflap-h) * 2));
         z-index: 2;
 
-        & .flap {
-            background-color: lightcoral;
-            /* transform: rotateX(-50deg); */
-        }
     }
 
     & #webPictunator {
         top: calc(var(--contflaps-y-padd) + (var(--overflap-h) * 3));
         z-index: 1;
-        
-        & .flap {
-            background-color: lightskyblue;
-            /* transform: rotateX(-75deg); */
-        }
+
     }
 }
