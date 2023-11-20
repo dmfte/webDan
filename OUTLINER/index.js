@@ -94,7 +94,7 @@ ifLoad.addEventListener("input", (evt) => {
 // Input color button.
 const icGeneralColor = document.getElementById("icGeneralColor");
 const lbGeneralColor = document.querySelector("label[for=icGeneralColor]");
-var accr_bg = "#3a4c7c";  // General color
+var accr_bg = "#2f4c57";  // General color
 icGeneralColor.value = accr_bg;
 lbGeneralColor.style.backgroundColor = icGeneralColor.value;
 

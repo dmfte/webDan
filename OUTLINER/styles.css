@@ -20,16 +20,16 @@ strong {
     /* FOR WEB TOOL */
     --dialog-body: rgb(159, 195, 249);
     --dialog-color: rgb(8, 26, 74);
-    --controls-bg: rgb(97, 103, 122);
+    --controls-bg: #4A7C8C;
     --controls-color: rgb(216, 217, 218);
-    --cont-write-bg: rgb(34, 65, 112);
+    --cont-write-bg: #0b3742;
     --write-btn-bg: rgb(137, 163, 205);
     --write-btn-bg-active: rgb(159, 195, 249);
     --write-btn-bg-hover: rgb(102, 139, 195);
     --write-btn-color: rgb(39, 40, 41);
     --write-bg: rgb(39, 40, 41);
     --write-color: rgb(255, 246, 224);
-    --accr-preview-bg: rgb(8, 26, 74);
+    --accr-preview-bg: #2f4c57;
 
     --accr-bg: rgb(58, 76, 124);
     --accr-border: rgb(98, 116, 164);

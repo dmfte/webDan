@@ -1,3 +1,154 @@
+// CANVAS BACKGROUND
+const canvBg = document.getElementById("canvBg");
+const cbg = canvBg.getContext("2d");
+
+canvBg.setAttribute("width", window.innerWidth);
+canvBg.setAttribute("height", window.innerHeight);
+cleanCanvBg();
+window.addEventListener("resize", () => {
+    canvBg.setAttribute("width", window.innerWidth);
+    canvBg.setAttribute("height", window.innerHeight);
+    cleanCanvBg();
+    for (let i = 0; i < arrSidereal.length; i++) {
+        const sidereal = arrSidereal[i];
+        sidereal.movement(cbg);
+    }
+});
+
+
+class Vector {
+    constructor(x, y, r, velx, vely) {
+        this.x = x;
+        this.y = y;
+        this.r = r;
+        this.velx = velx;
+        this.vely = vely;
+    }
+
+}
+
+class Sidereal {
+    constructor(vector) {
+        this.vector = vector;
+        this.movement.bind(this);
+        this.moving = false;
+    }
+    draw(ctx) {
+        ctx.beginPath();
+        ctx.arc(this.vector.x, this.vector.y, this.vector.r, 0, 2 * Math.PI, false);
+        ctx.fill();
+    }
+    movement(ctx) {
+        let w = ctx.canvas.width;
+        let h = ctx.canvas.height;
+        this.vector.x += this.vector.velx;
+        if (this.vector.x < 0 || this.vector.x > w) {
+            this.vector.velx *= -1;
+        }
+        this.vector.y += this.vector.vely;
+        if (this.vector.y < 0 || this.vector.y > h) {
+            this.vector.vely *= -1;
+        }
+    }
+
+    follow(ctx, evt) {
+        let x, y;
+        switch (evt.type) {
+            case "pointermove":
+                x = evt.x;
+                y = evt.y;
+                break;
+            case "touchmove":
+                x = evt.touches[0].clientX;
+                y = evt.touches[0].clientY;
+                break;
+            default:
+                break;
+        }
+        let w = ctx.canvas.width;
+        let h = ctx.canvas.height;
+
+        let dx = x - this.vector.x;
+        let dy = y - this.vector.y;
+        let dAng = Math.abs(Math.atan(dy / dx));
+        let v = Math.sqrt(this.vector.velx ** 2 + this.vector.vely ** 2);
+        let newVelx = v * Math.cos(dAng) * Math.sign(dx);
+        let newVely = v * Math.sin(dAng) * Math.sign(dy);
+        this.vector.x += newVelx;
+        if (this.vector.x < 0 || this.vector.x > w) {
+            newVelx *= -1;
+        }
+        this.vector.y += newVely;
+        if (this.vector.y < 0 || this.vector.y > h) {
+            newVely *= -1;
+        }
+        cleanCanvBg();
+        this.draw(ctx);
+    }
+}
+
+var countVectors = 50;
+var arrVectors = [];
+var arrSidereal = [];
+
+for (let i = 0; i < countVectors; i++) {
+    let v = new Vector(
+        randBetweenInt(0, canvBg.clientWidth),
+        randBetweenInt(0, canvBg.height),
+        randBetweenInt(2, 6),
+        randBetweenInt(-3, 3, 0),
+        randBetweenInt(-3, 3, 0)
+    );
+    arrSidereal.push(new Sidereal(v));;
+}
+
+let go = true;
+for (let i = 0; i < arrSidereal.length; i++) {
+    const sidereal = arrSidereal[i];
+    sidereal.draw(cbg);
+}
+
+window.onload = startthis;
+
+var pointerX = 0;
+var pointerY = 0;
+
+
+function startthis() {
+    cleanCanvBg();
+    if (go) {
+        arrSidereal.forEach(sidereal => {
+            sidereal.movement(cbg);
+            sidereal.draw(cbg);
+        });
+        window.requestAnimationFrame(startthis);
+    }
+}
+
+document.body.addEventListener("pointermove", (evt) => {
+    arrSidereal.forEach(sidereal => {
+        sidereal.follow(cbg, evt);
+    });
+});
+
+function randBetweenInt(n1, n2, n0) {
+    let n = parseInt((n2 - n1) * Math.random() + n1);
+    if (n0 !== undefined) {
+        while (n == n0) {
+            n = parseInt((n2 - n1) * Math.random() + n1);
+        }
+    }
+    return n;
+}
+
+function cleanCanvBg() {
+    cbg.fillStyle = "#000000";
+    cbg.fillRect(0, 0, canvBg.clientWidth, canvBg.height);
+    cbg.fillStyle = "#FFFFFF";
+}
+
+// ---------
+
 var arrWrapsFlap = document.querySelectorAll(".wrap-flap");
 var bucket = 1 / arrWrapsFlap.length;
 var arrBucks = [];
