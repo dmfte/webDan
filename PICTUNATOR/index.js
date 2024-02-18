@@ -322,7 +322,7 @@ async function onPixelateSlide() {
 
 //  MONOCHROME EFFECT
 const rbMonochrome = document.getElementById("rbMonochrome");
-rbMonochrome.addEventListener("click", onMonochromeSlide;
+rbMonochrome.addEventListener("click", onMonochromeSlide);
 
 const icMonoColor = document.getElementById("icMonoColor");
 const lbMonoColor = document.querySelector("[for=icMonoColor]");
@@ -433,7 +433,7 @@ rbGrayscaling.addEventListener("click", () => {
     if (imageOriginal !== undefined) onGrayscalingSlide();
 });
 
-cbGrayscalingBnw.addEventListener("input", onGrayscalingSlide;
+cbGrayscalingBnw.addEventListener("input", onGrayscalingSlide);
 
 var rsGrayscalingLevels = new RangeSlider(contGrayscalingLevels, { title: "Levels of gray", min: 2, max: 20, step: 1, def: 3, color1: "#2c5270", color2: "#DDE6ED" });
 //  More than 20 grayscale tones are barely distinguishable.
