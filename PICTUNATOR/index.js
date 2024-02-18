@@ -207,8 +207,8 @@ const rbGrid = document.getElementById("rbGrid");
 var rsGridAmtSqrs = new RangeSlider(contGridAmtSqrs, { title: "Number of squares", min: 2, step: 1, max: 30, def: 5, color1: "#2c5270", color2: "#DDE6ED" });
 var rsGridLinew = new RangeSlider(contGridLinew, { title: "Line width", min: 1, step: 1, max: 30, def: 2, color1: "#2c5270", color2: "#DDE6ED" });
 
-rsGridAmtSqrs.onslide(onGridSlide);
-rsGridLinew.onslide(onGridSlide);
+rsGridAmtSqrs.onslide = onGridSlide;
+rsGridLinew.onslide = onGridSlide;
 
 cbGridWOrH.addEventListener("input", () => {
     onGridSlide();
@@ -322,7 +322,7 @@ async function onPixelateSlide() {
 
 //  MONOCHROME EFFECT
 const rbMonochrome = document.getElementById("rbMonochrome");
-rbMonochrome.addEventListener("click", onMonochromeSlide);
+rbMonochrome.addEventListener("click", onMonochromeSlide;
 
 const icMonoColor = document.getElementById("icMonoColor");
 const lbMonoColor = document.querySelector("[for=icMonoColor]");
@@ -346,15 +346,15 @@ icMonoBg.addEventListener("input", () => {
 
 const contMonoSeparation = document.querySelector("#monoSeparation .wrapper");
 var rsMonoSeparation = new RangeSlider(contMonoSeparation, { title: "separation", min: 3, max: 50, step: 1, def: 10, color1: "#2c5270", color2: "#DDE6ED" });
-rsMonoSeparation.onslide(onMonochromeSlide);
+rsMonoSeparation.onslide = onMonochromeSlide;
 
 const contMonoShades = document.querySelector("#monoShades .wrapper");
 var rsMonoShades = new RangeSlider(contMonoShades, { title: "Shades", min: 1, max: 20, step: 1, def: 3, color1: "#2c5270", color2: "#DDE6ED" });
-rsMonoShades.onslide(onMonochromeSlide);
+rsMonoShades.onslide = onMonochromeSlide;
 
 const contMonoSenitivity = document.querySelector("#monoSensitivity .wrapper");
 var rsMonoSensitivity = new RangeSlider(contMonoSenitivity, { title: "Sensitivity", min: -250, max: 250, step: 5, def: 0, color1: "#2c5270", color2: "#DDE6ED" });
-rsMonoSensitivity.onslide(onMonochromeSlide);
+rsMonoSensitivity.onslide = onMonochromeSlide;
 
 async function onMonochromeSlide() {
     if (imageOriginal !== undefined) {
@@ -433,13 +433,13 @@ rbGrayscaling.addEventListener("click", () => {
     if (imageOriginal !== undefined) onGrayscalingSlide();
 });
 
-cbGrayscalingBnw.addEventListener("input", onGrayscalingSlide);
+cbGrayscalingBnw.addEventListener("input", onGrayscalingSlide;
 
 var rsGrayscalingLevels = new RangeSlider(contGrayscalingLevels, { title: "Levels of gray", min: 2, max: 20, step: 1, def: 3, color1: "#2c5270", color2: "#DDE6ED" });
 //  More than 20 grayscale tones are barely distinguishable.
 var rsGrayScalingSensitivity = new RangeSlider(contGrayscalingSensitivity, { title: "Sensitivity", min: -254, step: 1, max: 254, def: 0, color1: "#2c5270", color2: "#DDE6ED" });
-rsGrayscalingLevels.onslide(onGrayscalingSlide);
-rsGrayScalingSensitivity.onslide(onGrayscalingSlide);
+rsGrayscalingLevels.onslide = onGrayscalingSlide;
+rsGrayScalingSensitivity.onslide = onGrayscalingSlide;
 
 async function onGrayscalingSlide() {
     if (imageOriginal !== undefined) {
@@ -528,14 +528,14 @@ icHatchBg.addEventListener("input", () => {
 
 const contHatchHowmanyw = document.querySelector("#hatchHowmanyw .wrapper");
 var rsHatchHowmanyw = new RangeSlider(contHatchHowmanyw, { title: "Lines", min: 1, max: 10, def: 3, step: 1, color1: "#2c5270", color2: "#DDE6ED" });
-rsHatchHowmanyw.onslide(async () => {
+rsHatchHowmanyw.onslide = async () => {
     paramsHatch.buckets = await get255Buckets(rsHatchHowmanyw.val + 1, rsHatchSensitivity.val);
     paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, paramsHatch.buckets);
     onHatchSlide(paramsHatch);
 });
 const contHatchSensitivity = document.querySelector("#hatchSensitivity .wrapper");
 var rsHatchSensitivity = new RangeSlider(contHatchSensitivity, { title: "Sensitivity", min: -250, max: 250, step: 5, def: 0, color1: "#2c5270", color2: "#DDE6ED" });
-rsHatchSensitivity.onslide(async () => {
+rsHatchSensitivity.onslide = async () => {
     paramsHatch.buckets = await get255Buckets(rsHatchHowmanyw.val + 1, rsHatchSensitivity.val);
     paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, paramsHatch.buckets);
     onHatchSlide(paramsHatch);
@@ -543,14 +543,14 @@ rsHatchSensitivity.onslide(async () => {
 
 const contHatchSeparation = document.querySelector("#hatchSeparation .wrapper");
 var rsHatchSeparation = new RangeSlider(contHatchSeparation, { title: "Separation", min: 2, max: 3, step: 1, def: 3, color1: "#2c5270", color2: "#DDE6ED" });  //  Will be reinitialized when image is loaded.
-rsHatchSeparation.onslide(async () => {
+rsHatchSeparation.onslide = async () => {
     paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, paramsHatch.buckets);
     onHatchSlide(paramsHatch);
 });
 
 const contHatchLinewidth = document.querySelector("#hatchLinewidth .wrapper");
 var rsHatchLinewidth = new RangeSlider(contHatchLinewidth, { title: "Width", min: 1, max: 15, def: paramsHatch.linew, step: 1, color1: "#2c5270", color2: "#DDE6ED" });
-rsHatchLinewidth.onslide(() => {
+rsHatchLinewidth.onslide = () => {
     paramsHatch.linew = rsHatchLinewidth.val;
     onHatchSlide(paramsHatch);
 });
@@ -845,17 +845,17 @@ icCrosshBg.addEventListener("input", () => {
 
 const contCroshSeparation = document.querySelector("#crosshSeparation .wrapper");
 var rsCrosshSeparation = new RangeSlider(contCroshSeparation, { title: "Separation", min: 3, max: 4, step: 1, color1: "#2c5270", color2: "#DDE6ED" });
-rsCrosshSeparation.onslide(onCrosshSlide);
+rsCrosshSeparation.onslide = onCrosshSlide;
 
 const contCrosshLinew = document.querySelector("#crosshLinew .wrapper");
 const rsCrosshLinew = new RangeSlider(contCrosshLinew, { title: "Width", min: 1, max: 10, def: 2, step: 1, color1: "#2c5270", color2: "#DDE6ED" });
-rsCrosshLinew.onslide(() => {
+rsCrosshLinew.onslide = () => {
     paramsCrossh.linew = rsCrosshLinew.val;
     onCrosshSlide();
 });
 const contCrosshSensitivity = document.querySelector("#crosshSensitivity .wrapper");
 const rsCrosshSensitivity = new RangeSlider(contCrosshSensitivity, { title: "Sensitivity", min: -250, max: 250, def: 0, step: 5, color1: "#2c5270", color2: "#DDE6ED" });
-rsCrosshSensitivity.onslide(onCrosshSlide);
+rsCrosshSensitivity.onslide = onCrosshSlide;
 
 var objForSvg = {};
 var downloadSvg = true;
@@ -1026,7 +1026,7 @@ async function getArrToDrawHatch(direction, separation, buckets) {
 
 const contDecolorTolerance = document.querySelector("#decolorHowmany .wrapper");
 const rsDecolorTolerance = new RangeSlider(contDecolorTolerance, { title: "Tolerancy", min: 5, max: 100, def: 30, step: 5 });
-rsDecolorTolerance.onslide(onDecolorate);
+rsDecolorTolerance.onslide = onDecolorate);
 
 const rbDecolor = document.getElementById("rbDecolorate");
 rbDecolor.addEventListener("click", () => {
@@ -1243,11 +1243,11 @@ ifGaImage.addEventListener("input", async (evt) => {
     paramsPixelate.max = smallestDim / 10;
     paramsPixelate.def = paramsPixelate.max / 4;
     rsPixelate = new RangeSlider(contPixelateSlider, paramsPixelate);
-    rsPixelate.onslide(onPixelateSlide);
+    rsPixelate.onslide = onPixelateSlide;
     if (rbPixelate.checked) onGridSlide();
 
     // Black & White settings.
-    rsMonoSensitivity.onslide(onMonochromeSlide);
+    rsMonoSensitivity.onslide = onMonochromeSlide;
     if (rbMonochrome.checked) onMonochromeSlide();
 
     // Gray-scaling settings.
@@ -1257,7 +1257,7 @@ ifGaImage.addEventListener("input", async (evt) => {
     let newMax = parseInt(smallestDim / 10);
     let newDef = parseInt(newMax / 3);
     rsHatchSeparation = new RangeSlider(contHatchSeparation, { title: "Separation", min: 2, max: newMax, step: 1, def: newDef, color1: "#2c5270", color2: "#DDE6ED" });
-    rsHatchSeparation.onslide(async () => {
+    rsHatchSeparation.onslide = async () => {
         paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, paramsHatch.buckets);
         onHatchSlide(paramsHatch);
     });
@@ -1271,7 +1271,7 @@ ifGaImage.addEventListener("input", async (evt) => {
     let crosshSepMax = parseInt(smallestDim / (10));
     let crosshSepDef = parseInt(crosshSepMax / 10 * 4);
     rsCrosshSeparation = new RangeSlider(contCroshSeparation, { title: "Separation", min: 3, max: crosshSepMax, step: 1, def: crosshSepDef, color1: "#2c5270", color2: "#DDE6ED" });
-    rsCrosshSeparation.onslide(() => {
+    rsCrosshSeparation.onslide = () => {
         onCrosshSlide(paramsCrossh);
     });
     if (rbCrosshatch.checked) onCrosshSlide(paramsCrossh);
