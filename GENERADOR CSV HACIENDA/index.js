@@ -21,6 +21,7 @@ const modcontentCleartabs = document.getElementById("modcontentCleartabs");
 const modcontentClearDefaultVals = document.getElementById("modcontentClearDefaultVals");
 const modcontentClearStoredData = document.getElementById("modcontentClearStoredData");
 const modcontentDisclaimer = document.getElementById("modcontentDisclaimer");
+const modcontentContactme = document.getElementById("modcontentContactme");
 
 arrSubmenuLi.forEach(li => {
   li.addEventListener("click", evt => {
@@ -70,7 +71,11 @@ arrSubmenuLi.forEach(li => {
         break;
       
       case "contactme":
-
+        params = {
+          title: "Mi correo",
+          content: modcontentContactme,
+          okEnabled: false
+        }
         break;
       
       default:

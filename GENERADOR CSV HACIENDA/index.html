@@ -46,7 +46,7 @@
           <li id="separator">Separador <span id="spanSeparator">;</span></li>
           <li id="clear-data">Limpiar datos &#128465;</li>
           <li id="clear-default">Limpiar valores por defecto</li>
-          <li id="clear-stored-data">Limpiar todo &#9760;<span class="tooltip" id="ttDeleteEverything">Si la página funciona mal, pruebe <br>esta opción para eliminar todos los datos <br>y empezar de cero.</span></li>
+          <li id="clear-stored-data">Limpiar todo &#9760;<span class="tooltip" id="ttDeleteEverything">Si la página funciona mal, pruebe <br>esta opción para eliminar todos los datos y empezar de cero.</span></li>
           <li id="disclaimer">Info &#8505;</li>
           <li id="contactme">Contactarme &#9993;</li>
         </ul>
@@ -101,8 +101,8 @@
         </div>
         <div class="row" data-row-num="0">
           <input type="text" autocomplete="off" class="first date" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="\d{2}\/\d{2}\/\d{4}" onkeyup="onDateKeyup(event)" placeholder="DD/MM/YYYY" maxlength="10" autofocus id="0-vtas_date">
-          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^[124]$" placeholder="[1,2,4]" maxlength="1" id="0-vtas_classDoc">
-          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^03$|^05$|^06$" placeholder="[03,05,06]" maxlength="2" id="0-vtas_typeDoc">
+          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^[124]$" placeholder="1,2,4" maxlength="1" id="0-vtas_classDoc">
+          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^03$|^05$|^06$" placeholder="03,05,06" maxlength="2" id="0-vtas_typeDoc">
           <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^[a-zA-Z0-9]+$" maxlength="100" id="0-vtas_numRes">
           <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^[a-zA-Z0-9]+$" maxlength="100" id="0-vtas_numSerDoc">
           <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^[a-zA-Z0-9]+$" maxlength="100" id="0-vtas_numDoc">
@@ -142,6 +142,10 @@
           <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defCredtFisc" value="0.00">
           <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defTotComps" value="0.00">
           <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defDui">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defTipoOp">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defClasif">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defSector">
+          <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defTipoCostGast">
           <input type="text" autocomplete="off" oninput="autoSave()" id="comps_defNumAnx" value="3">
         </div>
         <div class="row labels">
@@ -161,12 +165,16 @@
           <label>Credt. Fisc.</label>
           <label>Tot. Comps.</label>
           <label>DUI</label>
+          <label>Tipo Op.</label>
+          <label>Clasif.</label>
+          <label>Sector</label>
+          <label>Tipo Cost/Gast</label>
           <label>Num. Anx.</label>
         </div>
         <div class="row" data-row-num="0">
           <input type="text" autocomplete="off" class="first date" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="\d{2}\/\d{2}\/\d{4}" onkeyup="onDateKeyup(event)" placeholder="DD/MM/YYYY" maxlength="10" autofocus id="0-comps_date">
-          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^[1234]$" placeholder="[1,2,3,4]" maxlength="1" id="0-comps_classDoc">
-          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^03$|^05$|^06$|^11$|^12$|^13$" maxlength="2" id="0-comps_typeDoc">
+          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^[1234]$" placeholder="1-4" maxlength="1" id="0-comps_classDoc">
+          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^03$|^05$|^06$|^11$|^12$|^13$" placeholder="03,05,06,11-13" maxlength="2" id="0-comps_typeDoc">
           <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^[a-zA-Z0-9]+$" maxlength="100" id="0-comps_numDoc">
           <input type="text" autocomplete="off" class="nit" oninput="onInputInput(this)" onkeydown="preventAlphabetKeydown(event)" data-regex="^(\d*)$" maxlength="14" id="0-comps_nit">
           <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="\S+$" id="0-comps_nombPov">
@@ -180,7 +188,11 @@
           <input type="text" autocomplete="off" class="addend comps-debt" data-perct="13" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d+\.\d{2})$" maxlength="13" id="0-comps_CredtFisc">
           <input type="text" autocomplete="off" class="total" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d+\.\d{2})$" maxlength="13" id="0-comps_totComps">
           <input type="text" autocomplete="off" class="dui" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d{9})$" maxlength="9" id="0-comps_dui">
-          <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^\d{1,2}$" id="0-comps_numAnx">
+          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^[1234]$" placeholder="1-4" maxlength="1" id="0-comps_tipoOp">
+          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^[12]$" placeholder="1,2" maxlength="1" id="0-comps_clasif">
+          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^[1234]$" placeholder="1-4" maxlength="1" id="0-comps_sector">
+          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^[1234567]$" placeholder="1-7" maxlength="1" id="0-comps_tipoCostGast">
+          <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^\d{1,2}$" placeholder="3" id="0-comps_numAnx">
         </div>
       </div>
     </div>
@@ -213,7 +225,7 @@
         <div class="row" data-row-num="0">
           <input type="text" autocomplete="off" class="nit first" oninput="onInputInput(this)" onkeydown="preventAlphabetKeydown(event)" data-regex="^(\d*)$" maxlength="14" id="0-rtcn_nit" autofocus>
           <input type="text" autocomplete="off" class="date" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" onkeyup="onDateKeyup(event)" data-regex="\d{2}\/\d{2}\/\d{4}" placeholder="DD/MM/YYYY" maxlength="10" id="0-rtcn_date">
-          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^05$|^06$|^07$" placeholder="[05, 06, 07]" maxlength="2" id="0-rtcn_typeDoc">
+          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^05$|^06$|^07$" placeholder="05, 06, 07" maxlength="2" id="0-rtcn_typeDoc">
           <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^[a-zA-Z0-9]*$" maxlength="100" id="0-rtcn_serie">
           <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^[a-zA-Z0-9]*$" maxlength="100" id="0-rtcn_numDoc">
           <input type="text" autocomplete="off" class="taxable" data-tax-on="mont-rtcn-1" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d+\.\d{2})$" maxlength="10" id="0-rtcn_montSuj">
@@ -253,7 +265,7 @@
         <div class="row" data-row-num="0">
           <input type="text" autocomplete="off" class="nit first" oninput="onInputInput(this)" onkeydown="preventAlphabetKeydown(event)" data-regex="^(\d*)$" maxlength="14" id="0-percp_nit" autofocus>
           <input type="text" autocomplete="off" class="date" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" onkeyup="onDateKeyup(event)" data-regex="\d{2}\/\d{2}\/\d{4}" placeholder="DD/MM/YYYY" maxlength="10" id="0-percp_date">
-          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^03$|^05$|^06$|^12$" placeholder="[03,05,06,12]" maxlength="2" id="0-percp_typeDoc">
+          <input type="text" autocomplete="off" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^03$|^05$|^06$|^12$" placeholder="03,05,06,12" maxlength="2" id="0-percp_typeDoc">
           <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^[a-zA-Z0-9]*$" maxlength="100" id="0-percp_serie">
           <input type="text" autocomplete="off" oninput="onInputInput(this)" data-regex="^[a-zA-Z0-9]*$" maxlength="100" id="0-percp_numDoc">
           <input type="text" autocomplete="off" class="taxable" data-tax-on="mont-rtcn-1" onkeydown="preventAlphabetKeydown(event)" oninput="onInputInput(this)" data-regex="^(\d+\.\d{2})$" maxlength="10" id="0-percp_montSuj">
@@ -300,6 +312,10 @@
 
   <div class="modal-content" id="modcontentDisclaimer">
     <div class="text">La información es guardada localmente en el explorador. No es subida ni enviada a ningún sitio.</div>
+  </div>
+
+  <div class="modal-content" id="modcontentContactme">
+    <div class="text">dmfte.dev@gmail.com</div>
   </div>
 
   <!-- </div> -->
