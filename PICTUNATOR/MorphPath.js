@@ -63,7 +63,7 @@ class MorphPath {
             if (this.countforrepeatcount < this.repeatcount) {
                 this.start();
             } else {
-                this.stop();
+                this.stop(this.arrayd.length - 1);
             }
         }
         window.requestAnimationFrame(this.animate);

@@ -2,350 +2,292 @@
 <html lang="en">
 
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>PICTUNATOR</title>
-	<!-- Stylesheets. -->
-	<link rel="stylesheet" href="styles.css">
-	<link rel="icon" href="favicon.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pictunator</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 </head>
 
 <body>
-	<nav class="top-nav">
-		<div class="logo">
-			<a href="../index.html" id="logoDmfte">
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 74" id="dmfte">
-					<path fill="none" stroke="black" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" d="m 36 4 l 0 64 m -32 -16 a 16 16 0 0 0 32 0 a 16 16 0 0 0 -32 0 m 32 0 a 16 16 0 0 1 32 0 a 16 16 0 0 1 32 0 l 0 16 l 0 -48 a 16 16 0 0 1 32 0 l 0 32 m -40 -24 l 16 0 m 16 0 l 16 0 m -8 24 a 16 16 0 0 1 32 0 l -32 0 a 16 16 0 0 0 27.3 11.3"></path>
-				</svg>
-			</a>
-		</div>
-		<div class="nav-items">
-			<div class="nav-i" id="gaBtnInfo">
-				<!-- See Dialog diagInfo at the bottom. -->
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
-					<path fill="black" stroke="none" stroke-width="1" stroke-linejoin="round" d="M 9 1 A 1 1 0 0 0 9 17 A 1 1 0 0 0 9 1 M 9 3 A 1 1 0 0 1 9 7 A 1 1 0 0 1 9 3 M 7 8 L 11 8 L 11 15 L 7 15 Z"></path>
-				</svg>
-			</div>
-			<div class="nav-i" id="navBtnContactme">
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
-					<path fill="none" stroke="black" stroke-width="1" stroke-linejoin="round" d="M 2 5 L 16 5 L 16 14 L 2 14 Z"></path>
-					<path fill="none" stroke="black" stroke-width="1" stroke-linejoin="round" d="M 2 14 L 5 7 M 16 14 L 13 7 M 2 5 L 9 10 L 16 5"></path>
-				</svg>
-				<div class="tooltip">
-					Email dmfte.dev@gmail.com copied to the clipboard.
-				</div>
-			</div>
-		</div>
-	</nav>
-	<div class="not-nav">
-		<section id="secGlobalActions">
-			<div class="g-action" id="gaInputImage">
-				<input type="file" id="ifGaImage">
-				<label for="ifGaImage" id="ifGaImageName">Selec. Img.</label>
-			</div>
-			<div class="g-action" id="gaHorzVert">
-				<input type="checkbox" id="cbGaHorzVert" checked>
-				<label for="cbGaHorzVert">
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" id="svgHorzVert">
-						<path id="pathLeftSquare" fill="none" stroke="black" stroke-width="1" stroke-linejoin="round" d="M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z">
-							<animate attributeName="d" dur="0" data-dur="1.5s" keyTimes="0; 0.2; 0.5; 0.8; 1" repeatCount="indefinite" values="M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z; M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z; M 2 4 C 2 3 3 2 4 2 L 14 2 C 15 2 16 3 16 4 L 16 8 L 2 8 C 2 8 2 8 2 8 Z; M 2 4 C 2 3 3 2 4 2 L 14 2 C 15 2 16 3 16 4 L 16 8 L 2 8 C 2 8 2 8 2 8 Z; M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z"></animate>
-						</path>
-						<path id="pathRightSquare" fill="black" stroke="black" stroke-width="1" stroke-linejoin="round" d="M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 C 10 16 10 16 10 16 Z">
-							<animate attributeName="d" dur="0" data-dur="1.5s" keyTimes="0; 0.2; 0.5; 0.8; 1" repeatCount="indefinite" values="M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 C 10 16 10 16 10 16 Z; M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 C 10 16 10 16 10 16 Z; M 2 10 L 16 10 C 16 10 16 10 16 10 L 16 14 C 16 15 15 16 14 16 L 4 16 C 3 16 2 15 2 14 Z; M 2 10 L 16 10 C 16 10 16 10 16 10 L 16 14 C 16 15 15 16 14 16 L 4 16 C 3 16 2 15 2 14 Z; M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 C 10 16 10 16 10 16 Z"></animate>
-						</path>
-					</svg>
-				</label>
-			</div>
-			<div class="g-action" id="gaSmallFloat">
-				<input type="checkbox" for="gaSmallFloat" id="cbGaSmallFloat">
-				<label for="cbGaSmallFloat">
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" id="svgFloatSquare">
-						<path id="pathFloatSquare" fill="none" stroke="black" stroke-width="1" stroke-linejoin="round" d="M 2 2 C 2 2 2 2 2 2 L 7 2 C 7 2 7 2 7 2 L 7 7 L 2 7 C 2 7 2 7 2 7 Z">
-							<animate attributeName="d" dur="0" data-dur="1.5s" keyTimes="0; 0.2; 0.5; 0.8; 1" repeatCount="indefinite" values="M 2 2 C 2 2 2 2 2 2 L 7 2 C 7 2 7 2 7 2 L 7 7 L 2 7 C 2 7 2 7 2 7 Z; M 2 2 C 2 2 2 2 2 2 L 7 2 C 7 2 7 2 7 2 L 7 7 L 2 7 C 2 7 2 7 2 7 Z; M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z; M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z; M 2 2 C 2 2 2 2 2 2 L 7 2 C 7 2 7 2 7 2 L 7 7 L 2 7 C 2 7 2 7 2 7 Z"></animate>
-						</path>
-						<path id="pathFixSquare" fill="black" stroke="black" stroke-width="1" stroke-linejoin="round" d="M 9 4 L 16 4 C 16 4 16 4 16 4 L 16 16 C 16 16 16 16 16 16 L 4 16 L 4 9 L 9 9 Z">
-							<animate attributeName="d" dur="0" data-dur="1.5s" keyTimes="0; 0.2; 0.5; 0.8; 1" repeatCount="indefinite" values="M 9 4 L 16 4 C 16 4 16 4 16 4 L 16 16 C 16 16 16 16 16 16 L 4 16 L 4 9 L 9 9 Z; M 9 4 L 16 4 C 16 4 16 4 16 4 L 16 16 C 16 16 16 16 16 16 L 4 16 L 4 9 L 9 9 Z; M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 L 10 14 L 10 11 Z; M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 L 10 14 L 10 11 Z; M 9 4 L 16 4 C 16 4 16 4 16 4 L 16 16 C 16 16 16 16 16 16 L 4 16 L 4 9 L 9 9 Z;"></animate>
-						</path>
-					</svg>
-				</label>
-			</div>
+    <nav id="top-nav">
+        <a href="../index.html" id="logoDmfte">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 74" id="dmfte">
+                <path fill="none" stroke="black" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"
+                    d="m 36 4 l 0 64 m -32 -16 a 16 16 0 0 0 32 0 a 16 16 0 0 0 -32 0 m 32 0 a 16 16 0 0 1 32 0 a 16 16 0 0 1 32 0 l 0 16 l 0 -48 a 16 16 0 0 1 32 0 l 0 32 m -40 -24 l 16 0 m 16 0 l 16 0 m -8 24 a 16 16 0 0 1 32 0 l -32 0 a 16 16 0 0 0 27.3 11.3">
+                </path>
+            </svg>
+        </a>
+        <div class="nav-items">
+            <div class="nav-i" id="gaBtnInfo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+                    <path fill="black" stroke="none" stroke-width="1" stroke-linejoin="round"
+                        d="M 9 1 A 1 1 0 0 0 9 17 A 1 1 0 0 0 9 1 M 9 3 A 1 1 0 0 1 9 7 A 1 1 0 0 1 9 3 M 7 8 L 11 8 L 11 15 L 7 15 Z">
+                    </path>
+                </svg>
+            </div>
+            <div class="nav-i" id="navBtnContactme">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+                    <path fill="none" stroke="black" stroke-width="1" stroke-linejoin="round"
+                        d="M 2 5 L 16 5 L 16 14 L 2 14 Z"></path>
+                    <path fill="none" stroke="black" stroke-width="1" stroke-linejoin="round"
+                        d="M 2 14 L 5 7 M 16 14 L 13 7 M 2 5 L 9 10 L 16 5"></path>
+                </svg>
+            </div>
+        </div>
+    </nav>
+    <!-- ------------ -->
+    <div id="containerAll">
+        <div id="globalControls">
+            <input type="file" class="g-ctrl" id="ifLoadImg" accept="image/">
+            <label for="ifLoadImg">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+                    <path fill="none" stroke="rgb(121, 152, 230)" stroke-width="1" stroke-linecap="round"
+                        stroke-linejoin="mitter" d="M 1 1 H 17 V 17 H 1 Z"></path>
+                    <path fill="none" stroke="rgb(121, 152, 230)" stroke-width="1" stroke-linecap="round"
+                        stroke-linejoin="mitter" d="M 11 5 A 2 2 0 1 0 15 5 A 1 1 0 1 0 11 5"></path>
+                    <path fill="none" stroke="rgb(121, 152, 230)" stroke-width="1" stroke-linecap="round"
+                        stroke-linejoin="mitter" d="M 3 15 C 5 8 8 4 11 11 C 12 9 13 8 15 11"></path>
+                </svg>
+                <span id="spanFileName">Image file</span>
+            </label>
+            <input type="checkbox" id="cbHorzVert">
+            <label for="cbHorzVert" class="g-ctrl">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+                    <path id="pathHorzvertLeftSquare" fill="none" stroke="rgb(121, 152, 230)" stroke-width="1"
+                        stroke-linejoin="round"
+                        d="M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z">
+                        <!-- "M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z; M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z; M 2 4 C 2 3 3 2 4 2 L 14 2 C 15 2 16 3 16 4 L 16 8 L 2 8 C 2 8 2 8 2 8 Z; M 2 4 C 2 3 3 2 4 2 L 14 2 C 15 2 16 3 16 4 L 16 8 L 2 8 C 2 8 2 8 2 8 Z; M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z" -->
+                    </path>
+                    <path id="pathHorzvertRightSquare" fill="rgb(121, 152, 230)" stroke="rgb(121, 152, 230)"
+                        stroke-width="1" stroke-linejoin="round"
+                        d="M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 C 10 16 10 16 10 16 Z">
+                        <!-- "M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 C 10 16 10 16 10 16 Z; M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 C 10 16 10 16 10 16 Z; M 2 10 L 16 10 C 16 10 16 10 16 10 L 16 14 C 16 15 15 16 14 16 L 4 16 C 3 16 2 15 2 14 Z; M 2 10 L 16 10 C 16 10 16 10 16 10 L 16 14 C 16 15 15 16 14 16 L 4 16 C 3 16 2 15 2 14 Z; M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 C 10 16 10 16 10 16 Z" -->
+                    </path>
+                </svg>
+            </label>
+            <input type="checkbox" id="cbFloatOriginal">
+            <label for="cbFloatOriginal" class="g-ctrl">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+                    <path id="pathFloatoriginalLeftSquare" fill="none" stroke="rgb(121, 152, 230)" stroke-width="1"
+                        stroke-linejoin="round"
+                        d="M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z">
+                    </path>
+                    <path id="pathFloatoriginalRightSquare" fill="rgb(121, 152, 230)" stroke="rgb(121, 152, 230)"
+                        stroke-width="1" stroke-linejoin="round"
+                        d="M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 L 10 14 L 10 11 Z">
+                    </path>
+                </svg>
+            </label>
+            <input type="checkbox" id="cbOriginalDimensions">
+            <label for="cbOriginalDimensions" class="g-ctrl gctrl2">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 18">
+                    <text x="2" y="2" font-size="5px" style="font-family:arial; font-weight: bold;"
+                        fill="rgb(131, 162, 240)" dominant-baseline="text-before-edge">500px</text>
+                    <path id="pathOriginaldimensionsNobLeft" stroke="none" fill="rgb(121, 152, 230)"
+                        d="M 17 17 A 1 1 -65 0 0 19 11 L 7 9 Z"></path>
+                    <text x="25" y="2" font-size="5px" style="font-family:arial; font-weight: bold;"
+                        fill="rgb(131, 162, 240)" dominant-baseline="text-before-edge">Orig.</text>
+                    <text x="25" y="7" font-size="5px" style="font-family:arial; font-weight: bold;"
+                        fill="rgb(131, 162, 240)" dominant-baseline="text-before-edge">Size</text>
+                </svg>
+            </label>
+        </div>
+        <!-- ------------ -->
+        <div id="effectsBar">
+            <!-- ---
+            <div class="effect" id="eff__">
+                <input type="radio" name="rbgEffects" id="rgEff__">
+                <label for="rgEff__" class="effect-title"><span class="circle"></span>EFFECT_NAME</label>
+                <label for="rgEff__" class="eff-title">ABBRV_EFFECT_NAME</label>
+                <div class="controls">
+                    <div class="btns">
 
+                    </div>
+                    <div class="rs0wrapper" tabindex="0">
+                        <div class="slider" id="container__EffectParameter"></div>
+                    </div>
+                </div>
+            </div>
+            --- -->
+            <div class="effect" id="effGrid">
+                <input type="radio" name="rbgEffects" id="rgEffGrid">
+                <label for="rgEffGrid" class="effect-title"><span class="circle"></span>Grid</label>
+                <label for="rgEffGrid" class="eff-title">Grd</label>
+                <div class="controls">
+                    <div class="btns">
+                        <input type="color" id="icGridColor" value="#ff0000">
+                        <label for="icGridColor" class="btn"></label>
+                        <input type="checkbox" id="cbGridHorzvert" checked>
+                        <label for="cbGridHorzvert" class="btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 18 18">
+                                <path id="pathGridHorzvert" fill="none" stroke="black" stroke-width="1"
+                                    d="M 2 3 H 14 V 13 H 2 Z M 7 3 V 13 M 12 3 V 13 M 2 8 H 14 M 2 13 H 14"></path>
+                            </svg>
+                        </label>
+                    </div>
+                    <div class="rs-wrapper" tabindex="0">
+                        <div class="slider" id="containerRsGridSquares"></div>
+                    </div>
+                    <div class="rs-wrapper" tabindex="0">
+                        <div class="slider" id="containerRsGridLinew"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- ------ -->
+            <div class="effect" id="effPixelate">
+                <input type="radio" name="rbgEffects" id="rgEffPixelate">
+                <label for="rgEffPixelate" class="effect-title"><span class="circle"></span>Pixelate</label>
+                <label for="rgEffPixelate" class="eff-title">Px</label>
+                <div class="controls">
+                    <div class="btns">
+                        <input type="checkbox" id="cbPxSmooth">
+                        <label for="cbPxSmooth" class="btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19 18">
+                                <defs>
+                                    <filter id="svgFilterBlur">
+                                        <feGaussianBlur in="SourceGraphic" stdDeviation="1" />
+                                    </filter>
+                                </defs>
+                                <!-- <g filter="url(#svgFilterBlur)"> -->
+                                <g filter="none">
+                                    <path stroke="none" fill="#000000" d="M 2 4 H 7 V 9 H 2 Z" />
+                                    <path stroke="none" fill="#1E1E1E" d="M 2 9 H 7 V 14 H 2 Z" />
+                                    <path stroke="none" fill="#3C3C3C" d="M 7 4 H 12 V 9 H 7 Z" />
+                                    <path stroke="none" fill="#5A5A5A" d="M 7 9 H 12 V 14 H 7 Z" />
+                                    <path stroke="none" fill="#787878" d="M 12 4 H 17 V 9 H 12 Z" />
+                                    <path stroke="none" fill="#969696" d="M 12 9 H 17 V 14 H 12 Z" />
+                                </g>
+                            </svg>
+                        </label>
+                    </div>
+                    <div class="rs-wrapper" tabindex="0">
+                        <div class="slider" id="containerPxLevel"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- ------ -->
+            <div class="effect" id="effGrayscale">
+                <input type="radio" name="rbgEffects" id="rgEffGrays">
+                <label for="rgEffGrays" class="effect-title"><span class="circle"></span>Grayscale</label>
+                <label for="rgEffGrays" class="eff-title">Gray</label>
+                <div class="controls">
+                    <div class="btns">
+                        <input type="checkbox" id="cbGraysBlack" checked>
+                        <label for="cbGraysBlack" class="btn">
+                            <span class="stripe1"></span>
+                            <span class="stripe2"></span>
+                            <span class="stripe3"></span>
+                        </label>
+                    </div>
+                    <div class="rs-wrapper" tabindex="0">
+                        <div class="slider" id="containerGraysLevels"></div>
+                    </div>
+                    <div class="rs-wrapper" tabindex="0">
+                        <div class="slider" id="containerGraysSensitivity"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- ------ -->
+            <div class="effect" id="effHatching">
+                <input type="radio" name="rbgEffects" id="rgEffHatching">
+                <label for="rgEffHatching" class="effect-title"><span class="circle"></span>Hatching</label>
+                <label for="rgEffHatching" class="eff-title">Hathc</label>
+                <div class="controls">
+                    <div class="btns">
+                        <div id="rgHatchDir" class="btn supermenu" tabindex="0">
+                            <div id="hatchCurrentDir">
+                                <svg xmlns="http://www.w3.org/2000/svg" id="svgdirections" viewBox="0 0 40 10">
+                                    <path id="pathdirections" stroke-linecap="round" stroke-linejoin="round"
+                                        stroke="rgb(10, 17, 88)" fill="none" stroke-width="1" d="
+                                            M 9 1 l -8 0 l 0 8 l 8 0 z M 7 3 l -4 4
+                                            M 19 1 l -8 0 l 0 8 l 8 0 z M 13 5 l 4 0
+                                            M 29 1 l -8 0 l 0 8 l 8 0 z M 23 3 l 4 4
+                                            M 39 1 l -8 0 l 0 8 l 8 0 z M 35 3 l 0 4"></path>
+                                </svg>
+                            </div>
+                            <div class="submenu">
+                                <input type="radio" id="hatchdirDLUR" value="DLUR" name="rgHatchDir">
+                                <label for="hatchdirDLUR">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke="rgb(40, 47, 118)" fill="none" stroke-width="1" 
+                                        d="M 9 1 l -8 0 l 0 8 l 8 0 z M 7 3 l -4 4"></path>
+                                    </svg>
+                                </label>
+                                <input type="radio" id="hatchdirLR" value="LR" name="rgHatchDir">
+                                <label for="hatchdirLR">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke="rgb(40, 47, 118)" fill="none" stroke-width="1" 
+                                        d="M 9 1 l -8 0 l 0 8 l 8 0 z M 3 5 l 4 0"></path>
+                                    </svg>
+                                </label>
+                                <input type="radio" id="hatchdirULDR" value="ULDR" name="rgHatchDir">
+                                <label for="hatchdirULDR">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke="rgb(40, 47, 118)" fill="none" stroke-width="1" 
+                                        d="M 9 1 l -8 0 l 0 8 l 8 0 z M 3 3 l 4 4"></path>
+                                    </svg>
+                                </label>
+                                <input type="radio" id="hatchdirUD" value="UD" name="rgHatchDir">
+                                <label for="hatchdirUD">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke="rgb(40, 47, 118)" fill="none" stroke-width="1" 
+                                        d="M 9 1 l -8 0 l 0 8 l 8 0 z M 5 3 l 0 4"></path>
+                                    </svg>
+                                </label>
+                            </div>
+                        </div>
+                        <input type="color" name="" id="icHatchBg" value="#ffffff">
+                        <label for="icHatchBg" class="btn"></label>
+                        <input type="color" name="" id="icHatchColor" value="#000000">
+                        <label for="icHatchColor" class="btn"></label>
+                    </div>
+                    <div class="rs0wrapper" tabindex="0">
+                        <div class="slider" id="containerHatchHowmany"></div>
+                    </div>
+                    <div class="rs0wrapper" tabindex="0">
+                        <div class="slider" id="containerHatchSeparation"></div>
+                    </div>
+                    <div class="rs0wrapper" tabindex="0">
+                        <div class="slider" id="containerHatchLinew"></div>
+                    </div>
+                    <div class="rs0wrapper" tabindex="0">
+                        <div class="slider" id="containerHatchSensitivity"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- ------ -->
+        </div>
+        <!-- ------------ -->
+        <div id="picturesArea">
+            <div class="display img-in">
+                <canvas id="canvIn" width="0" height="0"></canvas>
+            </div>
+            <div class="display img-out">
+                <canvas id="canvOut" width="0" height="0"></canvas>
+            </div>
+        </div>
+        <!-- ------------ -->
+        <div id="downloadBar">
+            <button id="dlDownload" class="dl-btn">
+                <span>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 34">
+                        <path id="m2-arrow" fill="black" stroke="none"
+                            d="M 23 2 V 8 H 16 L 26 16 L 30 16 L 39 8 H 32 V 2 Z "></path>
+                        <path id="m2-outline-flash-contacts" fill="black" stroke="none"
+                            d="
+                M 2 31 L 2 27 C 5 27 5 22 2 22 L 2 18 C 2 17 3 16 4 16 L 48 16 C 49 16 50 16 50 17 L 54 17 L 54 22 L 50 22 L 50 23 L 54 23 L 54 32 L 50 32 C 50 33 49 33 48 33 L 4 33 C 3 33 2 32 2 31 Z
+                M 8 20 V 31 H 16 V 20 Z M 19 20 V 31 H 27 V 20 Z M 36 25 V 31 H 46 V 25 Z
+                M 50 19 H 53 V 18 H 50 Z M 50 20 V 21 H 53 V 20 Z M 50 24 V 25 H 53 V 24 Z M 50 26 V 27 H 53 V 26 Z M 50 28 V 29 H 53 V 28 Z M 50 30 V 31 H 53 V 30 Z"></path>
+                    </svg>
+                </span>
+            </button>
+        </div>
+    </div>
 
-		</section>
-		<section id="secToolbar" class="expanded">
-			<div id="effectGrid" class="effect" data-btn-down="grid">
-				<input type="radio" name="rgEffects" id="rbGrid">
-				<label for="rbGrid"><span class="rb-dot"></span>Grid</label>
-				<div class="controllers">
-					<div class="cont other">
-						<div class="btn color">
-							<input type="color" id="icGridColor">
-							<label for="icGridColor"></label>
-						</div>
-						<div class="btn" id="wOrH">
-							<input type="checkbox" id="cbGridWOrH" checked>
-							<label for="cbGridWOrH">
-								<span class="grid-by-w">By W</span><br>
-								<span class="grid-by-h">By H</span>
-								<span class="arrow">➜</span>
-							</label>
-						</div>
-					</div>
-					<div class="cont slider" id="gridAmtSqrs" tabindex="0">
-						<div class="wrapper"></div>
-					</div>
-					<div class="cont slider" id="gridLinew" tabindex="0">
-						<div class="wrapper"></div>
-					</div>
-				</div>
-			</div>
-			<!-- --------- -->
-			<div id="effectPixelate" class="effect" data-btn-down="pixelate">
-				<input type="radio" name="rgEffects" id="rbPixelate">
-				<label for="rbPixelate"><span class="rb-dot"></span>Pixelate</label>
-				<div class="controllers">
-					<div class="cont slider" id="pxltPixelated" tabindex="0">
-						<div class="wrapper"></div>
-					</div>
-				</div>
-			</div>
-			<!-- --------- -->
-			<div id="effectMonochrome" class="effect" data-btn-down="mono" style="display: none;">
-				<input type="radio" name="rgEffects" id="rbMonochrome">
-				<label for="rbMonochrome"><span class="rb-dot"></span>Mono-chroming</label>
-				<div class="controllers">
-					<div class="cont other">
-						<div class="btn color">
-							<input type="color" id="icMonoColor">
-							<label for="icMonoColor"></label>
-						</div>
-						<div class="btn color">
-							<input type="color" id="icMonoBg">
-							<label for="icMonoBg"></label>
-						</div>
-					</div>
-					<div class="cont slider" id="monoSeparation" tabindex="0">
-						<div class="wrapper"></div>
-					</div>
-					<div class="cont slider" id="monoShades" tabindex="0">
-						<div class="wrapper"></div>
-					</div>
-					<div class="cont slider" id="monoSensitivity" tabindex="0">
-						<div class="wrapper"></div>
-					</div>
-				</div>
-			</div>
-			<!-- --------- -->
-			<div id="effectGrayscaling" class="effect">
-				<input type="radio" name="rgEffects" id="rbGrayscaling">
-				<label for="rbGrayscaling"><span class="rb-dot"></span>Gray-scaling</label>
-				<div class="controllers">
-					<div class="cont other">
-						<div class="btn bnw">
-							<input type="checkbox" id="cbGrayscalingBnw" checked>
-							<label for="cbGrayscalingBnw">
-								<span class="stripe1"></span>
-								<span class="stripe2"></span>
-								<span class="stripe3"></span>
-							</label>
-						</div>
-					</div>
-					<div class="cont slider" id="gsLevels" tabindex="0">
-						<div class="wrapper"></div>
-					</div>
-					<div class="cont slider" id="gsSensitivity" tabindex="0">
-						<div class="wrapper"></div>
-					</div>
-				</div>
-			</div>
-			<!-- --------- -->
-			<div id="effectHatching" class="effect">
-				<input type="radio" name="rgEffects" id="rbHatching">
-				<label for="rbHatching"><span class="rb-dot"></span>Hatching</label>
-				<div class="controllers">
-					<div class="cont other">
-						<div class="btn with-submenu" id="currentdirection" tabindex="0" data-vb="0">
-							<svg xmlns="http://www.w3.org/2000/svg" id="svgdirections">
-								<path stroke-linecap="round" stroke="rgb(221, 230, 237)" fill="none" stroke-width="1" d="
-                                        M 9 1 l -8 0 l 0 8 l 8 0 z M 7 3 l -4 4
-                                        M 19 1 l -8 0 l 0 8 l 8 0 z M 13 5 l 4 0
-                                        M 29 1 l -8 0 l 0 8 l 8 0 z M 23 3 l 4 4
-                                        M 39 1 l -8 0 l 0 8 l 8 0 z M 35 3 l 0 4"></path>
-							</svg>
-							<div class="submenu" id="rgdirections">
-								<div class="wrapper">
-									<input type="radio" id="rbDLUR" value="DLUR" name="rgHatchDir" data-vb="0" checked>
-									<label for="rbDLUR">
-										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
-											<use xlink:href="#DLUR" class="usesymbol-hatchdirection"></use>
-										</svg>
-									</label>
-									<input type="radio" id="rbLR" value="LR" name="rgHatchDir" data-vb="10">
-									<label for="rbLR">
-										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
-											<use xlink:href="#LR" class="usesymbol-hatchdirection"></use>
-										</svg>
-									</label>
-									<input type="radio" id="rbULDR" value="ULDR" name="rgHatchDir" data-vb="20">
-									<label for="rbULDR">
-										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
-											<use xlink:href="#ULDR" class="usesymbol-hatchdirection"></use>
-										</svg>
-									</label>
-									<input type="radio" id="rbUD" value="UD" name="rgHatchDir" data-vb="30">
-									<label for="rbUD">
-										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
-											<use xlink:href="#UD" class="usesymbol-hatchdirection"></use>
-										</svg>
-									</label>
-								</div>
-							</div>
-						</div>
-						<div class="btn color">
-							<input type="color" id="icHatchColor">
-							<label for="icHatchColor"></label>
-						</div>
-						<div class="btn color">
-							<input type="color" id="icHatchBg">
-							<label for="icHatchBg"></label>
-						</div>
-					</div>
-					<div class="cont slider" id="hatchHowmanyw" tabindex="0">
-						<div class="wrapper"></div>
-					</div>
-
-					<div class="cont slider" id="hatchSeparation" tabindex="0">
-						<div class="wrapper"></div>
-					</div>
-					<div class="cont slider" id="hatchLinewidth" tabindex="0">
-						<div class="wrapper"></div>
-					</div>
-					<div class="cont slider" id="hatchSensitivity" tabindex="0">
-						<div class="wrapper"></div>
-					</div>
-				</div>
-			</div>
-			<div class="effect" id="effectCrossh">
-				<input type="radio" name="rgEffects" id="rbCrosshatch">
-				<label for="rbCrosshatch"><span class="rb-dot"></span>Crosshatching</label>
-				<div class="controllers">
-					<div class="cont other">
-						<div class="btn submenuer" id="crosshDirections" tabindex="0">
-							<svg viewBox="0 0 10 10">
-								<use xlink:href="#ULDR" class="usesymbol-hatchdirection" id="useforULDR"></use>
-								<use xlink:href="#UD" class="usesymbol-hatchdirection" id="useforUD"></use>
-								<use xlink:href="#DLUR" class="usesymbol-hatchdirection" id="useforDLUR"></use>
-								<use xlink:href="#LR" class="usesymbol-hatchdirection" id="useforLR"></use>
-							</svg>
-							<div class="submenuee">
-								<input type="checkbox" name="cbgrpCrosshDirection" id="cbCrosshULDR" data-dir="ULDR" checked>
-								<label for="cbCrosshULDR" class="checked">
-									<svg viewBox="0 0 10 10">
-										<use xlink:href="#ULDR" class="usesymbol-hatchdirection"></use>
-									</svg>
-								</label>
-								<input type="checkbox" name="cbgrpCrosshDirection" id="cbCrosshUD" data-dir="UD" checked>
-								<label for="cbCrosshUD" class="checked">
-									<svg viewBox="0 0 10 10">
-										<use xlink:href="#UD" class="usesymbol-hatchdirection"></use>
-									</svg>
-								</label>
-								<input type="checkbox" name="cbgrpCrosshDirection" id="cbCrosshDLUR" data-dir="DLUR" checked>
-								<label for="cbCrosshDLUR" class="checked">
-									<svg viewBox="0 0 10 10">
-										<use xlink:href="#DLUR" class="usesymbol-hatchdirection"></use>
-									</svg>
-								</label>
-								<input type="checkbox" name="cbgrpCrosshDirection" id="cbCrosshLR" data-dir="LR" checked>
-								<label for="cbCrosshLR" class="checked">
-									<svg viewBox="0 0 10 10">
-										<use xlink:href="#LR" class="usesymbol-hatchdirection"></use>
-									</svg>
-								</label>
-							</div>
-						</div>
-						<div class="btn color">
-							<input type="color" id="icCrosshColor">
-							<label for="icCrosshColor"></label>
-						</div>
-						<div class="btn color">
-							<input type="color" id="icCrosshBg">
-							<label for="icCrosshBg"></label>
-						</div>
-					</div>
-					<div class="cont slider" id="crosshSeparation" tabindex="0">
-						<div class="wrapper"></div>
-					</div>
-					<div class="cont slider" id="crosshLinew" tabindex="0">
-						<div class="wrapper"></div>
-					</div>
-					<div class="cont slider" id="crosshSensitivity" tabindex="0">
-						<div class="wrapper"></div>
-					</div>
-				</div>
-			</div>
-			<svg style="width: 0; height: 0">
-				<defs>
-					<symbol viewBox="0 0 10 10" id="alldirections">
-						<path stroke-linecap="round" stroke-width="0.5" stroke="black" fill="none" d="M 0 0 H 56 V 14 V 14 H 0 V 0 M 14 0 V 14 M 28 0 V 14 M 42 0 V 14 M 0 0 M 2 2 L 12 12 M 16 7 H 26 M 30 12 L 40 2 m 9 0 l 0 10"></path>
-					</symbol>
-					<symbol viewBox="0 0 10 10" id="ULDR">
-						<path d="M 9 1 L 1 1 L 1 9 L 9 9 Z M 3 3 L 7 7"></path>
-					</symbol>
-					<symbol viewBox="0 0 10 10" id="LR">
-						<path d="M 9 1 L 1 1 L 1 9 L 9 9 Z M 3 5 L 7 5"></path>
-					</symbol>
-					<symbol viewBox="0 0 10 10" id="DLUR">
-						<path d="M 9 1 L 1 1 L 1 9 L 9 9 Z M 7 3 L 3 7"></path>
-					</symbol>
-					<symbol viewBox="0 0 10 10" id="UD">
-						<path d="M 9 1 L 1 1 L 1 9 L 9 9 Z M 5 3 L 5 7"></path>
-					</symbol>
-				</defs>
-			</svg>
-			<div class="effect" id="effectDecolorate" style="display: none;">
-				<input type="radio" name="rgEffects" id="rbDecolorate">
-				<label for="rbDecolorate"><span class="rb-dot"></span>Decolorate</label>
-				<div class="controllers">
-					<div class="cont slider" id="decolorHowmany">
-						<div class="wrapper"></div>
-					</div>
-				</div>
-			</div>
-		</section>
-		<section class="horizontal" id="secDisplay">
-			<div class="disp left">
-				<canvas id="canvOriginal"></canvas>
-			</div>
-			<div class="disp right">
-				<canvas id="canvFinal" width="0" height="0"></canvas>
-			</div>
-		</section>
-		<section id="secDownloadBar">
-			<div class="d-bar svg-cb">
-				<input type="checkbox" id="cbDownImgSvg">
-				<label for="cbDownImgSvg">
-					<svg viewBox="0 0 16 16">
-						<path id="path1" stroke="none" fill="black" d="M 2 11 L 5 11 L 5 8 L 8 8 L 8 5 L 11 5 L 11 2 C 12 2 13 2 14 2 L 14 5 L 11 5 L 11 8 L 8 8 L 8 11 L 5 11 L 5 14 L 5 14 L 2 14 C 2 13 2 12 2 11"></path>
-					</svg>
-				</label>
-			</div>
-			<div class="d-bar d-button">
-				<button id="btnDownImg" class="bwing"><label for="btnDownImg">Download</label></button>
-			</div>
-		</section>
-	</div>
-
-	<dialog id="diagInfo">
-		<div class="body">
-			The image file is only loaded locally to the browser. It is not uploaded anywhere.
-		</div>
-	</dialog>
-
-	<script src="AutoDialog.js"></script>
-	<script src="RangeSlider.js"></script>
-	<script src="MorphPath.js"></script>
-	<script src="index.js"></script>
+    <script src="RangeSlider.js"></script>
+    <script src="MorphPath.js"></script>
+    <script src="index.js"></script>
 </body>
 
 </html>

@@ -1,6 +1,6 @@
-//  It takes a parameter object and returns an instance.
-// {
-// container: Object element that will contain the slider. Slider will take up 100% of width and height.
+//  It takes a container element object and a parameter object and returns an instance.
+//  Slider will take up 100% of width and height of container element.
+// parameters {
 // title: String text with the title.
 // min: Number minimum.
 // max: Number maximum.
@@ -16,26 +16,27 @@
 
 
 class RangeSlider {
-    constructor(container, params) {
+    constructor(container, { title = "", min = new Number(), max = new Number(), step = new Number(), def = new Number, color1 = "rgb(116,116,231)", color2 = "rgba(90, 179, 211)", vert = false }) {
         this.onslide;
         this.parent = container;
-        this.title = (params.title == undefined) ? "" : params.title;
-        this.min = params.min;
-        this.max = params.max;
-        this.step = params.step;
-        this.def = (params.def == undefined) ? params.min : params.def;
-        this.def = (this.def > this.max) ? this.max : (this.def < this.min) ? this.min : this.def;
+        this.title = title;
+        this.min = min;
+        this.max = max;
+        this.step = step;
+        // this.def = (def == undefined) ? this.min : def;
+        this.def = (def > this.max) ? this.max : (def < this.min) ? this.min : def;
         this.val = this.def;
-        this.color1 = (params.color1 == undefined) ? "rgb(116,116,231)" : params.color1;
+        // this.color1 = (params.color1 == undefined) ? "rgb(116,116,231)" : params.color1;
+        this.color1 = color1;
         this.color1Dark = addToRgb(this.color1, -60);  //  Track start.
         this.color1Darkest = addToRgb(this.color1, -100);  // Background
         this.color1Light = addToRgb(this.color1, 100);
-        this.color2 = (params.color2 == undefined) ? "rgba(90, 179, 211)" : params.color2;
+        this.color2 = color2;
         this.color2Dark = addToRgb(this.color2, -60);  //  Track end.
         this.color2Darkest = addToRgb(this.color2, -110);  // Min, Max font. 
         this.color2Light = addToRgb(this.color2, 100);  //  Min, Max bg.
         this.color2Lightest = addToRgb(this.color2, 135);  //  Title, tooltip. Min, Max :active.
-        this.vert = (params.vert) ? true : false;
+        this.vert = vert;
         this.setBackgroundWithPerct = this.setBackgroundWithPerct.bind(this);
         this.on_pointerdrag = this.on_pointerdrag.bind(this);
         this.getValueFromPerct = this.getValueFromPerct.bind(this);
@@ -63,6 +64,7 @@ class RangeSlider {
         this.el.container.appendChild(this.el.max);
         this.el.container.appendChild(this.el.containerTrack);
 
+        this.parent.innerHTML = "";
         this.parent.appendChild(this.el.container);
 
         // Elements styles and defaults:
@@ -71,10 +73,12 @@ class RangeSlider {
         this.el.container.style.width = "100%";
         this.el.container.style.height = "100%";
         this.el.container.style.display = "grid";
+        this.el.container.style.padding = "0.5em 0.3em 0.2em";
         this.el.container.style.gridTemplateColumns = (this.vert) ? "2fr 5fr" : "1fr 12fr 1fr";
         this.el.container.style.gridTemplateRows = (this.vert) ? "1fr 12fr 1fr" : "2fr 5fr";
         this.el.container.style.gridTemplateAreas = (this.vert) ? "'title max' 'title track' 'title min'" : "'title title title' 'min track max'";
 
+        this.el.title.style.fontSize = "0.9em";
         this.el.title.innerText = `${this.title}: ${this.def}`;
         this.el.title.style.writingMode = (this.vert) ? "vertical-lr" : "inherit";
         this.el.title.style.transformOrigin = "center center";
@@ -84,6 +88,7 @@ class RangeSlider {
         this.el.title.style.display = "flex";
         this.el.title.style.justifyContent = "center";
         this.el.title.style.alignItems = "center";
+        this.el.title.style.userSelect = "none";
 
         this.el.containerTrack.style.position = "relative";
         this.el.containerTrack.style.gridArea = "track";
@@ -103,8 +108,8 @@ class RangeSlider {
         this.setBackgroundWithPerct(pfv);
 
         this.el.tooltip.style.position = "absolute";
-        this.el.tooltip.style.top = (this.vert) ? "unset" : "-120%";
-        this.el.tooltip.style.left = (this.vert) ? "-120%" : "unse";
+        this.el.tooltip.style.top = (this.vert) ? "unset" : "-80%";
+        this.el.tooltip.style.left = (this.vert) ? "-80%" : "unset";
         this.el.tooltip.style.backgroundColor = this.color2Lightest;
         this.el.tooltip.style.width = "2em";
         this.el.tooltip.style.height = "2em";
@@ -128,15 +133,15 @@ class RangeSlider {
         this.el.tooltipspan.style.fontSize = `${tooltipFontsize}em`;
 
         let maxWidthForMinAndMax = getMinWidth([this.max, this.min]);
-        
+
         this.el.max.innerText = this.max;
         this.el.max.style.writingMode = (this.vert) ? "vertical-lr" : "inherit";
         this.el.max.style.transformOrigin = "center center";
         this.el.max.style.rotate = (this.vert) ? "180deg" : "0";
         let maxFontS = parseFloat(window.getComputedStyle(this.el.max).fontSize);
-        let maxFontFactor = maxFontS / 16;
-        this.el.max.style.width = (this.vert) ? "unset" : `${maxFontFactor * maxWidthForMinAndMax}px`;
-        this.el.max.style.height = (this.vert) ? `${maxFontFactor * maxWidthForMinAndMax}px` : "unset";
+        let maxFontFactor = (maxFontS / 16);
+        this.el.max.style.width = (this.vert) ? "unset" : `calc(${maxFontFactor * maxWidthForMinAndMax}px + 0.3em)`;
+        this.el.max.style.height = (this.vert) ? `calc(${maxFontFactor * maxWidthForMinAndMax}px + 0.3em)` : "unset";
         this.el.max.style.gridArea = "max";
         this.el.max.style.backgroundColor = this.color2Light;
         this.el.max.style.color = this.color2Darkest;
@@ -159,14 +164,14 @@ class RangeSlider {
         });
 
         this.el.min.innerText = this.min;
-        
+
         this.el.min.style.writingMode = (this.vert) ? "vertical-lr" : "inherit";
         this.el.min.style.transformOrigin = "center center";
         this.el.min.style.rotate = (this.vert) ? "180deg" : "0";
         let minFontS = parseFloat(window.getComputedStyle(this.el.min).fontSize);
         let minFontFactor = minFontS / 16;
-        this.el.min.style.width = (this.vert) ? "unset" : `${minFontFactor * maxWidthForMinAndMax}px`;
-        this.el.min.style.height = (this.vert) ? `${minFontFactor * maxWidthForMinAndMax}px` : "unset";
+        this.el.min.style.width = (this.vert) ? "unset" : `calc(${minFontFactor * maxWidthForMinAndMax}px + 0.3em)`;
+        this.el.min.style.height = (this.vert) ? `calc(${minFontFactor * maxWidthForMinAndMax}px + 0.3em)` : "unset";
         this.el.min.style.gridArea = "min";
         this.el.min.style.backgroundColor = this.color2Light;
         this.el.max.style.color = this.color2Darkest;
@@ -214,7 +219,7 @@ class RangeSlider {
             this.setBackgroundWithPerct(pfv);
             this.el.title.innerText = `${this.title}: ${this.val}`;
             if (this.val != oldval) {
-                this.onslide();
+                if (this.onslide !== undefined) this.onslide();
             }
         });
 
@@ -225,7 +230,7 @@ class RangeSlider {
             this.setBackgroundWithPerct(pfv);
             this.el.title.innerText = `${this.title}: ${this.val}`;
             if (this.val != oldval) {
-                this.onslide();
+                if (this.onslide !== undefined) this.onslide();
             }
         });
     }
@@ -276,7 +281,7 @@ class RangeSlider {
         this.el.title.innerText = `${this.title}: ${this.val}`;
         // Run function.
         if (this.val != oldval) {
-            this.onslide();
+            if (this.onslide !== undefined) this.onslide();
         }
     }
 

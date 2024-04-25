@@ -1,1313 +1,873 @@
-@font-face {
-	font-family: "outfit";
-	src: url(fonts/outfit.ttf);
-}
-
-@font-face {
-	font-family: "mono3x3";
-	src: url(fonts/3x3mono.ttf);
-}
-
-@font-face {
-	font-family: "mukta";
-	src: url(fonts/mukta.ttf);
-}
-
 * {
-	margin: 0;
-	padding: 0;
-	box-sizing: border-box;
-	user-select: none;
-	font-family: 'Outfit', sans-serif;
-	/* weight 200, 400, 600. */
-	font-weight: 600;
-	font-size: 0.9rem;
-	color: var(--blue-darkest);
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
-
-/* #397DF8
-#3299D9
-#44DBEF
-#32D9BE
-#39F8A4 */
 
 :root {
-	--test: rgb(59, 0, 25);
-	/* FOR NAVIGATION BAR */
-	--nav-bg: rgb(26, 26, 46);
-	--nav-icon: rgb(233, 69, 96);
-	/* --nav-icon-bg:rgb(22, 64, 115); */
-	--nav-icon-bg: rgb(67, 101, 139);
-	--nav-dialog-body: #6ba9cf;
-	/* FOR WEB TOOL */
-	--blue-darkest: #162c4c;
-	--blue-dark: #2a506d;
-	--blue-soothing: #527387;
-	--blue-shade: #6e8b9d;
-	--blue-medium: #90b6ce;
-	--blue-muted: #b9cfda;
-	--blue-light: #DDE6ED;
+    --navheight-lg: 80px;
+    --navheight-md: 70px;
+    --navheight-tab: 60px;
+    --navheight-cel: 50px;
 
-	/* PIXELS */
-	--nav-height-desk: 40px;
-	--nav-height-mob: 48px;
-	--toolbar-width: 300px;
-	--cont-sider-width: 300px;
+    --globalbarh-cel: 35px;
+    --globalbarh-tab: 45px;
+    --globalbarh-md: 50px;
+    --globalbarh-lg: 60px;
+
+    --effectsbarw-cel: 60px;
+    --effectsbarw-tab: 70px;
+    --effectsbarw-md: 350px;
+    --effectsbarw-lg: 400px;
+
+    --downloadbar-cel: 40px;
+    --downloadbar-tab: 50px;
+    --downloadbar-md: 45px;
+    --downloadbar-lg: 50px;
+
+    --floaty-display-x: 50px;
+    --floaty-display-y: 50px;
+    --floaty-display-w: 150px;
+    --floaty-display-h: 150px;
+
+    --color-on: red;
+    --color-off: rgb(250, 91, 91);
+
+    --color-global-bg: rgb(47, 57, 95);
+    --color-global-btn-bg: rgb(59, 79, 80);
+    --color-global-btn-color: rgb(142, 167, 231);
+    --color-global-btn-outline: #719B9B;
+    --color-global-btn-hover: rgb(34, 45, 46);
+    --color-global-btn-active: rgb(90, 123, 124);
+
+    --color-effects-bg: #1e2c2c;
+    --color-effects-rb-bg-off: #3c5151;
+    --color-effects-rb-bg-on: #4D6666;
+    --color-effects-rb-outline: ;
+    --color-effects-rb-color-off: #78A1A1;
+    --color-effects-rb-color-on: #ACE6E6;
+    --color-effects-rb-inside: rgb(92, 166, 173);
+    --color-effects-rb-contrls: #ace6e7;
+    --color-effects-rb-contrls-hover: #c3f4f5;
+
+    --color-display-in-bg: #374949;
+    --color-display-out-bg: #3d4f4f;
+
+    --color-dlbar-bg: #576b9e;
+    --color-dlbar-btn-bg: #97a5c6;
+    --color-dlbar-btn-bg-hover: #aab7d5;
+    --color-dlbar-btn-bg-active: #becae6;
+
 }
 
-/* General styles. */
-html,
 body {
-	width: 100%;
-	height: 100%;
-}
-
-svg {
-	max-width: 100%;
-	max-height: 100%;
-}
-
-
-/* Styles for the dynamically added dialog with AutoDialog.js */
-dialog {
-	border-width: 3px;
-	max-width: 40vw;
-
-	@media (max-width: 600px) {
-		border-width: 2px;
-		max-width: 80vw;
-	}
-
-	@media (max-width: 250px) {
-		border-width: 1px;
-		min-width: calc(100vw - 3px);
-		max-width: calc(100vw - 3px);
-	}
-
-	& .wrapper {
-		& .container-title {
-			overflow: hidden;
-
-			& .title {
-				user-select: text;
-			}
-
-			& .x-it {
-				display: inline-block;
-				rotate: 45deg;
-				transition: rotate 300ms ease-in-out;
-			}
-
-			& .x-it:hover {
-				scale: 1.5;
-				background-color: transparent;
-				rotate: 405deg;
-			}
-		}
-
-		.body {
-			background-color: var(--nav-dialog-body);
-			padding: 0.5rem 1rem;
-			user-select: text;
-		}
-	}
-}
-
-dialog::backdrop {
-	background-color: rgb(0, 0, 0);
-	opacity: 0.5;
-}
-
-/* --------- */
-
-input[type=radio],
-input[type=checkbox] {
-	display: none;
-}
-
-.tooltip {
-	position: absolute;
-	background-color: lightyellow;
-	display: none;
-	align-items: center;
-	z-index: 4;
-}
-
-.tooltip.active {
-	display: block;
-}
-
-.tooltip::after {
-	position: absolute;
-	border-style: solid;
-	z-index: 3;
-}
-
-.g-action input~label,
-.btn input~label {
-	/* display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 100%;
-	height: 100%;
-	cursor: pointer; */
-}
-
-/* --------- */
-nav.top-nav {
-	height: var(--nav-height-desk);
-	background-color: var(--nav-bg);
-	display: flex;
-	flex-direction: row;
-	justify-content: start;
-	align-items: stretch;
-	padding: 0.2rem 0.5rem;
-	width: 100%;
-	overflow: visible;
-}
-
-/* Logo. */
-nav.top-nav .logo {
-	background-color: white;
-	border-radius: calc(var(--nav-height-desk)/2);
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 100px;
-	cursor: pointer;
-	border: 1px solid green;
-	padding: 1%;
-}
-
-nav.top-nav .logo a#logoDmfte {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 100%;
-}
-
-nav.top-nav .logo svg {
-	max-width: 80%;
-	max-height: 80%;
-}
-
-nav.top-nav .nav-items {
-	padding: 0;
-	display: flex;
-	flex-direction: row;
-	justify-content: flex-end;
-	align-items: stretch;
-	flex: 1;
-}
-
-nav.top-nav .nav-items .nav-i {
-	margin: 0 0.2rem;
-	display: flex;
-	justify-content: center;
-	align-items: stretch;
-	cursor: pointer;
-}
-
-nav.top-nav .nav-items .nav-i#navBtnContactme {
-	position: relative;
-	/* For tooltip. */
-}
-
-nav.top-nav .nav-items .nav-i#navBtnContactme .tooltip {
-	/* 10px is the .tooltip::after border width. */
-	top: calc(100% + 10px);
-	right: calc(50% - 10px);
-	border-radius: 10px 0 10px 20px;
-	padding: 5px 5px 10px 10px;
-	justify-content: flex-start;
-}
-
-nav.top-nav .nav-items .nav-i#navBtnContactme .tooltip::after {
-	content: "";
-	bottom: 100%;
-	right: 0;
-	border-width: 10px;
-	border-color: transparent transparent lightyellow transparent;
-}
-
-nav.top-nav .nav-items .nav-i svg path {
-	fill: var(--nav-icon-bg);
-}
-
-nav.top-nav .nav-items .nav-i:hover svg path {
-	fill: var(--nav-icon);
-}
-
-nav.top-nav .nav-items .nav-i:active svg path {
-	fill: var(--nav-icon);
-}
-
-.not-nav {
-	position: relative;
-	width: 100%;
-	height: calc(100% - var(--nav-height-desk));
-	background-color: lightgreen;
-	display: grid;
-	grid-template-areas: "global global" "toolbar display" "download download";
-	grid-template-columns: var(--toolbar-width) 1fr;
-	grid-template-rows: 64px 1fr 36px;
-}
-
-#secGlobalActions {
-	grid-area: global;
-	background-color: var(--blue-medium);
-	padding: 0.1rem 0.3rem;
-	display: flex;
-	flex-direction: row;
-	justify-content: flex-start;
-	align-items: center;
-	z-index: 1;
-
-	& .g-action {
-		position: relative;
-		border-radius: 0.7rem;
-		border: 2px solid var(--blue-dark);
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		padding: 0.1rem;
-		margin: 0 0.2rem;
-		background-color: var(--blue-medium);
-		width: 58px;
-		height: 58px;
-
-		& label {
-			cursor: pointer;
-			width: 100%;
-			height: 100%;
-		}
-	}
-
-	& #gaInputImage {
-		padding: 0;
-		align-items: stretch;
-		width: auto;
-		max-width: 150px;
-		margin-right: 2rem;
-	}
-}
-
-/* #secGlobalActions .g-action {
-	position: relative;
-	border-radius: 0.7rem;
-	border: 2px solid var(--blue-dark);
-	display: flex;
-	justify-content: center;
-	align-items: stretch;
-	margin: 0 0.2rem;
-	background-color: var(--blue-medium);
-	width: 58px;
-	height: 58px;
-} */
-
-#secGlobalActions .g-action input~label {
-	/* padding: 0.2rem;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 100%;
-	cursor: pointer; */
-}
-
-/* Input file button. */
-/* #secGlobalActions #gaInputImage {
-	padding: 0;
-	align-items: stretch;
-	width: auto;
-	max-width: 150px;
-	margin-right: 2rem;
-} */
-
-#secGlobalActions #gaInputImage::before {
-	position: absolute;
-	content: "";
-	border: 2px solid var(--blue-dark);
-	border-radius: 0.5rem;
-	top: 1px;
-	right: 1px;
-	bottom: 1px;
-	left: 1px;
-	opacity: 1;
-	transition: top 100ms, right 100ms, bottom 100ms, left 100ms;
-}
-
-#secGlobalActions #gaInputImage:hover::before {
-	top: 4px;
-	right: 4px;
-	bottom: 4px;
-	left: 4px;
-}
-
-#secGlobalActions #gaInputImage:active::before {
-	top: 10px;
-	right: 10px;
-	bottom: 10px;
-	left: 10px;
-	opacity: 0;
-}
-
-#secGlobalActions #gaInputImage #ifGaImage {
-	display: none;
-}
-
-#secGlobalActions #gaInputImage #ifGaImage+label {
-	padding: 7px;
-	font-size: 0.9rem;
-	line-height: 0.9rem;
-	cursor: pointer;
-	overflow: hidden;
-	z-index: 1;
-}
-
-/* Horizontal or vertical display. */
-#secGlobalActions #gaHorzVert input[type="checkbox"] {
-	/* display: none; */
-}
-
-/* Floating display. */
-#secGlobalActions #gaSmallFloat {
-	position: relative;
-}
-
-#secGlobalActions #gaSmallFloat input[type=checkbox]~label {
-	/* padding: 0.2rem; */
-}
-
-/* ---------- */
-
-#secToolbar {
-	position: relative;
-	grid-area: toolbar;
-	background-color: var(--blue-darkest);
-	display: flex;
-	flex-direction: column;
-	justify-content: flex-start;
-	align-items: stretch;
-	overflow-y: auto;
-	z-index: 3;
-
-	& .effect {
-		border: none;
-		border-radius: 1rem;
-		margin: 0.7rem 0.3rem;
-		padding: 0.4rem 0.2rem;
-		box-shadow: 0px -9px 15px -6px var(--blue-medium), 0px 6px 19px -7px black;
-		display: flex;
-		flex-direction: column;
-		justify-content: start;
-		align-items: stretch;
-
-		& input[name=rgEffects] {
-			display: none;
-		}
-
-		& input[name=rgEffects]+label {
-			padding: 0 0.2rem;
-			display: flex;
-			justify-content: flex-start;
-			align-items: center;
-			cursor: pointer;
-			color: var(--blue-muted);
-
-			& span.rb-dot {
-				background: var(--blue-muted);
-				border-radius: 50%;
-				margin-right: 0.4em;
-				width: 0.7em;
-				height: 0.7em;
-				transform: scale(0);
-			}
-		}
-
-		& .controllers {
-			position: relative;
-			margin: 0;
-			padding: 0;
-			max-height: 0;
-			display: flex;
-			flex-direction: column;
-			justify-content: flex-start;
-			align-items: stretch;
-			overflow: hidden;
-
-			& .cont {
-				margin: 0.1rem 0;
-			}
-
-			& .cont.other {
-				display: flex;
-				flex-direction: row;
-				justify-content: flex-start;
-				align-items: stretch;
-
-				& .btn {
-					cursor: pointer;
-					border-radius: 20%;
-					border: 2px solid var(--blue-darkest);
-					margin: 0 0.2rem;
-					padding: 0;
-					color: var(--blue-dark);
-					display: flex;
-					justify-content: center;
-					align-items: center;
-					width: 48px;
-					height: 48px;
-					overflow: hidden;
-
-					& input[type=color] {
-						width: 0;
-						height: 0;
-						border: none;
-						transform: scale(0);
-					}
-
-					& input[type=color]~label,
-					& input[type=checkbox]~label {
-						cursor: pointer;
-						width: 100%;
-						height: 100%;
-						/* Label BG color will be set in JS when inputColor is initialized. */
-					}
-				}
-
-				& .btn#wOrH {
-
-					& label {
-						margin: 0.1rem;
-						display: grid;
-						grid-template-areas: "arrowUp width" "arrowDown height";
-						align-items: center;
-
-						& span {
-							color: var(--blue-muted);
-							font-weight: 400;
-						}
-
-						& span.arrow {
-							grid-area: arrowUp;
-						}
-
-						& span:not(.arrow) {
-							font-size: 0.8rem;
-							line-height: 1.5;
-							white-space: nowrap;
-						}
-
-						& span.grid-by-w {
-							grid-area: width;
-							color: var(--blue-muted);
-						}
-
-						& span.grid-by-h {
-							grid-area: height;
-							color: var(--blue-shade);
-						}
-					}
-
-					& input[type=checkbox]:checked~label {
-
-						& span.arrow {
-							grid-area: arrowDown;
-						}
-
-						& span.grid-by-w {
-							color: var(--blue-shade);
-						}
-
-						& span.grid-by-h {
-							color: var(--blue-muted);
-						}
-					}
-
-				}
-
-				& .btn.bnw {
-
-					/* GRAYSCALING. For the button to switch between including-black-and-white and only-grays. */
-					& label {
-						display: flex;
-
-						& span {
-							flex: 1;
-						}
-
-						& span.stripe1 {
-							background-color: rgb(64, 64, 64);
-						}
-
-						& span.stripe2 {
-							background-color: rgb(160, 160, 160);
-						}
-
-						& span.stripe3 {
-							background-color: rgb(127, 127, 127);
-						}
-					}
-
-					& input[type=checkbox]:checked~label {
-
-						& span.stripe1 {
-							background-color: rgb(0, 0, 0);
-						}
-
-						& span.stripe3 {
-							background-color: rgb(255, 255, 255);
-						}
-					}
-
-					& input[type=checkbox]:hover~label {
-
-						& span.stripe1 {
-							animation: 700ms infinite alternate black-to-gray;
-						}
-
-						& span.stripe3 {
-							animation: 700ms infinite alternate white-to-gray;
-						}
-					}
-				}
-
-				& .btn.submenuer#crosshDirections {
-					display: flex;
-					position: relative;
-					overflow: visible;
-
-					& svg {
-
-						& .usesymbol-hatchdirection {
-							stroke-linecap: round;
-							stroke-width: 0.5;
-							stroke: black;
-							fill: none;
-						}
-					}
-
-					& .submenuee {
-						width: 0;
-					}
-
-				}
-
-				& .btn.submenuer#crosshDirections:focus-within {
-					/* & .btn.submenuer#crosshDirections { */
-					z-index: 2;
-					background-color: var(--blue-medium);
-
-
-					& .submenuee {
-						position: absolute;
-						top: 100%;
-						left: 0;
-						background-color: var(--blue-shade);
-						width: 240px;
-						height: 60px;
-						display: flex;
-						justify-content: space-between;
-						align-items: stretch;
-
-						& label svg use {
-							stroke: #575757;
-						}
-
-						& label.checked svg use {
-							stroke: var(--blue-darkest);
-						}
-
-						& label:hover svg use {
-							stroke: var(--blue-light)
-						}
-					}
-				}
-
-
-			}
-
-		}
-	}
-
-	& .effect.active {
-		box-shadow: inset 0px 5px 10px -5px black, inset 0px -5px 15px -4px var(--blue-light);
-		background-color: var(--blue-dark);
-
-		& input[name=rgEffects]+label {
-			transform-origin: center;
-			transform: scale(0.9);
-			color: var(--blue-light);
-
-			& span.rb-dot {
-				transform: scale(1);
-			}
-		}
-
-		& .controllers {
-			max-height: 1000px;
-			padding-top: 0.8rem;
-			transition: max-height 1s ease-in;
-
-		}
-
-	}
-
-
-}
-
-
-@keyframes black-to-gray {
-	from {
-		background-color: rgb(0, 0, 0);
-	}
-
-	35% {
-		background-color: rgb(0, 0, 0);
-	}
-
-	65% {
-		background-color: rgb(64, 64, 64);
-	}
-
-	to {
-		background-color: rgb(64, 64, 64);
-	}
-}
-
-@keyframes white-to-gray {
-	from {
-		background-color: rgb(255, 255, 255);
-	}
-
-	35% {
-		background-color: rgb(255, 255, 255);
-	}
-
-	60% {
-		background-color: rgb(160, 160, 160);
-	}
-
-	to {
-		background-color: rgb(160, 160, 160);
-	}
-}
-
-/* ------ */
-/* HATCHING. For the button to change the direction of the Hatching. */
-#secToolbar .effect .controllers .cont.other .btn.with-submenu {
-	position: relative;
-	overflow: visible;
-	cursor: pointer;
-	outline: none;
-	z-index: 3;
-}
-
-#secToolbar .effect .controllers .cont.other .btn.with-submenu .submenu {
-	background-color: var(--blue-dark);
-	position: absolute;
-	top: 110%;
-	left: 0;
-	/* Width will be determined on specific submenu. */
-	width: 0;
-	height: 54px;
-	padding: 0;
-	display: flex;
-	flex-direction: row;
-	transition: width 200ms ease-in-out;
-	/* overflow: hidden; */
-}
-
-#secToolbar .effect .controllers .cont.other .btn.with-submenu:focus .submenu {
-	box-shadow: 0 0 40px 30px rgba(0, 0, 0, 0.8);
-}
-
-#secToolbar .effect .controllers .cont.other .btn.with-submenu .submenu .wrapper {
-	width: 100%;
-	height: 100%;
-}
-
-#secToolbar .effect#effectHatching .controllers .cont.other .btn.with-submenu#currentdirection:focus .submenu {
-	width: calc(var(--cont-sider-width) - 20px);
-}
-
-#secToolbar .effect#effectHatching .controllers .cont.other .btn.with-submenu#currentdirection .submenu .wrapper {
-	padding: 0.2rem;
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-}
-
-#secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection .submenu#rgdirections .wrapper input[type=radio]~label {
-	height: 100%;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	flex: 1;
-	cursor: pointer;
-}
-
-#secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection .submenu#rgdirections .wrapper input[type=radio]+label svg {
-	pointer-events: none;
-}
-
-#secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection .submenu#rgdirections .wrapper input[type=radio]+label svg .usesymbol-hatchdirection {
-	stroke-linecap: round;
-	stroke-width: 0.5;
-	stroke: black;
-	fill: none;
-}
-
-#secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection .submenu#rgdirections .wrapper input[type=radio]:checked+label svg {
-	scale: 0.9;
-}
-
-#secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection .submenu#rgdirections .wrapper input[type=radio]:checked+label svg .usesymbol-hatchdirection {
-	stroke: var(--blue-light);
-}
-
-
-#secToolbar .effect .controllers .cont.other .btn.with-submenu#currentdirection .submenu#rgdirections .wrapper input[type=radio]:not(:checked)+label:hover svg .usesymbol-hatchdirection {
-	stroke: var(--blue-shade);
-}
-
-/* ------ */
-
-#secToolbar .effect .controllers .cont.slider {
-	position: relative;
-	padding: 0;
-	display: flex;
-	flex-direction: column;
-	justify-content: flex-start;
-	align-items: stretch;
-}
-
-/* ----------- */
-#secDisplay {
-	position: relative;
-	background-color: var(--blue-light);
-}
-
-#secDisplay .disp {
-	position: absolute;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	padding: 1rem;
-	transition-timing-function: linear;
-	transition-duration: 300ms;
-	transition-property: top, righ, bottom, left, width, height;
-	/* transition: top 500ms, right 500ms, bottom 500ms, left 500ms, width 500ms, height 500ms; */
-}
-
-#secDisplay .disp.left {
-	background-color: var(--blue-muted);
-	z-index: 2;
-}
-
-#secDisplay .disp.right {
-	background-color: var(--blue-light);
-}
-
-#secDisplay.horizontal .disp.left {
-	left: 0;
-	top: 0;
-	bottom: 0;
-	right: auto;
-	width: 50%;
-	height: 100%;
-}
-
-#secDisplay.horizontal .disp.right {
-	left: auto;
-	top: 0;
-	bottom: 0;
-	right: 0;
-	width: 50%;
-	height: 100%;
-}
-
-#secDisplay.vertical .disp.left {
-	left: 0;
-	top: 0;
-	bottom: auto;
-	right: 0;
-	width: 100%;
-	height: 50%;
-}
-
-#secDisplay.vertical .disp.right {
-	left: 0;
-	top: auto;
-	bottom: 0;
-	right: 0;
-	width: 100%;
-	height: 50%;
-}
-
-#secDisplay.float .disp.left {
-	touch-action: none;
-	bottom: auto;
-	right: auto;
-	padding: 0.5rem;
-	width: 120px;
-	height: 120px;
-	cursor: move;
-}
-
-#secDisplay.float .disp.right {
-	width: 100%;
-	height: 100%;
-}
-
-#secDisplay .disp canvas {
-	max-width: 100%;
-	max-height: 100%;
-}
-
-#secDisplay .disp.left canvas {
-	pointer-events: none;
-}
-
-/* ----------- */
-#secDownloadBar {
-	grid-area: download;
-	background-color: var(--blue-dark);
-	display: flex;
-	flex-direction: row;
-	justify-content: flex-end;
-	align-items: stretch;
-	z-index: 4;
-
-	& .d-bar {
-		position: relative;
-		margin: 0.1rem 1rem;
-		border: 1px solid blue;
-		max-width: 100px;
-		display: flex;
-		justify-content: center;
-		align-items: stretch;
-
-		& input {
-			display: none;
-		}
-
-		& input~label {
-			display: flex;
-			border-radius: 7px;
-			padding: 0.1rem;
-			cursor: pointer;
-
-		}
-
-		& input~label[for=cbDownImgSvg] {
-			background-color: white;
-
-		}
-	}
-
-	& .d-bar:active::after {
-		pointer-events: none;
-		position: absolute;
-		content: "";
-		top: -2px;
-		left: -2px;
-		bottom: -2px;
-		right: -2px;
-		border: 1px solid #FFFFFF;
-		border-radius: 5px;
-	}
-
-	& .d-bar.d-button {
-		display: flex;
-		justify-content: center;
-		align-items: stretch;
-		margin: 0.3rem 0.5rem;
-
-		& button {
-			position: relative;
-			border: none;
-			border-radius: 0.5rem;
-			margin: 0;
-			padding: 0;
-			width: 75px;
-
-			& label {
-				cursor: pointer;
-				display: flex;
-				justify-content: center;
-				align-items: center;
-				width: 100%;
-				height: 100%;
-			}
-		}
-	}
-}
-
-/* #secDownloadBar .d-bar {
-	margin: 0.1rem 0.2rem;
-} */
-
-/* #secDownloadBar .d-bar.d-button {
-	display: flex;
-	justify-content: center;
-	align-items: stretch;
-	margin: 0.3rem 0.5rem;
-} */
-
-/* #secDownloadBar .d-bar.d-button button {
-	position: relative;
-	border: none;
-	border-radius: 0.5rem;
-	margin: 0;
-	padding: 0;
-	width: 75px;
-} */
-
-/* #secDownloadBar .d-bar.d-button button label {
-	cursor: pointer;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 100%;
-	height: 100%;
-} */
-
-/* Grid button effect. */
-/* Vertical bars. */
-#secDownloadBar .d-bar.d-button button.grid {
-	overflow: visible;
-}
-
-#secDownloadBar .d-bar.d-button button.grid::before {
-	position: absolute;
-	content: "";
-	border-right: 1px solid red;
-	border-left: 1px solid red;
-	border-color: transparent;
-	left: 50%;
-	top: -10%;
-	transform: translate(-50%, 0);
-	width: 100%;
-	height: 125%;
-	transition: width 300ms;
-}
-
-#secDownloadBar .d-bar.d-button button.grid:hover::before {
-	border-color: red;
-	width: 40%;
-}
-
-/* Horizontal bars. */
-#secDownloadBar .d-bar.d-button button.grid::after {
-	position: absolute;
-	content: "";
-	border-top: 1px solid red;
-	border-bottom: 1px solid red;
-	border-color: transparent;
-	top: 50%;
-	transform: translate(-50%, -50%);
-	width: 115%;
-	height: 110%;
-	transition: height 300ms;
-}
-
-#secDownloadBar .d-bar.d-button button.grid:hover::after {
-	border-color: red;
-	height: 40%;
-}
-
-/* Pixelated button effect. */
-#secDownloadBar .d-bar.d-button button.pixelate {
-	align-items: center;
-	overflow: hidden;
-}
-
-#secDownloadBar .d-bar.d-button button.pixelate label {
-	transition: font-family 300ms;
-}
-
-#secDownloadBar .d-bar.d-button button.pixelate:hover label {
-	font-size: 0.6rem;
-	font-family: mono3x3;
-}
-
-/* Black and white button effect. */
-#secDownloadBar .d-bar.d-button button.mono {
-	box-shadow: inset 0 0 0 0 black;
-	transition: box-shadow 500ms;
-}
-
-#secDownloadBar .d-bar.d-button button.mono:hover {
-	box-shadow: inset 75px 0 0px 0 black;
-}
-
-#secDownloadBar .d-bar.d-button button.mono:hover label {
-	color: white;
-}
-
-/* ------------ */
-@media screen and (max-width: 600px) {
-	nav.top-nav {
-		height: var(--nav-height-mob);
-	}
-
-	.not-nav {
-		background-color: transparent;
-		grid-template-areas: "global global" "display toolbar" "download download";
-		grid-template-columns: 1fr 60px;
-		grid-template-rows: 64px 1fr 48px;
-		height: calc(100% - var(--nav-height-mob));
-		overflow: hidden;
-	}
-
-	input~label {
-		font-family: outfit;
-		font-weight: 400;
-	}
-
-	.cont.slider {
-		font-family: outfit;
-		font-weight: 300;
-	}
-
-	#secToolbar {
-		left: 0;
-		width: 60px;
-		padding: 0.5rem 0 0 0;
-		overflow: visible;
-	}
-
-	#secToolbar.expanded {
-		left: -140px;
-		width: var(--toolbar-width);
-		box-shadow: 5px 25px 30px 10px black;
-		transition: left 300ms ease-in-out;
-	}
-
-	#secToolbar .effect {
-		display: none;
-		border-radius: 0;
-		margin: 0;
-		padding: 0;
-		flex-direction: column;
-		justify-content: flex-start;
-		align-items: stretch;
-		flex: 1;
-		overflow: hidden;
-		width: 100%;
-	}
-
-	#secToolbar.expanded .effect {
-		display: flex;
-		box-shadow: none;
-		margin: 0.1rem 0;
-		padding: 0.2rem 0.5rem;
-		flex: 0;
-		overflow: visible;
-	}
-
-	#secToolbar .effect input[name=rgEffects]+label {
-		background-color: var(--blue-dark);
-		padding: 1rem 0;
-		border-radius: 0.5rem;
-		border: 1px solid var(--blue-muted);
-		width: 100%;
-		text-align: center;
-	}
-
-	#secToolbar .effect input[name=rgEffects]:checked+label {
-		border: 1px solid var(--blue-light);
-	}
-
-	#secToolbar .effect.active {
-		background-color: transparent;
-		display: flex;
-		box-shadow: none;
-		overflow: visible;
-	}
-
-	#secToolbar .effect.active input[name=rgEffects]:checked~.controllers {
-		max-height: 1000px;
-		padding-top: 0;
-		align-items: center;
-	}
-
-	#secToolbar .effect input[name=rgEffects]:checked+label span.rb-dot {
-		display: none;
-	}
-
-	#secToolbar.expanded .effect input[name=rgEffects]~.controllers {
-		transform: translate(150%, 0);
-	}
-
-	#secToolbar .effect.active input[name=rgEffects]~.controllers {
-		justify-content: center;
-		align-items: stretch;
-		overflow: visible;
-		flex: 1;
-		transform: translate(0, 0);
-		transition: transform 300ms ease-in-out;
-	}
-
-	#secToolbar.expanded .effect input[name=rgEffects]~.controllers .cont {
-		display: none;
-	}
-
-	#secToolbar .effect.active .controllers .cont {
-		margin: 0;
-		padding: 0;
-	}
-
-	#secToolbar .effect.active .controllers .cont.other {
-		flex-direction: column;
-		justify-content: stretch;
-		align-items: center;
-	}
-
-	/* All buttons in toolbar */
-	#secToolbar .effect.active .controllers .cont.other .btn {
-		border: none;
-	}
-
-	#secToolbar .effect.active .controllers .cont.other .btn.wOrH .arrow {
-		display: none;
-	}
-
-	#secToolbar .effect.active .controllers .cont.other .btn,
-	#secToolbar .effect.active .controllers .cont.slider {
-		border: 1px solid var(--blue-shade);
-		color: var(--blue-muted);
-		margin: 0.4rem 0;
-		padding: 0;
-		max-height: 45px;
-		min-height: 45px;
-		max-width: 45px;
-		min-width: 45px;
-		overflow: visible;
-		cursor: pointer;
-	}
-
-	#secToolbar .effect#effectGrayscaling .controllers .cont.other .btn.bnw {
-		overflow: hidden;
-	}
-
-	#secToolbar .effect.active .controllers .cont.other .btn.color {
-		border-width: 2px;
-		overflow: hidden;
-	}
-
-	#secToolbar .effect.active input[name=rgEffects]:checked+label {
-		justify-content: center;
-	}
-
-	/* -------- */
-
-	#secToolbar .effect.active .controllers .cont.slider::after {
-		/* This is for the Content property on specific containers. */
-		width: 100%;
-		height: 100%;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
-
-	#secToolbar .effect.active .controllers .cont.slider:focus {
-		box-shadow: inset 0px 0px 6px 1px var(--blue-medium);
-	}
-
-	#secToolbar .effect.active .controllers .cont.slider .wrapper {
-		position: absolute;
-		right: 115%;
-		width: 0;
-		padding: 0;
-		margin: 0;
-		height: 50px;
-		overflow: hidden;
-		display: flex;
-		justify-content: flex;
-		align-items: stretch;
-	}
-
-	#secToolbar .effect.active .controllers .cont.slider:focus .wrapper {
-		padding: 0;
-		width: var(--cont-sider-width);
-		transition: width 300ms ease-in-out;
-	}
-
-	#secToolbar .effect.active .controllers .cont.slider .wrapper .slider {
-		overflow: hidden;
-	}
-
-	/* GRID */
-	#secToolbar .effect.active .controllers .cont.slider#gridAmtSqrs::after {
-		content: "Sqrs.";
-	}
-
-	#secToolbar .effect.active .controllers .cont.slider#gridLinew::after {
-		content: "Width";
-	}
-
-	#secToolbar .effect.active .controllers .cont.slider#pxltPixelated::after {
-		content: "Pxlt";
-	}
-
-	#secToolbar .effect.active .controllers .cont.slider#bwSensitivity::after {
-		content: "Sens.";
-	}
-
-	#secToolbar .effect.active .controllers .cont.slider#gsLevels::after {
-		content: "Levl.";
-	}
-
-	#secToolbar .effect.active .controllers .cont.slider#gsSensitivity::after {
-		content: "Sens.";
-	}
-
-	/* ------ */
-	/* Hatching */
-	#secToolbar .effect .controllers .cont.other .btn.with-submenu .submenu {
-		left: auto;
-		top: auto;
-		right: 110%;
-	}
-
-	#secToolbar .effect .controllers .cont.other .btn.with-submenu:focus .submenu {
-		box-shadow: 0 0 80px 20px var(--blue-dark);
-	}
-
-	#secToolbar .effect.active#effectHatching .controllers .cont.slider#hatchHowmanyw::after {
-		content: "Lines";
-	}
-
-	#secToolbar .effect.active#effectHatching .controllers .cont.slider#hatchSeparation::after {
-		content: "Sepr.";
-	}
-
-	#secToolbar .effect.active#effectHatching .controllers .cont.slider#hatchLinewidth::after {
-		content: "Width";
-	}
-
-	#secToolbar .effect.active#effectHatching .controllers .cont.slider#hatchSensitivity::after {
-		content: "Sens.";
-	}
-
-	/* ------ */
-	/* CROSSHATCHING */
-	#effectCrosshactive {
-
-		& .controllers .cont.slider#crosshSeparation::after {
-			content: "Sepr.";
-		}
-	}
-
-	#secToolbar .effect.active#effectCrossh .controllers .cont.slider#crosshLinew::after {
-		content: "Width";
-	}
-
-	#secToolbar .effect.active#effectCrossh .controllers .cont.slider#crosshSensitivity::after {
-		content: "Sens.";
-	}
-
-	/* ------ */
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+nav#top-nav {
+    position: relative;
+    background-color: rgb(26, 26, 46);
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-items: stretch;
+    padding: 0.2rem 0.5rem;
+    overflow: visible;
+
+    /* Same pixels and break points will apply to container-all's margin-top. */
+    @media only screen and (max-width: 600px) {
+        height: var(--navheight-cel);
+    }
+
+    @media only screen and (min-width: 601px) and (max-width: 1024px) {
+        height: var(--navheight-tab);
+    }
+
+    @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+        height: var(--navheight-md);
+    }
+
+    @media only screen and (min-width: 1441px) {
+        height: var(--navheight-lg);
+    }
+
+    & a#logoDmfte {
+        position: relative;
+        background-color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        border: 1px solid green;
+        padding: 5px;
+
+        @media only screen and (max-width: 600px) {
+            width: calc(var(--navheight-cel) * 2);
+            border-radius: calc(var(--navheight-cel) / 2);
+        }
+
+        @media only screen and (min-width: 601px) and (max-width: 1024px) {
+            width: calc(var(--navheight-tab) * 2);
+            border-radius: calc(var(--navheight-tab) / 2);
+        }
+
+        @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+            width: calc(var(--navheight-md) * 2);
+            border-radius: calc(var(--navheight-md) / 2);
+        }
+
+        @media only screen and (min-width: 1441px) {
+            width: calc(var(--navheight-lg) * 2);
+            border-radius: calc(var(--navheight-lg) / 2);
+        }
+    }
+
+
+
+    & .nav-items {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        align-items: stretch;
+        flex: 1;
+
+        & .nav-i {
+            max-height: 100%;
+            max-width: 100%;
+            margin: 0 0.2rem;
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            cursor: pointer;
+
+            @media only screen and (max-width: 600px) {
+                width: calc(var(--navheight-cel) - 1%);
+            }
+
+            @media only screen and (min-width: 601px) and (max-width: 1024px) {
+                width: calc(var(--navheight-tab) - 1%);
+            }
+
+            @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+                width: calc(var(--navheight-md) - 1%);
+            }
+
+            @media only screen and (min-width: 1441px) {
+                width: calc(var(--navheight-lg) - 1%);
+            }
+
+            & svg path {
+                fill: rgb(67, 101, 139);
+            }
+        }
+
+        & .nav-i:hover svg path {
+            fill: rgb(233, 69, 96);
+        }
+
+        & .nav-i:active svg path {
+            fill: rgb(233, 69, 96);
+        }
+    }
+}
+
+#containerAll {
+    flex: 1;
+    display: grid;
+    overflow: hidden;
+
+    @media only screen and (max-width: 600px) {
+        grid-template-columns: 1fr var(--effectsbarw-cel);
+        grid-template-rows: var(--globalbarh-cel) 1fr var(--downloadbar-cel);
+        grid-template-areas: "global global" "pictures effects" "download download";
+    }
+
+    @media only screen and (min-width: 601px) and (max-width: 1024px) {
+        grid-template-columns: 1fr var(--effectsbarw-tab);
+        grid-template-rows: var(--globalbarh-tab) 1fr var(--downloadbar-tab);
+        grid-template-areas: "global global" "pictures effects" "download download";
+    }
+
+    @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+        grid-template-columns: var(--effectsbarw-md) 1fr;
+        grid-template-rows: var(--globalbarh-md) 1fr var(--downloadbar-md);
+        grid-template-areas: "global global" "effects pictures" "download download";
+    }
+
+    @media only screen and (min-width: 1441px) {
+        grid-template-columns: var(--effectsbarw-lg) 1fr;
+        grid-template-rows: var(--globalbarh-lg) 1fr var(--downloadbar-lg);
+        grid-template-areas: "global global" "effects pictures" "download download";
+    }
+
+    & #globalControls input:is([type=checkbox], [type=file]) {
+        display: none;
+    }
+
+    & #globalControls {
+        --marginctrl: 4px;
+        grid-area: global;
+        background-color: var(--color-global-bg);
+        display: flex;
+        justify-content: flex-start;
+        align-items: stretch;
+
+        & .g-ctrl {
+            outline: none;
+            background-color: var(--color-global-btn-bg);
+            border: 1px solid var(--color-global-btn-outline);
+            color: var(--color-global-btn-color);
+            cursor: pointer;
+            margin: var(--marginctrl);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            & svg {
+
+                & path {
+                    /* Colors are handled innline in HTML. */
+                    /* fill: var(--color-global-btn-color); */
+                    /* stroke: var(--color-global-btn-color) */
+                }
+            }
+
+            @media only screen and (max-width: 600px) {
+                width: calc(var(--globalbarh-cel) - (var(--marginctrl) * 2));
+            }
+
+            @media only screen and (min-width: 601px) and (max-width: 1024px) {
+
+                width: calc(var(--globalbarh-tab) - (var(--marginctrl) * 2));
+            }
+
+            @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+                width: calc(var(--globalbarh-md) - (var(--marginctrl) * 2));
+
+            }
+
+            @media only screen and (min-width: 1441px) {
+                width: calc(var(--globalbarh-lg) - (var(--marginctrl) * 2));
+
+            }
+        }
+
+        & .g-ctrl:hover {
+            background-color: var(--color-global-btn-hover);
+        }
+
+        & .g-ctrl:active {
+            background-color: var(--color-global-btn-active);
+        }
+
+        & .gctrl2 {
+
+            /* Same as .g-ctrl but twice the width. */
+            @media only screen and (max-width: 600px) {
+                width: calc((var(--globalbarh-cel) - (var(--marginctrl) * 2)) * 2);
+            }
+
+            @media only screen and (min-width: 601px) and (max-width: 1024px) {
+
+                width: calc((var(--globalbarh-tab) - (var(--marginctrl) * 2)) * 2);
+            }
+
+            @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+                width: calc((var(--globalbarh-md) - (var(--marginctrl) * 2)) * 2);
+
+            }
+
+            @media only screen and (min-width: 1441px) {
+                width: calc((var(--globalbarh-lg) - (var(--marginctrl) * 2)) * 2);
+
+            }
+        }
+
+        & label[for=ifLoadImg] {
+            /* Label for the button to load image. */
+            background-color: var(--color-global-btn-bg);
+            border: 1px solid var(--color-global-btn-outline);
+            margin: var(--marginctrl);
+            padding: 0.1em 0.5em 0.1em 0;
+            display: flex;
+            justify-content: flex-start;
+            align-items: stretch;
+            width: 200px;
+            cursor: pointer;
+            overflow: hidden;
+
+            & svg {
+                /* max-width: 100%; */
+                min-height: 100%;
+                margin-right: 0.2em;
+            }
+
+            & span {
+                user-select: none;
+                display: flex;
+                align-items: center;
+                flex: 1;
+                color: var(--color-global-btn-color);
+            }
+        }
+
+        & label[for=ifLoadImg]:hover {
+            background-color: var(--color-global-btn-hover);
+        }
+
+        & label[for=ifLoadImg]:active {
+            background-color: var(--color-global-btn-active);
+        }
+    }
+
+    & #effectsBar {
+        grid-area: effects;
+        background-color: var(--color-effects-bg);
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: stretch;
+        padding: 1em 0.5em;
+        overflow: auto;
+        z-index: 10;
+
+        @media only screen and (max-width: 1024px) {
+            padding: 1em 0;
+
+        }
+
+        & .effect {
+            background-color: var(--color-effects-rb-bg-off);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: stretch;
+            margin: 0.3em 0;
+            /* Border radious = .controls border-radius + margin; */
+            border-radius: 14px;
+
+            & :is([type=checkbox], [type=radio], [type=color]) {
+                display: none;
+            }
+
+            & .effect-title {
+                color: var(--color-effects-rb-color-off);
+                align-items: center;
+                padding: 1em;
+                cursor: pointer;
+
+
+                @media only screen and (max-width: 600px) {
+                    display: none;
+                }
+
+                @media only screen and (min-width: 601px) and (max-width: 1024px) {
+                    display: none;
+                }
+
+                @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+                    display: flex;
+                }
+
+                @media only screen and (min-width: 1441px) {
+                    display: flex;
+                }
+
+                & span.circle {
+                    background-color: var(--color-effects-rb-color-on);
+                    border-radius: 50%;
+                    width: 0.8em;
+                    height: 0.8em;
+                    margin-right: 0.5em;
+                    transition: 300ms;
+                    transform-origin: center;
+                    transform: scale(0);
+                }
+            }
+
+            /* & input:checked~.effect-title {
+                color: var(--color-effects-rb-color-on);
+
+                & span.circle {
+                    transform: scale(1);
+                }
+            } */
+
+            & input~.eff-title {
+                background-color: var(--color-effects-rb-off);
+                color: var(--color-effects-rb-color-off);
+                width: 100%;
+                justify-content: center;
+                align-items: center;
+                cursor: pointer;
+
+                @media only screen and (max-width: 600px) {
+                    display: flex;
+                    height: calc(var(--effectsbarw-cel));
+                }
+
+                @media only screen and (min-width: 601px) and (max-width: 1024px) {
+                    display: flex;
+                    height: calc(var(--effectsbarw-tab));
+                }
+
+                @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+                    display: none;
+                }
+
+                @media only screen and (min-width: 1441px) {
+                    display: none;
+                }
+            }
+
+            /* & input:checked~.eff-title {
+                color: var(--color-effects-rb-on);
+            } */
+
+            & .controls {
+                background-color: rgb(120, 162, 161);
+                border-radius: 0 0 10px 10px;
+                margin: 4px;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: stretch;
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 400ms linear 0ms, padding 400ms linear 0ms;
+
+                & .btns {
+                    display: flex;
+                    justify-content: flex-start;
+                    margin-bottom: 0.4rem;
+
+                    @media only screen and (max-width: 1024px) {
+                        flex-direction: column;
+                    }
+
+                    & .btn {
+                        position: relative;
+                        background-color: var(--color-effects-rb-contrls);
+                        border-radius: 10px;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        margin: 0 3px 0 0;
+                        overflow: hidden;
+                        cursor: pointer;
+
+                        & svg {
+                            max-width: 100%;
+                            max-height: 100%;
+                        }
+
+                        & div#hatchCurrentDir {
+                            flex: 1;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                        }
+
+                        @media only screen and (max-width: 600px) {
+                            width: calc(var(--effectsbarw-cel) - 6px);
+                            height: calc(var(--effectsbarw-cel) - 6px);
+                            align-self: center;
+                        }
+
+                        @media only screen and (min-width: 601px) and (max-width: 1024px) {
+                            width: calc(var(--effectsbarw-tab) - 12px);
+                            height: calc(var(--effectsbarw-tab) - 12px);
+                            align-self: center;
+                        }
+
+                        @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+                            width: calc(var(--effectsbarw-cel));
+                            height: calc(var(--effectsbarw-cel));
+                            align-self: flex-start;
+                        }
+
+                        @media only screen and (min-width: 1441px) {
+                            width: calc(var(--effectsbarw-tab));
+                            height: calc(var(--effectsbarw-tab));
+                            align-self: flex-start;
+                        }
+                    }
+
+                    & input[type=color]+label {
+                        border-radius: 50%;
+                        border: 5px solid #ffffff;
+                        background-color: #ff0000;
+                    }
+
+                    & .btn:hover:not(label[for=icGridColor]) {
+                        background-color: var(--color-effects-rb-contrls-hover);
+                    }
+
+                    & label[for=cbGraysBlack] {
+                        display: flex;
+                        align-items: stretch;
+
+                        & span {
+                            flex: 1;
+                        }
+
+                        & span.stripe1 {
+                            background-color: rgb(64, 64, 64);
+                        }
+
+                        & span.stripe2 {
+                            background-color: rgb(160, 160, 160);
+                        }
+
+                        & span.stripe3 {
+                            background-color: rgb(127, 127, 127);
+                        }
+                    }
+
+                    & input:checked~label[for=cbGraysBlack] {
+
+                        & span.stripe1 {
+                            background-color: rgb(0, 0, 0);
+                        }
+
+                        & span.stripe3 {
+                            background-color: rgb(255, 255, 255);
+                        }
+                    }
+
+                    & .btn.supermenu {
+                        position: relative;
+                        /* These properties will change on :focus-within. */
+                        overflow: hidden;
+                        cursor: pointer;
+
+                        & .submenu {
+                            position: absolute;
+                            background-color: var(--color-effects-rb-contrls);
+                            top: 100%;
+                            left: 0;
+                            display: grid;
+                            grid-template-columns: 1fr 1fr 1fr 1fr;
+                            max-width: 0;
+                            overflow: hidden;
+                            transition: 500ms ease-in-out;
+                            z-index: 2;
+
+                            & input~label {
+                                scale: 0.9;
+                                cursor: pointer;
+
+                                @media only screen and (max-width: 600px) {
+                                    width: calc(var(--effectsbarw-cel) - 6px);
+                                    height: calc(var(--effectsbarw-cel) - 6px);
+                                    align-self: center;
+                                }
+
+                                @media only screen and (min-width: 601px) and (max-width: 1024px) {
+                                    width: calc(var(--effectsbarw-tab) - 12px);
+                                    height: calc(var(--effectsbarw-tab) - 12px);
+                                    align-self: center;
+                                }
+
+                                @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+                                    width: calc(var(--effectsbarw-cel));
+                                    height: calc(var(--effectsbarw-cel));
+                                    align-self: flex-start;
+                                }
+
+                                @media only screen and (min-width: 1441px) {
+                                    width: calc(var(--effectsbarw-tab));
+                                    height: calc(var(--effectsbarw-tab));
+                                    align-self: flex-start;
+                                }
+                            }
+                        }
+
+                        & #hatchCurrentDir {
+                            position: relative;
+                            width: 100%;
+                            height: 100%;
+                            overflow: hidden;
+                            /* border: 3px solid red; */
+
+                            & svg {
+                                position: absolute;
+                                max-width: unset;
+                                min-height: 100%;
+                                left: 0%;
+                                transition: left 500ms ease-in-out;
+                            }
+                        }
+
+                        /* This selects the SVG insde of .hatchCurrentDir div.
+                         It changes the SVG position depending on the checked checkbox
+                         inside of .submenu (sibling of #hatchCurrentDir) */
+                        & #hatchCurrentDir:has(~.submenu #hatchdirDLUR:checked) svg {
+                            left: 0;
+                        }
+
+                        & #hatchCurrentDir:has(~.submenu #hatchdirLR:checked) svg {
+                            left: -100%;
+                        }
+
+                        & #hatchCurrentDir:has(~.submenu #hatchdirULDR:checked) svg {
+                            left: -200%;
+                        }
+
+                        & #hatchCurrentDir:has(~.submenu #hatchdirUD:checked) svg {
+                            left: -300%;
+                        }
+
+
+                    }
+
+                    & .btn.supermenu:focus-within {
+                        overflow: visible;
+                        cursor: default;
+
+                        & .submenu {
+
+                            @media only screen and (max-width: 600px) {
+                                max-width: var(--effectsbarw-md);
+                            }
+
+                            @media only screen and (min-width: 601px) and (max-width: 1024px) {
+                                max-width: var(--effectsbarw-lg);
+                            }
+
+                            @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+                                max-width: var(--effectsbarw-md);
+                            }
+
+                            @media only screen and (min-width: 1441px) {
+                                max-width: var(--effectsbarw-lg);
+                            }
+
+                            & input~label:hover {
+                                background-color: var(--color-effects-rb-contrls-hover);
+
+                                & svg path {
+                                    stroke: rgb(10, 17, 88);
+                                }
+                            }
+                        }
+                    }
+
+
+                }
+
+                & .rs-wrapper {
+                    margin-bottom: 0.4rem;
+
+                    & .slider {
+                        border-radius: 1em;
+                        position: relative;
+                        overflow: hidden;
+
+                        @media only screen and (max-width: 600px) {
+                            width: 0;
+                        }
+
+                        @media only screen and (min-width: 601px) and (max-width: 1024px) {
+                            width: 0;
+                        }
+
+                        @media only screen and (min-width: 1025px) and (max-width: 1440px) {}
+
+                        @media only screen and (min-width: 1441px) {}
+
+                    }
+
+                    @media only screen and (max-width: 600px) {
+                        width: calc(var(--effectsbarw-cel) - 6px);
+                        height: calc(var(--effectsbarw-cel) - 6px);
+                        align-self: center;
+                        cursor: pointer;
+                    }
+
+                    @media only screen and (min-width: 601px) and (max-width: 1024px) {
+                        width: calc(var(--effectsbarw-tab) - 12px);
+                        height: calc(var(--effectsbarw-tab) - 12px);
+                        align-self: center;
+                        cursor: pointer;
+                    }
+
+                    @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+                        align-self: stretch;
+                    }
+
+                    @media only screen and (min-width: 1441px) {
+                        align-self: stretch;
+                    }
+                }
+
+                & .rs-wrapper:focus-within {
+
+                    @media only screen and (max-width: 600px) {
+                        overflow: visible;
+
+                        & .slider {
+                            translate: -100% 0;
+                            width: var(--effectsbarw-md);
+                            transition: width 300ms;
+                        }
+                    }
+
+                    @media only screen and (min-width: 601px) and (max-width: 1024px) {
+                        overflow: visible;
+
+                        & .slider {
+                            translate: -100% 0;
+                            width: var(--effectsbarw-lg);
+                            transition: width 300ms;
+                        }
+                    }
+
+                    @media only screen and (min-width: 1025px) and (max-width: 1440px) {}
+
+                    @media only screen and (min-width: 1441px) {}
+                }
+
+            }
+
+        }
+
+        & .effect:has([name=rbgEffects]:checked) {
+            /* INCLUDE AL CHANGES WHEN A RB IS CHECKED HERE, THE HIGHEST PARENT BEING AFFECTED BY THE RB. */
+            background-color: var(--color-effects-rb-bg-on);
+
+            & .effect-title {
+                color: var(--color-effects-rb-color-on);
+
+                & span.circle {
+                    transform: scale(1);
+                }
+            }
+
+            & .eff-title {
+                color: var(--color-effects-rb-color-on);
+            }
+
+            & .controls {
+                padding: 5px 3px 3px 3px;
+                max-height: 50vh;
+            }
+
+            & .controls:has(.rs-wrapper:focus-within) {
+
+                @media only screen and (max-width: 1440px) {
+                    overflow: visible;
+                }
+            }
+        }
+    }
+
+    & #picturesArea {
+        background-color: rgb(0, 0, 0);
+        position: relative;
+        grid-area: pictures;
+        z-index: 1;
+        display: flex;
+
+        & .display {
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            transition: 500ms ease-in-out;
+
+            & canvas {
+                /* border: 5px solid purple; */
+                max-width: 97%;
+                max-height: 97%;
+            }
+        }
+
+        & .display.img-in {
+            background-color: var(--color-display-in-bg);
+            top: 0;
+            left: 0;
+            z-index: 2;
+        }
+
+        & .display.img-out {
+            background-color: var(--color-display-out-bg);
+            bottom: 0;
+            right: 0;
+        }
+    }
+
+    /* This will be controlled by the #cbHorzVert button in the globalControls toolbar. */
+    & #globalControls:has(#cbHorzVert)~#picturesArea {
+        flex-direction: row;
+
+        & .display {
+            width: 50%;
+            height: 100%;
+        }
+    }
+
+    & #globalControls:has(#cbHorzVert:checked)~#picturesArea {
+        flex-direction: column;
+
+        & .display {
+            width: 100%;
+            height: 50%;
+        }
+    }
+
+    /* This will be controled by the #cbFloatOriginal checkbox in the globalControls toolbar. */
+    & #globalControls:has(#cbFloatOriginal:checked)~#picturesArea {
+
+        & .display.img-in {
+            transition: none;
+            /* transition will dynamically change in JS when the #cbGridHorzVert is checked/unchecked. */
+            touch-action: none;
+            cursor: move;
+            left: var(--floaty-display-x);
+            top: var(--floaty-display-y);
+            width: var(--floaty-display-w);
+            height: var(--floaty-display-h);
+        }
+
+        & .display.img-out {
+            width: 100%;
+            height: 100%;
+        }
+    }
+
+    & #downloadBar {
+        grid-area: download;
+        background-color: var(--color-dlbar-bg);
+        display: flex;
+        justify-content: flex-end;
+        padding: 0.3rem 1rem;
+
+        & .dl-btn {
+            background-color: var(--color-dlbar-btn-bg);
+            color: var(--dlbar-btn-color);
+            border: 1px solid var(--color-dlbar-btn-outline);
+        }
+
+        & .dl-btn:hover {
+            cursor: pointer;
+            background-color: var(--color-dlbar-btn-bg-hover);
+        }
+
+        & .dl-btn:active {
+            background-color: var(--color-dlbar-btn-bg-active);
+        }
+
+        & #dlDownload {
+            width: 100px;
+
+            & svg {
+                max-width: 85%;
+                max-height: 85%;
+            }
+        }
+    }
 }
