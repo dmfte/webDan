@@ -244,8 +244,8 @@ cbGridHorzvert.addEventListener("input", async () => {
 
 
 //-- Slider for amoaunt of squares.
-const containerRsGridSquares = document.getElementById("containerRsGridSquares");
-var rsGridSquares = new RangeSlider(containerRsGridSquares, { title: "Grid", min: 2, max: 20, def: paramsGrid.amnt, step: 1, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+const containerGridSquares = document.getElementById("containerGridSquares");
+var rsGridSquares = new RangeSlider(containerGridSquares, { title: "Grid", min: 2, max: 20, def: paramsGrid.amnt, step: 1, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
 rsGridSquares.onslide = async function () {
     if (imageIn == undefined) return;
     paramsGrid.amnt = rsGridSquares.val;
@@ -254,8 +254,8 @@ rsGridSquares.onslide = async function () {
 };
 
 //-- Slider for the width of the grid line.
-const containerRsGridLinew = document.getElementById("containerRsGridLinew");
-var rsGridLinew = new RangeSlider(containerRsGridLinew, { title: "Line Width", min: 1, step: 1, max: 30, def: paramsGrid.linew, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+const containerGridLinew = document.getElementById("containerGridLinew");
+var rsGridLinew = new RangeSlider(containerGridLinew, { title: "Line Width", min: 1, step: 1, max: 30, def: paramsGrid.linew, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
 rsGridLinew.onslide = function () {
     paramsGrid.linew = rsGridLinew.val;
     drawGrid(canvOut, paramsGrid);
@@ -507,7 +507,7 @@ hatchRbgDirections.forEach(rb => {
 const icHatchBg = document.getElementById("icHatchBg");
 const lbIcHatchBg = document.querySelector("[for=icHatchBg]");
 lbIcHatchBg.style.backgroundColor = icHatchBg.value;
-icHatchBg.addEventListener("input", async ()=>{
+icHatchBg.addEventListener("input", async () => {
     paramsHatch.bg = icHatchBg.value;
     lbIcHatchBg.style.backgroundColor = paramsHatch.bg;
     if (imageIn == undefined) return;
@@ -517,7 +517,7 @@ icHatchBg.addEventListener("input", async ()=>{
 const icHatchColor = document.getElementById("icHatchColor");
 const lbIcHatchColor = document.querySelector("[for=icHatchColor]");
 lbIcHatchColor.style.backgroundColor = icHatchColor.value;
-icHatchColor.addEventListener("input", async ()=>{
+icHatchColor.addEventListener("input", async () => {
     paramsHatch.color = icHatchColor.value;
     lbIcHatchColor.style.backgroundColor = paramsHatch.color;
     if (imageIn == undefined) return;
@@ -827,6 +827,16 @@ async function onceImageLoads(inputFileEvent) {
     }
 }
 
+//  DOWNLOAD BUTTON
+const dlDownload = document.getElementById("dlDownload");
+dlDownload.addEventListener("click", () => {
+    let link = document.createElement("a");
+    link.download = getName("png");
+    link.href = canvOut.toDataURL();
+    link.click();
+});
+
+
 // FUNCTIONS
 
 // For SVG animation inside Global Actions Bar buttons.
@@ -884,4 +894,11 @@ function getarrRGB(color) {
     let regexp = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/;
     let rgb = rgbStr.match(regexp);
     return rgb.slice(1);
+}
+
+function getName(strExt) {
+    let now = new Date();
+    let date = `${now.getFullYear()}-${now.getMonth()}-${(now.getDate() < 10) ? "0" + now.getDate() : now.getDate()}`;
+    let time = `${now.getHours()}.${now.getMinutes()}.${(now.getMilliseconds()).toFixed(0)}`;
+    return `Pictunator ${date} ${time}.${strExt}`;
 }

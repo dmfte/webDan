@@ -78,7 +78,8 @@ class RangeSlider {
         this.el.container.style.gridTemplateRows = (this.vert) ? "1fr 12fr 1fr" : "2fr 5fr";
         this.el.container.style.gridTemplateAreas = (this.vert) ? "'title max' 'title track' 'title min'" : "'title title title' 'min track max'";
 
-        this.el.title.style.fontSize = "0.9em";
+        this.el.title.classList.add("rs-title");
+        // this.el.title.style.fontSize = "0.9em";
         this.el.title.innerText = `${this.title}: ${this.def}`;
         this.el.title.style.writingMode = (this.vert) ? "vertical-lr" : "inherit";
         this.el.title.style.transformOrigin = "center center";
@@ -134,6 +135,7 @@ class RangeSlider {
 
         let maxWidthForMinAndMax = getMinWidth([this.max, this.min]);
 
+        this.el.max.classList.add("rs-max");
         this.el.max.innerText = this.max;
         this.el.max.style.writingMode = (this.vert) ? "vertical-lr" : "inherit";
         this.el.max.style.transformOrigin = "center center";
@@ -144,7 +146,7 @@ class RangeSlider {
         this.el.max.style.height = (this.vert) ? `calc(${maxFontFactor * maxWidthForMinAndMax}px + 0.3em)` : "unset";
         this.el.max.style.gridArea = "max";
         this.el.max.style.backgroundColor = this.color2Light;
-        this.el.max.style.color = this.color2Darkest;
+        this.el.max.style.color = this.color1Dark;
         this.el.max.style.borderRadius = (this.vert) ? "0 0 50% 50%" : "0 50% 50% 0";
         this.el.max.style.margin = (this.vert) ? "0.1em 0.2em 0.1em" : "0.2em 0.1em 0.2em";
         this.el.max.style.padding = (this.vert) ? "0.1em 0.2em 0.4em 0.2em" : "0.2em 0.4em 0.2em 0.1em";
@@ -165,6 +167,7 @@ class RangeSlider {
 
         this.el.min.innerText = this.min;
 
+        this.el.min.classList.add("rs-min");
         this.el.min.style.writingMode = (this.vert) ? "vertical-lr" : "inherit";
         this.el.min.style.transformOrigin = "center center";
         this.el.min.style.rotate = (this.vert) ? "180deg" : "0";

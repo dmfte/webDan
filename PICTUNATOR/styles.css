@@ -15,8 +15,8 @@
     --globalbarh-md: 50px;
     --globalbarh-lg: 60px;
 
-    --effectsbarw-cel: 60px;
-    --effectsbarw-tab: 70px;
+    --effectsbarw-cel: 45px;
+    --effectsbarw-tab: 55px;
     --effectsbarw-md: 350px;
     --effectsbarw-lg: 400px;
 
@@ -49,6 +49,12 @@
     --color-effects-rb-inside: rgb(92, 166, 173);
     --color-effects-rb-contrls: #ace6e7;
     --color-effects-rb-contrls-hover: #c3f4f5;
+
+    /* --color-slider-bg: rgb(142, 167, 231);
+    --color-slider-bg-ligher: rgb(162, 187, 251); */
+    --color-slider-bg: rgb(87, 107, 158);
+    --color-slider-bg-ligher: rgb(107, 127, 178);
+    --color-slider-color: rgb(187, 207, 255);
 
     --color-display-in-bg: #374949;
     --color-display-out-bg: #3d4f4f;
@@ -329,15 +335,19 @@ nav#top-nav {
         flex-direction: column;
         justify-content: flex-start;
         align-items: stretch;
+        z-index: 10;
+        /* The following properties will change in Media Queries. */
         padding: 1em 0.5em;
         overflow: auto;
-        z-index: 10;
 
         @media only screen and (max-width: 1024px) {
             padding: 1em 0;
-
+            overflow: visible;
         }
 
+        /* #effHatching{
+            display: none;
+        } */
         & .effect {
             background-color: var(--color-effects-rb-bg-off);
             display: flex;
@@ -405,12 +415,12 @@ nav#top-nav {
 
                 @media only screen and (max-width: 600px) {
                     display: flex;
-                    height: calc(var(--effectsbarw-cel));
+                    height: var(--effectsbarw-cel);
                 }
 
                 @media only screen and (min-width: 601px) and (max-width: 1024px) {
                     display: flex;
-                    height: calc(var(--effectsbarw-tab));
+                    height: var(--effectsbarw-tab);
                 }
 
                 @media only screen and (min-width: 1025px) and (max-width: 1440px) {
@@ -471,8 +481,8 @@ nav#top-nav {
                         }
 
                         @media only screen and (max-width: 600px) {
-                            width: calc(var(--effectsbarw-cel) - 6px);
-                            height: calc(var(--effectsbarw-cel) - 6px);
+                            width: calc(var(--effectsbarw-cel) - 10px);
+                            height: calc(var(--effectsbarw-cel) - 10px);
                             align-self: center;
                         }
 
@@ -547,13 +557,15 @@ nav#top-nav {
                             position: absolute;
                             background-color: var(--color-effects-rb-contrls);
                             top: 100%;
-                            left: 0;
                             display: grid;
                             grid-template-columns: 1fr 1fr 1fr 1fr;
                             max-width: 0;
                             overflow: hidden;
                             transition: 500ms ease-in-out;
                             z-index: 2;
+                            /* The following properties will change in Media Queries. */
+                            left: 0;
+                            right: unset;
 
                             & input~label {
                                 scale: 0.9;
@@ -631,9 +643,13 @@ nav#top-nav {
 
                             @media only screen and (max-width: 600px) {
                                 max-width: var(--effectsbarw-md);
+                                left: unset;
+                                right: 0;
                             }
 
                             @media only screen and (min-width: 601px) and (max-width: 1024px) {
+                                left: unset;
+                                right: 0;
                                 max-width: var(--effectsbarw-lg);
                             }
 
@@ -659,35 +675,75 @@ nav#top-nav {
                 }
 
                 & .rs-wrapper {
+                    position: relative;
+                    border-radius: 10px;
                     margin-bottom: 0.4rem;
 
                     & .slider {
+                        font-size: 12px;
                         border-radius: 1em;
                         position: relative;
                         overflow: hidden;
 
-                        @media only screen and (max-width: 600px) {
+                        @media only screen and (max-width: 1024px) {
                             width: 0;
                         }
 
+                        @media only screen and (min-width: 1025px) {
+                            height: calc(var(--effectsbarw-cel) * 1.2);
+                        }
+
+                        & .rs-title {
+                            font-size: 12px;
+                            /* border: 4px solid red; */
+                        }
+
+                        & .rs-min {
+                            font-size: 18px;
+                        }
+
+                        & .rs-max {
+                            font-size: 18px;
+                        }
+
+                    }
+
+                    & .slid {
+                        position: absolute;
+                        left: 0;
+                        top: 0;
+                        right: 0;
+                        bottom: 0;
+                        color: var(--color-slider-color);
+                        display: none;
+                        justify-content: center;
+                        align-items: center;
+                        font-size: 0.8em;
+                        cursor: pointer;
+
+                        @media only screen and (max-width: 600px) {
+                            display: flex;
+                        }
+
                         @media only screen and (min-width: 601px) and (max-width: 1024px) {
-                            width: 0;
+                            display: flex;
                         }
 
                         @media only screen and (min-width: 1025px) and (max-width: 1440px) {}
 
                         @media only screen and (min-width: 1441px) {}
-
                     }
 
                     @media only screen and (max-width: 600px) {
-                        width: calc(var(--effectsbarw-cel) - 6px);
-                        height: calc(var(--effectsbarw-cel) - 6px);
+                        background-color: var(--color-slider-bg);
+                        width: calc(var(--effectsbarw-cel) - 10px);
+                        height: calc(var(--effectsbarw-cel) - 10px);
                         align-self: center;
                         cursor: pointer;
                     }
 
                     @media only screen and (min-width: 601px) and (max-width: 1024px) {
+                        background-color: var(--color-slider-bg);
                         width: calc(var(--effectsbarw-tab) - 12px);
                         height: calc(var(--effectsbarw-tab) - 12px);
                         align-self: center;
@@ -704,6 +760,7 @@ nav#top-nav {
                 }
 
                 & .rs-wrapper:focus-within {
+                    background-color: var(--color-slider-bg-ligher);
 
                     @media only screen and (max-width: 600px) {
                         overflow: visible;
@@ -748,11 +805,13 @@ nav#top-nav {
 
             & .eff-title {
                 color: var(--color-effects-rb-color-on);
+                font-size: 0.9em;
             }
 
             & .controls {
                 padding: 5px 3px 3px 3px;
                 max-height: 50vh;
+                overflow: visible;
             }
 
             & .controls:has(.rs-wrapper:focus-within) {
