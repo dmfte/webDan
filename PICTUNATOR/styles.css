@@ -5,10 +5,10 @@
 }
 
 :root {
-    --navheight-lg: 80px;
-    --navheight-md: 70px;
-    --navheight-tab: 60px;
-    --navheight-cel: 50px;
+    --navheight-lg: 55px;
+    --navheight-md: 65px;
+    --navheight-tab: 50px;
+    --navheight-cel: 40px;
 
     --globalbarh-cel: 35px;
     --globalbarh-tab: 45px;
@@ -66,8 +66,12 @@
 
 }
 
+html,
 body {
-    height: 100vh;
+    height: 100%;
+}
+
+body {
     display: flex;
     flex-direction: column;
 }
@@ -219,6 +223,7 @@ nav#top-nav {
         display: flex;
         justify-content: flex-start;
         align-items: stretch;
+        z-index: 4;
 
         & .g-ctrl {
             outline: none;
@@ -301,6 +306,7 @@ nav#top-nav {
             justify-content: flex-start;
             align-items: stretch;
             width: 200px;
+            font-size: 0.8em;
             cursor: pointer;
             overflow: hidden;
 
@@ -335,28 +341,39 @@ nav#top-nav {
         flex-direction: column;
         justify-content: flex-start;
         align-items: stretch;
-        z-index: 10;
         /* The following properties will change in Media Queries. */
         padding: 1em 0.5em;
-        overflow: auto;
+        /* overflow-x: visible; */
+        /* overflow-y: auto; */
+        z-index: 3;
 
         @media only screen and (max-width: 1024px) {
-            padding: 1em 0;
+            font-size: 0.8em;
+            padding: 0.1em 0.2em;
             overflow: visible;
         }
 
-        /* #effHatching{
-            display: none;
-        } */
+        @media only screen and (min-width: 1025px) {
+            overflow: auto;
+        }
+
         & .effect {
             background-color: var(--color-effects-rb-bg-off);
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
             align-items: stretch;
-            margin: 0.3em 0;
+            overflow: hidden;
             /* Border radious = .controls border-radius + margin; */
             border-radius: 14px;
+
+            @media only screen and (max-width: 1024px) {
+                margin: 0.1em 0;
+            }
+
+            @media only screen and (min-width: 1025px) {
+                margin: 0.3em 0;
+            }
 
             & :is([type=checkbox], [type=radio], [type=color]) {
                 display: none;
@@ -369,19 +386,11 @@ nav#top-nav {
                 cursor: pointer;
 
 
-                @media only screen and (max-width: 600px) {
+                @media only screen and (max-width: 1024px) {
                     display: none;
                 }
 
-                @media only screen and (min-width: 601px) and (max-width: 1024px) {
-                    display: none;
-                }
-
-                @media only screen and (min-width: 1025px) and (max-width: 1440px) {
-                    display: flex;
-                }
-
-                @media only screen and (min-width: 1441px) {
+                @media only screen and (min-width: 1025px) {
                     display: flex;
                 }
 
@@ -397,15 +406,7 @@ nav#top-nav {
                 }
             }
 
-            /* & input:checked~.effect-title {
-                color: var(--color-effects-rb-color-on);
-
-                & span.circle {
-                    transform: scale(1);
-                }
-            } */
-
-            & input~.eff-title {
+            & .eff-title {
                 background-color: var(--color-effects-rb-off);
                 color: var(--color-effects-rb-color-off);
                 width: 100%;
@@ -432,14 +433,9 @@ nav#top-nav {
                 }
             }
 
-            /* & input:checked~.eff-title {
-                color: var(--color-effects-rb-on);
-            } */
-
             & .controls {
                 background-color: rgb(120, 162, 161);
                 border-radius: 0 0 10px 10px;
-                margin: 4px;
                 display: flex;
                 flex-direction: column;
                 justify-content: flex-start;
@@ -448,6 +444,19 @@ nav#top-nav {
                 overflow: hidden;
                 transition: max-height 400ms linear 0ms, padding 400ms linear 0ms;
 
+                @media only screen and (max-width: 600px) {
+                    margin: 1px;
+                }
+                @media only screen and (min-width: 601px) and (max-width: 1024px) {
+                    margin: 2px;
+                }
+                @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+                    margin: 4px;
+                }
+                @media only screen and (min-width: 1441px) {
+                    margin: 5px;
+                }
+
                 & .btns {
                     display: flex;
                     justify-content: flex-start;
@@ -455,6 +464,9 @@ nav#top-nav {
 
                     @media only screen and (max-width: 1024px) {
                         flex-direction: column;
+                    }
+                    @media only screen and (min-width: 1025px) {
+                        flex-direction: row;
                     }
 
                     & .btn {
@@ -465,7 +477,6 @@ nav#top-nav {
                         justify-content: center;
                         align-items: center;
                         margin: 0 3px 0 0;
-                        overflow: hidden;
                         cursor: pointer;
 
                         & svg {
@@ -474,10 +485,12 @@ nav#top-nav {
                         }
 
                         & div#hatchCurrentDir {
+                            scale: 0.9;
                             flex: 1;
                             display: flex;
                             justify-content: center;
                             align-items: center;
+                            overflow: hidden;
                         }
 
                         @media only screen and (max-width: 600px) {
@@ -560,7 +573,7 @@ nav#top-nav {
                             display: grid;
                             grid-template-columns: 1fr 1fr 1fr 1fr;
                             max-width: 0;
-                            overflow: hidden;
+                            /* overflow: hidden; */
                             transition: 500ms ease-in-out;
                             z-index: 2;
                             /* The following properties will change in Media Queries. */
@@ -601,7 +614,6 @@ nav#top-nav {
                             position: relative;
                             width: 100%;
                             height: 100%;
-                            overflow: hidden;
                             /* border: 3px solid red; */
 
                             & svg {
@@ -670,8 +682,6 @@ nav#top-nav {
                             }
                         }
                     }
-
-
                 }
 
                 & .rs-wrapper {
@@ -763,7 +773,6 @@ nav#top-nav {
                     background-color: var(--color-slider-bg-ligher);
 
                     @media only screen and (max-width: 600px) {
-                        overflow: visible;
 
                         & .slider {
                             translate: -100% 0;
@@ -773,7 +782,6 @@ nav#top-nav {
                     }
 
                     @media only screen and (min-width: 601px) and (max-width: 1024px) {
-                        overflow: visible;
 
                         & .slider {
                             translate: -100% 0;
@@ -794,6 +802,7 @@ nav#top-nav {
         & .effect:has([name=rbgEffects]:checked) {
             /* INCLUDE AL CHANGES WHEN A RB IS CHECKED HERE, THE HIGHEST PARENT BEING AFFECTED BY THE RB. */
             background-color: var(--color-effects-rb-bg-on);
+            overflow: visible;
 
             & .effect-title {
                 color: var(--color-effects-rb-color-on);
@@ -809,7 +818,7 @@ nav#top-nav {
             }
 
             & .controls {
-                padding: 5px 3px 3px 3px;
+                padding: 3px;
                 max-height: 50vh;
                 overflow: visible;
             }
@@ -823,12 +832,13 @@ nav#top-nav {
         }
     }
 
+
     & #picturesArea {
         background-color: rgb(0, 0, 0);
         position: relative;
         grid-area: pictures;
-        z-index: 1;
         display: flex;
+        z-index: 2;
 
         & .display {
             position: absolute;
@@ -856,6 +866,7 @@ nav#top-nav {
             background-color: var(--color-display-out-bg);
             bottom: 0;
             right: 0;
+            z-index: 1;
         }
     }
 
@@ -904,6 +915,7 @@ nav#top-nav {
         display: flex;
         justify-content: flex-end;
         padding: 0.3rem 1rem;
+        z-index: 4;
 
         & .dl-btn {
             background-color: var(--color-dlbar-btn-bg);

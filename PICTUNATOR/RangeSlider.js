@@ -104,6 +104,7 @@ class RangeSlider {
         this.el.track.style.borderWidth = "0";
         this.el.track.style.overflow = "visible";
         this.el.track.style.userSelect = "none";
+        this.el.track.style.touchAction ="none"
 
         let pfv = this.getPerctFromValue(this.def);
         this.setBackgroundWithPerct(pfv);
