@@ -5,6 +5,39 @@
 }
 
 :root {
+
+    @media only screen and (max-width: 600px) {
+        --controlsbar-w: 45px;
+        --all-grid-columns: 1fr var(--controlsbar-w);
+        --controlsbar-padd: 1px;
+        --controls-padd: 1px;
+        --rs-width: 350px;
+    }
+
+    @media only screen and (min-width: 601px) and (max-width: 1024px) {
+        --controlsbar-w: 55px;
+        --all-grid-columns: 1fr var(--controlsbar-w);
+        --controls-padd: 0.1rem;
+        --controlsbar-padd: 0.2rem;
+        --rs-width: 400px;
+    }
+
+    @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+        --controlsbar-w: 350px;
+        --all-grid-columns: var(--controlsbar-w) 1fr;
+        --controls-padd: 0.2rem;
+        --controlsbar-padd: 0.3rem;
+        --rs-width: 100%;
+    }
+
+    @media only screen and (min-width: 1441px) {
+        --controlsbar-w: 400px;
+        --all-grid-columns: var(--controlsbar-w) 1fr;
+        --controls-padd: 0.2rem;
+        --controlsbar-padd: 0.4rem;
+        --rs-width: 100%;
+    }
+
     --navheight-lg: 55px;
     --navheight-md: 65px;
     --navheight-tab: 50px;
@@ -15,10 +48,10 @@
     --globalbarh-md: 50px;
     --globalbarh-lg: 60px;
 
-    --effectsbarw-cel: 45px;
-    --effectsbarw-tab: 55px;
-    --effectsbarw-md: 350px;
-    --effectsbarw-lg: 400px;
+    --controlsBar-cel: 45px;
+    --controlsBar-tab: 55px;
+    --controlsBar-md: 350px;
+    --controlsBar-lg: 400px;
 
     --downloadbar-cel: 40px;
     --downloadbar-tab: 50px;
@@ -40,15 +73,17 @@
     --color-global-btn-hover: rgb(34, 45, 46);
     --color-global-btn-active: rgb(90, 123, 124);
 
-    --color-effects-bg: #1e2c2c;
+    --color-ctrlsbar-bg: #1e2c2c;
     --color-effects-rb-bg-off: #3c5151;
-    --color-effects-rb-bg-on: #4D6666;
-    --color-effects-rb-outline: ;
-    --color-effects-rb-color-off: #78A1A1;
+    --color-effects-rb-bg-on: #617c7c;
+    /* --color-effects-rb-outline:; */
+    --color-controls-btn: rgb(121, 145, 206);
+    --color-controls-btn-hover: rgb(142, 167, 231);
+    --color-controls-btn-active: #c5e8e8;
     --color-effects-rb-color-on: #ACE6E6;
     --color-effects-rb-inside: rgb(92, 166, 173);
-    --color-effects-rb-contrls: #ace6e7;
-    --color-effects-rb-contrls-hover: #c3f4f5;
+    --color-controls-bg: #8fbcbd;
+    /* --color-controls-bg-hover: #c3f4f5; */
 
     /* --color-slider-bg: rgb(142, 167, 231);
     --color-slider-bg-ligher: rgb(162, 187, 251); */
@@ -186,30 +221,31 @@ nav#top-nav {
 #containerAll {
     flex: 1;
     display: grid;
+    grid-template-columns: var(--all-grid-columns);
     overflow: hidden;
 
     @media only screen and (max-width: 600px) {
-        grid-template-columns: 1fr var(--effectsbarw-cel);
-        grid-template-rows: var(--globalbarh-cel) 1fr var(--downloadbar-cel);
-        grid-template-areas: "global global" "pictures effects" "download download";
+        /* grid-template-columns: 1fr var(--all-grid-columns); */
+        grid-template-rows: var(--globalbarh-cel) var(--globalbarh-cel) 1fr;
+        grid-template-areas: "global global" "effects effects" "pictures controls";
     }
 
     @media only screen and (min-width: 601px) and (max-width: 1024px) {
-        grid-template-columns: 1fr var(--effectsbarw-tab);
-        grid-template-rows: var(--globalbarh-tab) 1fr var(--downloadbar-tab);
-        grid-template-areas: "global global" "pictures effects" "download download";
+        /* grid-template-columns: 1fr var(--all-grid-columns); */
+        grid-template-rows: var(--globalbarh-tab) var(--globalbarh-tab) 1fr;
+        grid-template-areas: "global global" "effects effects" "pictures controls";
     }
 
     @media only screen and (min-width: 1025px) and (max-width: 1440px) {
-        grid-template-columns: var(--effectsbarw-md) 1fr;
-        grid-template-rows: var(--globalbarh-md) 1fr var(--downloadbar-md);
-        grid-template-areas: "global global" "effects pictures" "download download";
+        /* grid-template-columns: var(--all-grid-columns) 1fr; */
+        grid-template-rows: var(--globalbarh-md) var(--globalbarh-md) 1fr;
+        grid-template-areas: "global global" "effects effects" "controls pictures";
     }
 
     @media only screen and (min-width: 1441px) {
-        grid-template-columns: var(--effectsbarw-lg) 1fr;
-        grid-template-rows: var(--globalbarh-lg) 1fr var(--downloadbar-lg);
-        grid-template-areas: "global global" "effects pictures" "download download";
+        /* grid-template-columns: var(--all-grid-columns) 1fr; */
+        grid-template-rows: var(--globalbarh-lg) var(--globalbarh-lg) 1fr;
+        grid-template-areas: "global global" "effects effects" "controls pictures";
     }
 
     & #globalControls input:is([type=checkbox], [type=file]) {
@@ -217,9 +253,11 @@ nav#top-nav {
     }
 
     & #globalControls {
-        --marginctrl: 4px;
+        --gctrls-padd: 5px;
+
         grid-area: global;
         background-color: var(--color-global-bg);
+        padding: var(--gctrls-padd) 0.5rem;
         display: flex;
         justify-content: flex-start;
         align-items: stretch;
@@ -230,38 +268,18 @@ nav#top-nav {
             background-color: var(--color-global-btn-bg);
             border: 1px solid var(--color-global-btn-outline);
             color: var(--color-global-btn-color);
-            cursor: pointer;
-            margin: var(--marginctrl);
+            margin: 0 var(--gctrls-padd) 0 0;
             display: flex;
             justify-content: center;
             align-items: center;
+            cursor: pointer;
 
             & svg {
+                max-height: 100%;
 
                 & path {
                     /* Colors are handled innline in HTML. */
-                    /* fill: var(--color-global-btn-color); */
-                    /* stroke: var(--color-global-btn-color) */
                 }
-            }
-
-            @media only screen and (max-width: 600px) {
-                width: calc(var(--globalbarh-cel) - (var(--marginctrl) * 2));
-            }
-
-            @media only screen and (min-width: 601px) and (max-width: 1024px) {
-
-                width: calc(var(--globalbarh-tab) - (var(--marginctrl) * 2));
-            }
-
-            @media only screen and (min-width: 1025px) and (max-width: 1440px) {
-                width: calc(var(--globalbarh-md) - (var(--marginctrl) * 2));
-
-            }
-
-            @media only screen and (min-width: 1441px) {
-                width: calc(var(--globalbarh-lg) - (var(--marginctrl) * 2));
-
             }
         }
 
@@ -273,50 +291,23 @@ nav#top-nav {
             background-color: var(--color-global-btn-active);
         }
 
-        & .gctrl2 {
-
-            /* Same as .g-ctrl but twice the width. */
-            @media only screen and (max-width: 600px) {
-                width: calc((var(--globalbarh-cel) - (var(--marginctrl) * 2)) * 2);
-            }
-
-            @media only screen and (min-width: 601px) and (max-width: 1024px) {
-
-                width: calc((var(--globalbarh-tab) - (var(--marginctrl) * 2)) * 2);
-            }
-
-            @media only screen and (min-width: 1025px) and (max-width: 1440px) {
-                width: calc((var(--globalbarh-md) - (var(--marginctrl) * 2)) * 2);
-
-            }
-
-            @media only screen and (min-width: 1441px) {
-                width: calc((var(--globalbarh-lg) - (var(--marginctrl) * 2)) * 2);
-
-            }
-        }
 
         & label[for=ifLoadImg] {
             /* Label for the button to load image. */
-            background-color: var(--color-global-btn-bg);
-            border: 1px solid var(--color-global-btn-outline);
-            margin: var(--marginctrl);
-            padding: 0.1em 0.5em 0.1em 0;
-            display: flex;
-            justify-content: flex-start;
-            align-items: stretch;
-            width: 200px;
             font-size: 0.8em;
             cursor: pointer;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: stretch;
             overflow: hidden;
 
             & svg {
-                /* max-width: 100%; */
-                min-height: 100%;
                 margin-right: 0.2em;
             }
 
             & span {
+                /* For the name of the image file. */
                 user-select: none;
                 display: flex;
                 align-items: center;
@@ -332,24 +323,177 @@ nav#top-nav {
         & label[for=ifLoadImg]:active {
             background-color: var(--color-global-btn-active);
         }
+
+        & #dlDownload {
+            /* margin-left: auto; */
+            margin: 0.4rem 1rem 0.4rem auto;
+
+            & svg {
+                max-height: 100%;
+            }
+        }
+
+        /* Classes to define different widths inside of the Global Actions bar. */
+        & .gctrl1 {
+            @media only screen and (max-width: 600px) {
+                width: calc(var(--globalbarh-cel) - (var(--gctrls-padd) * 2));
+            }
+
+            @media only screen and (min-width: 601px) and (max-width: 1024px) {
+                width: calc(var(--globalbarh-tab) - (var(--gctrls-padd) * 2));
+            }
+
+            @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+                width: calc(var(--globalbarh-md) - (var(--gctrls-padd) * 2));
+            }
+
+            @media only screen and (min-width: 1441px) {
+                width: calc(var(--globalbarh-lg) - (var(--gctrls-padd) * 2));
+            }
+        }
+
+        & .gctrl2 {
+            @media only screen and (max-width: 600px) {
+                width: calc((var(--globalbarh-cel) - (var(--gctrls-padd) * 2)) * 2);
+            }
+
+            @media only screen and (min-width: 601px) and (max-width: 1024px) {
+                width: calc((var(--globalbarh-tab) - (var(--gctrls-padd) * 2)) * 2);
+            }
+
+            @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+                width: calc((var(--globalbarh-md) - (var(--gctrls-padd) * 2)) * 2);
+            }
+
+            @media only screen and (min-width: 1441px) {
+                width: calc((var(--globalbarh-lg) - (var(--gctrls-padd) * 2)) * 2);
+            }
+        }
+
+        & .gctrl3 {
+            @media only screen and (max-width: 600px) {
+                width: calc((var(--globalbarh-cel) - (var(--gctrls-padd) * 2)) * 3);
+            }
+
+            @media only screen and (min-width: 601px) and (max-width: 1024px) {
+                width: calc((var(--globalbarh-tab) - (var(--gctrls-padd) * 2)) * 3);
+            }
+
+            @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+                width: calc((var(--globalbarh-md) - (var(--gctrls-padd) * 2)) * 3);
+            }
+
+            @media only screen and (min-width: 1441px) {
+                width: calc((var(--globalbarh-lg) - (var(--gctrls-padd) * 2)) * 3);
+            }
+        }
+
+        & .gctrl6 {
+            @media only screen and (max-width: 600px) {
+                width: calc((var(--globalbarh-cel) - (var(--gctrls-padd) * 2)) * 6);
+            }
+
+            @media only screen and (min-width: 601px) and (max-width: 1024px) {
+                width: calc((var(--globalbarh-tab) - (var(--gctrls-padd) * 2)) * 6);
+            }
+
+            @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+                width: calc((var(--globalbarh-md) - (var(--gctrls-padd) * 2)) * 6);
+            }
+
+            @media only screen and (min-width: 1441px) {
+                width: calc((var(--globalbarh-lg) - (var(--gctrls-padd) * 2)) * 6);
+            }
+        }
+    }
+
+    & #globalControls:not(:has(#cbHorzVert:checked))~#picturesArea {
+        flex-direction: row;
+
+        & .display {
+            width: 50%;
+            height: 100%;
+        }
+    }
+
+    & #globalControls:has(#cbHorzVert:checked)~#picturesArea {
+        flex-direction: column;
+
+        & .display {
+            width: 100%;
+            height: 50%;
+        }
+    }
+
+    & #globalControls:has(#cbFloatOriginal:checked)~#picturesArea {
+
+        & .display.img-in {
+            transition: none;
+            /* transition will dynamically change in JS when the #cbGridHorzVert is checked/unchecked. */
+            touch-action: none;
+            cursor: move;
+            left: var(--floaty-display-x);
+            top: var(--floaty-display-y);
+            width: var(--floaty-display-w);
+            height: var(--floaty-display-h);
+        }
+
+        & .display.img-out {
+            width: 100%;
+            height: 100%;
+        }
     }
 
     & #effectsBar {
         grid-area: effects;
-        background-color: var(--color-effects-bg);
+        background-color: var(--color-ctrlsbar-bg);
+        padding: 0.2rem 0.3rem;
         display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: stretch;
-        /* The following properties will change in Media Queries. */
-        padding: 1em 0.5em;
-        /* overflow-x: visible; */
-        /* overflow-y: auto; */
-        z-index: 3;
+        overflow: auto;
+
+        & .effect-title {
+            border-radius: 25px;
+            background-color: var(--color-effects-rb-bg-off);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 0.8rem;
+            margin: 0 0.2rem;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+    }
+
+    & #effectsBar:has(~ #controlsBar #rgEffGrid:checked) label[for=rgEffGrid] {
+        background-color: var(--color-effects-rb-bg-on);
+    }
+
+    & #effectsBar:has(~ #controlsBar #rgEffPixelate:checked) label[for=rgEffPixelate] {
+        background-color: var(--color-effects-rb-bg-on);
+    }
+
+    & #effectsBar:has(~ #controlsBar #rgEffGrays:checked) label[for=rgEffGrays] {
+        background-color: var(--color-effects-rb-bg-on);
+    }
+
+    & #effectsBar:has(~ #controlsBar #rgEffHatching:checked) label[for=rgEffHatching] {
+        background-color: var(--color-effects-rb-bg-on);
+    }
+
+    & #effectsBar:has(~ #controlsBar #rgEffCrossh:checked) label[for=rgEffCrossh] {
+        background-color: var(--color-effects-rb-bg-on);
+    }
+
+
+    & #controlsBar {
+        position: relative;
+        grid-area: controls;
+        background-color: var(--color-ctrlsbar-bg);
+        padding: var(--controlsbar-padd);
+        width: var(--controlsbar-w);
+        z-index: 20;
 
         @media only screen and (max-width: 1024px) {
-            font-size: 0.8em;
-            padding: 0.1em 0.2em;
             overflow: visible;
         }
 
@@ -357,34 +501,25 @@ nav#top-nav {
             overflow: auto;
         }
 
-        & .effect {
-            background-color: var(--color-effects-rb-bg-off);
-            display: flex;
+        & input {
+            display: none;
+        }
+
+        & .controls {
+            /* --controls-padd: 0.2rem; */
+            background-color: var(--color-controls-bg);
+            /* width: 100%; */
+            border-radius: 0.5rem;
+            padding: var(--controls-padd);
+            display: none;
             flex-direction: column;
             justify-content: flex-start;
             align-items: stretch;
-            overflow: hidden;
-            /* Border radious = .controls border-radius + margin; */
-            border-radius: 14px;
 
-            @media only screen and (max-width: 1024px) {
-                margin: 0.1em 0;
-            }
-
-            @media only screen and (min-width: 1025px) {
-                margin: 0.3em 0;
-            }
-
-            & :is([type=checkbox], [type=radio], [type=color]) {
-                display: none;
-            }
-
-            & .effect-title {
-                color: var(--color-effects-rb-color-off);
-                align-items: center;
-                padding: 1em;
-                cursor: pointer;
-
+            & .title {
+                /* display: flex; */
+                justify-content: center;
+                font-size: 1.5em;
 
                 @media only screen and (max-width: 1024px) {
                     display: none;
@@ -394,441 +529,300 @@ nav#top-nav {
                     display: flex;
                 }
 
-                & span.circle {
-                    background-color: var(--color-effects-rb-color-on);
-                    border-radius: 50%;
-                    width: 0.8em;
-                    height: 0.8em;
-                    margin-right: 0.5em;
-                    transition: 300ms;
-                    transform-origin: center;
-                    transform: scale(0);
-                }
             }
 
-            & .eff-title {
-                background-color: var(--color-effects-rb-off);
-                color: var(--color-effects-rb-color-off);
-                width: 100%;
-                justify-content: center;
-                align-items: center;
-                cursor: pointer;
-
-                @media only screen and (max-width: 600px) {
-                    display: flex;
-                    height: var(--effectsbarw-cel);
-                }
-
-                @media only screen and (min-width: 601px) and (max-width: 1024px) {
-                    display: flex;
-                    height: var(--effectsbarw-tab);
-                }
-
-                @media only screen and (min-width: 1025px) and (max-width: 1440px) {
-                    display: none;
-                }
-
-                @media only screen and (min-width: 1441px) {
-                    display: none;
-                }
-            }
-
-            & .controls {
-                background-color: rgb(120, 162, 161);
-                border-radius: 0 0 10px 10px;
+            & .btns {
                 display: flex;
-                flex-direction: column;
-                justify-content: flex-start;
-                align-items: stretch;
-                max-height: 0;
-                overflow: hidden;
-                transition: max-height 400ms linear 0ms, padding 400ms linear 0ms;
+                margin-bottom: 2px;
+                /* align-items: stretch; */
+
 
                 @media only screen and (max-width: 600px) {
-                    margin: 1px;
-                }
-                @media only screen and (min-width: 601px) and (max-width: 1024px) {
-                    margin: 2px;
-                }
-                @media only screen and (min-width: 1025px) and (max-width: 1440px) {
-                    margin: 4px;
-                }
-                @media only screen and (min-width: 1441px) {
-                    margin: 5px;
+                    flex-direction: column;
+                    align-items: center;
                 }
 
-                & .btns {
-                    display: flex;
-                    justify-content: flex-start;
-                    margin-bottom: 0.4rem;
+                @media only screen and (min-width: 601px) and (max-width: 1024px) {
+                    align-items: center;
+                    flex-direction: column;
+                }
+
+                @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+                    flex-direction: row;
+                }
+
+                @media only screen and (min-width: 1441px) {
+                    flex-direction: row;
+                }
+
+                & .btn {
+                    background-color: var(--color-controls-btn);
+                    border-radius: 0.5rem;
+                    overflow: hidden;
+                    cursor: pointer;
 
                     @media only screen and (max-width: 1024px) {
-                        flex-direction: column;
+                        /* border: 1px solid red; */
+                        width: calc(var(--controlsbar-w) - (var(--controlsbar-padd) * 2) - (var(--controls-padd) * 2));
+                        height: calc(var(--controlsbar-w) - (var(--controlsbar-padd) * 2) - (var(--controls-padd) * 2));
+                        margin-bottom: 2px;
                     }
+
                     @media only screen and (min-width: 1025px) {
-                        flex-direction: row;
-                    }
-
-                    & .btn {
-                        position: relative;
-                        background-color: var(--color-effects-rb-contrls);
-                        border-radius: 10px;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        margin: 0 3px 0 0;
-                        cursor: pointer;
-
-                        & svg {
-                            max-width: 100%;
-                            max-height: 100%;
-                        }
-
-                        & div#hatchCurrentDir {
-                            scale: 0.9;
-                            flex: 1;
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            overflow: hidden;
-                        }
-
-                        @media only screen and (max-width: 600px) {
-                            width: calc(var(--effectsbarw-cel) - 10px);
-                            height: calc(var(--effectsbarw-cel) - 10px);
-                            align-self: center;
-                        }
-
-                        @media only screen and (min-width: 601px) and (max-width: 1024px) {
-                            width: calc(var(--effectsbarw-tab) - 12px);
-                            height: calc(var(--effectsbarw-tab) - 12px);
-                            align-self: center;
-                        }
-
-                        @media only screen and (min-width: 1025px) and (max-width: 1440px) {
-                            width: calc(var(--effectsbarw-cel));
-                            height: calc(var(--effectsbarw-cel));
-                            align-self: flex-start;
-                        }
-
-                        @media only screen and (min-width: 1441px) {
-                            width: calc(var(--effectsbarw-tab));
-                            height: calc(var(--effectsbarw-tab));
-                            align-self: flex-start;
-                        }
-                    }
-
-                    & input[type=color]+label {
-                        border-radius: 50%;
-                        border: 5px solid #ffffff;
-                        background-color: #ff0000;
-                    }
-
-                    & .btn:hover:not(label[for=icGridColor]) {
-                        background-color: var(--color-effects-rb-contrls-hover);
-                    }
-
-                    & label[for=cbGraysBlack] {
-                        display: flex;
-                        align-items: stretch;
-
-                        & span {
-                            flex: 1;
-                        }
-
-                        & span.stripe1 {
-                            background-color: rgb(64, 64, 64);
-                        }
-
-                        & span.stripe2 {
-                            background-color: rgb(160, 160, 160);
-                        }
-
-                        & span.stripe3 {
-                            background-color: rgb(127, 127, 127);
-                        }
-                    }
-
-                    & input:checked~label[for=cbGraysBlack] {
-
-                        & span.stripe1 {
-                            background-color: rgb(0, 0, 0);
-                        }
-
-                        & span.stripe3 {
-                            background-color: rgb(255, 255, 255);
-                        }
-                    }
-
-                    & .btn.supermenu {
-                        position: relative;
-                        /* These properties will change on :focus-within. */
-                        overflow: hidden;
-                        cursor: pointer;
-
-                        & .submenu {
-                            position: absolute;
-                            background-color: var(--color-effects-rb-contrls);
-                            top: 100%;
-                            display: grid;
-                            grid-template-columns: 1fr 1fr 1fr 1fr;
-                            max-width: 0;
-                            /* overflow: hidden; */
-                            transition: 500ms ease-in-out;
-                            z-index: 2;
-                            /* The following properties will change in Media Queries. */
-                            left: 0;
-                            right: unset;
-
-                            & input~label {
-                                scale: 0.9;
-                                cursor: pointer;
-
-                                @media only screen and (max-width: 600px) {
-                                    width: calc(var(--effectsbarw-cel) - 6px);
-                                    height: calc(var(--effectsbarw-cel) - 6px);
-                                    align-self: center;
-                                }
-
-                                @media only screen and (min-width: 601px) and (max-width: 1024px) {
-                                    width: calc(var(--effectsbarw-tab) - 12px);
-                                    height: calc(var(--effectsbarw-tab) - 12px);
-                                    align-self: center;
-                                }
-
-                                @media only screen and (min-width: 1025px) and (max-width: 1440px) {
-                                    width: calc(var(--effectsbarw-cel));
-                                    height: calc(var(--effectsbarw-cel));
-                                    align-self: flex-start;
-                                }
-
-                                @media only screen and (min-width: 1441px) {
-                                    width: calc(var(--effectsbarw-tab));
-                                    height: calc(var(--effectsbarw-tab));
-                                    align-self: flex-start;
-                                }
-                            }
-                        }
-
-                        & #hatchCurrentDir {
-                            position: relative;
-                            width: 100%;
-                            height: 100%;
-                            /* border: 3px solid red; */
-
-                            & svg {
-                                position: absolute;
-                                max-width: unset;
-                                min-height: 100%;
-                                left: 0%;
-                                transition: left 500ms ease-in-out;
-                            }
-                        }
-
-                        /* This selects the SVG insde of .hatchCurrentDir div.
-                         It changes the SVG position depending on the checked checkbox
-                         inside of .submenu (sibling of #hatchCurrentDir) */
-                        & #hatchCurrentDir:has(~.submenu #hatchdirDLUR:checked) svg {
-                            left: 0;
-                        }
-
-                        & #hatchCurrentDir:has(~.submenu #hatchdirLR:checked) svg {
-                            left: -100%;
-                        }
-
-                        & #hatchCurrentDir:has(~.submenu #hatchdirULDR:checked) svg {
-                            left: -200%;
-                        }
-
-                        & #hatchCurrentDir:has(~.submenu #hatchdirUD:checked) svg {
-                            left: -300%;
-                        }
-
-
-                    }
-
-                    & .btn.supermenu:focus-within {
-                        overflow: visible;
-                        cursor: default;
-
-                        & .submenu {
-
-                            @media only screen and (max-width: 600px) {
-                                max-width: var(--effectsbarw-md);
-                                left: unset;
-                                right: 0;
-                            }
-
-                            @media only screen and (min-width: 601px) and (max-width: 1024px) {
-                                left: unset;
-                                right: 0;
-                                max-width: var(--effectsbarw-lg);
-                            }
-
-                            @media only screen and (min-width: 1025px) and (max-width: 1440px) {
-                                max-width: var(--effectsbarw-md);
-                            }
-
-                            @media only screen and (min-width: 1441px) {
-                                max-width: var(--effectsbarw-lg);
-                            }
-
-                            & input~label:hover {
-                                background-color: var(--color-effects-rb-contrls-hover);
-
-                                & svg path {
-                                    stroke: rgb(10, 17, 88);
-                                }
-                            }
-                        }
+                        width: calc((var(--controlsbar-w) - (var(--controlsbar-padd) * 2) - var(--controls-padd) * 2) / 7);
+                        height: calc((var(--controlsbar-w) - (var(--controlsbar-padd) * 2) - var(--controls-padd) * 2) / 7);
+                        margin-right: 1px;
                     }
                 }
 
-                & .rs-wrapper {
+                & .btn:hover:not(.icolor, [for=cbGraysBlack]) {
+                    background-color: var(--color-controls-btn-hover);
+                }
+
+                & .btn:active {
+                    background-color: var(--color-controls-btn-active);
+                }
+
+                & .btn.supermenu {
                     position: relative;
-                    border-radius: 10px;
-                    margin-bottom: 0.4rem;
+                    overflow: hidden;
+                    z-index: 2;
 
-                    & .slider {
-                        font-size: 12px;
-                        border-radius: 1em;
-                        position: relative;
+                    & .submenu {
+                        position: absolute;
+                        top: 100%;
+                        left: 0;
+                        background-color: var(--color-controls-btn);
+                        overflow: hidden;
+                        display: flex;
+                        flex-direction: row;
+                        justify-content: flex-start;
+                        align-items: stretch;
+                        max-width: 0;
+                        transition: max-width 300ms ease-in-out;
+
+                        & input~label {
+                            cursor: pointer;
+                            width: calc((var(--controlsbar-w) - (var(--controlsbar-padd) * 2) - var(--controls-padd) * 2) / 8);
+                            height: calc((var(--controlsbar-w) - (var(--controlsbar-padd) * 2) - var(--controls-padd) * 2) / 8);
+                        }
+
+                        & input~label:hover {
+                            background-color: var(--color-controls-btn-hover);
+                        }
+
+                        & input:checked+label {
+                            background-color: var(--color-controls-btn-active);
+                        }
+
+                    }
+                }
+
+                & .btn.supermenu:focus-within {
+                    overflow: visible;
+
+                    & .submenu {
+                        max-width: var(--controlsbar-w);
                         overflow: hidden;
 
-                        @media only screen and (max-width: 1024px) {
-                            width: 0;
-                        }
-
-                        @media only screen and (min-width: 1025px) {
-                            height: calc(var(--effectsbarw-cel) * 1.2);
-                        }
-
-                        & .rs-title {
-                            font-size: 12px;
-                            /* border: 4px solid red; */
-                        }
-
-                        & .rs-min {
-                            font-size: 18px;
-                        }
-
-                        & .rs-max {
-                            font-size: 18px;
-                        }
 
                     }
+                }
 
-                    & .slid {
-                        position: absolute;
+                & .btn.icolor {
+                    /* background-color will be defined in JavaScript. */
+                    border-radius: 50%;
+                    border: 5px solid white;
+                }
+
+                & .btn[for=cbGraysBlack] {
+                    display: flex;
+                    align-items: stretch;
+
+                    & span {
+                        flex: 1;
+                    }
+
+                    & span.stripe1 {
+                        background-color: rgb(54, 54, 54);
+                    }
+
+                    & span.stripe2 {
+                        background-color: rgb(160, 160, 160);
+                    }
+
+                    & span.stripe3 {
+                        background-color: rgb(197, 197, 197);
+                    }
+                }
+
+                & input:checked~.btn[for=cbGraysBlack] {
+
+                    & span.stripe1 {
+                        background-color: rgb(0, 0, 0);
+                    }
+
+                    & span.stripe3 {
+                        background-color: rgb(255, 255, 255);
+                    }
+                }
+
+                & .btn#hatchDirs {
+
+                    & #hatchCurrentDir {
+                        position: relative;
+                        width: 100%;
+                        height: 100%;
+                        scale: 0.9;
+                        overflow: hidden;
+                        /* border: 1px solid red; */
+
+                        #svghatchdirections {
+                            height: 100%;
+                            width: 400%;
+                            position: relative;
+                            left: 0;
+                            transition: left 300ms ease-in-out;
+                        }
+                    }
+
+                    & #hatchCurrentDir:has(~.submenu #hatchdirDLUR:checked) #svghatchdirections {
                         left: 0;
-                        top: 0;
-                        right: 0;
-                        bottom: 0;
-                        color: var(--color-slider-color);
+
+                    }
+
+                    & #hatchCurrentDir:has(~.submenu #hatchdirLR:checked) #svghatchdirections {
+                        left: -100%;
+
+                    }
+
+                    & #hatchCurrentDir:has(~.submenu #hatchdirULDR:checked) #svghatchdirections {
+                        left: -200%;
+
+                    }
+
+                    & #hatchCurrentDir:has(~.submenu #hatchdirUD:checked) #svghatchdirections {
+                        left: -300%;
+
+                    }
+                }
+
+                & .btn#cbgCrosshDirs:has(.submenu #crosshdirDLUR) {
+
+                    & #svgpCrosshDLUR {
                         display: none;
-                        justify-content: center;
-                        align-items: center;
-                        font-size: 0.8em;
-                        cursor: pointer;
-
-                        @media only screen and (max-width: 600px) {
-                            display: flex;
-                        }
-
-                        @media only screen and (min-width: 601px) and (max-width: 1024px) {
-                            display: flex;
-                        }
-
-                        @media only screen and (min-width: 1025px) and (max-width: 1440px) {}
-
-                        @media only screen and (min-width: 1441px) {}
-                    }
-
-                    @media only screen and (max-width: 600px) {
-                        background-color: var(--color-slider-bg);
-                        width: calc(var(--effectsbarw-cel) - 10px);
-                        height: calc(var(--effectsbarw-cel) - 10px);
-                        align-self: center;
-                        cursor: pointer;
-                    }
-
-                    @media only screen and (min-width: 601px) and (max-width: 1024px) {
-                        background-color: var(--color-slider-bg);
-                        width: calc(var(--effectsbarw-tab) - 12px);
-                        height: calc(var(--effectsbarw-tab) - 12px);
-                        align-self: center;
-                        cursor: pointer;
-                    }
-
-                    @media only screen and (min-width: 1025px) and (max-width: 1440px) {
-                        align-self: stretch;
-                    }
-
-                    @media only screen and (min-width: 1441px) {
-                        align-self: stretch;
                     }
                 }
 
-                & .rs-wrapper:focus-within {
-                    background-color: var(--color-slider-bg-ligher);
+                & .btn#cbgCrosshDirs:has(.submenu #crosshdirDLUR:checked) {
 
-                    @media only screen and (max-width: 600px) {
-
-                        & .slider {
-                            translate: -100% 0;
-                            width: var(--effectsbarw-md);
-                            transition: width 300ms;
-                        }
+                    & #svgpCrosshDLUR {
+                        display: inherit;
                     }
-
-                    @media only screen and (min-width: 601px) and (max-width: 1024px) {
-
-                        & .slider {
-                            translate: -100% 0;
-                            width: var(--effectsbarw-lg);
-                            transition: width 300ms;
-                        }
-                    }
-
-                    @media only screen and (min-width: 1025px) and (max-width: 1440px) {}
-
-                    @media only screen and (min-width: 1441px) {}
                 }
 
+                /* --- */
+
+                & .btn#cbgCrosshDirs:has(.submenu #crosshdirLR) {
+
+                    & #svgpCrosshLR {
+                        display: none;
+                    }
+                }
+
+                & .btn#cbgCrosshDirs:has(.submenu #crosshdirLR:checked) {
+
+                    & #svgpCrosshLR {
+                        display: inherit;
+                    }
+                }
+
+                /* --- */
+
+                & .btn#cbgCrosshDirs:has(.submenu #crosshdirULDR) {
+
+                    & #svgpCrosshULDR {
+                        display: none;
+                    }
+                }
+
+                & .btn#cbgCrosshDirs:has(.submenu #crosshdirULDR:checked) {
+
+                    & #svgpCrosshULDR {
+                        display: inherit;
+                    }
+                }
+
+                /* --- */
+
+                & .btn#cbgCrosshDirs:has(.submenu #crosshdirUD) {
+
+                    & #svgpCrosshUD {
+                        display: none;
+                    }
+                }
+
+                & .btn#cbgCrosshDirs:has(.submenu #crosshdirUD:checked) {
+
+                    & #svgpCrosshUD {
+                        display: inherit;
+                    }
+                }
             }
 
+            & .rs-wrapper {
+                position: relative;
+                border-radius: 0.5rem;
+                margin-bottom: 0.2rem;
+                font-family: monospace;
+
+                @media only screen and (max-width: 1024px) {
+                    background-color: var(--color-controls-btn);
+                    border-radius: 0.5rem;
+                    cursor: pointer;
+                    width: calc(var(--controlsbar-w) - (var(--controlsbar-padd) * 2) - (var(--controls-padd) * 2));
+                    height: calc(var(--controlsbar-w) - (var(--controlsbar-padd) * 2) - (var(--controls-padd) * 2));
+                    margin-bottom: 2px;
+                }
+
+
+                & .slider {
+                    overflow: hidden;
+
+                    @media only screen and (max-width: 1024px) {
+                        width: 0;
+                        position: absolute;
+                        right: 115%;
+
+                    }
+
+                    @media only screen and (min-width: 1025px) {
+                        width: 100%;
+                        position: relative;
+                        right: unset;
+                    }
+
+                    & .rs-title {}
+
+                    & .rs-track {}
+                }
+            }
+
+            & .rs-wrapper:focus-within {
+
+                & .slider {
+
+                    @media only screen and (max-width: 1024px) {
+                        width: var(--rs-width);
+                        transition: width 300ms ease-in-out;
+                    }
+
+                }
+            }
         }
 
-        & .effect:has([name=rbgEffects]:checked) {
-            /* INCLUDE AL CHANGES WHEN A RB IS CHECKED HERE, THE HIGHEST PARENT BEING AFFECTED BY THE RB. */
-            background-color: var(--color-effects-rb-bg-on);
-            overflow: visible;
-
-            & .effect-title {
-                color: var(--color-effects-rb-color-on);
-
-                & span.circle {
-                    transform: scale(1);
-                }
-            }
-
-            & .eff-title {
-                color: var(--color-effects-rb-color-on);
-                font-size: 0.9em;
-            }
-
-            & .controls {
-                padding: 3px;
-                max-height: 50vh;
-                overflow: visible;
-            }
-
-            & .controls:has(.rs-wrapper:focus-within) {
-
-                @media only screen and (max-width: 1440px) {
-                    overflow: visible;
-                }
-            }
+        & .controls:has(input[name=rbgEffects]:checked) {
+            display: flex;
         }
     }
 
@@ -867,78 +861,6 @@ nav#top-nav {
             bottom: 0;
             right: 0;
             z-index: 1;
-        }
-    }
-
-    /* This will be controlled by the #cbHorzVert button in the globalControls toolbar. */
-    & #globalControls:has(#cbHorzVert)~#picturesArea {
-        flex-direction: row;
-
-        & .display {
-            width: 50%;
-            height: 100%;
-        }
-    }
-
-    & #globalControls:has(#cbHorzVert:checked)~#picturesArea {
-        flex-direction: column;
-
-        & .display {
-            width: 100%;
-            height: 50%;
-        }
-    }
-
-    /* This will be controled by the #cbFloatOriginal checkbox in the globalControls toolbar. */
-    & #globalControls:has(#cbFloatOriginal:checked)~#picturesArea {
-
-        & .display.img-in {
-            transition: none;
-            /* transition will dynamically change in JS when the #cbGridHorzVert is checked/unchecked. */
-            touch-action: none;
-            cursor: move;
-            left: var(--floaty-display-x);
-            top: var(--floaty-display-y);
-            width: var(--floaty-display-w);
-            height: var(--floaty-display-h);
-        }
-
-        & .display.img-out {
-            width: 100%;
-            height: 100%;
-        }
-    }
-
-    & #downloadBar {
-        grid-area: download;
-        background-color: var(--color-dlbar-bg);
-        display: flex;
-        justify-content: flex-end;
-        padding: 0.3rem 1rem;
-        z-index: 4;
-
-        & .dl-btn {
-            background-color: var(--color-dlbar-btn-bg);
-            color: var(--dlbar-btn-color);
-            border: 1px solid var(--color-dlbar-btn-outline);
-        }
-
-        & .dl-btn:hover {
-            cursor: pointer;
-            background-color: var(--color-dlbar-btn-bg-hover);
-        }
-
-        & .dl-btn:active {
-            background-color: var(--color-dlbar-btn-bg-active);
-        }
-
-        & #dlDownload {
-            width: 100px;
-
-            & svg {
-                max-width: 85%;
-                max-height: 85%;
-            }
         }
     }
 }

@@ -39,8 +39,8 @@
     <!-- ------------ -->
     <div id="containerAll">
         <div id="globalControls">
-            <input type="file" class="g-ctrl" id="ifLoadImg" accept="image/">
-            <label for="ifLoadImg">
+            <input type="file" id="ifLoadImg" accept="image/">
+            <label for="ifLoadImg" class="g-ctrl gctrl6">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
                     <path fill="none" stroke="rgb(121, 152, 230)" stroke-width="1" stroke-linecap="round"
                         stroke-linejoin="mitter" d="M 1 1 H 17 V 17 H 1 Z"></path>
@@ -52,7 +52,7 @@
                 <span id="spanFileName">Image file</span>
             </label>
             <input type="checkbox" id="cbHorzVert">
-            <label for="cbHorzVert" class="g-ctrl">
+            <label for="cbHorzVert" class="g-ctrl gctrl1">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
                     <path id="pathHorzvertLeftSquare" fill="none" stroke="rgb(121, 152, 230)" stroke-width="1"
                         stroke-linejoin="round"
@@ -67,7 +67,7 @@
                 </svg>
             </label>
             <input type="checkbox" id="cbFloatOriginal">
-            <label for="cbFloatOriginal" class="g-ctrl">
+            <label for="cbFloatOriginal" class="g-ctrl gctrl1">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
                     <path id="pathFloatoriginalLeftSquare" fill="none" stroke="rgb(121, 152, 230)" stroke-width="1"
                         stroke-linejoin="round"
@@ -92,193 +92,7 @@
                         fill="rgb(131, 162, 240)" dominant-baseline="text-before-edge">Size</text>
                 </svg>
             </label>
-        </div>
-        <!-- ------------ -->
-        <div id="effectsBar">
-            <!-- ---
-            <div class="effect" id="eff__">
-                <input type="radio" name="rbgEffects" id="rgEff__">
-                <label for="rgEff__" class="effect-title"><span class="circle"></span>EFFECT_NAME</label>
-                <label for="rgEff__" class="eff-title">ABBRV_EFFECT_NAME</label>
-                <div class="controls">
-                    <div class="btns">
-
-                    </div>
-                    <div class="rs0wrapper" tabindex="0">
-                        <div class="slider" id="container__EffectParameter"></div>
-                    </div>
-                </div>
-            </div>
-            --- -->
-            <div class="effect" id="effGrid">
-                <input type="radio" name="rbgEffects" id="rgEffGrid">
-                <label for="rgEffGrid" class="effect-title"><span class="circle"></span>Grid</label>
-                <label for="rgEffGrid" class="eff-title">Grd</label>
-                <div class="controls">
-                    <div class="btns">
-                        <input type="color" id="icGridColor" value="#ff0000">
-                        <label for="icGridColor" class="btn"></label>
-                        <input type="checkbox" id="cbGridHorzvert" checked>
-                        <label for="cbGridHorzvert" class="btn">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 18 18">
-                                <path id="pathGridHorzvert" fill="none" stroke="black" stroke-width="1"
-                                    d="M 2 3 H 14 V 13 H 2 Z M 7 3 V 13 M 12 3 V 13 M 2 8 H 14 M 2 13 H 14"></path>
-                            </svg>
-                        </label>
-                    </div>
-                    <div class="rs-wrapper" tabindex="0">
-                        <div class="slider" id="containerGridSquares"></div>
-                        <label for="containerGridSquares" class="slid">Sqrs.</label>
-                    </div>
-                    <div class="rs-wrapper" tabindex="0">
-                        <div class="slider" id="containerGridLinew"></div>
-                        <label for="containerGridLinew" class="slid">Width</label>
-                    </div>
-                </div>
-            </div>
-            <!-- ------ -->
-            <div class="effect" id="effPixelate">
-                <input type="radio" name="rbgEffects" id="rgEffPixelate">
-                <label for="rgEffPixelate" class="effect-title"><span class="circle"></span>Pixelate</label>
-                <label for="rgEffPixelate" class="eff-title">Px</label>
-                <div class="controls">
-                    <div class="btns">
-                        <input type="checkbox" id="cbPxSmooth">
-                        <label for="cbPxSmooth" class="btn">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19 18">
-                                <defs>
-                                    <filter id="svgFilterBlur">
-                                        <feGaussianBlur in="SourceGraphic" stdDeviation="1" />
-                                    </filter>
-                                </defs>
-                                <!-- <g filter="url(#svgFilterBlur)"> -->
-                                <g filter="none">
-                                    <path stroke="none" fill="#000000" d="M 2 4 H 7 V 9 H 2 Z" />
-                                    <path stroke="none" fill="#1E1E1E" d="M 2 9 H 7 V 14 H 2 Z" />
-                                    <path stroke="none" fill="#3C3C3C" d="M 7 4 H 12 V 9 H 7 Z" />
-                                    <path stroke="none" fill="#5A5A5A" d="M 7 9 H 12 V 14 H 7 Z" />
-                                    <path stroke="none" fill="#787878" d="M 12 4 H 17 V 9 H 12 Z" />
-                                    <path stroke="none" fill="#969696" d="M 12 9 H 17 V 14 H 12 Z" />
-                                </g>
-                            </svg>
-                        </label>
-                    </div>
-                    <div class="rs-wrapper" tabindex="0">
-                        <div class="slider" id="containerPxLevel"></div>
-                        <label for="containerPxLevel" class="slid">Lvl.</label>
-                    </div>
-                </div>
-            </div>
-            <!-- ------ -->
-            <div class="effect" id="effGrayscale">
-                <input type="radio" name="rbgEffects" id="rgEffGrays">
-                <label for="rgEffGrays" class="effect-title"><span class="circle"></span>Grayscale</label>
-                <label for="rgEffGrays" class="eff-title">Gray</label>
-                <div class="controls">
-                    <div class="btns">
-                        <input type="checkbox" id="cbGraysBlack" checked>
-                        <label for="cbGraysBlack" class="btn">
-                            <span class="stripe1"></span>
-                            <span class="stripe2"></span>
-                            <span class="stripe3"></span>
-                        </label>
-                    </div>
-                    <div class="rs-wrapper" tabindex="0">
-                        <div class="slider" id="containerGraysLevels"></div>
-                        <label for="containerGraysLevels" class="slid">Lvls.</label>
-                    </div>
-                    <div class="rs-wrapper" tabindex="0">
-                        <div class="slider" id="containerGraysSensitivity"></div>
-                        <label for="containerGraysSensitivity" class="slid">Sens.</label>
-                    </div>
-                </div>
-            </div>
-            <!-- ------ -->
-            <div class="effect" id="effHatching">
-                <input type="radio" name="rbgEffects" id="rgEffHatching">
-                <label for="rgEffHatching" class="effect-title"><span class="circle"></span>Hatching</label>
-                <label for="rgEffHatching" class="eff-title">Hathc</label>
-                <div class="controls">
-                    <div class="btns">
-                        <div id="rgHatchDir" class="btn supermenu" tabindex="0">
-                            <div id="hatchCurrentDir">
-                                <svg xmlns="http://www.w3.org/2000/svg" id="svgdirections" viewBox="0 0 40 10">
-                                    <path id="pathdirections" stroke-linecap="round" stroke-linejoin="round"
-                                        stroke="rgb(10, 17, 88)" fill="none" stroke-width="1" d="
-                                            M 9 1 l -8 0 l 0 8 l 8 0 z M 7 3 l -4 4
-                                            M 19 1 l -8 0 l 0 8 l 8 0 z M 13 5 l 4 0
-                                            M 29 1 l -8 0 l 0 8 l 8 0 z M 23 3 l 4 4
-                                            M 39 1 l -8 0 l 0 8 l 8 0 z M 35 3 l 0 4"></path>
-                                </svg>
-                            </div>
-                            <div class="submenu">
-                                <input type="radio" id="hatchdirDLUR" value="DLUR" name="rgHatchDir">
-                                <label for="hatchdirDLUR">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke="rgb(40, 47, 118)" fill="none" stroke-width="1" 
-                                        d="M 9 1 l -8 0 l 0 8 l 8 0 z M 7 3 l -4 4"></path>
-                                    </svg>
-                                </label>
-                                <input type="radio" id="hatchdirLR" value="LR" name="rgHatchDir">
-                                <label for="hatchdirLR">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke="rgb(40, 47, 118)" fill="none" stroke-width="1" 
-                                        d="M 9 1 l -8 0 l 0 8 l 8 0 z M 3 5 l 4 0"></path>
-                                    </svg>
-                                </label>
-                                <input type="radio" id="hatchdirULDR" value="ULDR" name="rgHatchDir">
-                                <label for="hatchdirULDR">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke="rgb(40, 47, 118)" fill="none" stroke-width="1" 
-                                        d="M 9 1 l -8 0 l 0 8 l 8 0 z M 3 3 l 4 4"></path>
-                                    </svg>
-                                </label>
-                                <input type="radio" id="hatchdirUD" value="UD" name="rgHatchDir">
-                                <label for="hatchdirUD">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke="rgb(40, 47, 118)" fill="none" stroke-width="1" 
-                                        d="M 9 1 l -8 0 l 0 8 l 8 0 z M 5 3 l 0 4"></path>
-                                    </svg>
-                                </label>
-                            </div>
-                        </div>
-                        <input type="color" name="" id="icHatchBg" value="#ffffff">
-                        <label for="icHatchBg" class="btn"></label>
-                        <input type="color" name="" id="icHatchColor" value="#000000">
-                        <label for="icHatchColor" class="btn"></label>
-                    </div>
-                    <div class="rs-wrapper" tabindex="0">
-                        <div class="slider" id="containerHatchHowmany"></div>
-                        <label for="containerHatchHowmany" class="slid">Qty.</label>
-                    </div>
-                    <div class="rs-wrapper" tabindex="0">
-                        <div class="slider" id="containerHatchSeparation"></div>
-                        <label for="containerHatchSeparation" class="slid">Sepr.</label>
-                    </div>
-                    <div class="rs-wrapper" tabindex="0">
-                        <div class="slider" id="containerHatchLinew"></div>
-                        <label for="containerHatchLinew" class="slid">Width</label>
-                    </div>
-                    <div class="rs-wrapper" tabindex="0">
-                        <div class="slider" id="containerHatchSensitivity"></div>
-                        <label for="containerHatchSensitivity" class="slid">Sens.</label>
-                    </div>
-                </div>
-            </div>
-            <!-- ------ -->
-        </div>
-        <!-- ------------ -->
-        <div id="picturesArea">
-            <div class="display img-in">
-                <canvas id="canvIn" width="0" height="0"></canvas>
-            </div>
-            <div class="display img-out">
-                <canvas id="canvOut" width="0" height="0"></canvas>
-            </div>
-        </div>
-        <!-- ------------ -->
-        <div id="downloadBar">
-            <button id="dlDownload" class="dl-btn">
+            <button id="dlDownload" class="gctrl2">
                 <span>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 34">
                         <path id="m2-arrow" fill="black" stroke="none"
@@ -292,6 +106,267 @@
                 </span>
             </button>
         </div>
+        <!-- ------------ -->
+
+        <div id="effectsBar">
+            <label for="rgEffGrid" class="effect-title">Grid</label>
+            <label for="rgEffPixelate" class="effect-title">Pixelate</label>
+            <label for="rgEffGrays" class="effect-title">Grayscale</label>
+            <label for="rgEffHatching" class="effect-title">Hatching</label>
+            <label for="rgEffCrossh" class="effect-title">Cross-hatching</label>
+        </div>
+
+
+        <!-- ------------ -->
+
+        <div id="controlsBar">
+            <!-- <div id="ctrlEff__" class="controls">
+                <div class="title"></div>
+                <div class="btns">
+
+                </div>
+                <div class="rs-wrapper"></div>
+            </div> -->
+            <div id="ctrlsEffGrid" class="controls">
+                <input type="radio" name="rbgEffects" id="rgEffGrid">
+                <div class="title">Grid</div>
+                <div class="btns">
+                    <input type="color" id="icGridColor" value="#ff0000">
+                    <label for="icGridColor" class="btn icolor"></label>
+                    <input type="checkbox" id="cbGridHorzvert" checked>
+                    <label for="cbGridHorzvert" class="btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 18 18">
+                            <path id="pathGridHorzvert" fill="none" stroke="black" stroke-width="1"
+                                d="M 2 3 H 14 V 13 H 2 Z M 7 3 V 13 M 12 3 V 13 M 2 8 H 14 M 2 13 H 14"></path>
+                        </svg>
+                    </label>
+                </div>
+                <div class="rs-wrapper" tabindex="0">
+                    <div class="slider" id="containerGridSquares"></div>
+
+                </div>
+                <div class="rs-wrapper" tabindex="0">
+                    <div class="slider" id="containerGridLinew"></div>
+
+                </div>
+            </div>
+            <!-- ------ -->
+            <div id="ctrlsEffPixelate" class="controls">
+                <input type="radio" name="rbgEffects" id="rgEffPixelate">
+
+                <div class="title">Pixelate</div>
+                <div class="btns">
+                    <input type="checkbox" id="cbPxSmooth">
+                    <label for="cbPxSmooth" class="btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19 18">
+                            <defs>
+                                <filter id="svgFilterBlur">
+                                    <feGaussianBlur in="SourceGraphic" stdDeviation="1" />
+                                </filter>
+                            </defs>
+                            <!-- <g filter="url(#svgFilterBlur)"> -->
+                            <g filter="none">
+                                <path stroke="none" fill="#000000" d="M 2 4 H 7 V 9 H 2 Z" />
+                                <path stroke="none" fill="#1E1E1E" d="M 2 9 H 7 V 14 H 2 Z" />
+                                <path stroke="none" fill="#3C3C3C" d="M 7 4 H 12 V 9 H 7 Z" />
+                                <path stroke="none" fill="#5A5A5A" d="M 7 9 H 12 V 14 H 7 Z" />
+                                <path stroke="none" fill="#787878" d="M 12 4 H 17 V 9 H 12 Z" />
+                                <path stroke="none" fill="#969696" d="M 12 9 H 17 V 14 H 12 Z" />
+                            </g>
+                        </svg>
+                    </label>
+                </div>
+                <div class="rs-wrapper" tabindex="0">
+                    <div class="slider" id="containerPxLevel"></div>
+
+                </div>
+
+            </div>
+            <!-- ------ -->
+            <div id="ctrlsEffGrayscale" class="controls">
+                <input type="radio" name="rbgEffects" id="rgEffGrays">
+
+                <div class="title">Grayscale</div>
+                <div class="btns">
+                    <input type="checkbox" id="cbGraysBlack" checked>
+                    <label for="cbGraysBlack" class="btn">
+                        <span class="stripe1"></span>
+                        <span class="stripe2"></span>
+                        <span class="stripe3"></span>
+                    </label>
+                </div>
+                <div class="rs-wrapper" tabindex="0">
+                    <div class="slider" id="containerGraysLevels"></div>
+
+                </div>
+                <div class="rs-wrapper" tabindex="0">
+                    <div class="slider" id="containerGraysSensitivity"></div>
+
+                </div>
+
+            </div>
+            <!-- ------ -->
+            <div id="ctrlsEffHatching" class="controls">
+                <input type="radio" name="rbgEffects" id="rgEffHatching">
+
+                <div class="title">Hatching</div>
+                <div class="btns">
+                    <div id="hatchDirs" class="btn supermenu" tabindex="0">
+                        <div id="hatchCurrentDir">
+                            <svg xmlns="http://www.w3.org/2000/svg" id="svghatchdirections" viewBox="0 0 40 10">
+                                <path id="pathdirections" stroke-linecap="round" stroke-linejoin="round"
+                                    stroke="rgb(10, 17, 88)" fill="none" stroke-width="1" d="
+                                            M 9 1 l -8 0 l 0 8 l 8 0 z M 7 3 l -4 4
+                                            M 19 1 l -8 0 l 0 8 l 8 0 z M 13 5 l 4 0
+                                            M 29 1 l -8 0 l 0 8 l 8 0 z M 23 3 l 4 4
+                                            M 39 1 l -8 0 l 0 8 l 8 0 z M 35 3 l 0 4"></path>
+                            </svg>
+                        </div>
+                        <div class="submenu">
+                            <input type="radio" id="hatchdirDLUR" value="DLUR" name="rgHatchDir">
+                            <label for="hatchdirDLUR" class="smOption">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke="rgb(40, 47, 118)"
+                                        fill="none" stroke-width="1" d="M 9 1 l -8 0 l 0 8 l 8 0 z M 7 3 l -4 4">
+                                    </path>
+                                </svg>
+                            </label>
+                            <input type="radio" id="hatchdirLR" value="LR" name="rgHatchDir">
+                            <label for="hatchdirLR" class="smOption">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke="rgb(40, 47, 118)"
+                                        fill="none" stroke-width="1" d="M 9 1 l -8 0 l 0 8 l 8 0 z M 3 5 l 4 0">
+                                    </path>
+                                </svg>
+                            </label>
+                            <input type="radio" id="hatchdirULDR" value="ULDR" name="rgHatchDir">
+                            <label for="hatchdirULDR" class="smOption">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke="rgb(40, 47, 118)"
+                                        fill="none" stroke-width="1" d="M 9 1 l -8 0 l 0 8 l 8 0 z M 3 3 l 4 4">
+                                    </path>
+                                </svg>
+                            </label>
+                            <input type="radio" id="hatchdirUD" value="UD" name="rgHatchDir">
+                            <label for="hatchdirUD" class="smOption">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke="rgb(40, 47, 118)"
+                                        fill="none" stroke-width="1" d="M 9 1 l -8 0 l 0 8 l 8 0 z M 5 3 l 0 4">
+                                    </path>
+                                </svg>
+                            </label>
+                        </div>
+                    </div>
+                    <input type="color" name="" id="icHatchBg" value="#ffffff">
+                    <label for="icHatchBg" class="btn icolor"></label>
+                    <input type="color" name="" id="icHatchColor" value="#000000">
+                    <label for="icHatchColor" class="btn icolor"></label>
+                </div>
+                <div class="rs-wrapper" tabindex="0">
+                    <div class="slider" id="containerHatchHowmany"></div>
+
+                </div>
+                <div class="rs-wrapper" tabindex="0">
+                    <div class="slider" id="containerHatchSeparation"></div>
+
+                </div>
+                <div class="rs-wrapper" tabindex="0">
+                    <div class="slider" id="containerHatchLinew"></div>
+
+                </div>
+                <div class="rs-wrapper" tabindex="0">
+                    <div class="slider" id="containerHatchSensitivity"></div>
+
+                </div>
+
+            </div>
+            <!-- ------ -->
+            <div id="ctrlsEffCrossh" class="controls">
+                <input type="radio" name="rbgEffects" id="rgEffCrossh">
+
+                <div class="title">Cross-hatching</div>
+                <div class="btns">
+                    <div id="cbgCrosshDirs" class="btn supermenu" tabindex="0">
+                        <div id="crosshCurrentDirs">
+                            <svg xmlns="http://www.w3.org/2000/svg" id="svgcrosshdirections" viewBox="0 0 10 10">
+                                <path fill="none" stroke-width="1" stroke-linejoin="round" stroke="rgb(40, 47, 118)"
+                                    d="M 9 1 l -8 0 l 0 8 l 8 0 z"></path>
+                                <path id="svgpCrosshDLUR" stroke-linecap="round" stroke-linejoin="round" stroke="rgb(40, 47, 118)"
+                                    fill="none" stroke-width="1" d="M 7 3 l -4 4">
+                                </path>
+                                <path id="svgpCrosshLR" stroke-linecap="round" stroke-linejoin="round" stroke="rgb(40, 47, 118)"
+                                    fill="none" stroke-width="1" d="M 3 5 l 4 0">
+                                </path>
+                                <path id="svgpCrosshULDR" stroke-linecap="round" stroke-linejoin="round" stroke="rgb(40, 47, 118)"
+                                    fill="none" stroke-width="1" d="M 3 3 l 4 4">
+                                </path>
+                                <path id="svgpCrosshUD" stroke-linecap="round" stroke-linejoin="round" stroke="rgb(40, 47, 118)"
+                                    fill="none" stroke-width="1" d="M 5 3 l 0 4">
+                                </path>
+                            </svg>
+                        </div>
+                        <div class="submenu">
+                            <input type="checkbox" id="crosshdirDLUR" value="DLUR" name="cbgCrosshatchDir" checked>
+                            <label for="crosshdirDLUR">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke="rgb(40, 47, 118)"
+                                        fill="none" stroke-width="1" d="M 9 1 l -8 0 l 0 8 l 8 0 z M 7 3 l -4 4">
+                                    </path>
+                                </svg>
+                            </label>
+                            <input type="checkbox" id="crosshdirLR" value="LR" name="cbgCrosshatchDir" checked>
+                            <label for="crosshdirLR">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke="rgb(40, 47, 118)"
+                                        fill="none" stroke-width="1" d="M 9 1 l -8 0 l 0 8 l 8 0 z M 3 5 l 4 0">
+                                    </path>
+                                </svg>
+                            </label>
+                            <input type="checkbox" id="crosshdirULDR" value="ULDR" name="cbgCrosshatchDir" checked>
+                            <label for="crosshdirULDR">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke="rgb(40, 47, 118)"
+                                        fill="none" stroke-width="1" d="M 9 1 l -8 0 l 0 8 l 8 0 z M 3 3 l 4 4">
+                                    </path>
+                                </svg>
+                            </label>
+                            <input type="checkbox" id="crosshdirUD" value="UD" name="cbgCrosshatchDir" checked>
+                            <label for="crosshdirUD">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke="rgb(40, 47, 118)"
+                                        fill="none" stroke-width="1" d="M 9 1 l -8 0 l 0 8 l 8 0 z M 5 3 l 0 4">
+                                    </path>
+                                </svg>
+                            </label>
+                        </div>
+                    </div>
+                    <input type="color" name="" id="icCrosshBg" value="#ffffff">
+                    <label for="icCrosshBg" class="btn icolor"></label>
+                    <input type="color" name="" id="icCrosshColor" value="#000000">
+                    <label for="icCrosshColor" class="btn icolor"></label>
+                </div>
+                <div class="rs-wrapper" tabindex="0">
+                    <div class="slider" id="containerCrosshSeparation"></div>
+                </div>
+                <div class="rs-wrapper" tabindex="0">
+                    <div class="slider" id="containerCrosshWidth"></div>
+                </div>
+                <div class="rs-wrapper" tabindex="0">
+                    <div class="slider" id="containerCrosshSensitivity"></div>
+                </div>
+
+            </div>
+        </div>
+        <!-- ------------ -->
+        <div id="picturesArea">
+            <div class="display img-in">
+                <canvas id="canvIn" width="0" height="0"></canvas>
+            </div>
+            <div class="display img-out">
+                <canvas id="canvOut" width="0" height="0"></canvas>
+            </div>
+        </div>
+        <!-- ------------ -->
     </div>
 
     <script src="RangeSlider.js"></script>

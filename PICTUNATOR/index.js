@@ -129,8 +129,8 @@ function onMovedisplayImgIn(moveEvt) {
     let parentBcr = parent.getBoundingClientRect();
     let pureLeft = moveEvt.x - parentBcr.x - displayImgInOffsetLeft;
     let pureTop = moveEvt.y - parentBcr.y - displayImgInOffsetTop;
-    marginedLeft = getMinMax(pureLeft, 0, [parseInt(getComputedStyle(parent).width) - parseInt(getComputedStyle(displayImgIn).width)]);
-    marginedTop = getMinMax(pureTop, 0, [parseInt(getComputedStyle(parent).height) - parseInt(getComputedStyle(displayImgIn).height)]);
+    marginedLeft = getMinMax(pureLeft, [0, parseInt(getComputedStyle(parent).width) - parseInt(getComputedStyle(displayImgIn).width)]);
+    marginedTop = getMinMax(pureTop, [0, parseInt(getComputedStyle(parent).height) - parseInt(getComputedStyle(displayImgIn).height)]);
     displayImgIn.style.left = `${marginedLeft}px`;
     displayImgIn.style.top = `${marginedTop}px`;
 }
@@ -170,10 +170,10 @@ cbOriginalDimensions.addEventListener("change", () => {
 // ------------
 // VARIABLES
 var canvIn = document.getElementById("canvIn");
-var ctxIn;
+// var ctxIn = canvIn.getContext("2d", {willReadFrequently: true});
 var canvOut = document.getElementById("canvOut");
-var ctxOut;
-var imageIn, imageOut;
+var ctxOut = canvOut.getContext("2d", { willReadFrequently: true });
+var imageIn;
 
 // ---------
 
@@ -197,7 +197,7 @@ rgEffGrid.addEventListener("input", async () => {
 //-- Color picker behavior.
 const icGridColor = document.getElementById("icGridColor");
 const lbIcGridColor = document.querySelector("[for=icGridColor]");
-
+lbIcGridColor.style.backgroundColor = paramsGrid.color;
 icGridColor.addEventListener("input", () => {
     lbIcGridColor.style.backgroundColor = icGridColor.value;
     paramsGrid.color = icGridColor.value;
@@ -355,8 +355,8 @@ var paramsPxLevel = {
     max: 4,
     // Default value will be modified as a fourth of max.
     def: 3,
-    color1: "#2c5270",
-    color2: "#DDE6ED"
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
 };
 
 const containerPxLevel = document.getElementById("containerPxLevel");
@@ -405,7 +405,7 @@ cbGraysBlack.addEventListener("input", async () => {
 
 //-- Slider for gray levels.
 const containerGraysLevels = document.getElementById("containerGraysLevels");
-const rsGraysLevels = new RangeSlider(containerGraysLevels, { title: "Levels of gray", min: 2, max: 20, step: 1, def: paramsGrays.levels, color1: "#2c5270", color2: "#DDE6ED" });
+const rsGraysLevels = new RangeSlider(containerGraysLevels, { title: "Levels of gray", min: 2, max: 20, step: 1, def: paramsGrays.levels, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
 //  More than 20 grayscale tones are barely distinguishable.
 rsGraysLevels.onslide = function () {
     paramsGrays.levels = rsGraysLevels.val;
@@ -414,7 +414,7 @@ rsGraysLevels.onslide = function () {
 
 //-- Slider for gray sensitivity.
 const containerGraysSensitivity = document.getElementById("containerGraysSensitivity");
-const rsGraysSensitivity = new RangeSlider(containerGraysSensitivity, { title: "Sensitivity", min: -254, step: 1, max: 254, def: paramsGrays.levels, color1: "#2c5270", color2: "#DDE6ED" });
+const rsGraysSensitivity = new RangeSlider(containerGraysSensitivity, { title: "Sensitivity", min: -254, step: 1, max: 254, def: paramsGrays.levels, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
 rsGraysSensitivity.onslide = function () {
     paramsGrays.sens = rsGraysSensitivity.val;
     applyGrayscaling(paramsGrays);
@@ -506,7 +506,7 @@ hatchRbgDirections.forEach(rb => {
 
 const icHatchBg = document.getElementById("icHatchBg");
 const lbIcHatchBg = document.querySelector("[for=icHatchBg]");
-lbIcHatchBg.style.backgroundColor = icHatchBg.value;
+lbIcHatchBg.style.backgroundColor = paramsHatch.bg;
 icHatchBg.addEventListener("input", async () => {
     paramsHatch.bg = icHatchBg.value;
     lbIcHatchBg.style.backgroundColor = paramsHatch.bg;
@@ -516,7 +516,7 @@ icHatchBg.addEventListener("input", async () => {
 
 const icHatchColor = document.getElementById("icHatchColor");
 const lbIcHatchColor = document.querySelector("[for=icHatchColor]");
-lbIcHatchColor.style.backgroundColor = icHatchColor.value;
+lbIcHatchColor.style.backgroundColor = paramsHatch.color
 icHatchColor.addEventListener("input", async () => {
     paramsHatch.color = icHatchColor.value;
     lbIcHatchColor.style.backgroundColor = paramsHatch.color;
@@ -526,7 +526,7 @@ icHatchColor.addEventListener("input", async () => {
 
 // Slider for how many different widths being hatched
 const containerHatchHowmany = document.querySelector("#containerHatchHowmany");
-var rsHatchHowmanyw = new RangeSlider(containerHatchHowmany, { title: "Lines", min: 1, max: 10, def: paramsHatch.buckets.length - 1, step: 1, color1: "#2c5270", color2: "#DDE6ED" });
+var rsHatchHowmanyw = new RangeSlider(containerHatchHowmany, { title: "Lines", min: 1, max: 10, def: paramsHatch.buckets.length - 1, step: 1, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
 rsHatchHowmanyw.onslide = async function () {
     if (imageIn == undefined) return;
     paramsHatch.buckets = await get255Buckets(rsHatchHowmanyw.val + 1, paramsHatch.sensitivity);
@@ -536,7 +536,7 @@ rsHatchHowmanyw.onslide = async function () {
 
 // Hatch separation slider.
 const containerHatchSeparation = document.querySelector("#containerHatchSeparation");
-var rsHatchSeparation = new RangeSlider(containerHatchSeparation, { title: "Separation", min: 2, max: 3, step: 1, def: paramsHatch.separation, color1: "#2c5270", color2: "#DDE6ED" });  //  Will be reinitialized when image is loaded.
+var rsHatchSeparation = new RangeSlider(containerHatchSeparation, { title: "Separation", min: 2, max: 3, step: 1, def: paramsHatch.separation, color1: "#576b9e", color2: "rgb(142, 167, 231)" });  //  Will be reinitialized when image is loaded.
 rsHatchSeparation.onslide = async function () {
     if (imageIn == undefined) return;
     paramsHatch.separation = rsHatchSeparation.val;
@@ -546,7 +546,7 @@ rsHatchSeparation.onslide = async function () {
 
 // Width factor slider.
 const containerHatchLinew = document.querySelector("#containerHatchLinew");
-var rsHatchLinewidth = new RangeSlider(containerHatchLinew, { title: "Width", min: 1, max: 15, def: paramsHatch.linew, step: 1, color1: "#2c5270", color2: "#DDE6ED" });
+var rsHatchLinewidth = new RangeSlider(containerHatchLinew, { title: "Width", min: 1, max: 15, def: paramsHatch.linew, step: 1, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
 rsHatchLinewidth.onslide = function () {
     paramsHatch.linew = rsHatchLinewidth.val;
     applyHatching(paramsHatch);
@@ -554,7 +554,7 @@ rsHatchLinewidth.onslide = function () {
 
 // Sensitivity slider.
 const containerHatchSensitivity = document.querySelector("#containerHatchSensitivity");
-var rsHatchSensitivity = new RangeSlider(containerHatchSensitivity, { title: "Sensitivity", min: -250, max: 250, step: 5, def: paramsHatch.sensitivity, color1: "#2c5270", color2: "#DDE6ED" });
+var rsHatchSensitivity = new RangeSlider(containerHatchSensitivity, { title: "Sensitivity", min: -250, max: 250, step: 5, def: paramsHatch.sensitivity, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
 rsHatchSensitivity.onslide = async function () {
     if (imageIn == undefined) return;
     paramsHatch.sensitivity = rsHatchSensitivity.val;
@@ -742,6 +742,126 @@ function returnsDrawnImagedataWithATDH(ctx, params) {
     });
 }
 
+// CROSS HATCHING
+
+var paramsCrossh = {
+    bg: "#FFFFFF",
+    color: "#000000",
+    linew: 2,
+    arr_direction: ["DLUR", "LR", "ULDR", "UD"],
+    crossh_buckets: [[204, 255], [153, 203], [102, 152], [51, 101], [0, 50]],  //  This is what get255Buckets will return with 5 buckets and zero sensitivity.
+    separation: 3,
+    sensitivity: 0,
+    atch: undefined
+}
+
+const rgEffCrossh = document.getElementById("rgEffCrossh");
+rgEffCrossh.addEventListener("input", async () => {
+    if (imageIn == undefined) return;
+    paramsCrossh.atch = await getArrToCrossh(paramsCrossh);
+    applyCrossh(paramsCrossh);
+});
+
+const cbgCrosshatchDir = document.querySelectorAll("[name=cbgCrosshatchDir]");
+cbgCrosshatchDir.forEach(cb => {
+    cb.addEventListener("input", async () => {
+        if (imageIn == undefined) return;
+        if (cb.checked) {
+            paramsCrossh.arr_direction.push(cb.value);
+        } else {
+            let idx = paramsCrossh.arr_direction.indexOf(cb.value);
+            if (idx !== -1) paramsCrossh.arr_direction.splice(idx, 1);
+        }
+        paramsCrossh.atch = await getArrToCrossh(paramsCrossh);
+        applyCrossh(paramsCrossh);
+    });
+});
+
+const icCrosshBg = document.getElementById("icCrosshBg");
+const lbIcCrosshBg = document.querySelector("[for=icCrosshBg]");
+lbIcCrosshBg.style.backgroundColor = paramsCrossh.bg;
+icCrosshBg.addEventListener("input", () => {
+    paramsCrossh.bg = icCrosshBg.value;
+    lbIcCrosshBg.style.backgroundColor = paramsCrossh.bg;
+    applyCrossh(paramsCrossh);
+});
+
+const icCrosshColor = document.getElementById("icCrosshColor");
+const lbIcCrosshColor = document.querySelector("[for=icCrosshColor]");
+lbIcCrosshColor.style.backgroundColor = paramsCrossh.color;
+icCrosshColor.addEventListener("input", () => {
+    paramsCrossh.color = icCrosshColor.value;
+    lbIcCrosshColor.style.backgroundColor = paramsCrossh.color;
+    applyCrossh(paramsCrossh)
+});
+
+const containerCrosshSeparation = document.getElementById("containerCrosshSeparation");
+var rsCrosshSeparation = new RangeSlider(containerCrosshSeparation, { title: "Separation", min: 3, max: 4, def: 3, step: 1, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+rsCrosshSeparation.onslide = async function () {
+    paramsCrossh.separation = rsCrosshSeparation.val;
+    applyCrossh(paramsCrossh);
+}
+
+const containerCrosshWidth = document.getElementById("containerCrosshWidth");
+var rsCrosshWidth = new RangeSlider(containerCrosshWidth, { title: "Width", min: 1, max: 10, def: 2, step: 1, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+rsCrosshWidth.onslide = function () {
+    paramsCrossh.linew = rsCrosshWidth.val;
+    applyCrossh(paramsCrossh);
+}
+
+const containerCrosshSensitivity = document.getElementById("containerCrosshSensitivity");
+var rsCrosshSensitivity = new RangeSlider(containerCrosshSensitivity, { title: "Sensitivity", min: -254, max: 254, def: 0, step: 1, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+rsCrosshSensitivity.onslide = async function () {
+    if (imageIn == undefined) return;
+    paramsCrossh.sensitivity = rsCrosshSensitivity.val;
+    paramsCrossh.crossh_buckets = await get255Buckets(5, paramsCrossh.sensitivity);
+    paramsCrossh.atch = await getArrToCrossh(paramsCrossh);
+    applyCrossh(paramsCrossh);
+}
+
+function getArrToCrossh(params) {
+    return new Promise(async (res, rej) => {
+        let arr = [];
+        for (let i = 0; i < params.arr_direction.length; i++) {
+            const direction = params.arr_direction[i];
+            let brightest = [params.crossh_buckets[i + 1][1] + 1, 255];
+            let darkest = [0, params.crossh_buckets[i + 1][1]];
+            const buckets = [brightest, darkest];  //  The first bucket is ignored as it is for the brightest unstroked area.
+            const separation = params.separation;
+            var atdh = await getArrToDrawHatch({ direction, separation, buckets });
+            arr.push(atdh);
+        }
+        res(arr);
+    });
+}
+
+async function applyCrossh(params) {
+    if (imageIn == undefined || params.atch == undefined) return;
+    canvOut.imageSmoothingEnabled = false;
+    canvOut.width = imageIn.width;
+    canvOut.height = imageIn.height;
+    // ctxOut = canvOut.getContext("2d", { willReadFrequently: true });
+    ctxOut.fillStyle = params.bg;
+    ctxOut.fillRect(0, 0, canvOut.width, canvOut.height);
+    ctxOut.strokeStyle = params.color;
+    ctxOut.lineCap = "square";
+    for (let i = 0; i < params.atch.length; i++) {
+        const atdh = params.atch[i];
+        atdh.forEach(tch => {
+            tch.forEach(dh => {
+                ctxOut.save();
+                ctxOut.lineWidth = dh.linew * params.linew;
+                ctxOut.beginPath();
+                ctxOut.moveTo(dh.x, dh.y);
+                ctxOut.lineTo(dh.lx, dh.ly);
+                ctxOut.stroke();
+                ctxOut.restore();
+            });
+        });
+    }
+}
+// ---------
+
 function getImagedataIndex(x, y, width) {
     return (y * width + x) * 4;
 }
@@ -811,10 +931,12 @@ async function onceImageLoads(inputFileEvent) {
         applyGrayscaling(paramsGrays);
     }
 
-    //  Hatching Effect.
+    // For Hatching and Cross-hatching
     let newMax = parseInt(smallestDim / 10);
     let newDef = parseInt(newMax / 3);
-    rsHatchSeparation = new RangeSlider(containerHatchSeparation, { title: "Separation", min: 2, max: newMax, step: 1, def: newDef, color1: "#2c5270", color2: "#DDE6ED" });
+
+    //  Hatching Effect.
+    rsHatchSeparation = new RangeSlider(containerHatchSeparation, { title: "Separation", min: 2, max: newMax, step: 1, def: newDef, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
     paramsHatch.separation = rsHatchSeparation.val;
     rsHatchSeparation.onslide = async function () {
         paramsHatch.separation = rsHatchSeparation.val;
@@ -824,6 +946,19 @@ async function onceImageLoads(inputFileEvent) {
     if (rgEffHatching.checked) {
         paramsHatch.atdh = await getArrToDrawHatch(paramsHatch);
         applyHatching(paramsHatch);
+    }
+
+    //  Cross-hatching Effect.
+    rsCrosshSeparation = new RangeSlider(containerCrosshSeparation, { title: "Separation", min: 3, max: newMax, step: 1, def: newDef, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+    rsCrosshSeparation.onslide = async function () {
+        paramsCrossh.separation = rsCrosshSeparation.val;
+        paramsCrossh.atch = await getArrToCrossh(paramsCrossh);
+        applyCrossh(paramsCrossh);
+    }
+    paramsCrossh.separation = rsCrosshSeparation.val;
+    if (rgEffCrossh.checked) {
+        paramsCrossh.atch = await getArrToCrossh(paramsCrossh);
+        applyCrossh(paramsCrossh);
     }
 }
 

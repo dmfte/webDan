@@ -74,8 +74,8 @@ class RangeSlider {
         this.el.container.style.height = "100%";
         this.el.container.style.display = "grid";
         this.el.container.style.padding = "0.5em 0.3em 0.2em";
-        this.el.container.style.gridTemplateColumns = (this.vert) ? "2fr 5fr" : "1fr 12fr 1fr";
-        this.el.container.style.gridTemplateRows = (this.vert) ? "1fr 12fr 1fr" : "2fr 5fr";
+        this.el.container.style.gridTemplateColumns = (this.vert) ? "2fr 5fr" : "1fr 9fr 1fr";
+        this.el.container.style.gridTemplateRows = (this.vert) ? "1fr 12fr 1fr" : "2fr 3fr";
         this.el.container.style.gridTemplateAreas = (this.vert) ? "'title max' 'title track' 'title min'" : "'title title title' 'min track max'";
 
         this.el.title.classList.add("rs-title");
@@ -96,8 +96,9 @@ class RangeSlider {
         this.el.containerTrack.style.display = "flex";
         this.el.containerTrack.style.alignItems = "center";
         this.el.containerTrack.style.justifyContent = "center";
-        this.el.containerTrack.style.padding = (this.vert) ? "0 0.2em" : "0.2em 0";
+        // this.el.containerTrack.style.padding = (this.vert) ? "0 0.2em" : "0.2em 0";
 
+        this.el.track.classList.add("rs-track");
         this.el.track.style.position = "relative";
         this.el.track.style.width = "100%";
         this.el.track.style.height = "100%";
@@ -110,7 +111,7 @@ class RangeSlider {
         this.setBackgroundWithPerct(pfv);
 
         this.el.tooltip.style.position = "absolute";
-        this.el.tooltip.style.top = (this.vert) ? "unset" : "-80%";
+        this.el.tooltip.style.top = (this.vert) ? "unset" : "-40%";
         this.el.tooltip.style.left = (this.vert) ? "-80%" : "unset";
         this.el.tooltip.style.backgroundColor = this.color2Lightest;
         this.el.tooltip.style.width = "2em";
@@ -134,23 +135,24 @@ class RangeSlider {
         let tooltipFontsize = minMax(mfs, 0.4, 1);
         this.el.tooltipspan.style.fontSize = `${tooltipFontsize}em`;
 
-        let maxWidthForMinAndMax = getMinWidth([this.max, this.min]);
-
         this.el.max.classList.add("rs-max");
         this.el.max.innerText = this.max;
         this.el.max.style.writingMode = (this.vert) ? "vertical-lr" : "inherit";
         this.el.max.style.transformOrigin = "center center";
         this.el.max.style.rotate = (this.vert) ? "180deg" : "0";
-        let maxFontS = parseFloat(window.getComputedStyle(this.el.max).fontSize);
-        let maxFontFactor = (maxFontS / 16);
-        this.el.max.style.width = (this.vert) ? "unset" : `calc(${maxFontFactor * maxWidthForMinAndMax}px + 0.3em)`;
-        this.el.max.style.height = (this.vert) ? `calc(${maxFontFactor * maxWidthForMinAndMax}px + 0.3em)` : "unset";
+        let elementMaxW = parseFloat(window.getComputedStyle(this.el.max).width);
+        let maxFontS = getMaxFontsize(elementMaxW * 0.8, this.max);
+        this.el.max.style.fontSize = maxFontS;
+        this.el.max.style.overflow = "hidden";
+        this.el.max.style.width = (this.vert) ? "unset" : "100%";
+        this.el.max.style.height = (this.vert) ? "100%" : "unset";
         this.el.max.style.gridArea = "max";
         this.el.max.style.backgroundColor = this.color2Light;
         this.el.max.style.color = this.color1Dark;
+        this.el.max.style.border = "none";
         this.el.max.style.borderRadius = (this.vert) ? "0 0 50% 50%" : "0 50% 50% 0";
-        this.el.max.style.margin = (this.vert) ? "0.1em 0.2em 0.1em" : "0.2em 0.1em 0.2em";
-        this.el.max.style.padding = (this.vert) ? "0.1em 0.2em 0.4em 0.2em" : "0.2em 0.4em 0.2em 0.1em";
+        this.el.max.style.margin = (this.vert) ? "0.1em 0.2em 0.1em" : "0 0 0 0.1em";
+        this.el.max.style.padding = (this.vert) ? "0.1em 0.2em 0.4em 0.2em" : "0.2em 0 0.2em 0.2em";
         this.el.max.style.display = "flex";
         this.el.max.style.justifyContent = "flex-start";
         this.el.max.style.alignItems = "center";
@@ -169,19 +171,23 @@ class RangeSlider {
         this.el.min.innerText = this.min;
 
         this.el.min.classList.add("rs-min");
+        this.el.min.style.gridArea = "min";
         this.el.min.style.writingMode = (this.vert) ? "vertical-lr" : "inherit";
         this.el.min.style.transformOrigin = "center center";
         this.el.min.style.rotate = (this.vert) ? "180deg" : "0";
-        let minFontS = parseFloat(window.getComputedStyle(this.el.min).fontSize);
-        let minFontFactor = minFontS / 16;
-        this.el.min.style.width = (this.vert) ? "unset" : `calc(${minFontFactor * maxWidthForMinAndMax}px + 0.3em)`;
-        this.el.min.style.height = (this.vert) ? `calc(${minFontFactor * maxWidthForMinAndMax}px + 0.3em)` : "unset";
-        this.el.min.style.gridArea = "min";
+        let elementMinW = parseFloat(window.getComputedStyle(this.el.min).width);
+        let minFontS = getMaxFontsize(elementMinW * 0.8, this.min);
+        this.el.min.style.fontSize = minFontS;
+        this.el.min.style.overflow = "hidden";
+        // this.el.min.style.width = (this.vert) ? "unset" : "100%";
+        this.el.min.style.height = (this.vert) ? "100%" : "unset";
         this.el.min.style.backgroundColor = this.color2Light;
         this.el.max.style.color = this.color2Darkest;
         this.el.min.style.borderRadius = (this.vert) ? "50% 50% 0 0" : "50% 0 0 50%";
-        this.el.min.style.margin = (this.vert) ? "0.1em 0.2em 0.1em" : "0.2em 0.1em 0.2em";
-        this.el.min.style.padding = (this.vert) ? "0.4em 0.2em 0.1em 0.2em" : "0.2em 0.1em 0.2em 0.4em";
+        this.el.min.style.flex = "1";
+        this.el.min.style.margin = (this.vert) ? "0.1em 0.2em 0.1em" : "0 0.1em 0 0";
+        // this.el.min.style.marginRight = "5px";
+        this.el.min.style.padding = (this.vert) ? "0.4em 0.2em 0.1em 0.2em" : "0.2em 0.2em 0.2em 0";
         this.el.min.style.display = "flex";
         this.el.min.style.justifyContent = "flex-end";
         this.el.min.style.alignItems = "center";
@@ -355,7 +361,7 @@ function getMinWidth(arrTexts = []) {
     return arrWidths[arrWidths.length - 1];
 }
 
-function getMaxFontsize(width = 0, text) {
+function getMaxFontsize(width = 0, text="") {
     //  Calculate the maximum font size in 'em' so the text fits the width.
     let div = document.createElement("div");
     div.style.visibility = "hidden";
