@@ -515,6 +515,7 @@ nav#top-nav {
             flex-direction: column;
             justify-content: flex-start;
             align-items: stretch;
+            /* overflow: visible; */
 
             & .title {
                 /* display: flex; */
@@ -535,6 +536,7 @@ nav#top-nav {
                 display: flex;
                 margin-bottom: 2px;
                 /* align-items: stretch; */
+                /* overflow: visible; */
 
 
                 @media only screen and (max-width: 600px) {
@@ -590,8 +592,9 @@ nav#top-nav {
 
                     & .submenu {
                         position: absolute;
-                        top: 100%;
+                        /* top: 100%;
                         left: 0;
+                        right: unset; */
                         background-color: var(--color-controls-btn);
                         overflow: hidden;
                         display: flex;
@@ -599,12 +602,24 @@ nav#top-nav {
                         justify-content: flex-start;
                         align-items: stretch;
                         max-width: 0;
+                        box-shadow: none;
                         transition: max-width 300ms ease-in-out;
+
+                        @media only screen and (max-width: 1024px) {
+                            top: 0;
+                            left: unset;
+                            right: 115%;
+                        }
+                        @media only screen and (min-width: 1025px) and (min-width: 1441px) {
+                            top: 100%;
+                            left: 0;
+                            right: unset;
+                        }
 
                         & input~label {
                             cursor: pointer;
-                            width: calc((var(--controlsbar-w) - (var(--controlsbar-padd) * 2) - var(--controls-padd) * 2) / 8);
-                            height: calc((var(--controlsbar-w) - (var(--controlsbar-padd) * 2) - var(--controls-padd) * 2) / 8);
+                            width: calc((350px - (var(--controlsbar-padd) * 2) - var(--controls-padd) * 2) / 8);
+                            height: calc((350px - (var(--controlsbar-padd) * 2) - var(--controls-padd) * 2) / 8);
                         }
 
                         & input~label:hover {
@@ -622,10 +637,8 @@ nav#top-nav {
                     overflow: visible;
 
                     & .submenu {
-                        max-width: var(--controlsbar-w);
-                        overflow: hidden;
-
-
+                        max-width: 350px;
+                        box-shadow: 0 0 15px 15px var(--color-controls-btn-active);
                     }
                 }
 
