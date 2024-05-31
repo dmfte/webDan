@@ -114,6 +114,7 @@
             <label for="rgEffGrays" class="effect-title">Grayscale</label>
             <label for="rgEffHatching" class="effect-title">Hatching</label>
             <label for="rgEffCrossh" class="effect-title">Cross-hatching</label>
+            <label for="rgEffGlyph" class="effect-title" style="display: none;">Glyphate</label>
         </div>
 
 
@@ -212,7 +213,7 @@
                 <div class="title">Hatching</div>
                 <div class="btns">
                     <div id="hatchDirs" class="btn supermenu" tabindex="0">
-                        <div id="hatchCurrentDir">
+                        <div id="hatchCurrentDir" class="submenu-activator">
                             <svg xmlns="http://www.w3.org/2000/svg" id="svghatchdirections" viewBox="0 0 40 10">
                                 <path id="pathdirections" stroke-linecap="round" stroke-linejoin="round"
                                     stroke="rgb(10, 17, 88)" fill="none" stroke-width="1" d="
@@ -287,7 +288,7 @@
                 <div class="title">Cross-hatching</div>
                 <div class="btns">
                     <div id="cbgCrosshDirs" class="btn supermenu" tabindex="0">
-                        <div id="crosshCurrentDirs">
+                        <div id="crosshCurrentDirs" class="submenu-activator">
                             <svg xmlns="http://www.w3.org/2000/svg" id="svgcrosshdirections" viewBox="0 0 10 10">
                                 <path fill="none" stroke-width="1" stroke-linejoin="round" stroke="rgb(40, 47, 118)"
                                     d="M 9 1 l -8 0 l 0 8 l 8 0 z"></path>
@@ -354,8 +355,31 @@
                 <div class="rs-wrapper" tabindex="0">
                     <div class="slider" id="containerCrosshSensitivity"></div>
                 </div>
-
             </div>
+            <!-- ------------ -->
+            <div id="ctrlsEffGlyph" class="controls">
+                <input type="radio" name="rbgEffects" id="rgEffGlyph">
+                <div class="title">Glyphate</div>
+                <div class="btns">
+                    <input type="color" name="" id="icGlyphBg" value="#ffffff">
+                    <label for="icGlyphBg" class="btn icolor"></label>
+                    <input type="color" name="" id="icGlyphColor" value="#000000">
+                    <label for="icGlyphColor" class="btn icolor"></label>
+                    <input type="text" name="" id="itGlyphGlyphs" value="dmfte">
+                    <input type="checkbox" name="" id="cbGlyphRandom">
+                    <label for="cbGlyphRandom" class="btn">Rand</label>
+                </div>
+                <div class="rs-wrapper" tabindex="0">
+                    <div class="slider" id="containerGlyphDetail"></div>
+                </div>
+                <div class="rs-wrapper" tabindex="0">
+                    <div class="slider" id="containerGlyphFontsize"></div>
+                </div>
+            </div>
+            <!-- ------------ -->
+
+
+
         </div>
         <!-- ------------ -->
         <div id="picturesArea">

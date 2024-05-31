@@ -2,6 +2,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    user-select: none;
 }
 
 :root {
@@ -80,6 +81,7 @@
     --color-controls-btn: rgb(121, 145, 206);
     --color-controls-btn-hover: rgb(142, 167, 231);
     --color-controls-btn-active: #c5e8e8;
+    --color-controls-btn-checked: #9dcaca;
     --color-effects-rb-color-on: #ACE6E6;
     --color-effects-rb-inside: rgb(92, 166, 173);
     --color-controls-bg: #8fbcbd;
@@ -308,7 +310,6 @@ nav#top-nav {
 
             & span {
                 /* For the name of the image file. */
-                user-select: none;
                 display: flex;
                 align-items: center;
                 flex: 1;
@@ -501,7 +502,7 @@ nav#top-nav {
             overflow: auto;
         }
 
-        & input {
+        & input:not([type=text]) {
             display: none;
         }
 
@@ -535,9 +536,6 @@ nav#top-nav {
             & .btns {
                 display: flex;
                 margin-bottom: 2px;
-                /* align-items: stretch; */
-                /* overflow: visible; */
-
 
                 @media only screen and (max-width: 600px) {
                     flex-direction: column;
@@ -557,9 +555,24 @@ nav#top-nav {
                     flex-direction: row;
                 }
 
+                & input~label:hover {
+                    background-color: var(--color-controls-btn-hover);
+                }
+                & input:checked+label {
+                    background-color: var(--color-controls-btn-checked);
+                    scale: 0.85;
+                }
+                & input~label:active {
+                    background-color: var(--color-controls-btn-active);
+                }
+
                 & .btn {
                     background-color: var(--color-controls-btn);
                     border-radius: 0.5rem;
+                    position: relative;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
                     overflow: hidden;
                     cursor: pointer;
 
@@ -589,12 +602,17 @@ nav#top-nav {
                     position: relative;
                     overflow: hidden;
                     z-index: 2;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+
+                    & .submenu-activator{
+                        width: 100%;
+                        height: 100%;
+                    }
 
                     & .submenu {
                         position: absolute;
-                        /* top: 100%;
-                        left: 0;
-                        right: unset; */
                         background-color: var(--color-controls-btn);
                         overflow: hidden;
                         display: flex;
@@ -610,7 +628,7 @@ nav#top-nav {
                             left: unset;
                             right: 115%;
                         }
-                        @media only screen and (min-width: 1025px) and (min-width: 1441px) {
+                        @media only screen and (min-width: 1025px) {
                             top: 100%;
                             left: 0;
                             right: unset;
@@ -621,15 +639,6 @@ nav#top-nav {
                             width: calc((350px - (var(--controlsbar-padd) * 2) - var(--controls-padd) * 2) / 8);
                             height: calc((350px - (var(--controlsbar-padd) * 2) - var(--controls-padd) * 2) / 8);
                         }
-
-                        & input~label:hover {
-                            background-color: var(--color-controls-btn-hover);
-                        }
-
-                        & input:checked+label {
-                            background-color: var(--color-controls-btn-active);
-                        }
-
                     }
                 }
 

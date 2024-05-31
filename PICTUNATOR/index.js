@@ -421,37 +421,24 @@ rsGraysSensitivity.onslide = function () {
 }
 
 
-function getGrayscalledImgData(params) {
+function getGrayscaledImgData(imagedata, levels = 2, sens = 2, black = true) {
     return new Promise(async (res, rej) => {
-        let arrBucket = await get255Buckets(params.levels, params.sens);
-        let arrValues = new Array(params.levels);
-        let bucket = (params.black) ? 255 / (params.levels - 1) : 255 / (params.levels + 1);
-        if (params.black) {
-            for (let i = 0; i < arrValues.length; i++) {
-                // arrValues[arrValues.length - 1 - i] = parseInt(Math.max(Math.min(i * bucket, 255), 0));
-                arrValues[arrValues.length - 1 - i] = parseInt(getMinMax(i * bucket, [0, 255]));
-            }
-        } else {
-            for (let i = 1; i <= arrValues.length; i++) {
-                // arrValues[arrValues.length - i] = parseInt(Math.max(Math.min(i * bucket, 255), 0));
-                arrValues[arrValues.length - i] = parseInt(getMinMax(i * bucket, [0, 255]));
-            }
+        let arrBuckets = await get255Buckets(levels, sens);
+        let arrValues = new Array(levels);
+        let bucketSize = (black) ? 255 / (levels - 1) : 255 / (levels + 1);
+        for (let i = 0; i < arrValues.length; i++) {
+            let factor = (black) ? i : i + 1;
+            arrValues[i] = parseInt(getMinMax(factor * bucketSize, [0, 255]));
         }
-        let newImgdata = structuredClone(imageInData);
+        let newImgdata = structuredClone(imagedata);
         for (let i = 0; i < newImgdata.data.length; i += 4) {
             let r = newImgdata.data[i + 0];
             let g = newImgdata.data[i + 1];
             let b = newImgdata.data[i + 2];
             // let a = newImgdata.data[i + 3];
-            let grayScale = parseInt(r * 0.299 + g * 0.587 + b * 0.114);
-            let newGs = 0;
-            for (let j = 0; j < arrValues.length; j++) {
-                const val = arrValues[j];
-                if (grayScale >= arrBucket[j][0] && grayScale <= arrBucket[j][1]) {
-                    newGs = val;
-                    break;
-                }
-            }
+            let grayScale = getGrayscale(r, g, b);
+            let buck = getBucketPosition(grayScale, arrBuckets);
+            let newGs = arrValues[buck];
             newImgdata.data[i + 0] = newGs;
             newImgdata.data[i + 1] = newGs;
             newImgdata.data[i + 2] = newGs;
@@ -468,7 +455,7 @@ async function applyGrayscaling(params) {
     }
     ctx = canvOut.getContext("2d", { willReadFrequently: true });
     ctx.imageSmoothingEnabled = false;
-    let newData = await getGrayscalledImgData(params);
+    let newData = await getGrayscaledImgData(imageInData, params.levels, params.sens, params.black);
     ctx.putImageData(newData, 0, 0);
 }
 // ------------
@@ -479,7 +466,7 @@ var paramsHatch = {
     bg: "#FFFFFF",
     color: "#000000",
     linew: 2,
-    buckets: [[192, 255], [128, 191], [64, 127], [0, 63]],  //  This is what get255Buckets will return with default how_many lines value of 3 + 1.
+    buckets: [[0, 85], [86, 170]],  //  This is what get255Buckets will return with default how_many lines value of 2.
     direction: "DLUR",
     separation: 3,
     sensitivity: 0,
@@ -530,6 +517,7 @@ var rsHatchHowmanyw = new RangeSlider(containerHatchHowmany, { title: "Lines", m
 rsHatchHowmanyw.onslide = async function () {
     if (imageIn == undefined) return;
     paramsHatch.buckets = await get255Buckets(rsHatchHowmanyw.val + 1, paramsHatch.sensitivity);
+    paramsHatch.buckets.pop();  //  One more bucket is added for absolute white values, but then removed so it is not hatched.
     paramsHatch.atdh = await getArrToDrawHatch(paramsHatch);
     applyHatching(paramsHatch);
 };
@@ -554,12 +542,13 @@ rsHatchLinewidth.onslide = function () {
 
 // Sensitivity slider.
 const containerHatchSensitivity = document.querySelector("#containerHatchSensitivity");
-var rsHatchSensitivity = new RangeSlider(containerHatchSensitivity, { title: "Sensitivity", min: -250, max: 250, step: 5, def: paramsHatch.sensitivity, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+var rsHatchSensitivity = new RangeSlider(containerHatchSensitivity, { title: "Sensitivity", min: -250, max: 250, step: 1, def: paramsHatch.sensitivity, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
 rsHatchSensitivity.onslide = async function () {
     if (imageIn == undefined) return;
     paramsHatch.sensitivity = rsHatchSensitivity.val;
-    let howmany = paramsHatch.buckets.length;
-    paramsHatch.buckets = await get255Buckets(howmany, paramsHatch.sensitivity);
+    // let howmany = paramsHatch.buckets.length;
+    paramsHatch.buckets = await get255Buckets(paramsHatch.buckets.length + 1, paramsHatch.sensitivity);
+    paramsHatch.buckets.pop();  //  One more bucket is added for absolute white values but then removed so it is not hatched.
     paramsHatch.atdh = await getArrToDrawHatch(paramsHatch);
     applyHatching(paramsHatch);
 };
@@ -576,12 +565,16 @@ async function applyHatching(params) {
     ctxOut.strokeStyle = paramsHatch.color;
     ctxOut.lineCap = "square";
 
-    for (let i = 0; i < params.atdh.length; i++) {
-        const arr = params.atdh[i];
+    drawAtdh(params.atdh, params.linew);
+}
+
+function drawAtdh(atdh, linew) {
+    for (let i = 0; i < atdh.length; i++) {
+        const arr = atdh[i];
         for (let j = 0; j < arr.length; j++) {
             const obj = arr[j];
             ctxOut.save();
-            ctxOut.lineWidth = obj.linew * params.linew;
+            ctxOut.lineWidth = obj.linew * linew;
             ctxOut.beginPath();
             ctxOut.moveTo(obj.x, obj.y);
             ctxOut.lineTo(obj.lx, obj.ly);
@@ -676,10 +669,11 @@ async function getArrToDrawHatch(params) {
         let otsh = await getObjToStartHatching(params.direction, params.separation);
         let arr = [];
         // if (!objForSvg[params.direction]) objForSvg[params.direction] = [];
+
         for (let h = 0; h < otsh.arrXyLim.length; h++) {
             const obj = otsh.arrXyLim[h];
             arr.push([]);
-            let linewidth = 0;
+            let previousbucket = -1;
             for (let i = 0; i < obj.lim; i++) {
                 let x = obj.x + i * otsh.dirx;
                 let y = obj.y + i * otsh.diry;
@@ -690,33 +684,31 @@ async function getArrToDrawHatch(params) {
                 // let a = data.data[idx + 3];
                 let gs = getGrayscale(r, g, b);
                 const last = arr.length - 1;
-                for (let j = 0; j < params.buckets.length; j++) {
-                    const buck = params.buckets[j];
-                    if (gs >= buck[0] && gs <= buck[1]) {
-                        if (j == 0) {  //  It means it found the brightest pixel so it won't hatch it.
-                            linewidth = 0;
-                            break;
-                        }
-                        // This generates an array with each x, y coord, its length and width.
-                        if (j !== linewidth) {  //  The j counter for params.buckets[] is equal to the linewidth, that's why it it skips it if it is zero.
-                            arr[last].push({
-                                x: x,
-                                y: y,
-                                lx: x,
-                                ly: y,
-                                linew: j
-                            });
-                            linewidth = j;
-                            // objForSvg[params.direction].push({ x: x, y: y, lx: x, ly: y, linew: j });
-                        } else {  //  It means j == the previous linewidth.
-                            arr[last][arr[last].length - 1].lx += otsh.dirx;
-                            arr[last][arr[last].length - 1].ly += otsh.diry;
-                            // objForSvg[params.direction][objForSvg[params.direction].length - 1].lx += otsh.dirx;
-                            // objForSvg[params.direction][objForSvg[params.direction].length - 1].ly += otsh.diry;
-                        }
-                        break;
-                    }
+                const buck = getBucketPosition(gs, params.buckets);
+                if (buck == -1) {  //  It means it didn't found a bucket, which means a line should not be hatched (brightest value).
+                    previousbucket = -1;
+                    continue;
                 }
+                if (buck == previousbucket) {  //  If the current value is the same as the previous one, it means the same line (hatch) continues.
+                    arr[last][arr[last].length - 1].lx += otsh.dirx;
+                    arr[last][arr[last].length - 1].ly += otsh.diry;
+                    // objForSvg[params.direction][objForSvg[params.direction].length - 1].lx += otsh.dirx;
+                    // objForSvg[params.direction][objForSvg[params.direction].length - 1].ly += otsh.diry;
+                    continue;
+                }
+                // If code runs at this point, it means the width of the line (hatch) changes.
+                arr[last].push({
+                    x: x,
+                    y: y,
+                    lx: x,
+                    ly: y,
+                    linew: params.buckets.length - buck  //  Buckets are arranged from 0 to 255 (decreasing light value).
+                });
+                previousbucket = buck;
+                // objForSvg[params.direction].push({ x: x, y: y, lx: x, ly: y, linew: j });
+                continue;
+
+
 
             }
         }
@@ -749,11 +741,12 @@ var paramsCrossh = {
     color: "#000000",
     linew: 2,
     arr_direction: ["DLUR", "LR", "ULDR", "UD"],
-    crossh_buckets: [[204, 255], [153, 203], [102, 152], [51, 101], [0, 50]],  //  This is what get255Buckets will return with 5 buckets and zero sensitivity.
+    buckets: [[0, 51], [52, 102], [103, 153], [154, 204], [205, 255]],
     separation: 3,
     sensitivity: 0,
     atch: undefined
 }
+
 
 const rgEffCrossh = document.getElementById("rgEffCrossh");
 rgEffCrossh.addEventListener("input", async () => {
@@ -765,13 +758,13 @@ rgEffCrossh.addEventListener("input", async () => {
 const cbgCrosshatchDir = document.querySelectorAll("[name=cbgCrosshatchDir]");
 cbgCrosshatchDir.forEach(cb => {
     cb.addEventListener("input", async () => {
-        if (imageIn == undefined) return;
-        if (cb.checked) {
+        if (cb.checked && !paramsCrossh.arr_direction.includes(cb.value)) {
             paramsCrossh.arr_direction.push(cb.value);
         } else {
             let idx = paramsCrossh.arr_direction.indexOf(cb.value);
             if (idx !== -1) paramsCrossh.arr_direction.splice(idx, 1);
         }
+        if (imageIn == undefined) return;
         paramsCrossh.atch = await getArrToCrossh(paramsCrossh);
         applyCrossh(paramsCrossh);
     });
@@ -814,54 +807,117 @@ var rsCrosshSensitivity = new RangeSlider(containerCrosshSensitivity, { title: "
 rsCrosshSensitivity.onslide = async function () {
     if (imageIn == undefined) return;
     paramsCrossh.sensitivity = rsCrosshSensitivity.val;
-    paramsCrossh.crossh_buckets = await get255Buckets(5, paramsCrossh.sensitivity);
+    paramsCrossh.buckets = await get255Buckets(5, paramsCrossh.sensitivity);
     paramsCrossh.atch = await getArrToCrossh(paramsCrossh);
     applyCrossh(paramsCrossh);
 }
 
 function getArrToCrossh(params) {
     return new Promise(async (res, rej) => {
-        let arr = [];
-        for (let i = 0; i < params.arr_direction.length; i++) {
+        let arr = new Array(params.arr_direction.length);
+        for (let i = 0; i < arr.length; i++) {
+            let hatch_bucket = params.buckets[4 - i];
+            let bucket = [0, hatch_bucket[0]];
+            let buckets = [bucket];
             const direction = params.arr_direction[i];
-            let brightest = [params.crossh_buckets[i + 1][1] + 1, 255];
-            let darkest = [0, params.crossh_buckets[i + 1][1]];
-            const buckets = [brightest, darkest];  //  The first bucket is ignored as it is for the brightest unstroked area.
             const separation = params.separation;
-            var atdh = await getArrToDrawHatch({ direction, separation, buckets });
-            arr.push(atdh);
+            const sensitivity = params.sensitivity;
+            var atdh = await getArrToDrawHatch({ direction, separation, buckets, sensitivity });
+            arr[i] = (atdh);
         }
         res(arr);
     });
 }
 
+function getCrosshBuckets(arrBuckets) {
+    let arr = arrBuckets.map((buck) => {
+        let x = getMinMax(buck[1], [0, 255]);
+        let darkest = [0, x];
+        let brightest = [x + 1, 255];
+        return [darkest, brightest];
+    });
+    return arr;
+}
 async function applyCrossh(params) {
     if (imageIn == undefined || params.atch == undefined) return;
     canvOut.imageSmoothingEnabled = false;
     canvOut.width = imageIn.width;
     canvOut.height = imageIn.height;
-    // ctxOut = canvOut.getContext("2d", { willReadFrequently: true });
     ctxOut.fillStyle = params.bg;
     ctxOut.fillRect(0, 0, canvOut.width, canvOut.height);
     ctxOut.strokeStyle = params.color;
     ctxOut.lineCap = "square";
     for (let i = 0; i < params.atch.length; i++) {
         const atdh = params.atch[i];
-        atdh.forEach(tch => {
-            tch.forEach(dh => {
-                ctxOut.save();
-                ctxOut.lineWidth = dh.linew * params.linew;
-                ctxOut.beginPath();
-                ctxOut.moveTo(dh.x, dh.y);
-                ctxOut.lineTo(dh.lx, dh.ly);
-                ctxOut.stroke();
-                ctxOut.restore();
-            });
-        });
+        drawAtdh(atdh, params.linew);
     }
 }
-// ---------
+//  ---------
 
+// GLYPHATE
+var paramsGlyph = {
+    bg: "#ffffff",
+    color: "#000000",
+    text: "dmfte",
+    rand: false,
+    detail: 12,
+    fontsize: 3.0
+}
+
+const icGlyphBg = document.getElementById("icGlyphBg");
+const lbIcGlyphBg = document.querySelector("[for=icGlyphBg]");
+lbIcGlyphBg.style.backgroundColor = paramsGlyph.bg;
+icGlyphBg.addEventListener("input", () => {
+    lbIcGlyphBg.style.backgroundColor = paramsGlyph.bg;
+    paramsGlyph.bg = icGlyphBg.value;
+    applyGlyph(paramsGlyph);
+});
+
+const icGlyphColor = document.getElementById("icGlyphColor");
+const lbIcGlyphColor = document.querySelector("[for=icGlyphColor]");
+lbIcGlyphColor.style.backgroundColor = paramsGlyph.color;
+icGlyphColor.addEventListener("input", () => {
+    lbIcGlyphColor.style.backgroundColor = paramsGlyph.color;
+    paramsGlyph.color == icGlyphColor.value;
+    applyGlyph(paramsGlyph);
+});
+
+const containerGlyphDetail = document.getElementById("containerGlyphDetail");
+var rsGlyphDetail = new RangeSlider(containerGlyphDetail, { title: "Detail", min: 8, max: 20, step: 1, def: paramsGlyph.detail, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+
+const containerGlyphFontsize = document.getElementById("containerGlyphFontsize");
+var rsGlyphFontsize = new RangeSlider(containerGlyphFontsize, { title: "Font Size", min: 1.0, max: 20.0, ste: 0.1, def: paramsGlyph.fontsize, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+
+async function applyGlyph(params) {
+    if (imageIn == undefined) return;
+    let canv0 = document.createElement("canvas");
+    let c0 = canv0.getContext("2d", { willReadFrequently: true });
+    canv0.width = parseInt(imageIn.width / params.detail);
+    canv0.height = parseInt(imageIn.height / params.detail);
+    c0.drawImage(imageIn, 0, 0, canv0.width, canv0.height);
+    let canv0Data = c0.getImageData(0, 0, canv0.width, canv0.height);
+    let atg = await getArrayToGlyph(canv0Data, params.detail);
+
+    canvOut.width = canv0.width * params.detail;
+    canvOut.height = canv0.height * params.detail;
+    c0.fillStyle = params.bg;
+    canvOut.fillRect(0, 0, canvOut.width, canvOut.height);
+}
+
+function getArrayToGlyph(imagedata, factor) {
+    return new Promise((res, rej) => {
+        let w = imagedata.width;
+        let levels = factor - 4;
+        const data = getGrayscaledImgData(imagedata);
+        let arr = [];
+        for (let i = 0; i < data.length; i += 4) {
+
+        }
+    });
+}
+
+//  ---------
+// FUNCTIONS
 function getImagedataIndex(x, y, width) {
     return (y * width + x) * 4;
 }
@@ -869,6 +925,23 @@ function getGrayscale(r, g, b) {
     // return parseInt(r * 0.2426 + g * 0.7152 + b * 0.0822);
     return parseInt(0.299 * r + 0.587 * g + 0.114 * b);
 }
+
+function getBucketPosition(val, arrBuckets) {
+    // return new Promise((res, rej)=>{
+    let buckIndex = -1;
+    for (let i = 0; i < arrBuckets.length; i++) {
+        const bucket = arrBuckets[i];
+        if (bucket[0] == bucket[1]) continue;
+        if (val >= bucket[0] && val <= bucket[1]) {
+            buckIndex = i;
+            break;
+        }
+    }
+    // res(buckIndex);
+    return buckIndex;
+    // });
+}
+
 
 // ------------
 // Input File.
@@ -933,7 +1006,7 @@ async function onceImageLoads(inputFileEvent) {
 
     // For Hatching and Cross-hatching
     let newMax = parseInt(smallestDim / 10);
-    let newDef = parseInt(newMax / 3);
+    let newDef = parseInt(newMax / 4);
 
     //  Hatching Effect.
     rsHatchSeparation = new RangeSlider(containerHatchSeparation, { title: "Separation", min: 2, max: newMax, step: 1, def: newDef, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
@@ -1002,18 +1075,29 @@ function getMinMax(val = 0, [min = 0, max = 0]) {
 }
 
 
-// Returns an array of buckets given how many buckets are needed from the 0 - 255 range; it also adds/substract senstivity.
+// Returns an array of buckets given how many buckets are needed from the 0 - 255 range; it also adds/substract sensitivity.
 function get255Buckets(how_many_buckets = 0, sensitivity = 0) {
     return new Promise((res, rej) => {
         let arr = new Array(how_many_buckets);
-        let bucket = Math.ceil(255 / arr.length);
-        for (let i = arr.length - 1; i >= 0; i--) {
-            let lowerLim = getMinMax(i * bucket + sensitivity, [0, 255]);
-            let upperLim = getMinMax((i + 1) * bucket - 1 + sensitivity, [0, 255]);
-            arr[arr.length - 1 - i] = [lowerLim, upperLim];
+        let bucketSize = parseInt(255 / arr.length);
+        // for (let i = arr.length - 1; i >= 0; i--) {
+        //     let lowerLim = getMinMax(i * bucket + sensitivity, [0, 255]);
+        //     let upperLim = getMinMax((i + 1) * bucket - 1 + sensitivity, [0, 255]);
+        //     arr[arr.length - 1 - i] = [lowerLim, upperLim];
+        // }
+        for (let i = 0; i < how_many_buckets; i++) {
+            const factor = i * bucketSize;
+            const lowerLim = (i == 0) ? 0 : getMinMax(factor + 1 + sensitivity, [0, 255]);
+            const higherLim = (i == how_many_buckets - 1) ? 255 : getMinMax(factor + bucketSize + sensitivity, [0, 255]);
+            arr[i] = [lowerLim, higherLim];
         }
-        arr[0][1] = 255;
-        arr[arr.length - 1][0] = 0;
+        // for (let i = arr.length - 1; i >= 0; i--) {
+        //     let lowerLim = getMinMax(i * bucket + sensitivity, [0, 255]);
+        //     let upperLim = getMinMax((i + 1) * bucket - 1 + sensitivity, [0, 255]);
+        //     arr[arr.length - 1 - i] = [lowerLim, upperLim];
+        // }
+        // arr[0][0] = 0;
+        // arr[arr.length - 1][1] = 255;
         res(arr);
     });
 }
