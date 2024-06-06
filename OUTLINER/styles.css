@@ -440,7 +440,7 @@ label~input[type=file] {
                     }
                 }
 
-                & .accordions {
+                & .accordions {;
                     position: relative;
                     display: block;
                     width: 100%;
@@ -537,6 +537,7 @@ label~input[type=file] {
                             & .accr-title {
                                 text-align: center;
                                 flex: 1;
+                                user-select: none;
                             }
 
                             & .accr-arrow {
