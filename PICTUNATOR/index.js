@@ -245,8 +245,11 @@ cbGridHorzvert.addEventListener("input", async () => {
 
 //-- Slider for amoaunt of squares.
 const containerGridSquares = document.getElementById("containerGridSquares");
+const labelForContainerGridSquares = document.querySelector("[label-for=containerGridSquares]");
 var rsGridSquares = new RangeSlider(containerGridSquares, { title: "Grid", min: 2, max: 20, def: paramsGrid.amnt, step: 1, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+labelForContainerGridSquares.innerText = rsGridSquares.val;
 rsGridSquares.onslide = async function () {
+    labelForContainerGridSquares.innerText = rsGridSquares.val;
     if (imageIn == undefined) return;
     paramsGrid.amnt = rsGridSquares.val;
     paramsGrid.atdg = await getArrayToDrawGrid(imageInData, paramsGrid);
@@ -255,8 +258,11 @@ rsGridSquares.onslide = async function () {
 
 //-- Slider for the width of the grid line.
 const containerGridLinew = document.getElementById("containerGridLinew");
+const labelForContainerGridLinew = document.querySelector("[label-for=containerGridLinew]");
 var rsGridLinew = new RangeSlider(containerGridLinew, { title: "Line Width", min: 1, step: 1, max: 30, def: paramsGrid.linew, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+labelForContainerGridLinew.innerText = rsGridLinew.val;
 rsGridLinew.onslide = function () {
+    labelForContainerGridLinew.innerText = rsGridLinew.val;
     paramsGrid.linew = rsGridLinew.val;
     drawGrid(canvOut, paramsGrid);
 }
@@ -360,8 +366,17 @@ var paramsPxLevel = {
 };
 
 const containerPxLevel = document.getElementById("containerPxLevel");
+const labelForContainerPxLevel = document.querySelector("[label-for=containerPxLevel]");
 var rsPxLevel = new RangeSlider(containerPxLevel, paramsPxLevel);
 // paramsPxLevel will change according to image dimensions once image is loaded. Function onslide will be passed on image loading.
+rsPxLevel.onslide = function () {
+    // Since slider is re-created, onslide function has to be added, again.
+    labelForContainerPxLevel.innerText = rsPxLevel.val;
+    paramsPx.level = rsPxLevel.val;
+    canv0 = getPixelatedCanvas(paramsPx);
+    applyPixelation(canvOut, canv0, paramsPx);
+}
+labelForContainerPxLevel.innerText = rsPxLevel.val;
 
 function getPixelatedCanvas(params) {
     if (imageIn == undefined) return undefined;
@@ -405,17 +420,23 @@ cbGraysBlack.addEventListener("input", async () => {
 
 //-- Slider for gray levels.
 const containerGraysLevels = document.getElementById("containerGraysLevels");
+const labelForContainerGraysLevels = document.querySelector("[label-for=containerGraysLevels]");
 const rsGraysLevels = new RangeSlider(containerGraysLevels, { title: "Levels of gray", min: 2, max: 20, step: 1, def: paramsGrays.levels, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
 //  More than 20 grayscale tones are barely distinguishable.
+labelForContainerGraysLevels.innerText = rsGraysLevels.val;
 rsGraysLevels.onslide = function () {
+    labelForContainerGraysLevels.innerText = rsGraysLevels.val;
     paramsGrays.levels = rsGraysLevels.val;
     applyGrayscaling(paramsGrays);
 }
 
 //-- Slider for gray sensitivity.
 const containerGraysSensitivity = document.getElementById("containerGraysSensitivity");
+const labelForContainerGraysSensitivity = document.querySelector("[label-for=containerGraysSensitivity]");
 const rsGraysSensitivity = new RangeSlider(containerGraysSensitivity, { title: "Sensitivity", min: -254, step: 1, max: 254, def: paramsGrays.levels, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+labelForContainerGraysSensitivity.innerText = rsGraysSensitivity.val;
 rsGraysSensitivity.onslide = function () {
+    labelForContainerGraysSensitivity.innerText = rsGraysSensitivity.val;
     paramsGrays.sens = rsGraysSensitivity.val;
     applyGrayscaling(paramsGrays);
 }
@@ -466,7 +487,7 @@ var paramsHatch = {
     bg: "#FFFFFF",
     color: "#000000",
     linew: 2,
-    buckets: [[0, 85], [86, 170]],  //  This is what get255Buckets will return with default how_many lines value of 2.
+    buckets: [[0, 85], [86, 170]],  //  This is what get255Buckets will return with default how_many lines value of 3 minus the last (brightest) bucket.
     direction: "DLUR",
     separation: 3,
     sensitivity: 0,
@@ -513,8 +534,11 @@ icHatchColor.addEventListener("input", async () => {
 
 // Slider for how many different widths being hatched
 const containerHatchHowmany = document.querySelector("#containerHatchHowmany");
-var rsHatchHowmanyw = new RangeSlider(containerHatchHowmany, { title: "Lines", min: 1, max: 10, def: paramsHatch.buckets.length - 1, step: 1, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+const labelForContainerHatchHowmany = document.querySelector("[label-for=containerHatchHowmany]");
+var rsHatchHowmanyw = new RangeSlider(containerHatchHowmany, { title: "Lines", min: 1, max: 10, def: paramsHatch.buckets.length, step: 1, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+labelForContainerHatchHowmany.innerText = rsHatchHowmanyw.val;
 rsHatchHowmanyw.onslide = async function () {
+    labelForContainerHatchHowmany.innerText = rsHatchHowmanyw.val;
     if (imageIn == undefined) return;
     paramsHatch.buckets = await get255Buckets(rsHatchHowmanyw.val + 1, paramsHatch.sensitivity);
     paramsHatch.buckets.pop();  //  One more bucket is added for absolute white values, but then removed so it is not hatched.
@@ -523,9 +547,12 @@ rsHatchHowmanyw.onslide = async function () {
 };
 
 // Hatch separation slider.
-const containerHatchSeparation = document.querySelector("#containerHatchSeparation");
+const containerHatchSeparation = document.getElementById("containerHatchSeparation");
+const labelForContainerHatchSeparation = document.querySelector("[label-for=containerHatchSeparation]");
 var rsHatchSeparation = new RangeSlider(containerHatchSeparation, { title: "Separation", min: 2, max: 3, step: 1, def: paramsHatch.separation, color1: "#576b9e", color2: "rgb(142, 167, 231)" });  //  Will be reinitialized when image is loaded.
+labelForContainerHatchSeparation.innerText = rsHatchSeparation.val;
 rsHatchSeparation.onslide = async function () {
+    labelForContainerHatchSeparation.innerText = rsHatchSeparation.val;
     if (imageIn == undefined) return;
     paramsHatch.separation = rsHatchSeparation.val;
     paramsHatch.atdh = await getArrToDrawHatch(paramsHatch);
@@ -533,17 +560,23 @@ rsHatchSeparation.onslide = async function () {
 };
 
 // Width factor slider.
-const containerHatchLinew = document.querySelector("#containerHatchLinew");
+const containerHatchLinew = document.getElementById("containerHatchLinew");
+const labelForContainerHatchLinew = document.querySelector("[label-for=containerHatchLinew]");
 var rsHatchLinewidth = new RangeSlider(containerHatchLinew, { title: "Width", min: 1, max: 15, def: paramsHatch.linew, step: 1, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+labelForContainerHatchLinew.innerText = rsHatchLinewidth.val;
 rsHatchLinewidth.onslide = function () {
+    labelForContainerHatchLinew.innerText = rsHatchLinewidth.val;
     paramsHatch.linew = rsHatchLinewidth.val;
     applyHatching(paramsHatch);
 };
 
 // Sensitivity slider.
-const containerHatchSensitivity = document.querySelector("#containerHatchSensitivity");
+const containerHatchSensitivity = document.getElementById("containerHatchSensitivity");
+const labelForContainerHatchSensitivity = document.querySelector("[label-for=containerHatchSensitivity]");
 var rsHatchSensitivity = new RangeSlider(containerHatchSensitivity, { title: "Sensitivity", min: -250, max: 250, step: 1, def: paramsHatch.sensitivity, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+labelForContainerHatchSensitivity.innerText = rsHatchSensitivity.val;
 rsHatchSensitivity.onslide = async function () {
+    labelForContainerHatchSensitivity.innerText = rsHatchSensitivity.val;
     if (imageIn == undefined) return;
     paramsHatch.sensitivity = rsHatchSensitivity.val;
     // let howmany = paramsHatch.buckets.length;
@@ -789,22 +822,31 @@ icCrosshColor.addEventListener("input", () => {
 });
 
 const containerCrosshSeparation = document.getElementById("containerCrosshSeparation");
+const labelForContainerCrosshSeparation = document.querySelector("[label-for=containerCrosshSeparation]");
 var rsCrosshSeparation = new RangeSlider(containerCrosshSeparation, { title: "Separation", min: 3, max: 4, def: 3, step: 1, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+labelForContainerCrosshSeparation.innerText = rsCrosshSeparation.val;
 rsCrosshSeparation.onslide = async function () {
+    labelForContainerCrosshSeparation.innerText = rsCrosshSeparation.val;
     paramsCrossh.separation = rsCrosshSeparation.val;
     applyCrossh(paramsCrossh);
 }
 
 const containerCrosshWidth = document.getElementById("containerCrosshWidth");
+const labelForContainerCrosshWidth = document.querySelector("[label-for=containerCrosshWidth]");
 var rsCrosshWidth = new RangeSlider(containerCrosshWidth, { title: "Width", min: 1, max: 10, def: 2, step: 1, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+labelForContainerCrosshWidth.innerText = rsCrosshWidth.val;
 rsCrosshWidth.onslide = function () {
+    labelForContainerCrosshWidth.innerText = rsCrosshWidth.val;
     paramsCrossh.linew = rsCrosshWidth.val;
     applyCrossh(paramsCrossh);
 }
 
 const containerCrosshSensitivity = document.getElementById("containerCrosshSensitivity");
+const labelForContainerCrosshSensitivity = document.querySelector("[label-for=containerCrosshSensitivity]");
 var rsCrosshSensitivity = new RangeSlider(containerCrosshSensitivity, { title: "Sensitivity", min: -254, max: 254, def: 0, step: 1, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+labelForContainerCrosshSensitivity.innerText = rsCrosshSensitivity.val;
 rsCrosshSensitivity.onslide = async function () {
+    labelForContainerCrosshSensitivity.innerText = rsCrosshSensitivity.val;
     if (imageIn == undefined) return;
     paramsCrossh.sensitivity = rsCrosshSensitivity.val;
     paramsCrossh.buckets = await get255Buckets(5, paramsCrossh.sensitivity);
@@ -883,10 +925,14 @@ icGlyphColor.addEventListener("input", () => {
 });
 
 const containerGlyphDetail = document.getElementById("containerGlyphDetail");
+const labelForContainerGlyphDetail = document.querySelector("[label-for=containerGlyphDetail]");
 var rsGlyphDetail = new RangeSlider(containerGlyphDetail, { title: "Detail", min: 8, max: 20, step: 1, def: paramsGlyph.detail, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+labelForContainerGlyphDetail.innerText = rsGlyphDetail.val;
 
 const containerGlyphFontsize = document.getElementById("containerGlyphFontsize");
+const labelForContainerGlyphFontsize = document.querySelector("[label-for=containerGlyphFontsize]");
 var rsGlyphFontsize = new RangeSlider(containerGlyphFontsize, { title: "Font Size", min: 1.0, max: 20.0, ste: 0.1, def: paramsGlyph.fontsize, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+labelForContainerGlyphFontsize.innerText = rsGlyphFontsize.val;
 
 async function applyGlyph(params) {
     if (imageIn == undefined) return;
@@ -989,8 +1035,10 @@ async function onceImageLoads(inputFileEvent) {
     paramsPxLevel.max = Math.floor(smallestDim / 10);
     paramsPxLevel.def = Math.floor(paramsPxLevel.max / 4);
     rsPxLevel = new RangeSlider(containerPxLevel, paramsPxLevel);
+    labelForContainerPxLevel.innerText = rsPxLevel.val;
     rsPxLevel.onslide = function () {
         // Since slider is re-created, onslide function has to be added, again.
+        labelForContainerPxLevel.innerText = rsPxLevel.val;
         paramsPx.level = rsPxLevel.val;
         canv0 = getPixelatedCanvas(paramsPx);
         applyPixelation(canvOut, canv0, paramsPx);

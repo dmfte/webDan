@@ -326,11 +326,25 @@ nav#top-nav {
         }
 
         & #dlDownload {
-            /* margin-left: auto; */
-            margin: 0.4rem 1rem 0.4rem auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            margin: 0 0 0 auto;
 
             & svg {
-                max-height: 100%;
+                margin: 0;
+                /* border: 1px solid red; */
+
+                @media only screen and (max-width: 1024px) {
+                    padding: 0.1rem;
+                    height: 120%;
+                }
+                @media only screen and (min-width: 1025px) {
+                    padding: 0.4rem;
+                    height: 100%;
+                }
+                
             }
         }
 
@@ -794,22 +808,47 @@ nav#top-nav {
 
             & .rs-wrapper {
                 position: relative;
-                border-radius: 0.5rem;
                 margin-bottom: 0.2rem;
                 font-family: monospace;
+                border-radius: 0.5rem;
+                background-color: var(--color-controls-btn);
 
                 @media only screen and (max-width: 1024px) {
-                    background-color: var(--color-controls-btn);
-                    border-radius: 0.5rem;
                     cursor: pointer;
                     width: calc(var(--controlsbar-w) - (var(--controlsbar-padd) * 2) - (var(--controls-padd) * 2));
                     height: calc(var(--controlsbar-w) - (var(--controlsbar-padd) * 2) - (var(--controls-padd) * 2));
                     margin-bottom: 2px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: stretch;
+                }
+
+                & .mobile-label{
+                    border-radius: 0.5rem;
+                    font-size: 1.4em;
+                    display: none;
+                    justify-content: center;
+                    align-items: center;
+                    flex: 1;
+
+                    @media only screen and (max-width: 600px) {
+                        
+                    }
+                    @media only screen and (min-width: 601px) and (max-width: 1024px) {
+                        display: flex;
+                    }
+                    @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+                        
+                    }
+                    @media only screen and (min-width: 1441px) {
+                        
+                    }
                 }
 
 
                 & .slider {
                     overflow: hidden;
+                    border-radius: 0.5rem;
 
                     @media only screen and (max-width: 1024px) {
                         width: 0;
@@ -824,6 +863,9 @@ nav#top-nav {
                         right: unset;
                     }
 
+                    & .rs-min, .rs-max{
+                        font-size: 0.8em;
+                    }
                     & .rs-title {}
 
                     & .rs-track {}

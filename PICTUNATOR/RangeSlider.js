@@ -140,9 +140,9 @@ class RangeSlider {
         this.el.max.style.writingMode = (this.vert) ? "vertical-lr" : "inherit";
         this.el.max.style.transformOrigin = "center center";
         this.el.max.style.rotate = (this.vert) ? "180deg" : "0";
-        let elementMaxW = parseFloat(window.getComputedStyle(this.el.max).width);
-        let maxFontS = getMaxFontsize(elementMaxW * 0.8, this.max);
-        this.el.max.style.fontSize = maxFontS;
+        // let elementMaxW = parseFloat(window.getComputedStyle(this.el.max).width);
+        // let maxFontS = getMaxFontsize(elementMaxW * 0.8, this.max);
+        // this.el.max.style.fontSize = maxFontS;
         this.el.max.style.overflow = "hidden";
         this.el.max.style.width = (this.vert) ? "unset" : "100%";
         this.el.max.style.height = (this.vert) ? "100%" : "unset";
@@ -175,9 +175,9 @@ class RangeSlider {
         this.el.min.style.writingMode = (this.vert) ? "vertical-lr" : "inherit";
         this.el.min.style.transformOrigin = "center center";
         this.el.min.style.rotate = (this.vert) ? "180deg" : "0";
-        let elementMinW = parseFloat(window.getComputedStyle(this.el.min).width);
-        let minFontS = getMaxFontsize(elementMinW * 0.8, this.min);
-        this.el.min.style.fontSize = minFontS;
+        // let elementMinW = parseFloat(window.getComputedStyle(this.el.min).width);
+        // let minFontS = getMaxFontsize(elementMinW * 0.8, this.min);
+        // this.el.min.style.fontSize = minFontS;
         this.el.min.style.overflow = "hidden";
         // this.el.min.style.width = (this.vert) ? "unset" : "100%";
         this.el.min.style.height = (this.vert) ? "100%" : "unset";
