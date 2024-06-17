@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV HACIENDA</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div id="top-bar">
+        <a href="../index.html" id="logoDmfte">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 74" id="dmfte">
+                <path fill="none" stroke="black" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" d="m 36 4 l 0 64 m -32 -16 a 16 16 0 0 0 32 0 a 16 16 0 0 0 -32 0 m 32 0 a 16 16 0 0 1 32 0 a 16 16 0 0 1 32 0 l 0 16 l 0 -48 a 16 16 0 0 1 32 0 l 0 32 m -40 -24 l 16 0 m 16 0 l 16 0 m -8 24 a 16 16 0 0 1 32 0 l -32 0 a 16 16 0 0 0 27.3 11.3">
+                </path>
+            </svg>
+        </a>
+        <div class="topbar-items">
+            <div class="topbar-i" id="topbarBtnInfo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+                    <path fill="black" stroke="none" stroke-width="1" stroke-linejoin="round" d="M 9 1 A 1 1 0 0 0 9 17 A 1 1 0 0 0 9 1 M 9 3 A 1 1 0 0 1 9 7 A 1 1 0 0 1 9 3 M 7 8 L 11 8 L 11 15 L 7 15 Z">
+                    </path>
+                </svg>
+            </div>
+            <div class="topbar-i" id="topbarBtnContactme">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+                    <path fill="none" stroke="black" stroke-width="1" stroke-linejoin="round" d="M 2 5 L 16 5 L 16 14 L 2 14 Z"></path>
+                    <path fill="none" stroke="black" stroke-width="1" stroke-linejoin="round" d="M 2 14 L 5 7 M 16 14 L 13 7 M 2 5 L 9 10 L 16 5"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+    <!-- ------------ -->
+    <nav id="nav-top">
+        <div class="edit-menu">
+            <div class="editmenu-i" id="btnToggleAdd">
+                <svg viewBox="0 0 10 10">
+                    <use href="#syCrossMenu" />
+                </svg>
+            </div>
+            <div class="editmenu-i" id="btnToggleRemove">
+                <svg viewBox="0 0 10 10">
+                    <use href="#syTrashMenu" />
+                </svg>
+            </div>
+            <input type="file" id="ifJson" accept="application/json" multiple>
+            <label class="editmenu-i" for="ifJson" style="display: none;">
+                <svg viewBox="0 0 10 10">
+                    <use href="#syJson" />
+                </svg>
+            </label>
+        </div>
+        <div class="nav-menu">
+            <div class="menu-items">
+                <input type="radio" for-tab="ventas" name="cbgTabs" id="cbTabVentas" checked>
+                <label class="nav-tab" id="tab-ventas" for="cbTabVentas">VENTAS</label>
+                <input type="radio" for-tab="compras" name="cbgTabs" id="cbTabCompras">
+                <label class="nav-tab" id="tab-compras" for="cbTabCompras">COMPRAS</label>
+                <input type="radio" for-tab="retencion" name="cbgTabs" id="cbTabRetencion">
+                <label class="nav-tab" id="tab-retencion" for="cbTabRetencion">RETENCION</label>
+                <input type="radio" for-tab="percepcion" name="cbgTabs" id="cbTabPercepcion">
+                <label class="nav-tab" id="tab-percepcion" for="cbTabPercepcion">PERCEPCION</label>
+            </div>
+        </div>
+        <div class="nav-hamb" tabindex="0">
+            <div class="hamb">
+                <span class="line1"></span>
+                <span class="line2"></span>
+                <span class="line3"></span>
+            </div>
+            <div class="hamb-submenu">
+                <ul>
+                    <li class="hambsubmenu-i" id="separator">Separador <span>;</span></li>
+                    <li class="hambsubmenu-i" id="clear-data">Limpiar datos &#128465;</li>
+                    <li class="hambsubmenu-i" id="clear-default">Limpiar valores por defecto</li>
+                    <li class="hambsubmenu-i" id="clear-stored-data">Limpiar todo &#9760;<span class="tooltip" id="ttDeleteEverything">Si la
+                            página funciona mal, pruebe <br>esta opción para eliminar todos los datos y empezar de
+                            cero.</span></li>
+                    <li class="hambsubmenu-i" id="disclaimer">Info &#8505;</li>
+                    <li class="hambsubmenu-i" id="contactme">Contactarme &#9993;</li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div id="containerAll">
+        <div id="btnDownloadCsv">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 34">
+                <path id="m2-arrow" fill="black" stroke="none" d="M 23 0 V 8 H 16 L 26 16 L 30 16 L 39 8 H 32 V 0 Z "></path>
+                <path id="m2-outline-flash-contacts" fill="black" stroke="none" d="
+                    M 2 31 L 2 27 C 5 27 5 22 2 22 L 2 18 C 2 17 3 16 4 16 L 48 16 C 49 16 50 16 50 17 L 54 17 L 54 22 L 50 22 L 50 23 L 54 23 L 54 32 L 50 32 C 50 33 49 33 48 33 L 4 33 C 3 33 2 32 2 31 Z
+                    M 8 20 V 31 H 16 V 20 Z M 19 20 V 31 H 27 V 20 Z M 36 25 V 31 H 46 V 25 Z
+                    M 50 19 H 53 V 18 H 50 Z M 50 20 V 21 H 53 V 20 Z M 50 24 V 25 H 53 V 24 Z M 50 26 V 27 H 53 V 26 Z M 50 28 V 29 H 53 V 28 Z M 50 30 V 31 H 53 V 30 Z"></path>
+            </svg>
+        </div>
+        <div class="page" id="ventas">
+            <section class="section-defaults">
+                <div id="defTitle">Aplicar valores por defecto</div>
+                <div class="row default">
+                    <div class="rowgrid default-values">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="date">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="classDoc">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="typeDoc">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="numRes">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="numSerDoc">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="numDoc">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="numCtrlInt">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="nit">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="name">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" value="0.00" def-rowid="vtasExct">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" value="0.00" def-rowid="vtasNoSuj">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" value="0.00" def-rowid="vtasGrabLoc">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" value="0.00" def-rowid="debtFis">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" value="0.00" def-rowid="vtasCta3NoDomic">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" value="0.00" def-rowid="debtFiscVtaCta3">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" value="0.00" def-rowid="totVtas">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="dui">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" value="1" def-rowid="numAnx">
+                    </div>
+                </div>
+            </section>
+            <section class="section-values">
+                <div class="row first">
+                    <div class="btn-add-row" onclick="onBtnAddRow(this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                            <use href="#syCross" viewBox="0 0 10 10"></use>
+                        </svg>
+                    </div>
+                    <div class="btn-remove-row" onclick="onBtnRemoveRow(this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                            <use href="#syTrash" viewBox="0 0 10 10"></use>
+                        </svg>
+                    </div>
+                    <div class="rowgrid keys">
+                        <label for-rowid="date">Fecha</label>
+                        <label for-rowid="classDoc">Clase Doc.</label>
+                        <label for-rowid="typeDoc">Tipo Doc.</label>
+                        <label for-rowid="numRes">Núm. Res.</label>
+                        <label for-rowid="numSerDoc">Núm. Serie Doc.</label>
+                        <label for-rowid="numDoc">Núm. Doc.</label>
+                        <label for-rowid="numCtrlInt">Núm. Ctrl. Int.</label>
+                        <label for-rowid="nit">NIT o NRC</label>
+                        <label for-rowid="name">Nombre, Razón Social o Denominación</label>
+                        <label for-rowid="vtasExct">Vtas. Excentas</label>
+                        <label for-rowid="vtasNoSuj">Vtas. No Sujetas</label>
+                        <label for-rowid="vtasGrabLoc">Vtas. Grabadas Locales</label>
+                        <label for-rowid="debtFis">Débito Fiscal</label>
+                        <label for-rowid="vtasCta3NoDomic">Vtas. Cta. 3os No Domic.</label>
+                        <label for-rowid="debtFiscVtaCta3">Débt. Fisc. Vta. Cta. 3os</label>
+                        <label for-rowid="totVtas">Total de Vtas.</label>
+                        <label for-rowid="dui">DUI Cliente</label>
+                        <label for-rowid="numAnx">Núm. de Anx.</label>
+                    </div>
+                    <div class="rowgrid values">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="\d{2}\/\d{2}\/\d{4}" placeholder="DD/MM/YYYY" maxlength="10" autofocus class="first date" row-id="date">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[124]$" placeholder="1,2,4" maxlength="1" row-id="classDoc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^03$|^05$|^06$" placeholder="03,05,06" maxlength="2" row-id="typeDoc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[a-zA-Z0-9]+$" maxlength="100" row-id="numRes">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[a-zA-Z0-9]+$" maxlength="100" row-id="numSerDoc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[a-zA-Z0-9]+$" maxlength="100" row-id="numDoc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[a-zA-Z0-9]+$" maxlength="100" row-id="numCtrlInt">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d*)$" maxlength="14" class="nit" row-id="nit">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="\S+$" row-id="name">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" class="addend" row-id="vtasExct">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" class="addend" row-id="vtasNoSuj">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" data-tax-on="debtFis" class="addend taxable" row-id="vtasGrabLoc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" data-perct="13" class="addend" row-id="debtFis">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" data-tax-on="debtFiscVtaCta3" class="addend taxable" row-id="vtasCta3NoDomic">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" data-perct="13" class="addend" row-id="debtFiscVtaCta3">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" class="total" row-id="totVtas">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d{9})$" maxlength="9" class="dui" row-id="dui">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^\d{1}$" maxlength="1" placeholder="1" row-id="numAnx">
+                    </div>
+                </div>
+                <div class="row last">
+                    <div class="btn-add-row" onclick="onBtnAddRow(this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                            <use href="#syCross" viewBox="0 0 10 10"></use>
+                        </svg>
+                    </div>
+                    <div class="btn-remove-row" onclick="onBtnRemoveRow(this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                            <use href="#syTrash" viewBox="0 0 10 10"></use>
+                        </svg>
+                    </div>
+                    <div class="rowgrid keys">
+                        <label for-rowid="date">Fecha</label>
+                        <label for-rowid="classDoc">Clase Doc.</label>
+                        <label for-rowid="typeDoc">Tipo Doc.</label>
+                        <label for-rowid="numRes">Núm. Res.</label>
+                        <label for-rowid="numSerDoc">Núm. Serie Doc.</label>
+                        <label for-rowid="numDoc">Núm. Doc.</label>
+                        <label for-rowid="numCtrlInt">Núm. Ctrl. Int.</label>
+                        <label for-rowid="nit">NIT o NRC</label>
+                        <label for-rowid="name">Nombre, Razón Social o Denominación</label>
+                        <label for-rowid="vtasExct">Vtas. Excentas</label>
+                        <label for-rowid="vtasNoSuj">Vtas. No Sujetas</label>
+                        <label for-rowid="vtasGrabLoc">Vtas. Grabadas Locales</label>
+                        <label for-rowid="debtFis">Débito Fiscal</label>
+                        <label for-rowid="vtasCta3NoDomic">Vtas. Cta. 3os No Domic.</label>
+                        <label for-rowid="debtFiscVtaCta3">Débt. Fisc. Vta. Cta. 3os</label>
+                        <label for-rowid="totVtas">Total de Vtas.</label>
+                        <label for-rowid="dui">DUI Cliente</label>
+                        <label for-rowid="numAnx">Núm. de Anx.</label>
+                    </div>
+                    <div class="rowgrid values">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="\d{2}\/\d{2}\/\d{4}" placeholder="DD/MM/YYYY" maxlength="10" autofocus class="first date" row-id="date">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[124]$" placeholder="1,2,4" maxlength="1" row-id="classDoc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^03$|^05$|^06$" placeholder="03,05,06" maxlength="2" row-id="typeDoc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[a-zA-Z0-9]+$" maxlength="100" row-id="numRes">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[a-zA-Z0-9]+$" maxlength="100" row-id="numSerDoc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[a-zA-Z0-9]+$" maxlength="100" row-id="numDoc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[a-zA-Z0-9]+$" maxlength="100" row-id="numCtrlInt">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d*)$" maxlength="14" class="nit" row-id="nit">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="\S+$" row-id="name">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" class="addend" row-id="vtasExct">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" class="addend" row-id="vtasNoSuj">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" data-tax-on="debtFis" class="addend taxable" row-id="vtasGrabLoc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" data-perct="13" class="addend" row-id="debtFis">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" data-tax-on="debtFiscVtaCta3" class="addend taxable" row-id="vtasCta3NoDomic">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" data-perct="13" class="addend" row-id="debtFiscVtaCta3">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" class="total" row-id="totVtas">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d{9})$" maxlength="9" class="dui" row-id="dui">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^\d{1}$" maxlength="1" placeholder="1" row-id="numAnx">
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ------------ -->
+
+        <div class="page" id="compras">
+            <section class="section-defaults">
+                <div id="defTitle">Aplicar valores por defecto</div>
+                <div class="row default">
+                    <div class="rowgrid default-values">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="date">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="classDoc">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="typeDoc">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="numDoc">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="nit">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="nombPov">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" value="0.00" def-rowid="compsIntrExntNoSuj">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" value="0.00" def-rowid="intrnExntNoSuj">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" value="0.00" def-rowid="imprtExntNoSuj">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" value="0.00" def-rowid="compsIntrnGrav">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" value="0.00" def-rowid="intrnGravBienes">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" value="0.00" def-rowid="imprtGravBienes">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" value="0.00" def-rowid="imprtGravServcs">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" value="0.00" def-rowid="credtFisc">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" value="0.00" def-rowid="totComps">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="dui">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="tipoOp">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="clasif">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="sector">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="tipoCostGast">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" value="3" def-rowid="numAnx">
+                    </div>
+                </div>
+            </section>
+            <section class="section-values">
+                <div class="row first">
+                    <div class="btn-add-row" onclick="onBtnAddRow(this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                            <use href="#syCross" viewBox="0 0 10 10"></use>
+                        </svg>
+                    </div>
+                    <div class="btn-remove-row" onclick="onBtnRemoveRow(this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                            <use href="#syTrash" viewBox="0 0 10 10"></use>
+                        </svg>
+                    </div>
+                    <div class="rowgrid keys">
+                        <label for-rowid="date">Fecha</label>
+                        <label for-rowid="classDoc">Clase Doc.</label>
+                        <label for-rowid="typeDoc">Tipo Doc.</label>
+                        <label for-rowid="numDoc">Num. Doc.</label>
+                        <label for-rowid="nit">NIT o NRC</label>
+                        <label for-rowid="nombPov">Nomb. Prov.</label>
+                        <label for-rowid="compsIntrExntNoSuj">Comps. Int. Excnt. No Suj.</label>
+                        <label for-rowid="intrnExntNoSuj">Intrn. Exnt. No Suj.</label>
+                        <label for-rowid="imprtExntNoSuj">Imprt. Exnt. No Suj.</label>
+                        <label for-rowid="compsIntrnGrav">Comps. Intrn. Grav.</label>
+                        <label for-rowid="intrnGravBienes">Intrn. Grav. Bienes</label>
+                        <label for-rowid="imprtGravBienes">Imprt. Grav. Bienes</label>
+                        <label for-rowid="imprtGravServcs">Imprt. Grav. Servcs.</label>
+                        <label for-rowid="credtFisc">Credt. Fisc.</label>
+                        <label for-rowid="totComps">Tot. Comps.</label>
+                        <label for-rowid="dui">DUI</label>
+                        <label for-rowid="tipoOp">Tipo Op.</label>
+                        <label for-rowid="clasif">Clasif.</label>
+                        <label for-rowid="sector">Sector</label>
+                        <label for-rowid="tipoCostGast">Tipo Cost/Gast</label>
+                        <label for-rowid="numAnx">Num. Anx.</label>
+                    </div>
+                    <div class="rowgrid values">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="\d{2}\/\d{2}\/\d{4}" maxlength="10" placeholder="DD/MM/YYYY" autofocus row-id="date">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[1234]$" maxlength="1" placeholder="1-4" row-id="classDoc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^03$|^05$|^06$|^11$|^12$|^13$" maxlength="2" placeholder="03,05,06,11-13" row-id="typeDoc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[a-zA-Z0-9]+$" maxlength="100" row-id="numDoc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d*)$" maxlength="14" class="nit" row-id="nit">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="\S+$" row-id="nombPov">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" class="addend" row-id="compsIntrExntNoSuj">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" class="addend" row-id="intrnExntNoSuj">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" class="addend" row-id="imprtExntNoSuj">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" data-tax-on="credtFisc" class="addend taxable" row-id="compsIntrnGrav">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" data-tax-on="credtFisc" class="addend taxable" row-id="intrnGravBienes">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" data-tax-on="credtFisc" class="addend taxable" row-id="imprtGravBienes">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" data-tax-on="credtFisc" class="addend taxable" row-id="imprtGravServcs">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" data-perct="13" class="addend" row-id="credtFisc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" class="total" row-id="totComps">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d{9})$" maxlength="9" class="dui" row-id="dui">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[12349]$" maxlength="1" placeholder="1-4,9" row-id="tipoOp">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[129]$" maxlength="1" placeholder="1,2,9" row-id="clasif">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[12349]$" maxlength="1" placeholder="1-4,9" row-id="sector">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[12345679]$" maxlength="1" placeholder="1-7,9" row-id="tipoCostGast">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^\d{1}$" maxlength="1" placeholder="3" row-id="numAnx">
+                    </div>
+                </div>
+                <div class="row last">
+                    <div class="btn-add-row" onclick="onBtnAddRow(this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                            <use href="#syCross" viewBox="0 0 10 10"></use>
+                        </svg>
+                    </div>
+                    <div class="btn-remove-row" onclick="onBtnRemoveRow(this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                            <use href="#syTrash" viewBox="0 0 10 10"></use>
+                        </svg>
+                    </div>
+                    <div class="rowgrid keys">
+                        <label for-rowid="date">Fecha</label>
+                        <label for-rowid="classDoc">Clase Doc.</label>
+                        <label for-rowid="typeDoc">Tipo Doc.</label>
+                        <label for-rowid="numDoc">Num. Doc.</label>
+                        <label for-rowid="nit">NIT o NRC</label>
+                        <label for-rowid="nombPov">Nomb. Prov.</label>
+                        <label for-rowid="compsIntrExntNoSuj">Comps. Int. Excnt. No Suj.</label>
+                        <label for-rowid="intrnExntNoSuj">Intrn. Exnt. No Suj.</label>
+                        <label for-rowid="imprtExntNoSuj">Imprt. Exnt. No Suj.</label>
+                        <label for-rowid="compsIntrnGrav">Comps. Intrn. Grav.</label>
+                        <label for-rowid="intrnGravBienes">Intrn. Grav. Bienes</label>
+                        <label for-rowid="imprtGravBienes">Imprt. Grav. Bienes</label>
+                        <label for-rowid="imprtGravServcs">Imprt. Grav. Servcs.</label>
+                        <label for-rowid="credtFisc">Credt. Fisc.</label>
+                        <label for-rowid="totComps">Tot. Comps.</label>
+                        <label for-rowid="dui">DUI</label>
+                        <label for-rowid="tipoOp">Tipo Op.</label>
+                        <label for-rowid="clasif">Clasif.</label>
+                        <label for-rowid="sector">Sector</label>
+                        <label for-rowid="tipoCostGast">Tipo Cost/Gast</label>
+                        <label for-rowid="numAnx">Num. Anx.</label>
+                    </div>
+                    <div class="rowgrid values">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="\d{2}\/\d{2}\/\d{4}" maxlength="10" placeholder="DD/MM/YYYY" autofocus row-id="date">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[1234]$" maxlength="1" placeholder="1-4" row-id="classDoc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^03$|^05$|^06$|^11$|^12$|^13$" maxlength="2" placeholder="03,05,06,11-13" row-id="typeDoc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[a-zA-Z0-9]+$" maxlength="100" row-id="numDoc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d*)$" maxlength="14" class="nit" row-id="nit">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="\S+$" row-id="nombPov">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" class="addend" row-id="compsIntrExntNoSuj">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" class="addend" row-id="intrnExntNoSuj">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" class="addend" row-id="imprtExntNoSuj">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" data-tax-on="credtFisc" class="addend taxable" row-id="compsIntrnGrav">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" data-tax-on="credtFisc" class="addend taxable" row-id="intrnGravBienes">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" data-tax-on="credtFisc" class="addend taxable" row-id="imprtGravBienes">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" data-tax-on="credtFisc" class="addend taxable" row-id="imprtGravServcs">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" data-perct="13" class="addend" row-id="credtFisc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="13" placeholder="0.00" class="total" row-id="totComps">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d{9})$" maxlength="9" class="dui" row-id="dui">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[12349]$" maxlength="1" placeholder="1-4,9" row-id="tipoOp">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[129]$" maxlength="1" placeholder="1,2,9" row-id="clasif">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[12349]$" maxlength="1" placeholder="1-4,9" row-id="sector">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[12345679]$" maxlength="1" placeholder="1-7,9" row-id="tipoCostGast">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^\d{1}$" maxlength="1" placeholder="3" row-id="numAnx">
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div class="page" id="retencion">
+            <section class="section-defaults">
+                <div id="defTitle">Aplicar valores por defecto</div>
+                <div class="row default">
+                    <div class="rowgrid default-values">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="nit">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="date">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="typeDoc">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="serie">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="numDoc">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" value="0.00" def-rowid="montSuj">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" value="0.00" def-rowid="montRtcn">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="dui">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" value="7" def-rowid="numAnx">
+                    </div>
+                </div>
+            </section>
+            <section class="section-values">
+                <div class="row first">
+                    <div class="btn-add-row" onclick="onBtnAddRow(this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                            <use href="#syCross" viewBox="0 0 10 10"></use>
+                        </svg>
+                    </div>
+                    <div class="btn-remove-row" onclick="onBtnRemoveRow(this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                            <use href="#syTrash" viewBox="0 0 10 10"></use>
+                        </svg>
+                    </div>
+                    <div class="rowgrid keys">
+                        <label for-rowid="nit">NIT Agente</label>
+                        <label for-rowid="date">Fecha Emisión</label>
+                        <label for-rowid="typeDoc">Tipo Doc.</label>
+                        <label for-rowid="serie">Serie</label>
+                        <label for-rowid="numDoc">Núm. Doc.</label>
+                        <label for-rowid="montSuj">Monto Suj.</label>
+                        <label for-rowid="montRtcn">Monto Rtcn. 1%</label>
+                        <label for-rowid="dui">DUI Agente</label>
+                        <label for-rowid="numAnx">Núm. de Anx.</label>
+                    </div>
+                    <div class="rowgrid values">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d*)$" maxlength="14" row-id="nit" autofocus class="nit">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="\d{2}\/\d{2}\/\d{4}" maxlength="10" placeholder="DD/MM/YYYY" row-id="date">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^05$|^06$|^07$" maxlength="2" placeholder="05,06,07" row-id="typeDoc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[a-zA-Z0-9]*$" maxlength="100" row-id="serie">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[a-zA-Z0-9]*$" maxlength="100" row-id="numDoc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="10" placeholder="0.00" data-tax-on="montRtcn" class="taxable" row-id="montSuj">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="10" placeholder="0.00" data-perct="1" row-id="montRtcn">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d{9})$" maxlength="9" row-id="dui" class="dui">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^\d{1}$" maxlength="1" placeholder="7" row-id="numAnx">
+                    </div>
+                </div>
+                <div class="row last">
+                    <div class="btn-add-row" onclick="onBtnAddRow(this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                            <use href="#syCross" viewBox="0 0 10 10"></use>
+                        </svg>
+                    </div>
+                    <div class="btn-remove-row" onclick="onBtnRemoveRow(this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                            <use href="#syTrash" viewBox="0 0 10 10"></use>
+                        </svg>
+                    </div>
+                    <div class="rowgrid keys">
+                        <label for-rowid="nit">NIT Agente</label>
+                        <label for-rowid="date">Fecha Emisión</label>
+                        <label for-rowid="typeDoc">Tipo Doc.</label>
+                        <label for-rowid="serie">Serie</label>
+                        <label for-rowid="numDoc">Núm. Doc.</label>
+                        <label for-rowid="montSuj">Monto Suj.</label>
+                        <label for-rowid="montRtcn">Monto Rtcn. 1%</label>
+                        <label for-rowid="dui">DUI Agente</label>
+                        <label for-rowid="numAnx">Núm. de Anx.</label>
+                    </div>
+                    <div class="rowgrid values">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d*)$" maxlength="14" row-id="nit" autofocus class="nit">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="\d{2}\/\d{2}\/\d{4}" maxlength="10" placeholder="DD/MM/YYYY" row-id="date">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^05$|^06$|^07$" maxlength="2" placeholder="05,06,07" row-id="typeDoc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[a-zA-Z0-9]*$" maxlength="100" row-id="serie">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[a-zA-Z0-9]*$" maxlength="100" row-id="numDoc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="10" placeholder="0.00" data-tax-on="montRtcn" class="taxable" row-id="montSuj">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="10" placeholder="0.00" data-perct="1" row-id="montRtcn">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d{9})$" maxlength="9" row-id="dui" class="dui">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^\d{1}$" maxlength="1" placeholder="7" row-id="numAnx">
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div class="page" id="percepcion">
+            <section class="section-defaults">
+                <div id="defTitle">Aplicar valores por defecto</div>
+                <div class="row default">
+                    <div class="rowgrid default-values">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="nit">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="date">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="typeDoc">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="serie">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="numDoc">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" value="0.00" def-rowid="montSuj">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" value="0.00" def-rowid="montPercp1">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" def-rowid="dui">
+                        <input type="text" autocomplete="off" oninput="onInputInput(this)" value="8" def-rowid="numAnx">
+                    </div>
+                </div>
+            </section>
+            <section class="section-values">
+                <div class="row first">
+                    <div class="btn-add-row" onclick="onBtnAddRow(this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                            <use href="#syCross" viewBox="0 0 10 10"></use>
+                        </svg>
+                    </div>
+                    <div class="btn-remove-row" onclick="onBtnRemoveRow(this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                            <use href="#syTrash" viewBox="0 0 10 10"></use>
+                        </svg>
+                    </div>
+                    <div class="rowgrid keys">
+                        <label for-rowid="nit">NIT Agente</label>
+                        <label for-rowid="date">Fecha Emisión</label>
+                        <label for-rowid="typeDoc">Tipo Doc.</label>
+                        <label for-rowid="serie">Serie</label>
+                        <label for-rowid="numDoc">Núm. Doc.</label>
+                        <label for-rowid="montSuj">Monto Suj.</label>
+                        <label for-rowid="montPercp1">Monto Percp. 1%</label>
+                        <label for-rowid="dui">DUI Agente</label>
+                        <label for-rowid="numAnx">Núm. de Anx.</label>
+                    </div>
+                    <div class="rowgrid values">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d*)$" maxlength="14" row-id="nit" autofocus class="nit">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="\d{2}\/\d{2}\/\d{4}" maxlength="10" placeholder="DD/MM/YYYY" row-id="date">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^03$|^05$|^06$|^12$" maxlength="2" placeholder="03,05,06,12" row-id="typeDoc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[a-zA-Z0-9]*$" maxlength="100" row-id="serie">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[a-zA-Z0-9]*$" maxlength="100" row-id="numDoc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="10" placeholder="0.00" data-tax-on="montPercp1" class="taxable" row-id="montSuj">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="10" placeholder="0.00" data-perct="1" row-id="montPercp1">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d{9})$" maxlength="9" row-id="dui" class="dui">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^\d{1}$" maxlength="1" placeholder="8" row-id="numAnx">
+                    </div>
+                </div>
+                <div class="row last">
+                    <div class="btn-add-row" onclick="onBtnAddRow(this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                            <use href="#syCross" viewBox="0 0 10 10"></use>
+                        </svg>
+                    </div>
+                    <div class="btn-remove-row" onclick="onBtnRemoveRow(this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                            <use href="#syTrash" viewBox="0 0 10 10"></use>
+                        </svg>
+                    </div>
+                    <div class="rowgrid keys">
+                        <label for-rowid="nit">NIT Agente</label>
+                        <label for-rowid="date">Fecha Emisión</label>
+                        <label for-rowid="typeDoc">Tipo Doc.</label>
+                        <label for-rowid="serie">Serie</label>
+                        <label for-rowid="numDoc">Núm. Doc.</label>
+                        <label for-rowid="montSuj">Monto Suj.</label>
+                        <label for-rowid="montPercp1">Monto Percp. 1%</label>
+                        <label for-rowid="dui">DUI Agente</label>
+                        <label for-rowid="numAnx">Núm. de Anx.</label>
+                    </div>
+                    <div class="rowgrid values">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d*)$" maxlength="14" row-id="nit" autofocus class="nit">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="\d{2}\/\d{2}\/\d{4}" maxlength="10" placeholder="DD/MM/YYYY" row-id="date">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^03$|^05$|^06$|^12$" maxlength="2" placeholder="03,05,06,12" row-id="typeDoc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[a-zA-Z0-9]*$" maxlength="100" row-id="serie">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^[a-zA-Z0-9]*$" maxlength="100" row-id="numDoc">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="10" placeholder="0.00" data-tax-on="montPercp1" class="taxable" row-id="montSuj">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d+\.\d{2})$" maxlength="10" placeholder="0.00" data-perct="1" row-id="montPercp1">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^(\d{9})$" maxlength="9" row-id="dui" class="dui">
+                        <input type="text" oninput="onInputInput(this)" autocomplete="off" data-regex="^\d{1}$" maxlength="1" placeholder="8" row-id="numAnx">
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <svg style="display: block; width: 0; height: 0; margin: 0; padding: 0">
+        <defs>
+            <!-- Add (cross) -->
+            <!-- Define the mask -->
+            <mask id="hole-mask">
+                <!-- Outer path filled with white (visible) -->
+                <path d="M 0 5 A 1 1 0 0 1 10 5 A 1 1 0 0 1 0 5" fill="white" />
+                <!-- Inner path filled with black (transparent) -->
+                <path d="M 5 2 V 8 M 2 5 H 8" stroke="black" stroke-width="1.3" stroke-linecap="round" />
+            </mask>
+
+            <!-- Trash can -->
+            <mask id="mask-trash">
+                <path fill="white" stroke="none" d="M 0 5 A 1 1 0 0 1 10 5 A 1 1 0 0 1 0 5" />
+                <path fill="none" stroke="black" stroke-linecap="round" d="M 4 1 H 6 M 2 2 H 8 " />
+                <path fill="black" stroke="none" d="M 2 3 L 2 8 Q 2 9 3 9 H 7 Q 8 9 8 8 V 3" />
+                <path fill="none" stroke="white" stroke-width="0.7" stroke-linecap="round" d="M 4 5 V 8 M 6 5 V 8" />
+            </mask>
+
+            <!--     JSON symbol -->
+            <mask id="mask-json">
+                <path fill="white" stroke="none" d="M 0 0 H 10 V 10 H 0 Z" />
+                <path fill="none" stroke="black" stroke-width="1" stroke-linecap="square" d="M 3 1 C 1 2 3 3 1 5 C 3 7 1 8 3 9 M 7 1 C 9 2 7 3 9 5 C 7 7 9 8 7 9 M 4 3" />
+                <path fill="black" stroke="none" stroke-linecap="round" d="M 4 3 A 1 1 0 0 0 6 3 A 1 1 0 0 0 4 3" />
+                <path fill="black" stroke="none" stroke-linecap="round" d="M 4 6 A 1 1 0 0 0 6 6 A 1 1 0 0 0 4 6" />
+                <path fill="black" stroke="none" stroke-width="1" d=" M 6 6 Q 6 8 4 9 Q 5 8 5 6" />
+            </mask>
+
+
+            <symbol viewBox="0 0 10 10" id="syCross">
+                <path d="M 0 5 A 1 1 0 0 1 10 5 A 1 1 0 0 1 0 5" fill="rgb(0, 0, 255)" />
+                <path d="M 5 2 V 8 M 2 5 H 8" stroke="white" stroke-width="1.3" stroke-linecap="round" />
+            </symbol>
+            <symbol viewBox="0 0 10 10" id="syCrossMenu">
+                <!-- Apply the mask to the outer path -->
+                <rect width="100%" height="100%" fill="rgb(233, 69, 96)" mask="url(#hole-mask)" />
+            </symbol>
+
+            <symbol viewBox="0 0 10 10" id="syTrash">
+                <path fill="rgb(233, 69, 96)" stroke="none" d="M 0 5 A 1 1 0 0 1 10 5 A 1 1 0 0 1 0 5" />
+                <path fill="none" stroke="white" stroke-linecap="round" d="M 4 1 H 6 M 2 2 H 8 " />
+                <path fill="white" stroke="none" d="M 2 3 L 2 8 Q 2 9 3 9 H 7 Q 8 9 8 8 V 3" />
+                <path fill="none" stroke="rgb(233, 69, 96)" stroke-width="0.7" stroke-linecap="round" d="M 4 5 V 8 M 6 5 V 8" />
+            </symbol>
+
+            <symbol viewBox="0 0 10 10" id="syTrashMenu">
+                <rect width="10" height="10" fill="rgb(233, 69, 96)" mask="url(#mask-trash)" />
+            </symbol>
+
+            <symbol viewBox="0 0 10 10" id="syJson">
+                <rect width="100%" height="100%" fill="rgb(233, 69, 96)" mask="url(#mask-json)" />
+            </symbol>
+        </defs>
+    </svg>
+
+    <script src="index.js"></script>
+</body>
+
+</html>
