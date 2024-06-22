@@ -544,11 +544,12 @@ nav#nav-top:has( ~ #containerAll .page.remove-row) #btnToggleRemove{
 
         & section.section-values {
 
-            & .row {
+            & .row:not(.first) {
 
                 & .rowgrid.keys {
+                    display: none;
 
-                    @media only screen and (max-width: 1024px) {
+                    /* @media only screen and (max-width: 1024px) {
                         display: grid;
 
                     }
@@ -556,7 +557,7 @@ nav#nav-top:has( ~ #containerAll .page.remove-row) #btnToggleRemove{
                     @media only screen and (min-width: 1025px) {
                         display: none;
 
-                    }
+                    } */
                 }
             }
 
@@ -570,13 +571,6 @@ nav#nav-top:has( ~ #containerAll .page.remove-row) #btnToggleRemove{
 
                     background-color: rgb(38, 84, 124);
                 }
-            }
-        }
-
-        & section.section-values :first-child {
-
-            & .rowgrid.keys {
-                display: grid;
             }
         }
     }

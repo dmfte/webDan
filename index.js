@@ -9,9 +9,9 @@ window.addEventListener("resize", () => {
     canvBg.setAttribute("width", window.innerWidth);
     canvBg.setAttribute("height", window.innerHeight);
     cleanCanvBg();
-    for (let i = 0; i < arrSidereal.length; i++) {
-        const sidereal = arrSidereal[i];
-        sidereal.movement(cbg);
+    for (let i = 0; i < arrForce.length; i++) {
+        const Force = arrForce[i];
+        Force.bounce(cbg);
     }
 });
 
@@ -24,72 +24,57 @@ class Vector {
         this.velx = velx;
         this.vely = vely;
     }
-
-}
-
-class Sidereal {
-    constructor(vector) {
-        this.vector = vector;
-        this.movement.bind(this);
-        this.moving = false;
-    }
     draw(ctx) {
         ctx.beginPath();
-        ctx.arc(this.vector.x, this.vector.y, this.vector.r, 0, 2 * Math.PI, false);
+        ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI, false);
         ctx.fill();
     }
-    movement(ctx) {
-        let w = ctx.canvas.width;
-        let h = ctx.canvas.height;
-        this.vector.x += this.vector.velx;
-        if (this.vector.x < 0 || this.vector.x > w) {
-            this.vector.velx *= -1;
+}
+
+class Force {
+    constructor(context) {
+        this.ctx = context;
+        // console.log(this.ctx.canvas);
+        this.w = context.canvas.width;
+        this.h = context.canvas.height;
+    }
+    bounce(vector) {
+        vector.x += vector.velx;
+        if (vector.x < 0) {
+            vector.x = 0;
+            vector.velx *= -1;
         }
-        this.vector.y += this.vector.vely;
-        if (this.vector.y < 0 || this.vector.y > h) {
-            this.vector.vely *= -1;
+        if (vector.x > this.w) {
+            vector.x = this.w;
+            vector.velx *= -1;
+        }
+        vector.y += vector.vely;
+        if (vector.y < 0) {
+            vector.y = 0;
+            vector.vely *= -1;
+        }
+        if (vector.y > this.h) {
+            vector.y = this.h;
+            vector.vely *= -1;
         }
     }
 
-    follow(ctx, evt) {
-        let x, y;
-        switch (evt.type) {
-            case "pointermove":
-                x = evt.x;
-                y = evt.y;
-                break;
-            case "touchmove":
-                x = evt.touches[0].clientX;
-                y = evt.touches[0].clientY;
-                break;
-            default:
-                break;
-        }
-        let w = ctx.canvas.width;
-        let h = ctx.canvas.height;
-
-        let dx = x - this.vector.x;
-        let dy = y - this.vector.y;
-        let dAng = Math.abs(Math.atan(dy / dx));
-        let v = Math.sqrt(this.vector.velx ** 2 + this.vector.vely ** 2);
-        let newVelx = v * Math.cos(dAng) * Math.sign(dx);
-        let newVely = v * Math.sin(dAng) * Math.sign(dy);
-        this.vector.x += newVelx;
-        if (this.vector.x < 0 || this.vector.x > w) {
-            newVelx *= -1;
-        }
-        this.vector.y += newVely;
-        if (this.vector.y < 0 || this.vector.y > h) {
-            newVely *= -1;
-        }
-        cleanCanvBg();
-        this.draw(ctx);
+    scrolldown(vector) {
+        vector.y += Math.abs((vector.vely) * 10);
+        if (vector.y >= this.h) vector.y = 0;
+    }
+    
+    scrollup(vector) {
+        vector.y -= Math.abs((vector.vely) * 10);
+        if (vector.y <= 0) vector.y = this.h;
     }
 }
+
+
 
 var countVectors = 50;
 var arrVectors = [];
-var arrSidereal = [];
+var arrForce = [];
 
 for (let i = 0; i < countVectors; i++) {
     let v = new Vector(
@@ -99,13 +84,14 @@ for (let i = 0; i < countVectors; i++) {
         randBetweenInt(-3, 3, 0),
         randBetweenInt(-3, 3, 0)
     );
-    arrSidereal.push(new Sidereal(v));;
+    // arrForce.push(new Force(v));
+    arrVectors.push(v);
 }
 
 let go = true;
-for (let i = 0; i < arrSidereal.length; i++) {
-    const sidereal = arrSidereal[i];
-    sidereal.draw(cbg);
+for (let i = 0; i < arrVectors.length; i++) {
+    const v = arrVectors[i];
+    v.draw(cbg);
 }
 
 window.onload = startthis;
@@ -116,20 +102,16 @@ var pointerY = 0;
 
 function startthis() {
     cleanCanvBg();
+    let f = new Force(cbg)
     if (go) {
-        arrSidereal.forEach(sidereal => {
-            sidereal.movement(cbg);
-            sidereal.draw(cbg);
+        arrVectors.forEach(v => {
+            f.bounce(v);
+            v.draw(cbg);
         });
         window.requestAnimationFrame(startthis);
     }
 }
 
-document.body.addEventListener("pointermove", (evt) => {
-    arrSidereal.forEach(sidereal => {
-        sidereal.follow(cbg, evt);
-    });
-});
 
 function randBetweenInt(n1, n2, n0) {
     let n = parseInt((n2 - n1) * Math.random() + n1);
@@ -185,9 +167,51 @@ arrBucks[arrBucks.length - 1][1] = 1;
 
 // updateDim();
 
+function throttle(fx, time) {
+    let shouldwait = false;
+    let tempArgs;
+    const timedoutFx = () => {
+        if (tempArgs == null) {
+            shouldwait = false;
+        } else {
+            fx(...tempArgs);
+            tempArgs = null;
+            window.setTimeout(timedoutFx, time);
+        }
+    };
+    return ((...args) => {
+        if (shouldwait) {
+            tempArgs = args;
+            return;
+        }
+        fx(...args);
+        shouldwait = true;
+        window.setTimeout(timedoutFx, time);
+    });
+}
+
+const throttledScrollPerct = throttle(() => {
+    cleanCanvBg();
+
+}, 1000);
+
+
 var sp = 0;
 
-document.addEventListener("scroll", onScrolling);
+document.addEventListener("scroll", () => {
+    // throttledScrollPerct();
+    cleanCanvBg();
+    let down = scrolledDown();
+    let f = new Force(cbg);
+
+    for (let i = 0; i < arrVectors.length; i++) {
+        const v = arrVectors[i];
+        if (down) f.scrolldown(v);
+        if (!down) f.scrollup(v);
+        v.draw(cbg);
+    }
+    onScrolling();
+});
 onScrolling();
 
 function onScrolling() {
@@ -231,7 +255,7 @@ function onScrolling() {
 
             let flap = wrapFlap.querySelector(".flap");
             flap.style.transform = `rotateX(0deg)`;
-            flap.style.boxShadow = `inset 0 10px 30px -14px #FFFFFF, inset 0 -10px 30px 1px #000000`;
+            flap.style.boxShadow = `inset 0 20px 50px -15px #FFFFFF, inset 0 -25px 30px 0px #000000`;
 
             flap.querySelector(".overlay").style.opacity = 0;
 
@@ -271,10 +295,26 @@ function onScrolling() {
 var viewableHeight = document.documentElement.clientHeight || document.body.clientHeight;
 var scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
 var scrolledBody = scrollHeight - viewableHeight;
+
+var currentScrollPerct = 0;
+
+function scrolledDown() {
+    let newPerct = getScrollPerct();
+    let down = true;
+    if (currentScrollPerct - newPerct < 0) {
+        down = true;
+    } else {
+        down = false;
+    }
+    currentScrollPerct = newPerct;
+    return down;
+}
+
 function getScrollPerct() {
     let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
     // let scrolledBody = (document.documentElement.scrollHeight || document.body.scrollHeight) - (document.documentElement.clientHeight || document.body.clientHeight);
-    return (scrollTop / scrolledBody);
+    let perct = scrollTop / scrolledBody;
+    return perct;
 }
 
 function rangeMatch(value, valueMin, valueMax, closeToMin, closeToMax, dec) {

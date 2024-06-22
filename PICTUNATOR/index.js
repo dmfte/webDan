@@ -497,6 +497,7 @@ var paramsHatch = {
 const rgEffHatching = document.getElementById("rgEffHatching");
 rgEffHatching.addEventListener("input", async () => {
     if (imageIn == undefined) return;
+    labelForContainerHatchSeparation.innerText = rsHatchSeparation.val;
     paramsHatch.separation = rsHatchSeparation.val;
     paramsHatch.atdh = await getArrToDrawHatch(paramsHatch);
     applyHatching(paramsHatch);
@@ -1059,7 +1060,9 @@ async function onceImageLoads(inputFileEvent) {
     //  Hatching Effect.
     rsHatchSeparation = new RangeSlider(containerHatchSeparation, { title: "Separation", min: 2, max: newMax, step: 1, def: newDef, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
     paramsHatch.separation = rsHatchSeparation.val;
+    labelForContainerHatchSeparation.innerText = rsHatchSeparation.val;
     rsHatchSeparation.onslide = async function () {
+        labelForContainerHatchSeparation.innerText = rsHatchSeparation.val;
         paramsHatch.separation = rsHatchSeparation.val;
         paramsHatch.atdh = await getArrToDrawHatch(paramsHatch);
         applyHatching(paramsHatch);
@@ -1071,7 +1074,9 @@ async function onceImageLoads(inputFileEvent) {
 
     //  Cross-hatching Effect.
     rsCrosshSeparation = new RangeSlider(containerCrosshSeparation, { title: "Separation", min: 3, max: newMax, step: 1, def: newDef, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+    labelForContainerCrosshSeparation.innerText = rsCrosshSeparation.val;
     rsCrosshSeparation.onslide = async function () {
+        labelForContainerCrosshSeparation.innerText = rsCrosshSeparation.val;
         paramsCrossh.separation = rsCrosshSeparation.val;
         paramsCrossh.atch = await getArrToCrossh(paramsCrossh);
         applyCrossh(paramsCrossh);
