@@ -72,13 +72,11 @@
             <div class="hamb-submenu">
                 <ul>
                     <li class="hambsubmenu-i" id="separator" style="display: none;">Separador <span>;</span></li>
-                    <li class="hambsubmenu-i" id="clear-data" style="display: none;">Limpiar datos &#128465;</li>
+                    <li class="hambsubmenu-i" id="clear-data" style="display: none;">Limpiar pestaña &#128465;</li>
                     <li class="hambsubmenu-i" id="clear-default" style="display: none;">Limpiar valores por defecto</li>
-                    <li class="hambsubmenu-i" id="clear-stored-data">Limpiar todo &#9760;<span class="tooltip" id="ttDeleteEverything">Si la
-                            página funciona mal, pruebe <br>esta opción para eliminar todos los datos y empezar de
-                            cero.</span></li>
-                    <li class="hambsubmenu-i" id="disclaimer">Info &#8505;</li>
-                    <li class="hambsubmenu-i" id="contactme">Contactarme &#9993;</li>
+                    <li class="hambsubmenu-i" id="clear-stored-data">Limpiar todo &#9760;<span class="tooltip" id="ttDeleteEverything">
+                            Si la página funciona mal, pruebe <br>esta opción para eliminar todos los datos y empezar de cero.</span>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -555,6 +553,7 @@
         </div>
     </div>
 
+    <!-- SVG DEFINITIONS -->
     <svg style="display: block; width: 0; height: 0; margin: 0; padding: 0">
         <defs>
             <!-- Add (cross) -->
@@ -610,6 +609,24 @@
         </defs>
     </svg>
 
+    <!-- DIALOGS -->
+
+    <dialog id="diagInfo">
+        <div class="body">
+            <ul>
+                <li>La información es guardada localmente en el navegador. No es subida ni enviada a ningún sitio.</li>
+                <li>Se marcan las casillas equivocadas según el <a href="https://www.transparenciafiscal.gob.sv/downloads/pdf/700-DGII-MN-2021-26031.pdf" target="_blank">Manual de usuario</a> provisto por el Ministerio de Hacienda.</li>
+            </ul>
+        </div>
+    </dialog>
+
+    <dialog id="diagContactme">
+        <div class="body">
+            dmfte.dev@gmail.com
+        </div>
+    </dialog>
+
+    <script src="AutoDialog.js"></script>
     <script src="index.js"></script>
 </body>
 

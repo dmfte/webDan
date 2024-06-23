@@ -28,6 +28,9 @@
     --color-add-row: rgb(0, 0, 255);
     --color-remove-row: rgb(255, 0, 0);
 
+    --color-empty: rgb(239, 211, 110);
+    --color-wrong: rgb(159, 17, 17);
+
     @media only screen and (max-width: 600px) {
         --topbar-height: 20px;
         --topbar-padd-y: 0rem;
@@ -156,7 +159,7 @@ nav#nav-top {
     height: var(--topbar-height);
     z-index: 10;
 
-    & input{
+    & input {
         display: none;
     }
 
@@ -388,11 +391,11 @@ nav#nav-top:has(#cbTabPercepcion:checked)+#containerAll #percepcion {
     width: 100%;
 }
 
-nav#nav-top:has( ~ #containerAll .page.add-row) #btnToggleAdd{
+nav#nav-top:has(~ #containerAll .page.add-row) #btnToggleAdd {
     background-color: var(--color-navtop-bg-active)
 }
 
-nav#nav-top:has( ~ #containerAll .page.remove-row) #btnToggleRemove{
+nav#nav-top:has(~ #containerAll .page.remove-row) #btnToggleRemove {
     background-color: var(--color-navtop-bg-active);
 }
 
@@ -498,20 +501,20 @@ nav#nav-top:has( ~ #containerAll .page.remove-row) #btnToggleRemove{
                     }
 
                     & input[type=text].empty {
-                        background-color: rgb(239, 211, 110);
+                        background-color: var(--color-empty)
                     }
 
                     & input[type=text].wrong {
-                        background-color: rgb(159, 17, 17);
+                        background-color: var(--color-wrong);
                         color: white;
                     }
 
                 }
             }
 
-            & .row.last{
+            & .row.last {
 
-                & input:not(:first-child){
+                & input:not(:first-child) {
                     opacity: 0;
                 }
             }
@@ -580,10 +583,11 @@ nav#nav-top:has( ~ #containerAll .page.remove-row) #btnToggleRemove{
         & .section-values {
             animation: glow-add 0.5s infinite alternate;
 
-            & .row.last{
+            & .row.last {
                 visibility: hidden;
 
             }
+
             & .row:hover,
             & .row:focus-within {
                 border-bottom: 3px solid var(--color-add-row);
@@ -601,7 +605,7 @@ nav#nav-top:has( ~ #containerAll .page.remove-row) #btnToggleRemove{
         & .section-values {
             animation: glow-remove 0.5s infinite alternate;
 
-            & .row.last{
+            & .row.last {
                 visibility: hidden;
             }
 
@@ -649,9 +653,9 @@ nav#nav-top:has( ~ #containerAll .page.remove-row) #btnToggleRemove{
         background-color: var(--color-retencion-bg);
 
         & section {
-            
+
             & .row {
-                
+
                 & .rowgrid {
                     grid-template-columns: 4fr 3.5fr 3fr 6fr 6fr repeat(3, 3fr) 2fr;
                 }
@@ -670,6 +674,73 @@ nav#nav-top:has( ~ #containerAll .page.remove-row) #btnToggleRemove{
                     grid-template-columns: 4fr 3.5fr 3fr 6fr 6fr repeat(3, 3fr) 2fr;
                 }
             }
+        }
+    }
+}
+
+
+dialog {
+
+    @media only screen and (max-width: 600px) {
+        width: 90vw;
+        height: 60vh;
+    }
+    @media only screen and (min-width: 601px) and (max-width: 1024px) {
+        width: 80vw;
+        height: 50vh;
+    }
+    @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+        width: 50vw;
+        height: 35vh;
+    }
+    @media only screen and (min-width: 1441px) {
+        width: 40vw;
+        height: 30vh;
+    }
+
+    .wrapper {
+
+        & .body {
+            padding: 1.5rem;
+            background-color: var(--color-navtop-bg);
+            color: var(--color-empty);
+            font-weight: bolder;
+        }
+
+        & .footer {
+
+            & button {
+                font-weight: bolder;
+                color: var(--color-empty);
+            }
+        }
+    }
+}
+
+dialog::backdrop{
+    background-color: #000000;
+    opacity: 0.5;
+}
+
+dialog#diagInfo{
+
+    & .wrapper{
+
+        & .body{
+
+            & a:visited, a{
+                color: var(--color-navtop-submenu-bg);
+            }
+        }
+    }
+}
+
+dialog#diagContactme{
+
+    & .wrapper{
+
+        & .body{
+            user-select: text;
         }
     }
 }
