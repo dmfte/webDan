@@ -470,7 +470,7 @@ body {
 
         & .effect-title {
             border-radius: 25px;
-            background-color: var(--color-effects-rb-bg-off);
+            background-color: var(--color-effects-rb-bg-on);
             display: flex;
             justify-content: center;
             align-items: center;
