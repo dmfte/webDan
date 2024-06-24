@@ -194,6 +194,7 @@ body::-webkit-scrollbar {
                 & img {
                     border: 2px solid var(--color-flap-imgborder);
                     max-width: 40%;
+                    max-height: 90%;
                     margin: 0.5rem 1rem;
 
                 }
