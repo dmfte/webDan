@@ -1174,3 +1174,34 @@ function getName(strExt) {
     let time = `${now.getHours()}.${now.getMinutes()}.${(now.getMilliseconds()).toFixed(0)}`;
     return `Pictunator ${date} ${time}.${strExt}`;
 }
+
+// DIALOGS
+
+
+const bodyDiagInfo = document.getElementById("diagInfo");
+const topbarBtnInfo = document.getElementById("topbarBtnInfo");
+const diagInfo = new AutoDialog({
+    dialog: bodyDiagInfo,
+    title: "Info",
+    trigger: topbarBtnInfo,
+    ok: false,
+    cancel: false
+});
+
+const bodyDiagContactme = document.getElementById("diagContactme");
+const topbarBtnContactme = document.getElementById("topbarBtnContactme");
+const diagContactme = new AutoDialog({
+    dialog: bodyDiagContactme,
+    title: "Contactarme",
+    trigger: topbarBtnContactme,
+    ok: false,
+    cancel: false
+});
+topbarBtnContactme.addEventListener("click", () => {
+    let body = bodyDiagContactme.querySelector(".body");
+    let sel = window.getSelection();
+    let range = new Range();
+    range.selectNodeContents(body);
+    sel.removeAllRanges();
+    sel.addRange(range);
+});

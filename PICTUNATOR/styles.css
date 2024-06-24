@@ -1,8 +1,14 @@
+@font-face {
+    font-family: "NovaMono";
+    src: url(./fonts/NovaMono-Regular.ttf);
+}
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     user-select: none;
+    font-family: NovaMono;
+    font-weight: 100;
 }
 
 :root {
@@ -13,6 +19,11 @@
         --controlsbar-padd: 1px;
         --controls-padd: 1px;
         --rs-width: 350px;
+
+        --topbar-height: 20px;
+        --topbar-padd-y: 0rem;
+        --topbar-padd-x: 0.2rem;
+        --navbar-submenu-w: 200px;
     }
 
     @media only screen and (min-width: 601px) and (max-width: 1024px) {
@@ -21,6 +32,11 @@
         --controls-padd: 0.1rem;
         --controlsbar-padd: 0.2rem;
         --rs-width: 400px;
+
+        --topbar-height: 30px;
+        --topbar-padd-y: 0.1rem;
+        --topbar-padd-x: 0.2rem;
+        --navbar-submenu-w: 250px;
     }
 
     @media only screen and (min-width: 1025px) and (max-width: 1440px) {
@@ -29,6 +45,11 @@
         --controls-padd: 0.2rem;
         --controlsbar-padd: 0.3rem;
         --rs-width: 100%;
+
+        --topbar-height: 35px;
+        --topbar-padd-y: 0.2rem;
+        --topbar-padd-x: 0.5rem;
+        --navbar-submenu-w: 300px;
     }
 
     @media only screen and (min-width: 1441px) {
@@ -37,6 +58,11 @@
         --controls-padd: 0.2rem;
         --controlsbar-padd: 0.4rem;
         --rs-width: 100%;
+
+        --topbar-height: 45px;
+        --topbar-padd-y: 0.2rem;
+        --topbar-padd-x: 0.5rem;
+        --navbar-submenu-w: 350px
     }
 
     --navheight-lg: 55px;
@@ -113,32 +139,21 @@ body {
     flex-direction: column;
 }
 
-nav#top-nav {
-    position: relative;
+
+#top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
     background-color: rgb(26, 26, 46);
     display: flex;
     flex-direction: row;
     justify-content: start;
     align-items: stretch;
-    padding: 0.2rem 0.5rem;
+    padding: var(--topbar-padd-y) var(--topbar-padd-x);
+    height: var(--topbar-height);
     overflow: visible;
 
-    /* Same pixels and break points will apply to container-all's margin-top. */
-    @media only screen and (max-width: 600px) {
-        height: var(--navheight-cel);
-    }
-
-    @media only screen and (min-width: 601px) and (max-width: 1024px) {
-        height: var(--navheight-tab);
-    }
-
-    @media only screen and (min-width: 1025px) and (max-width: 1440px) {
-        height: var(--navheight-md);
-    }
-
-    @media only screen and (min-width: 1441px) {
-        height: var(--navheight-lg);
-    }
 
     & a#logoDmfte {
         position: relative;
@@ -147,80 +162,66 @@ nav#top-nav {
         justify-content: center;
         align-items: center;
         cursor: pointer;
-        border: 1px solid green;
+        border: 1px solid gray;
         padding: 5px;
 
         @media only screen and (max-width: 600px) {
-            width: calc(var(--navheight-cel) * 2);
-            border-radius: calc(var(--navheight-cel) / 2);
+            width: calc(var(--topbar-height) * 2);
+            border-radius: calc(var(--topbar-height) / 2);
         }
 
         @media only screen and (min-width: 601px) and (max-width: 1024px) {
-            width: calc(var(--navheight-tab) * 2);
-            border-radius: calc(var(--navheight-tab) / 2);
+            width: calc(var(--topbar-height) * 2);
+            border-radius: calc(var(--topbar-height) / 2);
         }
 
         @media only screen and (min-width: 1025px) and (max-width: 1440px) {
-            width: calc(var(--navheight-md) * 2);
-            border-radius: calc(var(--navheight-md) / 2);
+            width: calc(var(--topbar-height) * 2);
+            border-radius: calc(var(--topbar-height) / 2);
         }
 
         @media only screen and (min-width: 1441px) {
-            width: calc(var(--navheight-lg) * 2);
-            border-radius: calc(var(--navheight-lg) / 2);
+            width: calc(var(--topbar-height) * 2);
+            border-radius: calc(var(--topbar-height) / 2);
         }
     }
 
 
 
-    & .nav-items {
+    & .topbar-items {
+        margin-left: auto;
         display: flex;
-        flex-direction: row;
         justify-content: flex-end;
-        align-items: stretch;
-        flex: 1;
 
-        & .nav-i {
+        & .topbar-i {
             max-height: 100%;
-            max-width: 100%;
-            margin: 0 0.2rem;
-            display: flex;
+            width: calc(var(--topbar-height) - (var(--topbar-padd-y) * 2));
+            /* margin: 0 0.2rem; */
+            /* display: flex;
             justify-content: center;
-            align-items: stretch;
+            align-items: stretch; */
             cursor: pointer;
 
-            @media only screen and (max-width: 600px) {
-                width: calc(var(--navheight-cel) - 1%);
-            }
-
-            @media only screen and (min-width: 601px) and (max-width: 1024px) {
-                width: calc(var(--navheight-tab) - 1%);
-            }
-
-            @media only screen and (min-width: 1025px) and (max-width: 1440px) {
-                width: calc(var(--navheight-md) - 1%);
-            }
-
-            @media only screen and (min-width: 1441px) {
-                width: calc(var(--navheight-lg) - 1%);
-            }
 
             & svg path {
                 fill: rgb(67, 101, 139);
             }
         }
 
-        & .nav-i:hover svg path {
+        & .topbar-i:hover svg path {
             fill: rgb(233, 69, 96);
         }
 
-        & .nav-i:active svg path {
+        & .topbar-i:active svg path {
             fill: rgb(233, 69, 96);
         }
     }
 }
 
+
+
 #containerAll {
+    margin-top: var(--topbar-height);
     flex: 1;
     display: grid;
     grid-template-columns: var(--all-grid-columns);
@@ -229,25 +230,25 @@ nav#top-nav {
     @media only screen and (max-width: 600px) {
         /* grid-template-columns: 1fr var(--all-grid-columns); */
         grid-template-rows: var(--globalbarh-cel) var(--globalbarh-cel) 1fr;
-        grid-template-areas: "global global" "effects effects" "pictures controls";
+        grid-template-areas: "global global""effects effects""pictures controls";
     }
 
     @media only screen and (min-width: 601px) and (max-width: 1024px) {
         /* grid-template-columns: 1fr var(--all-grid-columns); */
         grid-template-rows: var(--globalbarh-tab) var(--globalbarh-tab) 1fr;
-        grid-template-areas: "global global" "effects effects" "pictures controls";
+        grid-template-areas: "global global""effects effects""pictures controls";
     }
 
     @media only screen and (min-width: 1025px) and (max-width: 1440px) {
         /* grid-template-columns: var(--all-grid-columns) 1fr; */
         grid-template-rows: var(--globalbarh-md) var(--globalbarh-md) 1fr;
-        grid-template-areas: "global global" "effects effects" "controls pictures";
+        grid-template-areas: "global global""effects effects""controls pictures";
     }
 
     @media only screen and (min-width: 1441px) {
         /* grid-template-columns: var(--all-grid-columns) 1fr; */
         grid-template-rows: var(--globalbarh-lg) var(--globalbarh-lg) 1fr;
-        grid-template-areas: "global global" "effects effects" "controls pictures";
+        grid-template-areas: "global global""effects effects""controls pictures";
     }
 
     & #globalControls input:is([type=checkbox], [type=file]) {
@@ -340,11 +341,12 @@ nav#top-nav {
                     padding: 0.1rem;
                     height: 120%;
                 }
+
                 @media only screen and (min-width: 1025px) {
                     padding: 0.4rem;
                     height: 100%;
                 }
-                
+
             }
         }
 
@@ -572,10 +574,12 @@ nav#top-nav {
                 & input~label:hover {
                     background-color: var(--color-controls-btn-hover);
                 }
+
                 & input:checked+label {
                     background-color: var(--color-controls-btn-checked);
                     scale: 0.85;
                 }
+
                 & input~label:active {
                     background-color: var(--color-controls-btn-active);
                 }
@@ -620,7 +624,7 @@ nav#top-nav {
                     justify-content: center;
                     align-items: center;
 
-                    & .submenu-activator{
+                    & .submenu-activator {
                         width: 100%;
                         height: 100%;
                     }
@@ -642,6 +646,7 @@ nav#top-nav {
                             left: unset;
                             right: 115%;
                         }
+
                         @media only screen and (min-width: 1025px) {
                             top: 100%;
                             left: 0;
@@ -823,7 +828,7 @@ nav#top-nav {
                     align-items: stretch;
                 }
 
-                & .mobile-label{
+                & .mobile-label {
                     border-radius: 0.5rem;
                     font-size: 1.4em;
                     display: none;
@@ -831,18 +836,15 @@ nav#top-nav {
                     align-items: center;
                     flex: 1;
 
-                    @media only screen and (max-width: 600px) {
-                        
-                    }
+                    @media only screen and (max-width: 600px) {}
+
                     @media only screen and (min-width: 601px) and (max-width: 1024px) {
                         display: flex;
                     }
-                    @media only screen and (min-width: 1025px) and (max-width: 1440px) {
-                        
-                    }
-                    @media only screen and (min-width: 1441px) {
-                        
-                    }
+
+                    @media only screen and (min-width: 1025px) and (max-width: 1440px) {}
+
+                    @media only screen and (min-width: 1441px) {}
                 }
 
 
@@ -863,9 +865,11 @@ nav#top-nav {
                         right: unset;
                     }
 
-                    & .rs-min, .rs-max{
+                    & .rs-min,
+                    .rs-max {
                         font-size: 0.8em;
                     }
+
                     & .rs-title {}
 
                     & .rs-track {}
@@ -926,5 +930,95 @@ nav#top-nav {
             right: 0;
             z-index: 1;
         }
+    }
+}
+
+
+dialog {
+
+    @media only screen and (max-width: 600px) {
+        width: 90vw;
+        height: 60vh;
+    }
+
+    @media only screen and (min-width: 601px) and (max-width: 1024px) {
+        width: 80vw;
+        height: 50vh;
+    }
+
+    @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+        width: 50vw;
+        height: 35vh;
+    }
+
+    @media only screen and (min-width: 1441px) {
+        width: 40vw;
+        height: 30vh;
+    }
+
+    .wrapper {
+
+        & .body {
+            padding: 1.5rem;
+            background-color: var(--color-global-bg);
+            color: var(--color-global-btn-color);
+            font-weight: bolder;
+
+            & a,
+            a:visited {
+                color: var(--color-dlbar-btn-bg-active);
+            }
+        }
+
+        & .footer {
+
+            & button {
+                font-weight: bolder;
+                color: var(--color-global-btn-color);
+            }
+        }
+    }
+}
+
+dialog::backdrop {
+    background-color: #000000;
+    opacity: 0.5;
+}
+
+dialog#diagInfo {
+
+    & .wrapper {
+
+        & .body {}
+    }
+}
+
+dialog#diagContactme {
+
+    & .wrapper {
+
+        & .body {
+            user-select: text;
+        }
+    }
+}
+
+@keyframes glow-add {
+    from {
+        background-color: rgb(128, 128, 192);
+    }
+
+    to {
+        background-color: rgb(51, 51, 185);
+    }
+}
+
+@keyframes glow-remove {
+    from {
+        background-color: rgb(196, 140, 140);
+    }
+
+    to {
+        background-color: rgb(185, 77, 77);
     }
 }
