@@ -48,25 +48,12 @@ document.addEventListener("keyup", (k) => {
 
 const ifJson = document.getElementById("ifJson");
 ifJson.addEventListener("input", async (event) => {
-    let checkedtab = document.querySelector("#nav-top .menu-items input[name=cbgTabs]:checked");
-    let currentpage = document.getElementById(checkedtab.getAttribute("for-tab"));
+    let currentpage = getCurrentPage();
     let lastrow = currentpage.querySelector(".row.last");
 
     let arr = await getJsonObj(event);
     console.log(arr);
     return;
-    arr.forEach(obj => {
-
-        let lastValuesRow = lastrow.querySelector(".rowgrid.values");
-        lastrow.classList.remove("last");
-        let inputs = lastValuesRow.querySelectorAll("input")
-        inputs.forEach(input => {
-            
-        });
-        onBtnAddRow(valuesRow);
-        lastrow = lastrow.nextElementSibling;
-        lastrow.classList.add("last");
-    });
 
 });
 
@@ -116,12 +103,27 @@ function autoSave() {
         });
         objPages[page.id].values = arrVals;
     });
+
     objCSVnator = {
         pages: objPages,
+        // CSV separator character.
         separator: spanSeparator.innerText
     }
     let json = JSON.stringify(objCSVnator);
     window.localStorage.setItem("CSVnator", json);
+}
+
+function defaultToArrayOfRows(arrayrows) {
+    let page = arrayrows[0].closest(".page");
+    for (let j = 0; j < arrayrows.length; j++) {
+        const row = arrayrows[j];
+        let inputs = row.querySelectorAll("input");
+        for (let k = 0; k < inputs.length; k++) {
+            const input = inputs[k];
+            let defInput = page.querySelector(`[def-rowid=${input.getAttribute("row-id")}]`);
+            input.value = defInput.value;
+        }
+    }
 }
 
 function autoLoad() {
@@ -129,22 +131,14 @@ function autoLoad() {
     if (!csvNator) {
         for (let i = 0; i < pages.length; i++) {
             const page = pages[i];
-            let rowValues = page.querySelectorAll(".rowgrid.values");
-            for (let j = 0; j < rowValues.length; j++) {
-                const row = rowValues[j];
-                let inputs = row.querySelectorAll("input");
-                for (let k = 0; k < inputs.length; k++) {
-                    const input = inputs[k];
-                    let defInput = page.querySelector(`[def-rowid=${input.getAttribute("row-id")}]`);
-                    input.value = defInput.value;
-                }
-            }
+            let arrayrows = page.querySelectorAll(".rowgrid.values");
+            defaultToArrayOfRows(arrayrows);
         }
         autoSave();
         return;
     }
     const obj = JSON.parse(csvNator);
-
+    spanSeparator.innerText = obj.separator;
     for (const page in obj.pages) {
         const objPage = obj.pages[page];
         const tab = document.getElementById(page);
@@ -183,7 +177,6 @@ function autoLoad() {
             }
         }
     }
-    spanSeparator.innerText = obj.separator;
 }
 
 
@@ -410,6 +403,13 @@ function onInputInput(input) {
         });
     }
 
+    if (input.getAttribute("row-id") == "date") {
+        let regexDd = /^\d{2}$/;
+        let regexMm = new RegExp(/^\d{2}\/\d{2}$/);
+        if (regexDd.test(input.value)) input.value += "/";
+        if (regexMm.test(input.value)) input.value += "/";
+    }
+
     checkAllRegex();
 
 
@@ -465,11 +465,16 @@ function getTotal(input) {
 const btnDownloadCsv = document.getElementById("btnDownloadCsv");
 btnDownloadCsv.addEventListener("click", generateCSV);
 
+function getCurrentPage() {
+    let checkedtab = document.querySelector("#nav-top .menu-items input[name=cbgTabs]:checked");
+    let currentpage = document.getElementById(checkedtab.getAttribute("for-tab"));
+    return currentpage;
+}
+
 function generateCSV() {
     if (window.localStorage.getItem("CSVnator") == null) return;
-    let checkedtab = document.querySelector("#nav-top .menu-items input:checked");
-    let page = document.getElementById(checkedtab.getAttribute("for-tab"));
-    let arrRows = page.querySelectorAll(".section-values .row:not(.last)");
+    let currentpage = getCurrentPage();
+
     let arrText = [];
     for (let i = 0; i < arrRows.length; i++) {
         const row = arrRows[i];
@@ -487,7 +492,7 @@ function generateCSV() {
         type: "text/csv"
     });
     let url = window.URL.createObjectURL(blob);
-    let tabname = "" + page.id.charAt(0).toUpperCase() + page.id.slice(1);
+    let tabname = "" + currentpage.id.charAt(0).toUpperCase() + currentpage.id.slice(1);
     let filename = addTimestamp(tabname);
 
     const a = document.createElement("a");
@@ -522,7 +527,8 @@ const diagInfo = new AutoDialog({
     dialog: bodyDiagInfo,
     title: "Info",
     trigger: topbarBtnInfo,
-    ok: false
+    ok: false,
+    cancel: false
 })
 
 const bodyDiagContactme = document.getElementById("diagContactme");
@@ -531,7 +537,8 @@ const diagContactme = new AutoDialog({
     dialog: bodyDiagContactme,
     title: "Contactarme",
     trigger: topbarBtnContactme,
-    ok: false
+    ok: false,
+    cancel: false
 })
 topbarBtnContactme.addEventListener("click", () => {
     let body = bodyDiagContactme.querySelector(".body");
@@ -541,3 +548,47 @@ topbarBtnContactme.addEventListener("click", () => {
     sel.removeAllRanges();
     sel.addRange(range);
 })
+
+const bodyDiagSeparator = document.getElementById("diagSeparator");
+const itDiagSeparator = bodyDiagSeparator.querySelector(".body input");
+itDiagSeparator.value = spanSeparator.innerText;
+const separator = document.getElementById("separator");
+const diagSeparator = new AutoDialog({
+    dialog: bodyDiagSeparator,
+    title: "Caracter separador",
+    trigger: separator
+});
+
+diagSeparator.onOk(() => {
+    spanSeparator.innerText = itDiagSeparator.value;
+    autoSave();
+});
+
+const bodyDiagClearData = document.getElementById("diagClearData");
+const spDiagClear = bodyDiagClearData.querySelector(".body span");
+const clearData = document.getElementById("clear-data");
+clearData.addEventListener("click", () => {
+    let currentpage = getCurrentPage();
+    let pageid = currentpage.id;
+    pagename = pageid.charAt(0).toUpperCase() + pageid.slice(1);
+    spDiagClear.innerText = pagename;
+});
+const diagClearData = new AutoDialog({
+    dialog: bodyDiagClearData,
+    title: "Limpiar datios",
+    trigger: clearData
+});
+diagClearData.onOk(() => {
+    let currentpage = getCurrentPage();
+    let section = currentpage.querySelector(".section-values");
+    let arrRows = section.querySelectorAll(".row:not(.first):not(.last)");
+    arrRows.forEach(row => {
+        section.removeChild(row);
+    });
+    let first = section.querySelector(".row.first");
+    let last = section.querySelector(".row.last");
+    defaultToArrayOfRows([first, last]);
+    checkAllRegex();
+    first.querySelector(".rowgrid.values input:first-of-type").focus();
+    autoSave();
+});

@@ -427,7 +427,7 @@ nav#nav-top:has(~ #containerAll .page.remove-row) #btnToggleRemove {
         }
     }
 
-    & #fbtnDownloadCsv:hover {
+    & #btnDownloadCsv:hover {
         background-color: var(--color-navtop-bg);
 
         & svg {
@@ -438,7 +438,7 @@ nav#nav-top:has(~ #containerAll .page.remove-row) #btnToggleRemove {
         }
     }
 
-    & #fbtnDownloadCsv:active {
+    & #btnDownloadCsv:active {
         background-color: var(--color-navtop-bg-active);
     }
 
@@ -565,7 +565,7 @@ nav#nav-top:has(~ #containerAll .page.remove-row) #btnToggleRemove {
             }
 
             & .row:focus-within {
-                border-bottom: 5px solid rgb(255, 184, 51);
+                border-bottom: 3px solid rgb(0, 0, 255);
             }
 
             & .row:nth-child(even) {
@@ -685,14 +685,17 @@ dialog {
         width: 90vw;
         height: 60vh;
     }
+
     @media only screen and (min-width: 601px) and (max-width: 1024px) {
         width: 80vw;
         height: 50vh;
     }
+
     @media only screen and (min-width: 1025px) and (max-width: 1440px) {
         width: 50vw;
         height: 35vh;
     }
+
     @media only screen and (min-width: 1441px) {
         width: 40vw;
         height: 30vh;
@@ -717,29 +720,30 @@ dialog {
     }
 }
 
-dialog::backdrop{
+dialog::backdrop {
     background-color: #000000;
     opacity: 0.5;
 }
 
-dialog#diagInfo{
+dialog#diagInfo {
 
-    & .wrapper{
+    & .wrapper {
 
-        & .body{
+        & .body {
 
-            & a:visited, a{
+            & a:visited,
+            a {
                 color: var(--color-navtop-submenu-bg);
             }
         }
     }
 }
 
-dialog#diagContactme{
+dialog#diagContactme {
 
-    & .wrapper{
+    & .wrapper {
 
-        & .body{
+        & .body {
             user-select: text;
         }
     }

@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CSV HACIENDA</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 
 <body>
@@ -71,9 +72,8 @@
             </div>
             <div class="hamb-submenu">
                 <ul>
-                    <li class="hambsubmenu-i" id="separator" style="display: none;">Separador <span>;</span></li>
-                    <li class="hambsubmenu-i" id="clear-data" style="display: none;">Limpiar pestaña &#128465;</li>
-                    <li class="hambsubmenu-i" id="clear-default" style="display: none;">Limpiar valores por defecto</li>
+                    <li class="hambsubmenu-i" id="separator">Separador <span>;</span></li>
+                    <li class="hambsubmenu-i" id="clear-data">Limpiar pestaña actual &#128465;</li>
                     <li class="hambsubmenu-i" id="clear-stored-data">Limpiar todo &#9760;<span class="tooltip" id="ttDeleteEverything">
                             Si la página funciona mal, pruebe <br>esta opción para eliminar todos los datos y empezar de cero.</span>
                     </li>
@@ -614,8 +614,8 @@
     <dialog id="diagInfo">
         <div class="body">
             <ul>
-                <li>La información es guardada localmente en el navegador. No es subida ni enviada a ningún sitio.</li>
-                <li>Se marcan las casillas equivocadas según el <a href="https://www.transparenciafiscal.gob.sv/downloads/pdf/700-DGII-MN-2021-26031.pdf" target="_blank">Manual de usuario</a> provisto por el Ministerio de Hacienda.</li>
+                <li>La información digitada es guardada únicamente en su dispositivo. No es subida ni enviada a ningún sitio.</li>
+                <li>Se marcan las casillas equivocadas según el <a href="https://www.transparenciafiscal.gob.sv/downloads/pdf/700-DGII-MN-2021-26031.pdf" target="_blank">Manual de usuario</a> provisto por el Ministerio de Hacienda de El Salvador.</li>
             </ul>
         </div>
     </dialog>
@@ -623,6 +623,19 @@
     <dialog id="diagContactme">
         <div class="body">
             dmfte.dev@gmail.com
+        </div>
+    </dialog>
+
+    <dialog id="diagSeparator">
+        <div class="body">
+            Introduzca el caracter separador para el archivo CSV:
+            <input type="text">
+        </div>
+    </dialog>
+
+    <dialog id="diagClearData">
+        <div class="body">
+            ¿Desea eliminar los valores de la pestaña <span></span>?
         </div>
     </dialog>
 
