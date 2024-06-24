@@ -23,29 +23,57 @@
 //     ok: false, //  Button OK will be disabled. true by defaul.
 //     cancel: false, //  Button cancel  will be disabled. true by defaul.
 //     glyph: stringName, //  Name of the glyph to be used as the upper right close button. 'times' (the multiplication symbol ×) by default.
-//     backropclose: true  //  Sets whether a click on the backdrop will close the modal or not.
+//     backdropclose: true  //  Sets whether a click on the backdrop will close the modal or not.
 // }
 
 // Color given to .body via CSS will be used to create the rest of the styles. If color is not specified (or equal to 'rgba(0, 0, 0, 0)'), no style will be applied.
 
 // Add this to CSS and modify as needed.
 // ---------
-/* Styles for the dynamically added dialog with AutoDialog.js */
+/* Add this to CSS for standar styles */
 // dialog {
-//     border-width: 3px;
-//     min-height: 60vh;
-//     max-height: 80vh;
-
-//     @media (max-width: 600px) {
-//         border-width: 2px;
-//         min-width: 80vw;
-//         max-height: 95vh;
+// 
+//     @media only screen and (max-width: 600px) {
+//         width: 90vw;
+//         height: 60vh;
 //     }
-
-//     & .body {
-//         background-color: var(--dialog-body);
+//     @media only screen and (min-width: 601px) and (max-width: 1024px) {
+//         width: 80vw;
+//         height: 50vh;
+//     }
+//     @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+//         width: 50vw;
+//         height: 35vh;
+//     }
+//     @media only screen and (min-width: 1441px) {
+//         width: 40vw;
+//         height: 30vh;
+//     }
+// 
+//     .wrapper {
+// 
+//         & .body {
+//             padding: 1.5rem;
+//             background-color: ;
+//             color: ;
+//             font-weight: bolder;
+//         }
+// 
+//         & .footer {
+// 
+//             & button {
+//                 font-weight: bolder;
+//                 color: ;
+//             }
+//         }
 //     }
 // }
+// 
+// dialog::backdrop{
+//     background-color: #000000;
+//     opacity: 0.5;
+// }
+
 // ---------
 
 // params: dialog, title, ok, cancel 
@@ -65,8 +93,11 @@ class AutoDialog {
         this.dialog.style.position = "absolute";
         this.dialog.style.top = "50vh";
         this.dialog.style.left = "50vw";
+        // this.dialog.style.minWidth = "80vw";
+        // this.dialog.style.maxHeight = "95vh";
         this.dialog.style.transform = "translate(-50%, -50%)";
         this.dialog.style.padding = "0";
+        this.dialog.style.borderWidth = "2px";
         this.dialog.style.borderRadius = "0.5rem";
         this.dialog.style.overflow = "hidden";
 

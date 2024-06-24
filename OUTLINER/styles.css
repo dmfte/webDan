@@ -46,20 +46,47 @@ strong {
     --controls-height-mob: 48px;
     --accr-padding: 5px;
     --contextmenu-btn-dim: 30px;
+
+
+    @media only screen and (max-width: 600px) {
+        --topbar-height: 20px;
+        --topbar-padd-y: 0rem;
+        --topbar-padd-x: 0.2rem;
+
+        --navbar-submenu-w: 200px
+    }
+
+    @media only screen and (min-width: 601px) and (max-width: 1024px) {
+        --topbar-height: 30px;
+        --topbar-padd-y: 0.1rem;
+        --topbar-padd-x: 0.2rem;
+
+        --navbar-submenu-w: 250px
+    }
+
+    @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+        --topbar-height: 35px;
+        --topbar-padd-y: 0.2rem;
+        --topbar-padd-x: 0.5rem;
+
+        --navbar-submenu-w: 300px
+    }
+
+    @media only screen and (min-width: 1441px) {
+        --topbar-height: 45px;
+        --topbar-padd-y: 0.2rem;
+        --topbar-padd-x: 0.5rem;
+
+        --navbar-submenu-w: 350px
+    }
 }
 
 body,
 html {
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     overscroll-behavior: none;
 }
-
-svg {
-    max-width: 100%;
-    max-height: 100%;
-}
-
 svg.svg-symbols {
     display: none;
 }
@@ -67,21 +94,6 @@ svg.svg-symbols {
 input[type=radio],
 input[type=checkbox] {
     display: none;
-}
-
-/* Styles for the dynamically added dialog with AutoDialog.js */
-dialog {
-    border-width: 3px;
-
-    & .body {
-        background-color: var(--dialog-body);
-        padding: 0.5rem;
-    }
-}
-
-dialog::backdrop {
-    background-color: rgb(0, 0, 0);
-    opacity: 0.5;
 }
 
 /* --------- */
@@ -143,8 +155,6 @@ dialog::backdrop {
 
     & .body {
         padding: 1rem;
-        /* min-width: 50vw;
-        max-width: 90vw; */
     }
 }
 
@@ -166,106 +176,77 @@ dialog::backdrop {
     z-index: 3;
 }
 
-/* 
-.g-action input~label,
-.btn input~label {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-} */
 
-/* --------- */
-nav.top-nav {
-    height: var(--nav-height-desk);
-    background-color: var(--nav-bg);
+#top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: rgb(26, 26, 46);
     display: flex;
     flex-direction: row;
     justify-content: start;
     align-items: stretch;
-    padding: 0.2rem 0.5rem;
-    width: 100%;
+    padding: var(--topbar-padd-y) var(--topbar-padd-x);
+    height: var(--topbar-height);
     overflow: visible;
 
-    @media screen and (max-width: 600px) {
-        height: var(--nav-height-mob);
-    }
 
-    & .logo {
+    & a#logoDmfte {
+        position: relative;
         background-color: white;
-        border-radius: calc(var(--nav-height-desk)/2);
         display: flex;
         justify-content: center;
         align-items: center;
-        width: 100px;
         cursor: pointer;
-        border: 1px solid green;
-        padding: 1%;
+        border: 1px solid gray;
+        padding: 5px;
 
-        & a#logoDmfte {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
+        @media only screen and (max-width: 600px) {
+            width: calc(var(--topbar-height) * 2);
+            border-radius: calc(var(--topbar-height) / 2);
         }
 
-        & svg {
-            max-width: 80%;
-            max-height: 80%;
+        @media only screen and (min-width: 601px) and (max-width: 1024px) {
+            width: calc(var(--topbar-height) * 2);
+            border-radius: calc(var(--topbar-height) / 2);
         }
 
+        @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+            width: calc(var(--topbar-height) * 2);
+            border-radius: calc(var(--topbar-height) / 2);
+        }
+
+        @media only screen and (min-width: 1441px) {
+            width: calc(var(--topbar-height) * 2);
+            border-radius: calc(var(--topbar-height) / 2);
+        }
     }
 
-    & .nav-items {
-        padding: 0;
-        display: flex;
-        flex-direction: row;
-        justify-content: flex-end;
-        align-items: stretch;
-        flex: 1;
 
-        & .nav-i {
-            margin: 0 0.2rem;
-            display: flex;
-            justify-content: center;
-            align-items: stretch;
+
+    & .topbar-items {
+        margin-left: auto;
+        display: flex;
+        justify-content: flex-end;
+
+        & .topbar-i {
+            max-height: 100%;
+            width: calc(var(--topbar-height) - (var(--topbar-padd-y) * 2));
             cursor: pointer;
 
+
             & svg path {
-                fill: var(--nav-icon-bg);
+                fill: var(--nav-icon);
             }
         }
 
-        & .nav-i:hover svg path {
-            fill: var(--nav-icon);
+        & .topbar-i:hover svg path {
+            fill: var(--nav-icon-bg);
         }
 
-        & .nav-i:active svg path {
-            fill: var(--nav-icon);
-        }
-
-        & #navBtnContactme {
-            position: relative;
-            /* For tooltip. */
-
-            & .tooltip {
-                /* 10px is the .tooltip::after border width. */
-                top: calc(100% + 10px);
-                right: calc(50% - 10px);
-                border-radius: 10px 0 10px 20px;
-                padding: 5px 5px 10px 10px;
-                justify-content: flex-start;
-            }
-
-            & .tooltip::after {
-                content: "";
-                bottom: 100%;
-                right: 0;
-                border-width: 10px;
-                border-color: transparent transparent lightyellow transparent;
-            }
+        & .topbar-i:active svg path {
+            fill: rgb(67, 101, 139);
         }
     }
 }
@@ -284,13 +265,10 @@ label~input[type=file] {
 }
 
 .container-all {
+    top: var(--topbar-height);
     position: relative;
     display: block;
-    height: calc(100% - var(--nav-height-desk));
-
-    @media (max-width: 600px) {
-        height: calc(100% - var(--nav-height-mob));
-    }
+    height: calc(100% - var(--topbar-height));
 
     & .controls {
         display: block;
@@ -334,7 +312,6 @@ label~input[type=file] {
             & .cont {
                 display: flex;
                 flex: 1;
-                /* height: 100%; */
             }
 
 
@@ -348,7 +325,6 @@ label~input[type=file] {
                 grid-template-rows: 3.5rem 1fr;
 
                 & .title {
-                    /* background-color: purple; */
                     grid-area: title;
 
                     & #itTitle {
@@ -440,7 +416,7 @@ label~input[type=file] {
                     }
                 }
 
-                & .accordions {;
+                & .accordions {
                     position: relative;
                     display: block;
                     width: 100%;
@@ -537,7 +513,6 @@ label~input[type=file] {
                             & .accr-title {
                                 text-align: center;
                                 flex: 1;
-                                user-select: none;
                             }
 
                             & .accr-arrow {
@@ -579,7 +554,6 @@ label~input[type=file] {
 
                                     & u:hover {
                                         text-decoration-line: line-through underline;
-                                        /* text-decoration-color: red; */
                                     }
 
                                     & span.show-popup {
@@ -644,6 +618,77 @@ label~input[type=file] {
                 height: 100%;
             }
 
+        }
+    }
+}
+
+
+dialog {
+
+    @media only screen and (max-width: 600px) {
+        width: 90vw;
+        height: 60vh;
+    }
+
+    @media only screen and (min-width: 601px) and (max-width: 1024px) {
+        width: 80vw;
+        height: 50vh;
+    }
+
+    @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+        width: 50vw;
+        height: 35vh;
+    }
+
+    @media only screen and (min-width: 1441px) {
+        width: 40vw;
+        height: 30vh;
+    }
+
+    .wrapper {
+
+        & .body {
+            padding: 1.5rem;
+            background-color: var(--controls-bg);
+            color: var(--controls-color);
+            font-weight: bolder;
+        }
+
+        & .footer {
+
+            & button {
+                font-weight: bolder;
+                color: var(--controls-color);
+            }
+        }
+    }
+}
+
+dialog::backdrop {
+    background-color: #000000;
+    opacity: 0.5;
+}
+
+dialog#diagInfo {
+
+    & .wrapper {
+
+        & .body {
+
+            & a:visited,
+            a {
+                color: var(--write-btn-color);
+            }
+        }
+    }
+}
+
+dialog#diagContactme {
+
+    & .wrapper {
+
+        & .body {
+            user-select: text;
         }
     }
 }

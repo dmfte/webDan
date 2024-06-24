@@ -14,32 +14,30 @@
 </head>
 
 <body>
-    <nav class="top-nav">
-        <div class="logo">
-            <a href="../index.html" id="logoDmfte">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 74" id="dmfte">
-                    <path fill="none" stroke="black" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" d="m 36 4 l 0 64 m -32 -16 a 16 16 0 0 0 32 0 a 16 16 0 0 0 -32 0 m 32 0 a 16 16 0 0 1 32 0 a 16 16 0 0 1 32 0 l 0 16 l 0 -48 a 16 16 0 0 1 32 0 l 0 32 m -40 -24 l 16 0 m 16 0 l 16 0 m -8 24 a 16 16 0 0 1 32 0 l -32 0 a 16 16 0 0 0 27.3 11.3"></path>
-                </svg>
-            </a>
-        </div>
-        <div class="nav-items">
-            <div class="nav-i" id="gaBtnInfo">
-                <!-- See Dialog diagInfo at the bottom. -->
+    <!-- <nav class="top-nav"> -->
+    <div id="top-bar">
+        <a href="../index.html" id="logoDmfte">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 74" id="dmfte">
+                <path fill="none" stroke="black" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" d="m 36 4 l 0 64 m -32 -16 a 16 16 0 0 0 32 0 a 16 16 0 0 0 -32 0 m 32 0 a 16 16 0 0 1 32 0 a 16 16 0 0 1 32 0 l 0 16 l 0 -48 a 16 16 0 0 1 32 0 l 0 32 m -40 -24 l 16 0 m 16 0 l 16 0 m -8 24 a 16 16 0 0 1 32 0 l -32 0 a 16 16 0 0 0 27.3 11.3">
+                </path>
+            </svg>
+        </a>
+        <div class="topbar-items">
+            <div class="topbar-i" id="topbarBtnInfo">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
-                    <path fill="black" stroke="none" stroke-width="1" stroke-linejoin="round" d="M 9 1 A 1 1 0 0 0 9 17 A 1 1 0 0 0 9 1 M 9 3 A 1 1 0 0 1 9 7 A 1 1 0 0 1 9 3 M 7 8 L 11 8 L 11 15 L 7 15 Z"></path>
+                    <path fill="black" stroke="none" stroke-width="1" stroke-linejoin="round" d="M 9 1 A 1 1 0 0 0 9 17 A 1 1 0 0 0 9 1 M 9 3 A 1 1 0 0 1 9 7 A 1 1 0 0 1 9 3 M 7 8 L 11 8 L 11 15 L 7 15 Z">
+                    </path>
                 </svg>
             </div>
-            <div class="nav-i" id="navBtnContactme">
+            <div class="topbar-i" id="topbarBtnContactme">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
                     <path fill="none" stroke="black" stroke-width="1" stroke-linejoin="round" d="M 2 5 L 16 5 L 16 14 L 2 14 Z"></path>
                     <path fill="none" stroke="black" stroke-width="1" stroke-linejoin="round" d="M 2 14 L 5 7 M 16 14 L 13 7 M 2 5 L 9 10 L 16 5"></path>
                 </svg>
-                <div class="tooltip">
-                    Email dmfte.dev@gmail.com copied to the clipboard.
-                </div>
             </div>
         </div>
-    </nav>
+    </div>
+    <!-- </nav> -->
     <!-- ------------ -->
     <div class="container-all dual">
         <div class="controls">
@@ -155,6 +153,24 @@
         </defs>
     </svg>
 
+    <!-- DIALOGS -->
+
+    <dialog id="diagInfo">
+        <div class="body">
+            <ul>
+                <li>La información digitada es guardada únicamente en su dispositivo. No es subida ni enviada a ningún sitio.</li>
+                <li>Se marcan las casillas equivocadas según el <a href="https://www.transparenciafiscal.gob.sv/downloads/pdf/700-DGII-MN-2021-26031.pdf" target="_blank">Manual de usuario</a> provisto por el Ministerio de Hacienda de El Salvador.</li>
+            </ul>
+        </div>
+    </dialog>
+
+    <dialog id="diagContactme">
+        <div class="body">
+            dmfte.dev@gmail.com
+        </div>
+    </dialog>
+
+
     <dialog id="modAddPopup">
         <div class="body">
             <div class="subtitle">
@@ -172,6 +188,8 @@
             <div class="body-cont content"></div>
         </div>
     </dialog>
+
+
 
     <script src="AutoDialog.js"></script>
     <script src="index.js"></script>
