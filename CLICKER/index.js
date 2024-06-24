@@ -60,7 +60,7 @@ btnCounter.addEventListener("click", function() {
 
 btnReset.addEventListener("click", function() {
   btnCounter.innerText = "0";
-  navigator.vibrate([100, 15, 100]);
+  navigator.vibrate([300]);
   resizeFont(btnCounter);
 });
 
@@ -72,9 +72,9 @@ function decreaseNum() {
   if (num > 0) {
     num--;
     btnCounter.innerText = num;
-    navigator.vibrate(50);
+    navigator.vibrate(100);
   } else {
-    navigator.vibrate([50, 15, 50]);
+    navigator.vibrate([100, 60, 100]);
   }
   resizeFont(btnCounter);
 }
@@ -84,7 +84,7 @@ function increaseNum() {
   num++;
   btnCounter.innerText = num;
   resizeFont(btnCounter);
-  navigator.vibrate(50);
+  navigator.vibrate(100);
 }
 
 function resizeFont(element) { //  Calculates the best font size, first based on height, then based on width, to a minimum of 0.4em.
