@@ -393,7 +393,7 @@ function onInputInput(input) {
     }
 
 
-    if (regex.test(input.value)) {
+    if (regex.test(input.value) || input.value.length == 0) {
         startCalculations(input).then((input) => {
             calculateTaxes(input).then((input) => {
                 getTotal(input).then((input) => {
@@ -432,7 +432,12 @@ function calculateTaxes(input) {
             let tax = parseFloat(taxon.dataset.perct);
             let sumTax = 0;
             for (let i = 0; i < arrTaxables.length; i++) {
+                console.log("here");
                 const taxable = arrTaxables[i];
+                if (taxable.value.length == 0) {
+                    console.log("skipped");
+                    continue;
+                }
                 sumTax += parseFloat(taxable.value) * (tax / 100);
             }
             taxon.value = twoDecimals(sumTax);
