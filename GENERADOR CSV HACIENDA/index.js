@@ -474,7 +474,7 @@ function getCurrentPage() {
 function generateCSV() {
     if (window.localStorage.getItem("CSVnator") == null) return;
     let currentpage = getCurrentPage();
-
+    let arrRows = currentpage.querySelectorAll(".section-values .row:not(.last)");
     let arrText = [];
     for (let i = 0; i < arrRows.length; i++) {
         const row = arrRows[i];
