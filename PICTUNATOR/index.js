@@ -94,6 +94,26 @@ lbFloatOriginal.addEventListener("pointerleave", () => {
     }
 });
 
+// Checkbox to erase in original image.
+var pointerEraser = false;
+
+const cbEraser = document.getElementById("cbEraser");
+cbEraser.addEventListener("input", () => {
+    if (imageIn == undefined) return;
+    if (cbEraser.checked) {
+        pointerEraser = true;
+    } else {
+        pointerEraser = false;
+    }
+});
+
+canvIn.addEventListener("click", (evt) => {
+    if (!pointerEraser) return;
+    
+});
+
+
+// ------------
 var displayImgInOffsetLeft, displayImgInOffsetTop;
 var marginedLeft = 15, marginedTop = 15;
 

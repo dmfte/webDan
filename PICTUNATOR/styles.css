@@ -2,6 +2,7 @@
     font-family: "NovaMono";
     src: url(./fonts/NovaMono-Regular.ttf);
 }
+
 * {
     margin: 0;
     padding: 0;
@@ -251,10 +252,6 @@ body {
         grid-template-areas: "global global""effects effects""controls pictures";
     }
 
-    & #globalControls input:is([type=checkbox], [type=file]) {
-        display: none;
-    }
-
     & #globalControls {
         --gctrls-padd: 5px;
 
@@ -421,6 +418,15 @@ body {
             @media only screen and (min-width: 1441px) {
                 width: calc((var(--globalbarh-lg) - (var(--gctrls-padd) * 2)) * 6);
             }
+        }
+
+        & input#cbEraser:checked ~ .g-ctrl {
+                background-color: var(--color-global-btn-hover);
+            }
+        }
+
+        & input:is([type=checkbox], [type=file]) {
+            display: none;
         }
     }
 
