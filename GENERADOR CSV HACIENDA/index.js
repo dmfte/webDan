@@ -1,770 +1,599 @@
-//  Overlays
-// const modalOverlay = document.querySelector(".modal-overlay");
-const navOverlay = document.querySelector(".nav-overlay");
+const ventasKeys = {
+    forRowid: ["date", "classDoc", "typeDoc", "numRes", "numSerDoc", "numDoc", "numCtrlInt", "nit", "name", "vtasExct", "vtasNoSuj", "vtasGrabLoc", "debtFis", "vtasCta3NoDomic", "debtFiscVtaCta3", "totVtas", "dui", "numAnx"],
+    text: ["Fecha", "Clase Doc.", "Tipo Doc.", "Núm. Res.", "Núm. Serie Doc.", "Núm. Doc.", "Núm. Ctrl. Int.", "NIT o NRC", "Nombre, Razón Social o Denominación", "Vtas. Excentas", "Vtas. No Sujetas", "Vtas. Grabadas Locales", "Débito Fiscal", "Vtas. Cta. 3os No Domic.", "Débt. Fisc. Vta. Cta. 3os", "Total de Vtas.", "DUI Cliente", "Núm. de Anx."]
+};
+const comprasKeys = {
+    forRowid: ["date", "classDoc", "typeDoc", "numDoc", "nit", "nombPov", "CompsIntrExntNoSuj", "IntrnExntNoSuj", "ImprtExntNoSuj", "CompsIntrnGrav", "IntrnGravBienes", "ImprtGravBienes", "ImprtGravServcs", "CredtFisc", "totComps", "dui", "tipoOp", "clasif", "sector", "tipoCostGast", "numAnx"],
+    text: ["Fecha", "Clase Doc.", "Tipo Doc.", "Num. Doc.", "NIT o NRC", "Nomb. Prov.", "Comps. Int. Excnt. No Suj.", "Intrn. Exnt. No Suj.", "Imprt. Exnt. No Suj.", "Comps. Intrn. Grav.", "Intrn. Grav. Bienes", "Imprt. Grav. Bienes", "Imprt. Grav. Servcs.", "Credt. Fisc.", "Tot. Comps.", "DUI", "Tipo Op.", "Clasif.", "Sector", "Tipo Cost/Gast", "Num. Anx."]
+};
+const retencionKeys = {
+    forRowid: ["nit", "date", "typeDoc", "serie", "numDoc", "montSuj", "monRtcn", "dui", "numAnx"],
+    text: ["NIT Agente", "Fecha Emisión", "Tipo Doc.", "Serie", "Núm. Doc.", "Monto Suj.", "Monto Rtcn. 1%", "DUI Agente", "Núm. de Anx."]
+};
+const percepcionKeys = {
+    forRowid: ["nit", "date", "typeDoc", "serie", "numDoc", "montSuj", "monPercp", "dui", "numAnx"],
+    text: ["NIT Agente", "Fecha Emisión", "Tipo Doc.", "Serie", "Núm. Doc.", "Monto Suj.", "Monto Percp. 1%", "DUI Agente", "Núm. de Anx."]
+};
 
-// NAVIGATION BAR
-const arrNavTabs = document.querySelectorAll(".nav-menu .container-menu li");
-const navHamb = document.querySelector(".nav-hamb");
-const navSubmenu = document.querySelector(".nav-hamb .nav-submenu");
-const arrSubmenuLi = navSubmenu.querySelectorAll("li");
-arrNavTabs.forEach((li, i) => {
-  li.addEventListener("click", function () {
-    document.body.setAttribute("class", li.dataset.tab);
-  });
-});
-navHamb.addEventListener("click", function () {
-  toggleNavSubmenu();
-});
+const pages = document.querySelectorAll(".page");
 
-const modcontentSeparatorChar = document.getElementById("modcontentSeparatorChar");
-const modcontentCleartabs = document.getElementById("modcontentCleartabs");
-const modcontentClearDefaultVals = document.getElementById("modcontentClearDefaultVals");
-const modcontentClearStoredData = document.getElementById("modcontentClearStoredData");
-const modcontentDisclaimer = document.getElementById("modcontentDisclaimer");
-const modcontentContactme = document.getElementById("modcontentContactme");
+// HAMBURGER MENU
 
-arrSubmenuLi.forEach(li => {
-  li.addEventListener("click", evt => {
-    let params = {};
-    switch (evt.currentTarget.id) {
-      case "separator":
-        modcontentSeparatorChar.querySelector("#itSeparatorChar").value = CSVnator.separator;
-        params = {
-          title: "Caracter separador",
-          content: modcontentSeparatorChar,
-          okEnabled: false
-        }
-        break;
-      case "clear-data":
-        modcontentCleartabs.querySelectorAll("[type='radio']").forEach(rbtn => {
-          rbtn.checked = false;
-        });
-        params = {
-          title: "Limpiar datos",
-          content: modcontentCleartabs,
-          okEnabled: false
-        }
-        break;
-      case "clear-default":
-        modcontentClearDefaultVals.querySelectorAll("[type='radio']").forEach(rbtn => {
-          rbtn.checked = false;
-        });
-        params = {
-          title: "Limpiar valores por defecto.",
-          content: modcontentClearDefaultVals,
-          okEnabled: false
-        }
-        break;
-      case "clear-stored-data":
-        params = {
-          title: "Limpiar datos guardados.",
-          content: modcontentClearStoredData,
-          okEnabled: true
-        }
-        break;
-      case "disclaimer":
-        params = {
-          title: "Aclaración",
-          content: modcontentDisclaimer,
-          okEnabled: false
-        }
-        break;
-      
-      case "contactme":
-        params = {
-          title: "Mi correo",
-          content: modcontentContactme,
-          okEnabled: false
-        }
-        break;
-      
-      default:
-        break;
-    }
-    showDialog(dialog, params);
-  });
-  
+const smClearStoredData = document.getElementById("clear-stored-data");
+smClearStoredData.addEventListener("click", () => {
+    window.localStorage.removeItem("CSVnator");
+    location.reload();
 });
 
-//  Body keys listener.
+const smSeparator = document.getElementById("separator");
+const spanSeparator = smSeparator.querySelector("span");
+smSeparator.addEventListener("click", () => {
+
+});
+
+
+
+autoLoad();
+checkAllRegex();
+
 document.addEventListener("keyup", (k) => {
-  if (k.key == "Escape") {
-    if (navHamb.classList.contains("active")) {
-      toggleNavSubmenu();
+    autoSave();
+    if (k.key == "Escape") {
+        pages.forEach(page => {
+            page.classList.remove("add-row");
+            page.classList.remove("remove-row");
+        });
     }
-    // if (modalOverlay.classList.contains("active")) {
-    //   hideActiveModal();
-    // }
-  }
 });
 
-function toggleNavSubmenu() {
-  navOverlay.classList.toggle("active");
-  navHamb.classList.toggle("active");
-  navSubmenu.classList.toggle("active");
-}
-//  ------
+const ifJson = document.getElementById("ifJson");
+ifJson.addEventListener("input", async (event) => {
+    let currentpage = getCurrentPage();
+    let lastrow = currentpage.querySelector(".row.last");
 
-//  MODALS
-const dialog = document.querySelector("dialog");
+    let arr = await getJsonObj(event);
+    console.log(arr);
+    return;
 
-dialog.addEventListener("click", evt => {  //  Dialog element should be covered with a div so this triggers when clicking on the backdrop.
-  if (evt.target.tagName === "DIALOG") {
-    dialog.close();
-  }
 });
 
-function getRbCheckedValue(arrRadBtns) {
-  let value = "";
-  for (let i = 0; i < arrRadBtns.length; i++) {
-    if (arrRadBtns[i].checked) {
-      value = arrRadBtns[i].value;
-      break;
-    }
-    else {
-      value = undefined;
-    }
-  }
-  return value;
-}
-
-function onModalOkBtnClick(element) { //  This button already closes the modal.
-  let thisDialog = element.closest("dialog");
-  switch (thisDialog.querySelector(".modal-content").id) {
-    //  TO CLEAR TABS.
-    case "modcontentCleartabs":
-      let arrRbClearTab = thisDialog.querySelectorAll("input[type='radio']");
-      let rbtnClearTabValue = getRbCheckedValue(arrRbClearTab);
-      switch (rbtnClearTabValue) {
-        case "delete_all_tabs":
-          let allTabs = document.querySelectorAll(".container-tab");
-          allTabs.forEach(tab => {
-            clearTab(tab);
-            autoSave();
-          });
-          break;
-        case "delete_current_tab":
-          let tab = getCurrentTab();
-          clearTab(tab);
-          autoSave();
-          break;
-        default:
-          break;
-      }
-      break;
-    //  TO CHANGE THE SEPARATOR CHARACTER FOR THE CSV FILE.
-    case "modcontentSeparatorChar":
-      let itSeparatorChar = thisDialog.querySelector("input[type='text']");
-      spanSeparator.innerText = itSeparatorChar.value;
-      autoSave();
-    //  TO CLEAR DEFAULT VALUES
-    case "modcontentClearDefaultVals":
-      let arrRbClearDef = thisDialog.querySelectorAll("input[type='radio']");
-      let rbtnClearDefValue = getRbCheckedValue(arrRbClearDef);
-      switch (rbtnClearDefValue) {
-        case "delete_all_defs":
-          let allTabs = document.querySelectorAll(".container-tab");
-          allTabs.forEach(tab => {
-            clearDefaultValues(tab);
-          });
-          autoSave();
-          break;
-        case "delete_current_def":
-          let tab = getCurrentTab();
-          clearDefaultValues(tab);
-          autoSave();
-          break;
-        default:
-          break;
-      }
-      break;
-    // TO DELTE STORED VALUES.
-    case "modcontentClearStoredData":
-      window.localStorage.removeItem("CSVnator");
-      location.reload();
-      break;
-    default:
-      break;
-  }
-}
-
-function clearDefaultValues(tab) {
-  let defaultRow = tab.querySelector(".row.default");
-  clearRow(defaultRow);
-}
-
-function showDialog(dialog, params) {
-  dialog.querySelector(".title").innerText = params.title;
-  dialog.querySelector("form .body").appendChild(params.content);
-  if (params.okEnabled) {
-    dialog.querySelector("#btnOk").disabled = false;
-  } else {
-    dialog.querySelector("#btnOk").disabled = true;
-  }
-  dialog.showModal();
-}
-
-dialog.addEventListener("close", evt => {
-
-  dialog.querySelector(".title").innerHTML = "";
-  dialog.querySelector(".body").innerHTML = "";
-});
-
-function enableBtnOk(element) {
-  let dialog = element.closest("dialog");
-  let btnOk = dialog.querySelector("#btnOk");
-  switch (element.type) {
-    case "text":
-      if (element.value.length > 0) {
-        btnOk.disabled = false;
-      } else {
-        btnOk.disabled = true;
-      }
-      break;
-    case "radio":
-      btnOk.disabled = false;
-      break;
-    default:
-      break;
-  }
-}
-//  ------
-
-//  LOAD STORED VALUES
-const spanSeparator = document.getElementById("spanSeparator");
-var CSVnator = {};
-
-if (window.localStorage.getItem("CSVnator") !== null) {
-  CSVnator = JSON.parse(window.localStorage.getItem("CSVnator"));
-  spanSeparator.innerText = CSVnator.separator;
-  (CSVnator.values).forEach(objTabs => {
-    let tab = document.getElementById(objTabs.id);
-    let amountRows = objTabs.values.length - 2; //  Row with default input values and one blank row  already exist.
-    let containerRows = tab.querySelector(".container-rows");
-    for (let i = 0; i < amountRows; i++) {
-      addBlankRowAtEnd(containerRows);
-    }
-    objTabs.values.forEach(row => {
-      row.forEach(objInput => {
-        document.getElementById(objInput.id).value = objInput.value;
-      });
+function getJsonObj(e) {
+    return new Promise((res, rej) => {
+        let arr = [];
+        const files = e.target.files;
+        if (!files) return;
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                arr.push(JSON.parse(evt.target.result));
+            }
+            reader.readAsText(file);
+        }
+        res(arr);
     });
-    let defDate = tab.querySelector(".row.default .first");
-    if (defDate.value.length > 0) {
-      let lastDateInput = tab.querySelector(".row:last-of-type .first");
-      makeButton(lastDateInput);
-    }
-  });
-  validateInputsRegexp();
-} else {
-  console.log("No values stored");
 }
 
-//  STORE VALUES
 
 function autoSave() {
-  CSVnator.separator = spanSeparator.innerText;
-  CSVnator.values = getArrTabs();
-  window.localStorage.setItem("CSVnator", JSON.stringify(CSVnator));
-}
+    let objCSVnator = {};
+    let objPages = {};
+    pages.forEach(page => {
+        // Default values.
+        let inputsDef = page.querySelectorAll(".default-values input");
+        let objDefs = {};
+        objPages[page.id] = {};
+        inputsDef.forEach(idef => {
+            objDefs[idef.getAttribute("def-rowid")] = idef.value;
+        });
+        objPages[page.id].defs = objDefs;
+        // Values.
+        let rows = page.querySelectorAll(".row:not(.default");
+        let arrVals = [];
 
-function getArrTabs() {
-  let arrTabs = document.querySelectorAll(".container-tab");
-  return Array.from(arrTabs, tab => {
-    return {
-      id: tab.id,
-      values: getArrValuesPerTab(tab)
+        rows.forEach((row, i) => {
+            if (i !== 0 && areAllInputsEmpty(row)) return;
+            if (row.classList.contains("last")) return;
+            let inputsVals = row.querySelectorAll("input");
+            let objVals = {};
+            inputsVals.forEach(ival => {
+                objVals[ival.getAttribute("row-id")] = ival.value;
+            });
+            arrVals.push(objVals);
+        });
+        objPages[page.id].values = arrVals;
+    });
+
+    objCSVnator = {
+        pages: objPages,
+        // CSV separator character.
+        separator: spanSeparator.innerText
     }
-  });
+    let json = JSON.stringify(objCSVnator);
+    window.localStorage.setItem("CSVnator", json);
 }
 
-function getArrValuesPerTab(tab) {
-  let arrRows = tab.querySelectorAll(".row:not(.labels)");
-  return Array.from(arrRows, row => {
-    return getArrValuesPerRow(row);
-  });
-}
-
-function getArrValuesPerRow(row) {
-  let arrInputs = row.querySelectorAll("input");
-  return Array.from(arrInputs, input => {
-    return {
-      id: input.id,
-      value: input.value
-    }
-  });
-}
-//  ------
-
-// CLEAR VALUES
-
-function clearTab(tab) {
-  let arrRows = tab.querySelectorAll(".row:not(.default):not(.labels)");
-  for (let i = 1; i < arrRows.length; i++) {
-    removeRow(arrRows[i]);
-  }
-  clearRow(arrRows[0]);
-  arrRows[0].classList.remove("active");
-  let lastDateInput = arrRows[0].querySelector("input.first");
-  unmakeButton(lastDateInput);
-  lastDateInput.focus();
-}
-
-function removeRow(row) {
-  let parent = row.parentElement;
-  parent.removeChild(row);
-}
-function clearRow(row) {
-  let arrInputs = row.querySelectorAll("input");
-  arrInputs.forEach(input => {
-    input.value = "";
-    input.classList.remove("wrong");
-  });
-}
-//  ------
-
-// INPUT ELEMENT BEHAVIOR
-function onInputInput(e) {
-  if (checkRegex(e)) {
-    e.classList.remove("wrong");
-  } else {
-    e.classList.add("wrong");
-  }
-  if (e.value.length == 0 && !e.classList.contains("addend")) e.classList.remove("wrong");
-  let row = e.closest(".row"); //  Input's parent.
-  let containerTab = row.closest(".container-tab");
-
-  // Hide/unhide the rest of inputs    
-  if (e.classList.contains("first")) {
-    let parent = row.parentElement;
-    let rn = rowNumber(row);
-    if (rn.i == rn.l - 1 && e.value.length > 0) { // If the current row is the last one and input is not empty.
-      setDefaultValues(row);
-      // Show rest of inputs.
-      row.classList.add("active");
-      // Add next blank row.
-      addBlankRowAtEnd(parent);
-    }
-    if (rn.i == rn.l - 2 && e.value.length == 0) { // If the current row is the one before the last one and input is empty.
-      if (areInputsEmpty(row)) { // If the rest of inputs are empty.
-        // Hide rest of inputs.
-        row.classList.remove("active");
-        if (rn.last.querySelector("input.first").classList.contains("btn")) { //  If the last Date was a button.
-          makeButton(e);
-          //  Focus on preious (two before last one) first-input field.
-          rn.arr[rn.l - 3].querySelector("input.first").focus();
+function defaultToArrayOfRows(arrayrows) {
+    let page = arrayrows[0].closest(".page");
+    for (let j = 0; j < arrayrows.length; j++) {
+        const row = arrayrows[j];
+        let inputs = row.querySelectorAll("input");
+        for (let k = 0; k < inputs.length; k++) {
+            const input = inputs[k];
+            let defInput = page.querySelector(`[def-rowid=${input.getAttribute("row-id")}]`);
+            input.value = defInput.value;
         }
-        parent.removeChild(rn.last);
-      }
     }
-  }
-
-  //  Check if it is a Date field.
-  if (e.classList.contains("date") && checkRegex(e)) {
-    if (validateDateFormat(e.value)) {
-      e.classList.remove("wrong");
-    } else {
-      e.classList.add("wrong");
-    }
-  }
-
-  // If it is a dolar amount to be added.
-  if (e.classList.contains("addend") && checkRegex(e)) {
-    let totInput = row.querySelector(".total");
-    totInput.value = getTotal(e);
-    totInput.classList.remove("wrong");
-    e.classList.remove("wrong");
-  }
-  // Si es una cantidad sujeta a impuesto.
-  if (e.classList.contains("taxable") && checkRegex(e)) {
-    let taxOn = row.querySelector("." + e.dataset.taxOn);
-    let arrNodeTaxable = row.querySelectorAll("[data-tax-on='" + e.dataset.taxOn + "'");
-    let arrTaxable = Array.prototype.slice.call(arrNodeTaxable).map(taxable => {
-      return taxable.value.length > 0 ? taxable.value : 0;
-    });
-    let totTaxable = arrTaxable.reduce((tot, taxable) => {
-      return parseFloat(tot) + parseFloat(taxable);
-    });
-    taxOn.value = getTax(totTaxable, taxOn.dataset.perct);
-    taxOn.classList.remove("wrong");
-    // Calcular total otra vez.
-    let totInput = row.querySelector(".total");
-    if (totInput !== null) {
-      totInput.value = getTotal(e);
-      totInput.classList.remove("wrong");
-      e.classList.remove("wrong");
-    }
-  }
-
-  // Currency fields should not be empty.
-  if ((e.classList.contains("addend") || e.classList.contains("total")) && e.value.length == 0) e.classList.add("wrong");
-
-  //  If this is the first input of the .default row, a new row  should be added with a button for first input.
-  if (row.classList.contains("default") && e.classList.contains("first")) {
-    let container = row.closest(".container-rows");
-    let lastRow = container.querySelector(".row:not(.default):not(.labels):last-of-type");
-    let lastFirst = lastRow.querySelector("input.first");
-    if (e.value.length > 0) {
-      makeButton(lastFirst);
-    } else {
-      unmakeButton(lastFirst);
-    }
-  }
-
-  //  DUI and NIT have to be mutually exclusive.
-  let nit = row.querySelector(".nit");
-  let dui = row.querySelector(".dui");
-  if (nit.value.length > 0 && dui.value.length > 0) {
-    nit.classList.add("wrong");
-    dui.classList.add("wrong");
-  } else {
-    nit.classList.remove("wrong");
-    dui.classList.remove("wrong");
-  }
-
-  // ------ VENTAS ------
-  if (containerTab.id == "container-ventas") {
-    let VtasClassDoc, vtasNumDoc, vtasTotInput, vtasNumCtrlInt, vtasNumRes;
-    let allInput = row.querySelectorAll("input");
-    for (let i = 0; i < allInput.length; i++) {
-      const input = allInput[i];
-      if (input.id.includes("vtas_numRes")) vtasNumRes = input;
-      if (input.id.includes("vtas_numCtrlInt")) vtasNumCtrlInt = input;
-      if (input.id.includes("vtas_classDoc")) VtasClassDoc = input;
-      if (input.id.includes("vtas_numDoc")) vtasNumDoc = input;
-      if (input.id.includes("vtas_totVtas")) vtasTotInput = input;
-    }
-
-
-    // Si Numero Resolucion contiene "dte" (Dcumento Tributario Electronico) Numero Ctrl Interno debe estar vacio.
-    if (e == vtasNumCtrlInt || e == vtasNumRes) {
-      if (vtasNumRes.value.match(/^(dte)/i) !== null && vtasNumCtrlInt.value.length !== 0) {
-        vtasNumCtrlInt.classList.add("wrong");
-      } else {
-        vtasNumCtrlInt.classList.remove("wrong");
-        if (checkRegex(vtasNumCtrlInt)) vtasNumCtrlInt.classList.remove("wrong");
-      }
-    }
-
-    // Si Clase Documento es 2, Numero Ctrl Interno debe ser igual a Numero Documento.
-    if (e == VtasClassDoc || e == vtasNumDoc || e == vtasNumCtrlInt) {
-      if (VtasClassDoc.value == "2" && vtasNumDoc.value !== vtasNumCtrlInt.value) {
-        vtasNumCtrlInt.classList.add("wrong");
-      } else {
-        vtasNumCtrlInt.classList.remove("wrong");
-        if (checkRegex(vtasNumCtrlInt)) vtasNumCtrlInt.classList.remove("wrong");
-      }
-    }
-    if (e == vtasNumDoc && VtasClassDoc.value == "2") {
-      vtasNumCtrlInt.value = e.value;
-      vtasNumCtrlInt.classList.remove("wrong");
-    }
-
-    // ------ COMPRAS ------
-    let compClasDoc;
-  }
-
-  autoSave();
 }
 
-function rowNumber(row) { //  Returns data about the row, including an array of all .row objects except .default and .labels.
-  let parent = row.parentElement;
-  let arrRows = parent.querySelectorAll(".row:not(.default):not(.labels)");
-  return {
-    i: Array.prototype.slice.call(arrRows).indexOf(row),
-    l: arrRows.length,
-    arr: arrRows,
-    last: arrRows[arrRows.length - 1]
-  };
-}
-
-function makeButton(inputElement) {
-  inputElement.classList.add("btn");
-  inputElement.classList.remove("wrong");
-  inputElement.value = "▾";
-  inputElement.style.fontSize = "1.4rem";
-  inputElement.addEventListener("click", addDefaultDate);
-}
-
-function unmakeButton(inputElement) {
-  inputElement.classList.remove("btn");
-  inputElement.value = "";
-  inputElement.style.fontSize = "0.7rem";
-  inputElement.removeEventListener("click", addDefaultDate);
-}
-
-function addDefaultDate(evt) {
-  let input = evt.target;
-  let row = input.closest(".row");
-  let parent = row.parentElement;
-  addBlankRowAtEnd(parent, addDefaultDate);
-  row.classList.add("active");
-  unmakeButton(input);
-  setDefaultValues(row);
-  validateInputsRegexp(row);
-  autoSave();
-}
-
-function addBlankRowAtEnd(parent, dateListener) {
-  let row = parent.querySelector(".row:last-of-type");
-  row.classList.add("active");
-  let cloneRow = row.cloneNode(true);
-  cloneRow.classList.remove("active");
-  cloneRow.dataset.rowNum = parseInt(cloneRow.dataset.rowNum) + 1;
-  cloneRow.querySelectorAll("input").forEach((input) => {
-    input.classList.remove("wrong");
-    input.id = "" + cloneRow.dataset.rowNum + "-" + input.id.split("-")[1]; //  New ID will be new row number plus same part after the underscore.
-    if (input.value !== "▾") { //  If it doesn{t have the button due to a default date.
-      input.value = "";
+function autoLoad() {
+    const csvNator = window.localStorage.getItem("CSVnator");
+    if (!csvNator) {
+        for (let i = 0; i < pages.length; i++) {
+            const page = pages[i];
+            let arrayrows = page.querySelectorAll(".rowgrid.values");
+            defaultToArrayOfRows(arrayrows);
+        }
+        autoSave();
+        return;
     }
-  });
-  if (dateListener !== null) {
-    cloneRow.querySelector(".first").addEventListener("click", dateListener);
-  }
-  parent.appendChild(cloneRow);
-}
-
-function getTax(num, intPerct) {
-  let tax = parseInt(intPerct) / 100;
-  return twoDecimals(num * tax);
-}
-
-function getTotal(e) {
-  let tot = 0;
-  let parentRow = e.closest(".row");
-  let arrAddends = parentRow.querySelectorAll(".addend");
-  arrAddends.forEach(addend => {
-    if (checkRegex(addend) && addend.value.length > 0) {
-      tot += parseFloat(twoDecimals(addend.value));
-    }
-  });
-  return twoDecimals(tot);
-}
-
-function areInputsEmpty(row) {
-  let arrInputs = row.querySelectorAll("input");
-  let allEmpty = 0;
-  arrInputs.forEach(input => {
-    if (input.value.length > 0) {
-      allEmpty++;
-    }
-  });
-  if (allEmpty > 0) {
-    return false;
-  } else {
-    return true;
-  }
-}
-
-function setDefaultValues(row) {
-  let parent = row.parentElement;
-  let defaultInputs = parent.querySelectorAll(".row.default input");
-  for (let i = 0; i < defaultInputs.length; i++) {
-    let defaultInput = defaultInputs[i];
-    let input = row.querySelectorAll("input")[i];
-    if (defaultInput.value.length > 0) { //  If there's any corresponding default value.
-      input.value = defaultInput.value;
-    }
-  }
-}
-
-function validateInputsRegexp() {
-  let tabs = document.querySelectorAll(".container-tab");
-  tabs.forEach(tab => {
-    let rows = tab.querySelectorAll(".row:not(.default):not(.labels)");
-    rows.forEach(row => {
-      let inputs = row.querySelectorAll("input");
-      inputs.forEach(input => {
-        if (!input.classList.contains("btn")) {
-          if (input.classList.contains("date")) {
-            if (validateDateFormat(input.value) || input.value.length == 0 || input.value == "▾") {
-              input.classList.remove("wrong");
-            } else {
-              input.classList.add("wrong");
+    const obj = JSON.parse(csvNator);
+    spanSeparator.innerText = obj.separator;
+    for (const page in obj.pages) {
+        const objPage = obj.pages[page];
+        const tab = document.getElementById(page);
+        // Defaults.
+        const secdef = tab.querySelector(".section-defaults");
+        for (const def in objPage.defs) {
+            if (Object.hasOwnProperty.call(objPage.defs, def)) {
+                const objDefaults = objPage.defs;
+                const input = secdef.querySelector(`[def-rowid=${[def]}]`);
+                input.value = objDefaults[def];
             }
-          } else {
-            checkRegex(input);
-          }
         }
-      });
-    });
-  });
-}
-
-function checkRegex(e) {
-  if (e.dataset.regex !== undefined) {
-    regex = new RegExp(e.dataset.regex);
-    if (regex.test(e.value) || e.value.length == 0) {
-      // e.classList.remove("wrong");
-      return true;
-    } else {
-      // e.classList.add("wrong");
-      return false;
+        // Values.
+        let secval = tab.querySelector(".section-values");
+        let firstRow = secval.querySelector(".row.first");
+        let lastRow = secval.querySelector(".row.last");
+        secval.innerHTML = "";
+        secval.appendChild(firstRow);
+        secval.appendChild(lastRow);
+        let lastUsedRow = firstRow;
+        const rowsObj = objPage.values;
+        for (let i = 0; i < rowsObj.length; i++) {
+            const ro = rowsObj[i];
+            if (i > 0) {
+                let increasedParent = onBtnAddRow(lastUsedRow);
+                let newArrRows = increasedParent.querySelectorAll(".row:not(.first):not(.last)");
+                let newLastRow = newArrRows[newArrRows.length - 1];
+                lastUsedRow = newLastRow;
+            }
+            for (const key in ro) {
+                if (Object.hasOwnProperty.call(ro, key)) {
+                    const value = ro[key];
+                    const input = lastUsedRow.querySelector(`[row-id=${key}]`);
+                    input.value = value;
+                }
+            }
+        }
     }
-  } else {
-    // e.classList.remove("wrong");
-    return true;
-  }
 }
 
-function validateDateFormat(txt) { //  Provided it is in the format "dd/mm/yyyy".
-  // if (!/^\d{2}\/\d{2}\/\d{4}$/.test(txt)) {
-  //   return false;
-  // } else {
-  let arrDate = txt.split("/");
-  let dd = parseInt(arrDate[0]);
-  let mm = parseInt(arrDate[1]);
-  let yyyy = parseInt(arrDate[2]);
-  let arrMonths = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]; //  Days of each month.
-  if (isLeapYear(yyyy)) {
-    arrMonths[1] = 29;
-  }
-  if (yyyy < 1) {
-    // Invalid year.
-    return false;
-  } else {
-    // Valid year.
+
+
+// ADD/REMOVE ROWS BEHAVIOR
+const btnToggleAdd = document.getElementById("btnToggleAdd");
+const btnToggleRemove = document.getElementById("btnToggleRemove");
+
+const arrPages = document.querySelectorAll(".page");
+
+btnToggleAdd.addEventListener("click", () => {
+    arrPages.forEach(page => {
+        page.classList.remove("remove-row");
+        page.classList.toggle("add-row");
+    });
+});
+btnToggleRemove.addEventListener("click", () => {
+    arrPages.forEach(page => {
+        page.classList.remove("add-row");
+        page.classList.toggle("remove-row");
+    });
+});
+
+function onBtnAddRow(btn) {
+    let thisrow = btn.closest(".row");
+    let parent = thisrow.closest(".section-values");
+    let newrow = thisrow.cloneNode(true);
+    newrow.classList.remove("first");
+    let arrRows = parent.querySelectorAll(".row");
+    let newArrRows = [];
+    for (let i = 0; i < arrRows.length; i++) {
+        const row = arrRows[i];
+        newArrRows.push(row);
+        if (row == thisrow) newArrRows.push(newrow);
+        if (i == arrRows.length - 1) {
+            parent.innerHTML = "";
+            newArrRows.forEach(nar => {
+                parent.appendChild(nar);
+                if (nar == newrow) applyDefaultValues(nar);
+            });
+        }
+    }
+    checkAllRegex();
+    autoSave();
+    return parent;
+}
+
+function onBtnRemoveRow(btn) {
+    let thisrow = btn.closest(".row");
+    let parent = thisrow.closest(".section-values");
+    let allrows = parent.querySelectorAll(".row");
+    let newrowsarray = [];
+    for (let i = 0; i < allrows.length; i++) {
+        const currentrow = allrows[i];
+        if (thisrow == currentrow) continue;
+        newrowsarray.push(currentrow);
+        if (i == allrows.length - 1) {
+            parent.innerHTML = "";
+            newrowsarray.forEach(row => {
+                parent.appendChild(row);
+            });
+        }
+    }
+    autoSave();
+}
+
+function applyDefaultValues(row) {
+    let page = row.closest(".page");
+    let inputs = row.querySelectorAll("input");
+    inputs.forEach(input => {
+        const defInput = page.querySelector(`[def-rowid=${input.getAttribute("row-id")}]`);
+        input.value = defInput.value;
+    });
+}
+
+function areAllInputsEmpty(rowElement) {
+    arrInputs = rowElement.querySelectorAll(".rowgrid.values input");
+    let allempty = true;
+    for (let i = 0; i < arrInputs.length; i++) {
+        const input = arrInputs[i];
+        if (input.value.length !== 0) {
+            allempty = false;
+            break;
+        }
+    }
+    return allempty;
+}
+
+
+
+function twoDecimals(floatNum) {
+    let num = (Math.round(floatNum * 100) / 100).toString(); //  Reducing to a maximum of 2 decimals.
+    if (/^\d+$/.test(num)) { //  0
+        return num + ".00";
+    } else if (/^\d+\.\d$/.test(num)) { //  0.0
+        return num + "0";
+    } else { //  0.00
+        return "" + num;
+    }
+}
+
+function checkAllRegex() {
+    for (let i = 0; i < pages.length; i++) {
+        const page = pages[i];
+        let inputs = page.querySelector(".section-values").querySelectorAll("input");
+        for (let j = 0; j < inputs.length; j++) {
+            const input = inputs[j];
+            let rowValues = input.closest(".rowgrid.values")
+            let regex = new RegExp(input.dataset.regex);
+
+            if (input.value.length == 0) {
+                // If input is empty.
+                input.classList.remove("wrong");
+                input.classList.add("empty");
+            } else {
+                // If input is not empty.
+                input.classList.remove("empty");
+                if (regex.test(input.value)) {
+                    //Date
+                    if (input.getAttribute("placeholder") == "DD/MM/YYYY") {
+                        // If input is a date, check if it is a valid date and valid year.
+                        if (!isValidDateFormat(input.value)) {
+                            input.classList.add("wrong");
+                            continue;
+                        }
+                    }
+
+                    // If input is not empty and corrctly formated.
+                    input.classList.remove("wrong");
+                } else {
+                    // If input is not empty but wrongly formated.
+                    input.classList.add("wrong");
+                }
+
+                // if it is not empty, regarless of whether is correctly formated or not.
+                if (input.classList.contains("dui" || input.classList.contains("nit"))) {
+                    // If input is not empty, correctly formated, but it is either a NIT or DUI input.
+                    let otherone = (input.classList.contains("dui")) ? rowValues.querySelector(".nit") : rowValues.querySelector(".dui");
+                    if (input.value.length > 0 && otherone.value.length > 0) {
+                        input.classList.add("wrong");
+                        otherone.classList.add("wrong");
+                        continue;
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+function isValidDateFormat(txt) { //  Provided it is in the format "dd/mm/yyyy".
+    let regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+    if (!regex.test(txt)) return false;
+    let arr = txt.match(regex);
+    let [, day, month, year] = arr;
+    let dd = parseInt(day);
+    let mm = parseInt(month);
+    let yyyy = parseInt(year);
+    let arrMonths = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]; //  Days of each month.
+    if (isLeapYear(yyyy)) {
+        arrMonths[1] = 29;
+    }
+    if (yyyy < 1) {
+        // Invalid year.
+        return false;
+    }
     if (mm < 1 || mm > 12) {
-      // Invalid month.
-      return false;
-    } else {
-      // Valid month.
-      if (dd < 1 || dd > arrMonths[mm - 1]) {
+        // Invalid month.
+        return false;
+    }
+    if (dd < 1 || dd > arrMonths[mm - 1]) {
         // Invalid date-
         return false;
-      } else {
-        // Valid date.
-        return true;
-      }
     }
-  }
-  // }
+    return true;
 }
 
 function isLeapYear(intYear) {
-  let leap = null;
-  if (intYear % 4 === 0) {
-    if (intYear % 100 === 0) {
-      if (intYear % 400 === 0) {
-        leap = true;
-      } else {
-        leap = false;
-      }
-    } else {
-      leap = true;
+    if (!Number.isInteger(intYear)) return false;
+    if (intYear % 4 !== 0) return false;
+    if (intYear % 100 == 0) {
+        if (intYear % 400 == 0) return true;
+        return false;
     }
-  } else {
-    leap = false;
-  }
-  return leap;
+    return true;
 }
 
-function onDateKeyup(event) { //  Automatically converts text to the format dd/mm/yyyy
-  let txt = event.target.value;
-  if (event.keyCode !== 8) { //  If it is not backspace.
-    if (/^(\d{2})$/m.test(txt)) {
-      event.target.value = txt + "/";
+
+// ON INPUT OF ALL <input>
+
+function onInputInput(input) {
+    let page = input.closest(".page");
+    let row = input.closest(".row");
+    let regex = new RegExp(input.dataset.regex);
+    let rowValues = row.querySelector(".rowgrid.values");
+
+    // Last row will be partially hidden until the first input is filled.
+    if (row.classList.contains("last")) {
+        let valuesRow = row.querySelector(".rowgrid.values");
+        let firstinput = valuesRow.firstElementChild;
+        if (firstinput.value.length !== 0) {
+            row.classList.remove("last");
+            onBtnAddRow(valuesRow);
+            let lastrow = row.nextElementSibling;
+            lastrow.classList.add("last");
+            firstinput.focus();
+        }
     }
-    if (/^(\d{2})\/(\d{2})$/.test(txt)) {
-      event.target.value = txt + "/"
+    if (row.classList.contains("default")) {
+        let hiddenRow = page.querySelector(".row.last");
+        let hiddenInput = hiddenRow.querySelector(`[row-id=${input.getAttribute("def-rowid")}]`);
+        hiddenInput.value = input.value;
+
     }
-  }
+
+
+    if (regex.test(input.value) || input.value.length == 0) {
+        startCalculations(input).then((input) => {
+            calculateTaxes(input).then((input) => {
+                getTotal(input).then((input) => {
+                    checkAllRegex();
+                })
+            });
+        });
+    }
+
+    if (input.getAttribute("row-id") == "date") {
+        let regexDd = /^\d{2}$/;
+        let regexMm = new RegExp(/^\d{2}\/\d{2}$/);
+        if (regexDd.test(input.value)) input.value += "/";
+        if (regexMm.test(input.value)) input.value += "/";
+    }
+
+    checkAllRegex();
+
+
 }
 
-function preventAlphabetKeydown(event) {
-  if (/^[a-zA-Z ]$/.test(event.key) && event.ctrlKey == false) {
-    event.preventDefault();
-  }
+
+function startCalculations(input) {
+    return new Promise((res, re) => {
+        res(input);
+    });
 }
 
-function twoDecimals(floatNum) {
-  let num = (Math.round(floatNum * 100) / 100).toString(); //  Reducing to a maximum of 2 decimals.
-  if (/^\d+$/.test(num)) { //  0
-    return num + ".00";
-  } else if (/^\d+\.\d$/.test(num)) { //  0.0
-    return num + "0";
-  } else { //  0.00
-    return "" + num;
-  }
+function calculateTaxes(input) {
+    return new Promise((res, rej) => {
+        if (input.classList.contains("taxable")) {
+            let taxonid = input.dataset.taxOn;
+            let rowvalues = input.closest(".rowgrid.values");
+            let arrTaxables = rowvalues.querySelectorAll(`[data-tax-on=${taxonid}]`);
+            let taxon = rowvalues.querySelector(`[row-id=${taxonid}]`);
+            let tax = parseFloat(taxon.dataset.perct);
+            let sumTax = 0;
+            for (let i = 0; i < arrTaxables.length; i++) {
+                console.log("here");
+                const taxable = arrTaxables[i];
+                if (taxable.value.length == 0) {
+                    console.log("skipped");
+                    continue;
+                }
+                sumTax += parseFloat(taxable.value) * (tax / 100);
+            }
+            taxon.value = twoDecimals(sumTax);
+        }
+        res(input);
+    });
 }
-// ------
 
-function getCurrentTab() {
-  let tabName = `container-${document.body.classList}`;
-  return document.querySelector(`#${tabName}`);
+function getTotal(input) {
+    return new Promise((res, rej) => {
+        if (input.classList.contains("addend")) {
+            let rowvalues = input.closest(".rowgrid");
+            let totalInput = rowvalues.querySelector(".total");
+            let arrAddends = rowvalues.querySelectorAll(".addend");
+            let sum = 0;
+            for (let i = 0; i < arrAddends.length; i++) {
+                const addend = arrAddends[i];
+                if (addend.value.length > 0) {
+                    sum += parseFloat(twoDecimals(addend.value));
+                }
+                if (i == arrAddends.length - 1) totalInput.value = twoDecimals(sum);
+            }
+        }
+        res(input);
+    });
 }
-//  GENERATE CSV FILE
+
+// DOWNLOAD CSV
+
+const btnDownloadCsv = document.getElementById("btnDownloadCsv");
+btnDownloadCsv.addEventListener("click", generateCSV);
+
+function getCurrentPage() {
+    let checkedtab = document.querySelector("#nav-top .menu-items input[name=cbgTabs]:checked");
+    let currentpage = document.getElementById(checkedtab.getAttribute("for-tab"));
+    return currentpage;
+}
+
 function generateCSV() {
-  if (window.localStorage.getItem("CSVnator") == null) return;
-  let tabName = document.body.classList[0];
-  //  Get the array of data from the current tab.
-  let arrRows = [];
-  CSVnator.values.forEach(objTabs => {
-    if (objTabs.id == "container-" + tabName) {
-      arrRows = objTabs.values.slice(1).slice(0, -1); //  The first position corresponds to the Default Values, not needes for the CSV file. The last position is always an empty row.
+    if (window.localStorage.getItem("CSVnator") == null) return;
+    let currentpage = getCurrentPage();
+    let arrRows = currentpage.querySelectorAll(".section-values .row:not(.last)");
+    let arrText = [];
+    for (let i = 0; i < arrRows.length; i++) {
+        const row = arrRows[i];
+        if (areAllInputsEmpty(row)) continue;
+        const arrInputs = row.querySelectorAll(".rowgrid.values input");
+        let line = "";
+        for (let j = 0; j < arrInputs.length; j++) {
+            const input = arrInputs[j];
+            line += input.value + spanSeparator.innerText;
+        }
+        arrText.push(line);
     }
-  });
-  //  Make the array of data a string chain.
-  let completeStr = arrRows.map(row => {
-    return row.map(input => {
-      return input.value;
-    }).join(spanSeparator.innerText);
-  }).join("\n");
+    let str = arrText.join("\n");
+    let blob = new Blob([str], {
+        type: "text/csv"
+    });
+    let url = window.URL.createObjectURL(blob);
+    let tabname = "" + currentpage.id.charAt(0).toUpperCase() + currentpage.id.slice(1);
+    let filename = addTimestamp(tabname);
 
-  //  Create the CSV file with the string chain.
-  let csvFile = null;
-  if (csvFile !== null) window.URL.revokeObjectURL(csvFile);
-  let data = new Blob([completeStr], {
-    type: "text/csv"
-  });
-  csvFile = window.URL.createObjectURL(data);
-
-  //  Get the first part of the file name.
-  let docFileName = "";
-  switch (tabName) {
-    case "ventas":
-      docFileName = "Detalle de Ventas "
-      break;
-    case "compras":
-      docFileName = "Detalle de Compras ";
-      break;
-    case "retencion":
-      docFileName = "Detalle de Retencion ";
-      break;
-    case "percepcion":
-      docFileName = "Detalle de Percepcion ";
-      break;
-    default:
-      break;
-  }
-  //  Complete the file name with the timestamp.
-  let fileName = addTimestamp(docFileName);
-  //  Create a ghost "a" element to click to download the file.
-  let a = document.createElement("a");
-  a.href = csvFile;
-  a.download = fileName;
-  a.style.display = "none";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+    const a = document.createElement("a");
+    a.style.display = "none";
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
 }
 
-function addTimestamp(txt) {
-  let t = new Date();
-  let year = t.getFullYear();
-  let month = addZerosFirst(t.getMonth(), 2);
-  let date = addZerosFirst(t.getDay(), 2);
-  let hours = addZerosFirst(t.getHours(), 2);
-  let minutes = addZerosFirst(t.getMinutes(), 2);
-  let seconds = addZerosFirst(t.getSeconds(), 2);
-  let timeStamp = year + "-" + month + "-" + date + " " + hours + "\:" + minutes + "\:" + seconds;
-  return txt + timeStamp;
+function addTimestamp(name) {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const timestamp = `${year}-${month}-${day} ${hours}${minutes}${seconds}`;
+
+    return `${name} - ${timestamp}`;
 }
 
-function addZerosFirst(txtNum, intOfDigits) {
-  let difference = intOfDigits - txtNum.length;
-  for (var i = 0; i < difference; i++) {
-    txtNum = "0" + txtNum;
-  }
-  return txtNum;
-}
+// DIALOGS
+
+const bodyDiagInfo = document.getElementById("diagInfo");
+const topbarBtnInfo = document.getElementById("topbarBtnInfo");
+
+const diagInfo = new AutoDialog({
+    dialog: bodyDiagInfo,
+    title: "Info",
+    trigger: topbarBtnInfo,
+    ok: false,
+    cancel: false
+})
+
+const bodyDiagContactme = document.getElementById("diagContactme");
+const topbarBtnContactme = document.getElementById("topbarBtnContactme");
+const diagContactme = new AutoDialog({
+    dialog: bodyDiagContactme,
+    title: "Contactarme",
+    trigger: topbarBtnContactme,
+    ok: false,
+    cancel: false
+})
+topbarBtnContactme.addEventListener("click", () => {
+    let body = bodyDiagContactme.querySelector(".body");
+    let sel = window.getSelection();
+    let range = new Range();
+    range.selectNodeContents(body);
+    sel.removeAllRanges();
+    sel.addRange(range);
+})
+
+const bodyDiagSeparator = document.getElementById("diagSeparator");
+const itDiagSeparator = bodyDiagSeparator.querySelector(".body input");
+itDiagSeparator.value = spanSeparator.innerText;
+const separator = document.getElementById("separator");
+const diagSeparator = new AutoDialog({
+    dialog: bodyDiagSeparator,
+    title: "Caracter separador",
+    trigger: separator
+});
+
+diagSeparator.onOk(() => {
+    spanSeparator.innerText = itDiagSeparator.value;
+    autoSave();
+});
+
+const bodyDiagClearData = document.getElementById("diagClearData");
+const spDiagClear = bodyDiagClearData.querySelector(".body span");
+const clearData = document.getElementById("clear-data");
+clearData.addEventListener("click", () => {
+    let currentpage = getCurrentPage();
+    let pageid = currentpage.id;
+    pagename = pageid.charAt(0).toUpperCase() + pageid.slice(1);
+    spDiagClear.innerText = pagename;
+});
+const diagClearData = new AutoDialog({
+    dialog: bodyDiagClearData,
+    title: "Limpiar datios",
+    trigger: clearData
+});
+diagClearData.onOk(() => {
+    let currentpage = getCurrentPage();
+    let section = currentpage.querySelector(".section-values");
+    let arrRows = section.querySelectorAll(".row:not(.first):not(.last)");
+    arrRows.forEach(row => {
+        section.removeChild(row);
+    });
+    let first = section.querySelector(".row.first");
+    let last = section.querySelector(".row.last");
+    defaultToArrayOfRows([first, last]);
+    checkAllRegex();
+    first.querySelector(".rowgrid.values input:first-of-type").focus();
+    autoSave();
+});
