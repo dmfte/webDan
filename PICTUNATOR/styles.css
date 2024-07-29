@@ -11,60 +11,16 @@
     font-family: NovaMono;
     font-weight: 100;
 }
-
 :root {
-
-    @media only screen and (max-width: 600px) {
-        --controlsbar-w: 45px;
-        --all-grid-columns: 1fr var(--controlsbar-w);
-        --controlsbar-padd: 1px;
-        --controls-padd: 1px;
-        --rs-width: 350px;
-
-        --topbar-height: 20px;
-        --topbar-padd-y: 0rem;
-        --topbar-padd-x: 0.2rem;
-        --navbar-submenu-w: 200px;
-    }
-
-    @media only screen and (min-width: 601px) and (max-width: 1024px) {
-        --controlsbar-w: 55px;
-        --all-grid-columns: 1fr var(--controlsbar-w);
-        --controls-padd: 0.1rem;
-        --controlsbar-padd: 0.2rem;
-        --rs-width: 400px;
-
-        --topbar-height: 30px;
-        --topbar-padd-y: 0.1rem;
-        --topbar-padd-x: 0.2rem;
-        --navbar-submenu-w: 250px;
-    }
-
-    @media only screen and (min-width: 1025px) and (max-width: 1440px) {
-        --controlsbar-w: 350px;
-        --all-grid-columns: var(--controlsbar-w) 1fr;
-        --controls-padd: 0.2rem;
-        --controlsbar-padd: 0.3rem;
-        --rs-width: 100%;
-
-        --topbar-height: 35px;
-        --topbar-padd-y: 0.2rem;
-        --topbar-padd-x: 0.5rem;
-        --navbar-submenu-w: 300px;
-    }
-
-    @media only screen and (min-width: 1441px) {
-        --controlsbar-w: 400px;
-        --all-grid-columns: var(--controlsbar-w) 1fr;
-        --controls-padd: 0.2rem;
-        --controlsbar-padd: 0.4rem;
-        --rs-width: 100%;
-
-        --topbar-height: 45px;
-        --topbar-padd-y: 0.2rem;
-        --topbar-padd-x: 0.5rem;
-        --navbar-submenu-w: 350px
-    }
+    --controlsbar-w: 45px;
+    --all-grid-columns: 1fr var(--controlsbar-w);
+    --controlsbar-padd: 1px;
+    --controls-padd: 1px;
+    --rs-width: 350px;
+    --topbar-height: 20px;
+    --topbar-padd-y: 0rem;
+    --topbar-padd-x: 0.2rem;
+    --navbar-submenu-w: 200px;
 
     --navheight-lg: 55px;
     --navheight-md: 65px;
@@ -104,7 +60,6 @@
     --color-ctrlsbar-bg: #1e2c2c;
     --color-effects-rb-bg-off: #3c5151;
     --color-effects-rb-bg-on: #617c7c;
-    /* --color-effects-rb-outline:; */
     --color-controls-btn: rgb(121, 145, 206);
     --color-controls-btn-hover: rgb(142, 167, 231);
     --color-controls-btn-active: #c5e8e8;
@@ -112,10 +67,7 @@
     --color-effects-rb-color-on: #ACE6E6;
     --color-effects-rb-inside: rgb(92, 166, 173);
     --color-controls-bg: #8fbcbd;
-    /* --color-controls-bg-hover: #c3f4f5; */
 
-    /* --color-slider-bg: rgb(142, 167, 231);
-    --color-slider-bg-ligher: rgb(162, 187, 251); */
     --color-slider-bg: rgb(87, 107, 158);
     --color-slider-bg-ligher: rgb(107, 127, 178);
     --color-slider-color: rgb(187, 207, 255);
@@ -127,8 +79,64 @@
     --color-dlbar-btn-bg: #97a5c6;
     --color-dlbar-btn-bg-hover: #aab7d5;
     --color-dlbar-btn-bg-active: #becae6;
-
 }
+
+@media only screen and (max-width: 600px) {
+    :root {
+        --controlsbar-w: 45px;
+        --all-grid-columns: 1fr var(--controlsbar-w);
+        --controlsbar-padd: 1px;
+        --controls-padd: 1px;
+        --rs-width: 350px;
+        --topbar-height: 20px;
+        --topbar-padd-y: 0rem;
+        --topbar-padd-x: 0.2rem;
+        --navbar-submenu-w: 200px;
+    }
+}
+
+@media only screen and (min-width: 601px) and (max-width: 1024px) {
+    :root {
+        --controlsbar-w: 55px;
+        --all-grid-columns: 1fr var(--controlsbar-w);
+        --controls-padd: 0.1rem;
+        --controlsbar-padd: 0.2rem;
+        --rs-width: 400px;
+        --topbar-height: 30px;
+        --topbar-padd-y: 0.1rem;
+        --topbar-padd-x: 0.2rem;
+        --navbar-submenu-w: 250px;
+    }
+}
+
+@media only screen and (min-width: 1025px) and (max-width: 1440px) {
+    :root {
+        --controlsbar-w: 350px;
+        --all-grid-columns: var(--controlsbar-w) 1fr;
+        --controls-padd: 0.2rem;
+        --controlsbar-padd: 0.3rem;
+        --rs-width: 100%;
+        --topbar-height: 35px;
+        --topbar-padd-y: 0.2rem;
+        --topbar-padd-x: 0.5rem;
+        --navbar-submenu-w: 300px;
+    }
+}
+
+@media only screen and (min-width: 1441px) {
+    :root {
+        --controlsbar-w: 400px;
+        --all-grid-columns: var(--controlsbar-w) 1fr;
+        --controls-padd: 0.2rem;
+        --controlsbar-padd: 0.4rem;
+        --rs-width: 100%;
+        --topbar-height: 45px;
+        --topbar-padd-y: 0.2rem;
+        --topbar-padd-x: 0.5rem;
+        --navbar-submenu-w: 350px;
+    }
+}
+
 
 html,
 body {
@@ -420,15 +428,15 @@ body {
             }
         }
 
-        & input#cbEraser:checked ~ .g-ctrl {
-                background-color: var(--color-global-btn-hover);
-            }
-        }
-
-        & input:is([type=checkbox], [type=file]) {
-            display: none;
+        & input#cbEraser:checked~.g-ctrl {
+            background-color: var(--color-global-btn-hover);
         }
     }
+
+    & input:is([type=checkbox], [type=file]) {
+        display: none;
+    }
+
 
     & #globalControls:not(:has(#cbHorzVert:checked))~#picturesArea {
         flex-direction: row;
@@ -583,7 +591,7 @@ body {
 
                 & input:checked+label {
                     background-color: var(--color-controls-btn-checked);
-                    scale: 0.85;
+                    /* scale: 0.85; */
                 }
 
                 & input~label:active {
@@ -597,11 +605,11 @@ body {
                     display: flex;
                     justify-content: center;
                     align-items: center;
+                    padding: 0;
                     overflow: hidden;
                     cursor: pointer;
 
                     @media only screen and (max-width: 1024px) {
-                        /* border: 1px solid red; */
                         width: calc(var(--controlsbar-w) - (var(--controlsbar-padd) * 2) - (var(--controls-padd) * 2));
                         height: calc(var(--controlsbar-w) - (var(--controlsbar-padd) * 2) - (var(--controls-padd) * 2));
                         margin-bottom: 2px;
@@ -612,6 +620,12 @@ body {
                         height: calc((var(--controlsbar-w) - (var(--controlsbar-padd) * 2) - var(--controls-padd) * 2) / 7);
                         margin-right: 1px;
                     }
+
+                    & svg {
+                        width: 100%;
+                        height: 100%;
+                    }
+
                 }
 
                 & .btn:hover:not(.icolor, [for=cbGraysBlack]) {

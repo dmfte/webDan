@@ -1,3 +1,12 @@
+// VARIABLES
+var canvIn = document.getElementById("canvIn");
+// var ctxIn = canvIn.getContext("2d", {willReadFrequently: true});
+var canvOut = document.getElementById("canvOut");
+var ctxOut = canvOut.getContext("2d", { willReadFrequently: true });
+var imageIn;
+
+// ---------
+
 // GLOBAL ACTION BAR.
 
 // Checkbox to display images side to side or one on top of the other.
@@ -188,14 +197,6 @@ cbOriginalDimensions.addEventListener("change", () => {
     }
 });
 // ------------
-// VARIABLES
-var canvIn = document.getElementById("canvIn");
-// var ctxIn = canvIn.getContext("2d", {willReadFrequently: true});
-var canvOut = document.getElementById("canvOut");
-var ctxOut = canvOut.getContext("2d", { willReadFrequently: true });
-var imageIn;
-
-// ---------
 
 // GRID EFFECT
 var paramsGrid = {
