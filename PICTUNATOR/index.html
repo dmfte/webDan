@@ -79,7 +79,7 @@
             </label>
 
             <input type="checkbox" name="" id="cbEraser">
-            <label for="cbEraser" class="g-ctrl gctrl1">
+            <label for="cbEraser" class="g-ctrl gctrl1" style="display: none;">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
                     <path fill="none" stroke="rgb(121, 152, 230)" stroke-width="1" d="M 3 5 L 5 3 Q 7 1 9 3 L 12 6 L 6 12 L 3 9 Q 1 7 3 5 " />
                     <path fill="rgb(121, 152, 230)" stroke="rgb(121, 152, 230)" stroke-width="1" d="M 12 6 L 15 9 Q 17 11 15 13 L 13 15 Q 11 17 9 15 L 6 12 Z"/>
@@ -167,6 +167,18 @@
                                 <path stroke="none" fill="#969696" d="M 12 9 H 17 V 14 H 12 Z" />
                             </g>
                         </svg>
+                    </label>
+                    <input type="checkbox" id="cbPxHorizontal">
+                    <label for="cbPxHorizontal" class="btn" >
+                    
+                    </label>
+                    <input type="checkbox" id="cbPxGrid">
+                    <label for="cbPxGrid" class="btn">
+                        
+                    </label>
+                    <input type="checkbox" id="cbPxPalette">
+                    <label for="cbPxPalette" class="btn">
+
                     </label>
                 </div>
                 <div class="rs-wrapper" tabindex="0">
@@ -374,6 +386,10 @@
         <!-- ------------ -->
         <div id="picturesArea">
             <div class="display img-in">
+                <div class="palette-container" style="display: none;">
+                    <div class="resolution">32px x 64px</div>
+                    <div class="color-list"></div>
+                </div>
                 <canvas id="canvIn" width="0" height="0"></canvas>
             </div>
             <div class="display img-out">

@@ -2,9 +2,12 @@
 var canvIn = document.getElementById("canvIn");
 // var ctxIn = canvIn.getContext("2d", {willReadFrequently: true});
 var canvOut = document.getElementById("canvOut");
-var ctxOut = canvOut.getContext("2d", { willReadFrequently: true });
+var ctxOut = canvOut.getContext("2d", {
+    willReadFrequently: true
+});
 var imageIn;
 
+var SMALLEST_DIM, RATIO;
 // ---------
 
 // GLOBAL ACTION BAR.
@@ -20,7 +23,8 @@ const mpHLS = new MorphPath({
         "M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z",
         "M 2 4 C 2 3 3 2 4 2 L 14 2 C 15 2 16 3 16 4 L 16 8 L 2 8 C 2 8 2 8 2 8 Z",
         "M 2 4 C 2 3 3 2 4 2 L 14 2 C 15 2 16 3 16 4 L 16 8 L 2 8 C 2 8 2 8 2 8 Z",
-        "M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z"],
+        "M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z"
+    ],
     dur: 1000,
     keytimes: [0, 0.2, 0.5, 0.8, 1]
 });
@@ -31,7 +35,8 @@ const mpHRS = new MorphPath({
         "M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 C 10 16 10 16 10 16 Z",
         "M 2 10 L 16 10 C 16 10 16 10 16 10 L 16 14 C 16 15 15 16 14 16 L 4 16 C 3 16 2 15 2 14 Z",
         "M 2 10 L 16 10 C 16 10 16 10 16 10 L 16 14 C 16 15 15 16 14 16 L 4 16 C 3 16 2 15 2 14 Z",
-        "M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 C 10 16 10 16 10 16 Z"],
+        "M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 C 10 16 10 16 10 16 Z"
+    ],
     dur: 1000,
     keytimes: [0, 0.2, 0.5, 0.8, 1]
 });
@@ -65,7 +70,8 @@ const mpFLS = new MorphPath({
         "M 2 2 C 2 2 2 2 2 2 L 7 2 C 7 2 7 2 7 2 L 7 7 L 2 7 C 2 7 2 7 2 7 Z",
         "M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z",
         "M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z",
-        "M 2 2 C 2 2 2 2 2 2 L 7 2 C 7 2 7 2 7 2 L 7 7 L 2 7 C 2 7 2 7 2 7 Z"],
+        "M 2 2 C 2 2 2 2 2 2 L 7 2 C 7 2 7 2 7 2 L 7 7 L 2 7 C 2 7 2 7 2 7 Z"
+    ],
     dur: 1000,
     keytimes: [0, 0.2, 0.5, 0.8, 1],
 });
@@ -76,7 +82,8 @@ const mpFRR = new MorphPath({
         "M 9 4 L 16 4 C 16 4 16 4 16 4 L 16 16 C 16 16 16 16 16 16 L 4 16 L 4 9 L 9 9 Z",
         "M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 L 10 14 L 10 11 Z",
         "M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 L 10 14 L 10 11 Z",
-        "M 9 4 L 16 4 C 16 4 16 4 16 4 L 16 16 C 16 16 16 16 16 16 L 4 16 L 4 9 L 9 9 Z"],
+        "M 9 4 L 16 4 C 16 4 16 4 16 4 L 16 16 C 16 16 16 16 16 16 L 4 16 L 4 9 L 9 9 Z"
+    ],
     dur: 1000,
     keytimes: [0, 0.2, 0.5, 0.8, 1],
 });
@@ -118,13 +125,14 @@ cbEraser.addEventListener("input", () => {
 
 canvIn.addEventListener("click", (evt) => {
     if (!pointerEraser) return;
-    
+
 });
 
 
 // ------------
 var displayImgInOffsetLeft, displayImgInOffsetTop;
-var marginedLeft = 15, marginedTop = 15;
+var marginedLeft = 15,
+    marginedTop = 15;
 
 cbFloatOriginal.addEventListener("input", () => {
     if (cbFloatOriginal.checked) {
@@ -171,7 +179,8 @@ const mpONL = new MorphPath({
     arrayd: [
         "M 17 17 A 1 1 -65 0 0 19 11 L 7 9 Z",
         "M 15 14 A 1 1 0 0 0 21 14 L 18 2 Z",
-        "M 17 11 A 1 1 65 0 0 19 17 L 29 9 Z"],
+        "M 17 11 A 1 1 65 0 0 19 17 L 29 9 Z"
+    ],
     dur: 300,
     keytimes: [0, 0.5, 1],
     repeatcount: 1
@@ -181,7 +190,8 @@ const mpONR = new MorphPath({
     arrayd: [
         "M 17 11 A 1 1 65 0 0 19 17 L 29 9 Z",
         "M 15 14 A 1 1 0 0 0 21 14 L 18 2 Z",
-        "M 17 17 A 1 1 -65 0 0 19 11 L 7 9 Z"],
+        "M 17 17 A 1 1 -65 0 0 19 11 L 7 9 Z"
+    ],
     dur: 300,
     keytimes: [0, 0.5, 1],
     repeatcount: 1
@@ -234,7 +244,8 @@ var mpGHh = new MorphPath({
     path: pathGridHorzvert,
     arrayd: [
         "M 2 3 H 14 V 13 H 2 Z M 8 3 V 13 M 14 3 V 13 M 2 9 H 14 M 2 13 H 14",
-        "M 2 3 H 14 V 13 H 2 Z M 7 3 V 13 M 12 3 V 13 M 2 8 H 14 M 2 13 H 14"],
+        "M 2 3 H 14 V 13 H 2 Z M 7 3 V 13 M 12 3 V 13 M 2 8 H 14 M 2 13 H 14"
+    ],
     dur: 300,
     keytimes: [0, 1],
     repeatcount: 1
@@ -244,7 +255,8 @@ var mpGHv = new MorphPath({
     path: pathGridHorzvert,
     arrayd: [
         "M 2 3 H 14 V 13 H 2 Z M 7 3 V 13 M 12 3 V 13 M 2 8 H 14 M 2 13 H 14",
-        "M 2 3 H 14 V 13 H 2 Z M 8 3 V 13 M 14 3 V 13 M 2 9 H 14 M 2 13 H 14"],
+        "M 2 3 H 14 V 13 H 2 Z M 8 3 V 13 M 14 3 V 13 M 2 9 H 14 M 2 13 H 14"
+    ],
     dur: 300,
     keytimes: [0, 1],
     repeatcount: 1
@@ -267,7 +279,15 @@ cbGridHorzvert.addEventListener("input", async () => {
 //-- Slider for amoaunt of squares.
 const containerGridSquares = document.getElementById("containerGridSquares");
 const labelForContainerGridSquares = document.querySelector("[label-for=containerGridSquares]");
-var rsGridSquares = new RangeSlider(containerGridSquares, { title: "Grid", min: 2, max: 20, def: paramsGrid.amnt, step: 1, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+var rsGridSquares = new RangeSlider(containerGridSquares, {
+    title: "Grid",
+    min: 2,
+    max: 20,
+    def: paramsGrid.amnt,
+    step: 1,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+});
 labelForContainerGridSquares.innerText = rsGridSquares.val;
 rsGridSquares.onslide = async function () {
     labelForContainerGridSquares.innerText = rsGridSquares.val;
@@ -280,7 +300,15 @@ rsGridSquares.onslide = async function () {
 //-- Slider for the width of the grid line.
 const containerGridLinew = document.getElementById("containerGridLinew");
 const labelForContainerGridLinew = document.querySelector("[label-for=containerGridLinew]");
-var rsGridLinew = new RangeSlider(containerGridLinew, { title: "Line Width", min: 1, step: 1, max: 30, def: paramsGrid.linew, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+var rsGridLinew = new RangeSlider(containerGridLinew, {
+    title: "Line Width",
+    min: 1,
+    step: 1,
+    max: 30,
+    def: paramsGrid.linew,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+});
 labelForContainerGridLinew.innerText = rsGridLinew.val;
 rsGridLinew.onslide = function () {
     labelForContainerGridLinew.innerText = rsGridLinew.val;
@@ -332,7 +360,9 @@ function drawGrid(canvas, params) {
         canvas.width = imageIn.width;
         canvas.height = imageIn.height;
     }
-    ctx = canvas.getContext("2d", { willReadFrequently: true });
+    ctx = canvas.getContext("2d", {
+        willReadFrequently: true
+    });
     ctx.drawImage(imageIn, 0, 0);
     ctx.strokeStyle = params.color;
     ctx.lineWidth = params.linew;
@@ -350,9 +380,14 @@ function drawGrid(canvas, params) {
 //  PIXELATE EFFECT
 var paramsPx = {
     smooth: false,
-    level: 10
+    dimension: 10,
+    horizontal: false,
+    grid: true,
+    palete: true
 }
-var canv0;
+var canv0 = document.createElement("canvas");
+var c0 = canv0.getContext("2d", { willReadFrequently: true });
+var pxPalette = {};
 
 //-- Radio Button from the Effects group.
 const rgEffPixelate = document.getElementById("rgEffPixelate");
@@ -373,15 +408,52 @@ cbPxSmooth.addEventListener("input", () => {
     applyPixelation(canvOut, canv0, paramsPx);
 });
 
+const cbPxHorizontal = document.getElementById("cbPxHorizontal");
+cbPxHorizontal.addEventListener("click", () => {
+    paramsPx.horizontal = cbPxHorizontal.checked;
+
+    canv0 = getPixelatedCanvas(paramsPx);
+    applyPixelation(canvOut, canv0, paramsPx);
+});
+
+const cbPxGrid = document.getElementById("cbPxGrid");
+cbPxGrid.addEventListener("click", () => {
+    paramsPx.grid = cbPxGrid.checked;
+    canv0 = getPixelatedCanvas(paramsPx);
+    applyPixelation(canvOut, canv0, paramsPx);
+});
+
+const cbPxPalette = document.getElementById("cbPxPalette");
+cbPxPalette.addEventListener("click", () => {
+    if (!cbPxPalette.checked) return;
+    if (imageIn == undefined) return;
+    let imagedata = c0.getImageData(0, 0, canv0.width, canv0.height).data;
+    for (let i = 0; i < imagedata.length; i += 4) {
+        let r = imagedata[i + 0];
+        let g = imagedata[i + 1];
+        let b = imagedata[i + 2];
+        // let a = imagedata[i + 3];
+        let rgb = `${r}, ${g}, ${b}`;
+        if (!pxPalette.hasOwnProperty(rgb))  pxPalette[rgb] = [];
+        pxPalette[rgb].push(i);
+    }
+    console.log(pxPalette);
+    for (const key in pxPalette) {
+        if (Object.prototype.hasOwnProperty.call(pxPalette, key)) {
+            const rgb = pxPalette[key];
+            
+        }
+    }
+    
+});
+
 //-- Range slider controlling level of pixelation
 var paramsPxLevel = {
-    title: "1/x size",
-    min: 2,
+    title: "Dimension",
+    min: 8,
     step: 1,
-    // Max will be re-set as a tenth  of the img smallest dimention.
-    max: 4,
-    // Default value will be modified as a fourth of max.
-    def: 3,
+    max: 128,
+    def: 32,
     color1: "#576b9e",
     color2: "rgb(142, 167, 231)"
 };
@@ -389,22 +461,23 @@ var paramsPxLevel = {
 const containerPxLevel = document.getElementById("containerPxLevel");
 const labelForContainerPxLevel = document.querySelector("[label-for=containerPxLevel]");
 var rsPxLevel = new RangeSlider(containerPxLevel, paramsPxLevel);
-// paramsPxLevel will change according to image dimensions once image is loaded. Function onslide will be passed on image loading.
 rsPxLevel.onslide = function () {
-    // Since slider is re-created, onslide function has to be added, again.
     labelForContainerPxLevel.innerText = rsPxLevel.val;
-    paramsPx.level = rsPxLevel.val;
+    paramsPx.dimension = rsPxLevel.val;
     canv0 = getPixelatedCanvas(paramsPx);
+
     applyPixelation(canvOut, canv0, paramsPx);
 }
 labelForContainerPxLevel.innerText = rsPxLevel.val;
 
 function getPixelatedCanvas(params) {
     if (imageIn == undefined) return undefined;
-    let canv0 = document.createElement("canvas");
-    canv0.width = Math.floor(imageIn.width / params.level);
-    canv0.height = Math.floor(imageIn.height / params.level);
-    let c0 = canv0.getContext("2d", { willReadFrequently: true });
+    
+    canv0.width = (params.horizontal) ? params.dimension : parseInt(params.dimension / RATIO);
+    canv0.height = (params.horizontal) ? parseInt(params.dimension * RATIO) : params.dimension;
+    c0 = canv0.getContext("2d", {
+        willReadFrequently: true
+    });
     c0.imageSmoothingEnabled = params.smooth;
     c0.drawImage(imageIn, 0, 0, canv0.width, canv0.height);
     return canv0;
@@ -412,11 +485,36 @@ function getPixelatedCanvas(params) {
 
 function applyPixelation(canvasTarget, canvasPixelated, params) {
     if (imageIn == undefined) return;
-    canvasTarget.width = canvasPixelated.width * params.level;
-    canvasTarget.height = canvasPixelated.height * params.level;
-    let ctx = canvasTarget.getContext("2d", { willReadFrequently: true });
+    let block = (params.horizontal) ? parseInt(imageIn.width / params.dimension) : parseInt(imageIn.height / params.dimension);
+    let pw = canvasPixelated.width * block;
+    let ph = canvasPixelated.height * block;
+    canvasTarget.width = pw;
+    canvasTarget.height = ph;
+
+    let ctx = canvasTarget.getContext("2d", {
+        willReadFrequently: true
+    });
     ctx.imageSmoothingEnabled = params.smooth;
     ctx.drawImage(canvasPixelated, 0, 0, canvOut.width, canvOut.height);
+
+    if (params.grid) {
+        for (let i = 1; i < canvasPixelated.height; i++) {
+            let x = 0;
+            let y = i * block
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(canvOut.width, y);
+            ctx.stroke();
+        }
+        for (let i = 1; i < canvasPixelated.width; i++) {
+            let x = i * block;
+            let y = 0;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x, canvOut.height);
+            ctx.stroke();
+        }
+    }
 }
 
 //  GRAYSCALE
@@ -442,7 +540,15 @@ cbGraysBlack.addEventListener("input", async () => {
 //-- Slider for gray levels.
 const containerGraysLevels = document.getElementById("containerGraysLevels");
 const labelForContainerGraysLevels = document.querySelector("[label-for=containerGraysLevels]");
-const rsGraysLevels = new RangeSlider(containerGraysLevels, { title: "Levels of gray", min: 2, max: 20, step: 1, def: paramsGrays.levels, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+const rsGraysLevels = new RangeSlider(containerGraysLevels, {
+    title: "Levels of gray",
+    min: 2,
+    max: 20,
+    step: 1,
+    def: paramsGrays.levels,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+});
 //  More than 20 grayscale tones are barely distinguishable.
 labelForContainerGraysLevels.innerText = rsGraysLevels.val;
 rsGraysLevels.onslide = function () {
@@ -454,7 +560,15 @@ rsGraysLevels.onslide = function () {
 //-- Slider for gray sensitivity.
 const containerGraysSensitivity = document.getElementById("containerGraysSensitivity");
 const labelForContainerGraysSensitivity = document.querySelector("[label-for=containerGraysSensitivity]");
-const rsGraysSensitivity = new RangeSlider(containerGraysSensitivity, { title: "Sensitivity", min: -254, step: 1, max: 254, def: paramsGrays.levels, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+const rsGraysSensitivity = new RangeSlider(containerGraysSensitivity, {
+    title: "Sensitivity",
+    min: -254,
+    step: 1,
+    max: 254,
+    def: paramsGrays.levels,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+});
 labelForContainerGraysSensitivity.innerText = rsGraysSensitivity.val;
 rsGraysSensitivity.onslide = function () {
     labelForContainerGraysSensitivity.innerText = rsGraysSensitivity.val;
@@ -495,7 +609,9 @@ async function applyGrayscaling(params) {
         canvOut.width = imageIn.width;
         canvOut.height = imageIn.height;
     }
-    ctx = canvOut.getContext("2d", { willReadFrequently: true });
+    ctx = canvOut.getContext("2d", {
+        willReadFrequently: true
+    });
     ctx.imageSmoothingEnabled = false;
     let newData = await getGrayscaledImgData(imageInData, params.levels, params.sens, params.black);
     ctx.putImageData(newData, 0, 0);
@@ -508,7 +624,10 @@ var paramsHatch = {
     bg: "#FFFFFF",
     color: "#000000",
     linew: 2,
-    buckets: [[0, 85], [86, 170]],  //  This is what get255Buckets will return with default how_many lines value of 3 minus the last (brightest) bucket.
+    buckets: [
+        [0, 85],
+        [86, 170]
+    ], //  This is what get255Buckets will return with default how_many lines value of 3 minus the last (brightest) bucket.
     direction: "DLUR",
     separation: 3,
     sensitivity: 0,
@@ -557,13 +676,21 @@ icHatchColor.addEventListener("input", async () => {
 // Slider for how many different widths being hatched
 const containerHatchHowmany = document.querySelector("#containerHatchHowmany");
 const labelForContainerHatchHowmany = document.querySelector("[label-for=containerHatchHowmany]");
-var rsHatchHowmanyw = new RangeSlider(containerHatchHowmany, { title: "Lines", min: 1, max: 10, def: paramsHatch.buckets.length, step: 1, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+var rsHatchHowmanyw = new RangeSlider(containerHatchHowmany, {
+    title: "Lines",
+    min: 1,
+    max: 10,
+    def: paramsHatch.buckets.length,
+    step: 1,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+});
 labelForContainerHatchHowmany.innerText = rsHatchHowmanyw.val;
 rsHatchHowmanyw.onslide = async function () {
     labelForContainerHatchHowmany.innerText = rsHatchHowmanyw.val;
     if (imageIn == undefined) return;
     paramsHatch.buckets = await get255Buckets(rsHatchHowmanyw.val + 1, paramsHatch.sensitivity);
-    paramsHatch.buckets.pop();  //  One more bucket is added for absolute white values, but then removed so it is not hatched.
+    paramsHatch.buckets.pop(); //  One more bucket is added for absolute white values, but then removed so it is not hatched.
     paramsHatch.atdh = await getArrToDrawHatch(paramsHatch);
     applyHatching(paramsHatch);
 };
@@ -571,7 +698,15 @@ rsHatchHowmanyw.onslide = async function () {
 // Hatch separation slider.
 const containerHatchSeparation = document.getElementById("containerHatchSeparation");
 const labelForContainerHatchSeparation = document.querySelector("[label-for=containerHatchSeparation]");
-var rsHatchSeparation = new RangeSlider(containerHatchSeparation, { title: "Separation", min: 2, max: 3, step: 1, def: paramsHatch.separation, color1: "#576b9e", color2: "rgb(142, 167, 231)" });  //  Will be reinitialized when image is loaded.
+var rsHatchSeparation = new RangeSlider(containerHatchSeparation, {
+    title: "Separation",
+    min: 2,
+    max: 3,
+    step: 1,
+    def: paramsHatch.separation,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+}); //  Will be reinitialized when image is loaded.
 labelForContainerHatchSeparation.innerText = rsHatchSeparation.val;
 rsHatchSeparation.onslide = async function () {
     labelForContainerHatchSeparation.innerText = rsHatchSeparation.val;
@@ -584,7 +719,15 @@ rsHatchSeparation.onslide = async function () {
 // Width factor slider.
 const containerHatchLinew = document.getElementById("containerHatchLinew");
 const labelForContainerHatchLinew = document.querySelector("[label-for=containerHatchLinew]");
-var rsHatchLinewidth = new RangeSlider(containerHatchLinew, { title: "Width", min: 1, max: 15, def: paramsHatch.linew, step: 1, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+var rsHatchLinewidth = new RangeSlider(containerHatchLinew, {
+    title: "Width",
+    min: 1,
+    max: 15,
+    def: paramsHatch.linew,
+    step: 1,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+});
 labelForContainerHatchLinew.innerText = rsHatchLinewidth.val;
 rsHatchLinewidth.onslide = function () {
     labelForContainerHatchLinew.innerText = rsHatchLinewidth.val;
@@ -595,7 +738,15 @@ rsHatchLinewidth.onslide = function () {
 // Sensitivity slider.
 const containerHatchSensitivity = document.getElementById("containerHatchSensitivity");
 const labelForContainerHatchSensitivity = document.querySelector("[label-for=containerHatchSensitivity]");
-var rsHatchSensitivity = new RangeSlider(containerHatchSensitivity, { title: "Sensitivity", min: -250, max: 250, step: 1, def: paramsHatch.sensitivity, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+var rsHatchSensitivity = new RangeSlider(containerHatchSensitivity, {
+    title: "Sensitivity",
+    min: -250,
+    max: 250,
+    step: 1,
+    def: paramsHatch.sensitivity,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+});
 labelForContainerHatchSensitivity.innerText = rsHatchSensitivity.val;
 rsHatchSensitivity.onslide = async function () {
     labelForContainerHatchSensitivity.innerText = rsHatchSensitivity.val;
@@ -603,7 +754,7 @@ rsHatchSensitivity.onslide = async function () {
     paramsHatch.sensitivity = rsHatchSensitivity.val;
     // let howmany = paramsHatch.buckets.length;
     paramsHatch.buckets = await get255Buckets(paramsHatch.buckets.length + 1, paramsHatch.sensitivity);
-    paramsHatch.buckets.pop();  //  One more bucket is added for absolute white values but then removed so it is not hatched.
+    paramsHatch.buckets.pop(); //  One more bucket is added for absolute white values but then removed so it is not hatched.
     paramsHatch.atdh = await getArrToDrawHatch(paramsHatch);
     applyHatching(paramsHatch);
 };
@@ -614,7 +765,9 @@ async function applyHatching(params) {
     canvOut.imageSmoothingEnabled = false;
     canvOut.width = imageIn.width;
     canvOut.height = imageIn.height;
-    ctxOut = canvOut.getContext("2d", { willReadFrequently: true });
+    ctxOut = canvOut.getContext("2d", {
+        willReadFrequently: true
+    });
     ctxOut.fillStyle = params.bg;
     ctxOut.fillRect(0, 0, canvOut.width, canvOut.height);
     ctxOut.strokeStyle = paramsHatch.color;
@@ -740,11 +893,11 @@ async function getArrToDrawHatch(params) {
                 let gs = getGrayscale(r, g, b);
                 const last = arr.length - 1;
                 const buck = getBucketPosition(gs, params.buckets);
-                if (buck == -1) {  //  It means it didn't found a bucket, which means a line should not be hatched (brightest value).
+                if (buck == -1) { //  It means it didn't found a bucket, which means a line should not be hatched (brightest value).
                     previousbucket = -1;
                     continue;
                 }
-                if (buck == previousbucket) {  //  If the current value is the same as the previous one, it means the same line (hatch) continues.
+                if (buck == previousbucket) { //  If the current value is the same as the previous one, it means the same line (hatch) continues.
                     arr[last][arr[last].length - 1].lx += otsh.dirx;
                     arr[last][arr[last].length - 1].ly += otsh.diry;
                     // objForSvg[params.direction][objForSvg[params.direction].length - 1].lx += otsh.dirx;
@@ -757,7 +910,7 @@ async function getArrToDrawHatch(params) {
                     y: y,
                     lx: x,
                     ly: y,
-                    linew: params.buckets.length - buck  //  Buckets are arranged from 0 to 255 (decreasing light value).
+                    linew: params.buckets.length - buck //  Buckets are arranged from 0 to 255 (decreasing light value).
                 });
                 previousbucket = buck;
                 // objForSvg[params.direction].push({ x: x, y: y, lx: x, ly: y, linew: j });
@@ -767,7 +920,7 @@ async function getArrToDrawHatch(params) {
 
             }
         }
-        let cleanArr = arr.filter(ar => {  //  Remove lines in which there was no hatching at all.
+        let cleanArr = arr.filter(ar => { //  Remove lines in which there was no hatching at all.
             return ar.length > 0;
         });
         res(cleanArr);
@@ -796,7 +949,13 @@ var paramsCrossh = {
     color: "#000000",
     linew: 2,
     arr_direction: ["DLUR", "LR", "ULDR", "UD"],
-    buckets: [[0, 51], [52, 102], [103, 153], [154, 204], [205, 255]],
+    buckets: [
+        [0, 51],
+        [52, 102],
+        [103, 153],
+        [154, 204],
+        [205, 255]
+    ],
     separation: 3,
     sensitivity: 0,
     atch: undefined
@@ -845,7 +1004,15 @@ icCrosshColor.addEventListener("input", () => {
 
 const containerCrosshSeparation = document.getElementById("containerCrosshSeparation");
 const labelForContainerCrosshSeparation = document.querySelector("[label-for=containerCrosshSeparation]");
-var rsCrosshSeparation = new RangeSlider(containerCrosshSeparation, { title: "Separation", min: 3, max: 4, def: 3, step: 1, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+var rsCrosshSeparation = new RangeSlider(containerCrosshSeparation, {
+    title: "Separation",
+    min: 3,
+    max: 4,
+    def: 3,
+    step: 1,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+});
 labelForContainerCrosshSeparation.innerText = rsCrosshSeparation.val;
 rsCrosshSeparation.onslide = async function () {
     labelForContainerCrosshSeparation.innerText = rsCrosshSeparation.val;
@@ -855,7 +1022,15 @@ rsCrosshSeparation.onslide = async function () {
 
 const containerCrosshWidth = document.getElementById("containerCrosshWidth");
 const labelForContainerCrosshWidth = document.querySelector("[label-for=containerCrosshWidth]");
-var rsCrosshWidth = new RangeSlider(containerCrosshWidth, { title: "Width", min: 1, max: 10, def: 2, step: 1, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+var rsCrosshWidth = new RangeSlider(containerCrosshWidth, {
+    title: "Width",
+    min: 1,
+    max: 10,
+    def: 2,
+    step: 1,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+});
 labelForContainerCrosshWidth.innerText = rsCrosshWidth.val;
 rsCrosshWidth.onslide = function () {
     labelForContainerCrosshWidth.innerText = rsCrosshWidth.val;
@@ -865,7 +1040,15 @@ rsCrosshWidth.onslide = function () {
 
 const containerCrosshSensitivity = document.getElementById("containerCrosshSensitivity");
 const labelForContainerCrosshSensitivity = document.querySelector("[label-for=containerCrosshSensitivity]");
-var rsCrosshSensitivity = new RangeSlider(containerCrosshSensitivity, { title: "Sensitivity", min: -254, max: 254, def: 0, step: 1, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+var rsCrosshSensitivity = new RangeSlider(containerCrosshSensitivity, {
+    title: "Sensitivity",
+    min: -254,
+    max: 254,
+    def: 0,
+    step: 1,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+});
 labelForContainerCrosshSensitivity.innerText = rsCrosshSensitivity.val;
 rsCrosshSensitivity.onslide = async function () {
     labelForContainerCrosshSensitivity.innerText = rsCrosshSensitivity.val;
@@ -886,7 +1069,12 @@ function getArrToCrossh(params) {
             const direction = params.arr_direction[i];
             const separation = params.separation;
             const sensitivity = params.sensitivity;
-            var atdh = await getArrToDrawHatch({ direction, separation, buckets, sensitivity });
+            var atdh = await getArrToDrawHatch({
+                direction,
+                separation,
+                buckets,
+                sensitivity
+            });
             arr[i] = (atdh);
         }
         res(arr);
@@ -948,18 +1136,36 @@ icGlyphColor.addEventListener("input", () => {
 
 const containerGlyphDetail = document.getElementById("containerGlyphDetail");
 const labelForContainerGlyphDetail = document.querySelector("[label-for=containerGlyphDetail]");
-var rsGlyphDetail = new RangeSlider(containerGlyphDetail, { title: "Detail", min: 8, max: 20, step: 1, def: paramsGlyph.detail, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+var rsGlyphDetail = new RangeSlider(containerGlyphDetail, {
+    title: "Detail",
+    min: 8,
+    max: 20,
+    step: 1,
+    def: paramsGlyph.detail,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+});
 labelForContainerGlyphDetail.innerText = rsGlyphDetail.val;
 
 const containerGlyphFontsize = document.getElementById("containerGlyphFontsize");
 const labelForContainerGlyphFontsize = document.querySelector("[label-for=containerGlyphFontsize]");
-var rsGlyphFontsize = new RangeSlider(containerGlyphFontsize, { title: "Font Size", min: 1.0, max: 20.0, ste: 0.1, def: paramsGlyph.fontsize, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+var rsGlyphFontsize = new RangeSlider(containerGlyphFontsize, {
+    title: "Font Size",
+    min: 1.0,
+    max: 20.0,
+    ste: 0.1,
+    def: paramsGlyph.fontsize,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+});
 labelForContainerGlyphFontsize.innerText = rsGlyphFontsize.val;
 
 async function applyGlyph(params) {
     if (imageIn == undefined) return;
     let canv0 = document.createElement("canvas");
-    let c0 = canv0.getContext("2d", { willReadFrequently: true });
+    let c0 = canv0.getContext("2d", {
+        willReadFrequently: true
+    });
     canv0.width = parseInt(imageIn.width / params.detail);
     canv0.height = parseInt(imageIn.height / params.detail);
     c0.drawImage(imageIn, 0, 0, canv0.width, canv0.height);
@@ -989,6 +1195,7 @@ function getArrayToGlyph(imagedata, factor) {
 function getImagedataIndex(x, y, width) {
     return (y * width + x) * 4;
 }
+
 function getGrayscale(r, g, b) {
     // return parseInt(r * 0.2426 + g * 0.7152 + b * 0.0822);
     return parseInt(0.299 * r + 0.587 * g + 0.114 * b);
@@ -1017,11 +1224,12 @@ const spanFileName = document.getElementById("spanFileName");
 const ifLoadImg = document.getElementById("ifLoadImg");
 ifLoadImg.addEventListener("input", onceImageLoads);
 
-var imageInData, smallestDim;
+var imageInData;
 
 async function onceImageLoads(inputFileEvent) {
     imageIn = await getLoadedImage(inputFileEvent);
-    smallestDim = Math.min(imageIn.width, imageIn.height);
+    SMALLEST_DIM = Math.min(imageIn.width, imageIn.height);
+    RATIO = imageIn.height / imageIn.width;
     // if (cbOriginalDimensions.checked) {
     //     canvIn.width = imageIn.width;
     //     canvIn.height = imageIn.height;
@@ -1038,7 +1246,9 @@ async function onceImageLoads(inputFileEvent) {
     // }
     canvIn.width = imageIn.width;
     canvIn.height = imageIn.height;
-    ctxIn = canvIn.getContext("2d", { willReadFrequently: true });
+    ctxIn = canvIn.getContext("2d", {
+        willReadFrequently: true
+    });
     ctxIn.drawImage(imageIn, 0, 0, canvIn.width, canvIn.height);
     imageInData = ctxIn.getImageData(0, 0, canvIn.width, canvIn.height);
     spanFileName.innerText = inputFileEvent.target.files[0].name;
@@ -1054,17 +1264,17 @@ async function onceImageLoads(inputFileEvent) {
 
     // Pixelate Effect
     //-- Re-create slider according to image dimensions.
-    paramsPxLevel.max = Math.floor(smallestDim / 10);
-    paramsPxLevel.def = Math.floor(paramsPxLevel.max / 4);
-    rsPxLevel = new RangeSlider(containerPxLevel, paramsPxLevel);
-    labelForContainerPxLevel.innerText = rsPxLevel.val;
-    rsPxLevel.onslide = function () {
-        // Since slider is re-created, onslide function has to be added, again.
-        labelForContainerPxLevel.innerText = rsPxLevel.val;
-        paramsPx.level = rsPxLevel.val;
-        canv0 = getPixelatedCanvas(paramsPx);
-        applyPixelation(canvOut, canv0, paramsPx);
-    }
+    // paramsPxLevel.max = Math.floor(SMALLEST_DIM / 10);
+    // paramsPxLevel.def = Math.floor(paramsPxLevel.max / 4);
+    // rsPxLevel = new RangeSlider(containerPxLevel, paramsPxLevel);
+    // labelForContainerPxLevel.innerText = rsPxLevel.val;
+    // rsPxLevel.onslide = function () {
+    //     // Since slider is re-created, onslide function has to be added, again.
+    //     labelForContainerPxLevel.innerText = rsPxLevel.val;
+    //     paramsPx.dimension = rsPxLevel.val;
+    //     canv0 = getPixelatedCanvas(paramsPx);
+    //     applyPixelation(canvOut, canv0, paramsPx);
+    // }
     if (rgEffPixelate.checked) {
         rsPxLevel.onslide();
     }
@@ -1075,11 +1285,19 @@ async function onceImageLoads(inputFileEvent) {
     }
 
     // For Hatching and Cross-hatching
-    let newMax = parseInt(smallestDim / 10);
+    let newMax = parseInt(SMALLEST_DIM / 10);
     let newDef = parseInt(newMax / 4);
 
     //  Hatching Effect.
-    rsHatchSeparation = new RangeSlider(containerHatchSeparation, { title: "Separation", min: 2, max: newMax, step: 1, def: newDef, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+    rsHatchSeparation = new RangeSlider(containerHatchSeparation, {
+        title: "Separation",
+        min: 2,
+        max: newMax,
+        step: 1,
+        def: newDef,
+        color1: "#576b9e",
+        color2: "rgb(142, 167, 231)"
+    });
     paramsHatch.separation = rsHatchSeparation.val;
     labelForContainerHatchSeparation.innerText = rsHatchSeparation.val;
     rsHatchSeparation.onslide = async function () {
@@ -1094,7 +1312,15 @@ async function onceImageLoads(inputFileEvent) {
     }
 
     //  Cross-hatching Effect.
-    rsCrosshSeparation = new RangeSlider(containerCrosshSeparation, { title: "Separation", min: 3, max: newMax, step: 1, def: newDef, color1: "#576b9e", color2: "rgb(142, 167, 231)" });
+    rsCrosshSeparation = new RangeSlider(containerCrosshSeparation, {
+        title: "Separation",
+        min: 3,
+        max: newMax,
+        step: 1,
+        def: newDef,
+        color1: "#576b9e",
+        color2: "rgb(142, 167, 231)"
+    });
     labelForContainerCrosshSeparation.innerText = rsCrosshSeparation.val;
     rsCrosshSeparation.onslide = async function () {
         labelForContainerCrosshSeparation.innerText = rsCrosshSeparation.val;
@@ -1127,6 +1353,7 @@ function startPaths(morphPaths = []) {
         mp.start();
     });
 }
+
 function stopPaths(morphPaths = []) {
     morphPaths.forEach(mp => {
         mp.stop();

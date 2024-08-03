@@ -944,6 +944,35 @@ body {
             top: 0;
             left: 0;
             z-index: 2;
+
+            & .palette-container{
+                border: 1px solid red;
+                position: absolute;
+                top: 2em;
+                left: 2em;
+                display: flex;
+                flex-direction: column;
+                justify-content: stretch;
+                width: 100px;
+                max-height: 80%;
+                font-size: 0.7em;
+
+                & .resolution{
+                    border: 1px solid blue;
+
+                }
+
+                & .color-list{
+                    border: 1px solid orange;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: stretch;
+
+                    & .color{
+                        border: 1px solid green;
+                    }
+                }
+            }
         }
 
         & .display.img-out {
