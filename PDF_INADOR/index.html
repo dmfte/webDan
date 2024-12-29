@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF-inador</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Google fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Turret+Road:wght@200;300;400;500;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="title">PDF-inador</div>
+    <div class="container">
+        <nav id="nav-top">
+            <!-- Menu of functions -->
+            <div id="menuFuncs" tabindex="0">
+                <div class="hamburger mobile" tabindex="0">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+                <div class="wrapper-menu">
+                    <input type="radio" name="rbgFuncs" id="rbImagesToPDF" checked>
+                    <label for="rbImagesToPDF">⟕ Images a PDF</label>
+                    <input type="radio" name="rbgFuncs" id="rbSplitPDF">
+                    <label for="rbSplitPDF">⟖ Partir PDF</label>
+                    <input type="radio" name="rbgFuncs" id="rbPdfToBooklet">
+                    <label for="rbPdfToBooklet">⫘ PDF a folletitos</label>
+                    <input type="radio" name="rbgFuncs" id="rbImagesInPage">
+                    <label for="rbImagesInPage">⤵ Imágenes en página</label>
+                </div>
+            </div>
+
+            <!-- I/O buttons -->
+            <div id="ioButtons">
+                <input type="file" id="loadImgs" multiple accept="image/png, image/jpg">
+                <label for="loadImgs" class="io-btn load-imgs">Cargar imágenes</label>
+                <input type="button" id="downloadPDF">
+                <label for="downloadPDF" class="io-btn download-PDF disabled">Descargar PDF</label>
+                <div class="wrapper-inputname">
+                    <input type="text" id="inputName" placeholder="pedeefe">
+                    <span>.pdf</span>
+                </div>
+            </div>
+
+            <!-- Title only for mobile -->
+            <div id="menuTitle" class="mobile">PDF-inador</div>
+        </nav>
+
+        <div id="previewPDF">
+            <div class="preview-text">Muestra de la primera página</div>
+            <canvas id="preview1stPage"></canvas>
+        </div>
+
+        <div id="controls">
+            <div id="ctrlsImagesToPDF" class="ctrls">
+                <div class="container-ctrl">
+                    <div class="ctrl-title">Ajustar tamaño a...</div>
+                    <div class="two-options-switch">
+                        <input type="checkbox" name="" id="imgPdf_cbPageSize">
+                        <span class="cb-left image">Imagen</span>
+                        <span class="switch-socket left" id="forImgPdf_cbPageSize">
+                            <span class="switch-onoff"></span>
+                        </span>
+                        <span class="cb-right page">Página</span>
+                    </div>
+                </div>
+            </div>
+            <div id="ctrlsSplitPDF" class="ctrls"></div>
+            <div id="ctrlsPDFToBooklet" class="ctrls"></div>
+            <div id="ctrlsImagesInPage" class="ctrls"></div>
+        </div>
+    </div>
+    <script src="pdf-lib.min.js"></script>
+    <script src="index.js"></script>
+</body>
+
+</html>
