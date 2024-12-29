@@ -146,8 +146,10 @@ downloadPDFBtn.addEventListener('click', async () => {
                     const pdfBytes = await pdfDoc.save();
                     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
                     const link = document.createElement('a');
+                    const inputFilename = document.getElementById("inputName");
+                    const filename = (inputFilename.value == "") ? "pedeefe" : inputFilename.value;
                     link.href = URL.createObjectURL(blob);
-                    link.download = 'images.pdf';
+                    link.download = `${filename}.pdf`;
                     link.click();
                     URL.revokeObjectURL(link.href); // Revoke the object URL after the download
 
