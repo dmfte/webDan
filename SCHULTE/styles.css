@@ -20,10 +20,10 @@ body {
 
 /* Center everything */
 .wrap {
-    min-height: 100vh;
-    /* fallback for older browsers */
     min-height: 100svh;
     /* modern mobile units */
+    min-height: 100vh;
+    /* fallback for older browsers */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -144,6 +144,8 @@ button.reset:focus,
 
 /* Grid board */
 .board {
+    aspect-ratio: 1 / 1;
+    /* modern browsers use this */
     width: 92vw;
     /* fallback width */
     max-width: 560px;
@@ -151,8 +153,6 @@ button.reset:focus,
     height: 92vw;
     /* fallback height to keep square */
     max-height: 560px;
-    aspect-ratio: 1 / 1;
-    /* modern browsers use this */
     display: grid;
     border: 3px solid var(--border);
     border-radius: .9rem;
