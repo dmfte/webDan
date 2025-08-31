@@ -116,7 +116,7 @@ button.reset {
     color: var(--fg);
     padding: .4rem .6rem;
     border-radius: .5rem;
-    font-size: 1rem;
+    font-size: 2rem;
     cursor: pointer;
 }
 
@@ -134,12 +134,12 @@ button.reset:focus,
     text-align: center;
     margin: .25rem 0 -.25rem;
     color: var(--fg);
-    visibility: hidden;
+    display: none;
     font-variant-numeric: tabular-nums;
 }
 
 #message.show {
-    visibility: visible;
+    display: block;
 }
 
 /* Grid board */
