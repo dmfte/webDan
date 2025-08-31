@@ -15,11 +15,15 @@ body {
     color: var(--fg);
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
     line-height: 1.35;
+    -webkit-text-size-adjust: 100%;
 }
 
 /* Center everything */
 .wrap {
+    min-height: 100vh;
+    /* fallback for older browsers */
     min-height: 100svh;
+    /* modern mobile units */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -27,7 +31,10 @@ body {
 }
 
 .panel {
-    width: min(92vw, 760px);
+    width: 92vw;
+    /* fallback */
+    max-width: 760px;
+    /* replaces min() */
     display: grid;
     gap: 1rem;
     justify-items: center;
@@ -40,9 +47,17 @@ header {
 
 header h1 {
     margin: 0 0 .25rem 0;
-    font-size: clamp(1.1rem, 1rem + 1.2vw, 1.6rem);
+    font-size: 1.4rem;
+    /* simpler default */
     letter-spacing: .02em;
     font-weight: 700;
+}
+
+/* Prefer modern sizing when available */
+@supports (font-size: clamp(1rem, 2vw, 2rem)) {
+    header h1 {
+        font-size: clamp(1.1rem, 1rem + 1.2vw, 1.6rem);
+    }
 }
 
 header p {
@@ -129,18 +144,26 @@ button.reset:focus,
 
 /* Grid board */
 .board {
-    width: min(92vw, 560px);
+    width: 92vw;
+    /* fallback width */
+    max-width: 560px;
+    /* replaces min() */
+    height: 92vw;
+    /* fallback height to keep square */
+    max-height: 560px;
     aspect-ratio: 1 / 1;
-    /* perfect square */
+    /* modern browsers use this */
     display: grid;
     border: 3px solid var(--border);
     border-radius: .9rem;
-    overflow: clip;
+    overflow: hidden;
+    /* fallback for overflow: clip */
     background: var(--bg);
     box-shadow: 0 0 0 6px #0001 inset;
     /* subtle frame without color dependency */
     user-select: none;
     -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 
 .cell {
@@ -148,10 +171,19 @@ button.reset:focus,
     display: grid;
     place-items: center;
     font-weight: 800;
-    font-size: clamp(1rem, 1.2rem + 2.2vw, 3rem);
+    /* BASIC fallback sizing for older browsers */
+    font-size: 6vw;
+    /* scales with viewport width so cells on small screens get bigger */
     cursor: pointer;
     transition: transform 60ms ease-in-out;
     background: #fff;
+}
+
+/* Prefer modern responsive text sizing when available */
+@supports (font-size: clamp(1rem, 2vw, 3rem)) {
+    .cell {
+        font-size: clamp(1.1rem, 1rem + 2.6vw, 3.4rem);
+    }
 }
 
 .cell:active {
