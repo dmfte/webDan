@@ -1,7 +1,9 @@
 (function () {
     const MIN_SIZE = 3;
-    const MAX_SIZE = 6; // bump this later to allow larger boards
+    const MAX_SIZE = 8; // bump this later to allow larger boards
+    const FILL_MAX = 1; // MAX grid occupies 100% of available square area
     const LS_KEY = 'schulte_best_times_v1';
+    const FONT_SCALE = 0.35; // proportion of cell size used for number font
 
     let gridSize = MIN_SIZE;
     let nextExpected = 1;
@@ -9,6 +11,11 @@
     let finished = false;
     let startTime = 0;
 
+    const wrap = document.querySelector('.wrap');
+    const panel = document.querySelector('.panel');
+    const headerEl = document.querySelector('header');
+    const controlsEl = document.querySelector('.controls');
+    const statusEl = document.querySelector('.statusbar');
     const boardEl = document.getElementById('board');
     const sizeSel = document.getElementById('size');
     const nextNumEl = document.getElementById('nextNum');
@@ -50,9 +57,16 @@
         totalCells = gridSize * gridSize;
         sizeInfoEl.textContent = `${gridSize}×${gridSize}`;
         newGame();
+        // extra safety: recompute after new game in case some browsers delay layout
+        computeBoardSize();
+        applyCellFontSizes();
     });
 
     resetBtn.addEventListener('click', newGame);
+    window.addEventListener('resize', () => {
+        computeBoardSize();
+        applyCellFontSizes();
+    });
 
     // ---- UI builders ----
     function renderBestBar() {
@@ -97,6 +111,9 @@
             btn.addEventListener('click', onCellClick);
             boardEl.appendChild(btn);
         });
+        // Size after DOM is ready
+        computeBoardSize();
+        applyCellFontSizes();
     }
 
     // ---- Time helpers ----
@@ -159,6 +176,9 @@
             msgEl.textContent = msg;
             msgEl.classList.add('show');
             boardEl.classList.add('dimmed');
+            // Recompute size in case the banner's height changed layout
+            computeBoardSize();
+            applyCellFontSizes();
             // Defer attaching the reset listener to avoid catching the same click event
             setTimeout(() => {
                 boardEl.addEventListener('click', handlePostWinResetOnce, {
@@ -194,6 +214,47 @@
         boardEl.classList.remove('dimmed');
         buildGrid(shuffledNumbers());
         startTime = now();
+    }
+
+    // --- Layout math: keep everything in one viewport
+    //     and make MAX grid use 95% of available area.
+    //     Smaller grids reuse the same cell size.
+    function computeBoardSize() {
+        const vw = Math.min(window.innerWidth || 0, document.documentElement.clientWidth || 0) || window.innerWidth;
+        const vh = Math.min(window.innerHeight || 0, document.documentElement.clientHeight || 0) || window.innerHeight;
+
+        const wrapCS = getComputedStyle(wrap);
+        const panelCS = getComputedStyle(panel);
+        const padV = parseFloat(wrapCS.paddingTop) + parseFloat(wrapCS.paddingBottom);
+        const padH = parseFloat(wrapCS.paddingLeft) + parseFloat(wrapCS.paddingRight);
+        const gap = parseFloat(panelCS.gap) || 0;
+
+        const usedAbove = headerEl.offsetHeight + controlsEl.offsetHeight + msgEl.offsetHeight + statusEl.offsetHeight + gap * 4;
+        const maxByHeight = vh - padV - usedAbove;
+        const containerW = panel.clientWidth || (vw - padH);
+        const maxByWidth = Math.min(containerW, vw - padH);
+        const maxSide = Math.max(0, Math.min(maxByHeight, maxByWidth));
+
+        // 1) Determine cell size from MAX grid occupying 95% of available square
+        const maxBoardSide = Math.floor(maxSide * FILL_MAX);
+        const cellPx = Math.max(1, Math.floor(maxBoardSide / MAX_SIZE));
+
+        // 2) Current board is cellPx times current dimension
+        const side = cellPx * gridSize;
+
+        // Apply via CSS var and inline style for broader compatibility
+        boardEl.style.width = side + 'px';
+        boardEl.style.height = side + 'px';
+    }
+
+    function applyCellFontSizes() {
+        const side = boardEl.getBoundingClientRect().width;
+        const cell = side / gridSize; // constant across sizes because side ∝ gridSize
+        const fontPx = Math.max(10, Math.floor(cell * FONT_SCALE));
+        const cells = boardEl.querySelectorAll('.cell');
+        cells.forEach(c => {
+            c.style.fontSize = fontPx + 'px';
+        });
     }
 
     // Initial

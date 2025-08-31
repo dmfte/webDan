@@ -5,6 +5,8 @@
     --border: #000;
     --accent: #000;
     /* keep monochrome for e‑ink */
+    --board: 320px;
+    /* JS will override to keep within viewport */
 }
 
 html,
@@ -16,28 +18,31 @@ body {
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
     line-height: 1.35;
     -webkit-text-size-adjust: 100%;
+    overflow: hidden;
+    /* never scroll — JS keeps content inside viewport */
 }
 
 /* Center everything */
 .wrap {
     min-height: 100svh;
-    /* modern mobile units */
+    /* modern */
     min-height: 100vh;
-    /* fallback for older browsers */
+    /* fallback */
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 1.25rem;
+    box-sizing: border-box;
+    width: 100vw;
 }
 
 .panel {
-    width: 92vw;
-    /* fallback */
-    max-width: 760px;
-    /* replaces min() */
+    width: 100%;
+    /* max-width: 760px; */
     display: grid;
     gap: 1rem;
     justify-items: center;
+    box-sizing: border-box;
 }
 
 header {
@@ -53,7 +58,6 @@ header h1 {
     font-weight: 700;
 }
 
-/* Prefer modern sizing when available */
 @supports (font-size: clamp(1rem, 2vw, 2rem)) {
     header h1 {
         font-size: clamp(1.1rem, 1rem + 1.2vw, 1.6rem);
@@ -79,6 +83,7 @@ header p {
     border-radius: .6rem;
     padding: .4rem .6rem;
     background: #fff;
+    box-sizing: border-box;
 }
 
 .bestbar .best {
@@ -142,25 +147,16 @@ button.reset:focus,
     display: block;
 }
 
-/* Grid board */
+/* Grid board: JS sets inline width/height to fit viewport */
 .board {
-    aspect-ratio: 1 / 1;
-    /* modern browsers use this */
-    width: 92vw;
-    /* fallback width */
-    max-width: 560px;
-    /* replaces min() */
-    height: 92vw;
-    /* fallback height to keep square */
-    max-height: 560px;
+    /* width/height are set inline by JS to avoid custom-prop caching on basic browsers */
     display: grid;
     border: 3px solid var(--border);
     border-radius: .9rem;
     overflow: hidden;
-    /* fallback for overflow: clip */
+    /* broad support */
     background: var(--bg);
     box-shadow: 0 0 0 6px #0001 inset;
-    /* subtle frame without color dependency */
     user-select: none;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
@@ -171,19 +167,10 @@ button.reset:focus,
     display: grid;
     place-items: center;
     font-weight: 800;
-    /* BASIC fallback sizing for older browsers */
-    font-size: 6vw;
-    /* scales with viewport width so cells on small screens get bigger */
+    /* JS sets an inline font-size per cell based on board size and gridSize */
     cursor: pointer;
     transition: transform 60ms ease-in-out;
     background: #fff;
-}
-
-/* Prefer modern responsive text sizing when available */
-@supports (font-size: clamp(1rem, 2vw, 3rem)) {
-    .cell {
-        font-size: clamp(1.1rem, 1rem + 2.6vw, 3.4rem);
-    }
 }
 
 .cell:active {
@@ -217,7 +204,6 @@ button.reset:focus,
     color: var(--fg);
 }
 
-/* Prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {
     .cell {
         transition: none;
