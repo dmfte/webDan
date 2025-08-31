@@ -15,12 +15,21 @@ body {
     margin: 0;
     background: var(--bg);
     color: var(--fg);
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
     line-height: 1.35;
     -webkit-text-size-adjust: 100%;
     overflow: hidden;
     /* never scroll — JS keeps content inside viewport */
+    font-family: "IBM Plex Sans";
+    font-optical-sizing: auto;
+    font-style: normal;
 }
+
+.best .time,
+.cell,
+#message {
+    font-variant-numeric: tabular-nums;
+}
+
 
 /* Center everything */
 .wrap {
@@ -171,6 +180,7 @@ button.reset:focus,
     cursor: pointer;
     transition: transform 60ms ease-in-out;
     background: #fff;
+    font-family: "IBM Plex Sans";
 }
 
 .cell:active {
