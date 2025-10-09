@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Poly-head</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <!-- Mock header -->
+    <header class="app-header">
+        <div class="hdr-left">
+            <div class="logo-dot"></div>
+            <h1>Poly-head</h1>
+        </div>
+        <div class="hdr-right">
+            <button id="btn-disclaimer" class="icon-btn" title="Usage disclaimer">ⓘ</button>
+            <button id="btn-collapse" class="icon-btn" title="Toggle controls">☰</button>
+        </div>
+    </header>
+
+    <!-- Main layout -->
+    <main class="app-main">
+        <aside id="control-panel" class="panel">
+            <div class="panel-scroll">
+                <!-- Section: Scene -->
+                <section class="group">
+                    <h2>Scene</h2>
+                    <div class="row">
+                        <label for="bg-color">Background</label>
+                        <input id="bg-color" type="color" value="#202225" />
+                    </div>
+                    <div class="row">
+                        <label for="lod">Detail (LOD)</label>
+                        <select id="lod">
+                            <option value="low" selected>Low</option>
+                            <option value="med">Medium</option>
+                            <option value="high">High</option>
+                            <option value="ultra">Ultra</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <label for="gender">Gender</label>
+                        <select id="gender">
+                            <option value="female" selected>Female</option>
+                            <option value="male">Male</option>
+                        </select>
+                    </div>
+
+                    <!-- Hidden checkbox toggles -->
+                    <div class="toggles">
+                        <input type="checkbox" id="tgl-gizmo" hidden />
+                        <label class="tgl" for="tgl-gizmo"><span></span>Light gizmo</label>
+
+                        <input type="checkbox" id="tgl-orbit" hidden />
+                        <label class="tgl" for="tgl-orbit"><span></span>Lock camera orbit</label>
+
+                        <input type="checkbox" id="tgl-smooth" hidden checked />
+                        <label class="tgl" for="tgl-smooth"><span></span>Smooth shading</label>
+                    </div>
+                </section>
+
+                <!-- Section: Head Rotation -->
+                <section class="group">
+                    <h2>Head Rotation (°)</h2>
+                    <div id="rot-x" class="slider"></div>
+                    <div id="rot-y" class="slider"></div>
+                    <div id="rot-z" class="slider"></div>
+                </section>
+
+                <!-- Section: Light -->
+                <section class="group">
+                    <h2>Light Position (units)</h2>
+                    <div id="lx" class="slider"></div>
+                    <div id="ly" class="slider"></div>
+                    <div id="lz" class="slider"></div>
+
+                    <h3>Intensity</h3>
+                    <div id="l-int" class="slider"></div>
+                </section>
+
+                <!-- Section: Assets (optional GLB swap) -->
+                <section class="group">
+                    <h2>Models</h2>
+                    <p class="small">
+                        Using <em>procedural low-poly lathe meshes</em> for both genders.
+                        <strong>To use GLB files</strong>, open <code>js/app.js</code> and search for
+                        <code>// [SWAP_TO_GLB]</code> — replace with your <code>.glb</code> URLs per LOD/gender.
+                    </p>
+                </section>
+            </div>
+        </aside>
+
+        <!-- 3D viewport -->
+        <section class="viewport">
+            <canvas id="scene"></canvas>
+        </section>
+    </main>
+
+    <!-- Disclaimer modal -->
+    <dialog id="dlg-disclaimer">
+        <h3>Free-to-use results</h3>
+        <p>All images and outputs you create with this app are free to use without restrictions.</p>
+        <div class="dlg-actions">
+            <button id="btn-close-dlg" class="primary">OK</button>
+        </div>
+    </dialog>
+
+    <!-- Scripts (module) -->
+    <script type="module" src="index.js"></script>
+</body>
+
+</html>
