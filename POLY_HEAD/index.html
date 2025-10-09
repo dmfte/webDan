@@ -6,6 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Poly-head</title>
     <link rel="stylesheet" href="styles.css" />
+
+    <!-- Import maps polyfill (for Firefox/Safari). Safe to leave enabled. -->
+    <script async src="https://unpkg.com/es-module-shims@1/dist/es-module-shims.js"></script>
+
+    <!-- Map bare specifiers to CDN URLs -->
+    <script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
 </head>
 
 <body>
