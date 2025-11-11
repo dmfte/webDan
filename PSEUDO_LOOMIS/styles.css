@@ -1,0 +1,139 @@
+:root {
+    --pl-bg: #0b0c0f;
+    --pl-fg: #e8eaf0;
+    --pl-accent: #75e3ff;
+    --pl-muted: #2a2f3a;
+    --pl-hi: #ffd166;
+    --pl-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    --pl-radius: 16px;
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, ui-sans-serif, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    background: radial-gradient(1200px 800px at 20% 10%, #111418, #0b0c0f);
+    color: var(--pl-fg);
+    min-height: 100svh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+}
+
+.ploomis-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .75rem 1rem;
+    border-bottom: 1px solid var(--pl-muted);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.06));
+    backdrop-filter: blur(6px);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+
+.ploomis-title {
+    font-weight: 700;
+    letter-spacing: .2px;
+}
+
+.ploomis-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    align-items: center;
+}
+
+.pl-btn,
+.pl-file {
+    appearance: none;
+    border: 1px solid var(--pl-muted);
+    background: #141821;
+    color: var(--pl-fg);
+    border-radius: var(--pl-radius);
+    padding: .55rem .9rem;
+    cursor: pointer;
+    box-shadow: var(--pl-shadow);
+}
+
+.pl-btn[disabled] {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.pl-sep {
+    width: 1px;
+    height: 34px;
+    background: var(--pl-muted);
+    margin: 0 .25rem;
+}
+
+.pl-slider-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+.pl-slider-wrap label {
+    opacity: .8;
+    font-size: .9rem;
+}
+
+.pl-range {
+    inline-size: 180px;
+}
+
+.ploomis-stage {
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    overflow: auto;
+}
+
+.pl-canvas-wrap {
+    position: relative;
+    isolation: isolate;
+    border: 1px dashed var(--pl-muted);
+    border-radius: 20px;
+    padding: 8px;
+    background: #0e1219;
+}
+
+canvas {
+    display: block;
+    max-inline-size: 100%;
+    height: auto;
+    background: #000;
+    border-radius: 12px;
+}
+
+.ploomis-footer {
+    padding: .75rem 1rem;
+    border-top: 1px solid var(--pl-muted);
+    opacity: .85;
+    font-size: .9rem;
+}
+
+/* overlay help chip */
+.pl-help {
+    position: absolute;
+    right: 14px;
+    bottom: 12px;
+    background: rgba(20, 24, 33, .75);
+    color: #cbd5e1;
+    padding: .4rem .6rem;
+    border-radius: 999px;
+    font-size: .8rem;
+    border: 1px solid var(--pl-muted);
+    pointer-events: none;
+}
+
+/* small chips used as handles rendering reference */
+.pl-chip {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--pl-hi);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, .35);
+}
