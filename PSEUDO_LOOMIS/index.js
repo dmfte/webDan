@@ -12,12 +12,11 @@ const ctx = canvas.getContext('2d', {
     alpha: true
 });
 const fileInput = $('#pl-file');
-const fitBtn = $('#pl-fit');
-const resetBtn = $('#pl-reset');
 const exportBtn = $('#pl-export');
-const axisBtn = $('#pl-axis');
 const helpChip = $('#pl-help');
 const range = $('#pl-range');
+const strokeInput = $('#pl-stroke');
+const colorInput = $('#pl-color');
 
 // State
 const state = {
@@ -36,11 +35,23 @@ const state = {
             top: 1,
             right: 1
         }, // normalized handle position along each axis (-1..1)
+        strokeWidth: 6,
+        strokeColor: '#75e3ff',
     }
 };
 
 function clamp(v, mi, ma) {
     return Math.max(mi, Math.min(ma, v));
+}
+
+function getStrokeWidth() {
+    const sw = state.circle.strokeWidth;
+    return Math.max(1, typeof sw === 'number' ? sw : 1);
+}
+
+function getStrokeColor() {
+    const col = state.circle.strokeColor;
+    return typeof col === 'string' && col ? col : '#75e3ff';
 }
 
 function getArcFactor(axis) {
@@ -62,12 +73,6 @@ function setArcFactor(axis, value) {
 function setArcAxis(axis) {
     if (axis !== 'top' && axis !== 'right') return;
     state.circle.arcAxis = axis;
-    updateAxisButton();
-}
-
-function updateAxisButton() {
-    if (!axisBtn) return;
-    axisBtn.textContent = `Arc axis: ${state.circle.arcAxis[0].toUpperCase()}${state.circle.arcAxis.slice(1)}`;
 }
 
 function deg(rad) {
@@ -110,15 +115,15 @@ function drawCircle() {
         r
     } = state.circle;
     ctx.save();
-    ctx.lineWidth = Math.max(1, r * 0.02);
-    ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+    ctx.lineWidth = getStrokeWidth();
+    ctx.strokeStyle = getStrokeColor();
     ctx.beginPath();
     ctx.arc(cx, cy, r, 0, Math.PI * 2);
     ctx.stroke();
     ctx.restore();
 }
 
-function drawAxes() {
+function drawAxes(showHandles = true) {
     const {
         cx,
         cy,
@@ -128,8 +133,9 @@ function drawAxes() {
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(angleOffset);
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = 'rgba(117,227,255,0.7)';
+    const axisWidth = Math.max(1, getStrokeWidth() * 0.1);
+    ctx.lineWidth = axisWidth;
+    ctx.strokeStyle = getStrokeColor();
     ctx.beginPath();
     // main axes (top/bottom and right/left)
     ctx.moveTo(0, -r);
@@ -138,33 +144,41 @@ function drawAxes() {
     ctx.lineTo(r, 0);
     ctx.stroke();
 
-    const handles = [{
-            axis: 'top',
-            dir: {
-                x: 0,
-                y: -1
+    if (showHandles) {
+        const handles = [{
+                axis: 'top',
+                dir: {
+                    x: 0,
+                    y: -1
+                }
+            },
+            {
+                axis: 'right',
+                dir: {
+                    x: 1,
+                    y: 0
+                }
             }
-        },
-        {
-            axis: 'right',
-            dir: {
-                x: 1,
-                y: 0
-            }
-        }
-    ];
-    handles.forEach(({
-        axis,
-        dir
-    }) => {
-        const factor = getArcFactor(axis);
-        const hx = dir.x * factor * r;
-        const hy = dir.y * factor * r;
-        ctx.fillStyle = axis === state.circle.arcAxis ? 'rgba(255,209,102,0.95)' : 'rgba(255,209,102,0.7)';
-        ctx.beginPath();
-        ctx.arc(hx, hy, Math.max(4, r * 0.05), 0, Math.PI * 2);
-        ctx.fill();
-    });
+        ];
+        handles.forEach(({
+            axis,
+            dir
+        }) => {
+            const factor = getArcFactor(axis);
+            const hx = dir.x * factor * r;
+            const hy = dir.y * factor * r;
+            ctx.fillStyle = axis === state.circle.arcAxis ? 'rgba(255,209,102,0.95)' : 'rgba(255,209,102,0.7)';
+            const handleRadius = Math.max(4, r * 0.05);
+            ctx.beginPath();
+            ctx.arc(hx, hy, handleRadius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#000';
+            ctx.stroke();
+            ctx.lineWidth = axisWidth;
+            ctx.strokeStyle = getStrokeColor();
+        });
+    }
 
     ctx.restore();
 }
@@ -189,14 +203,15 @@ function drawArc() {
             isTop: false
         }
     ];
+    const strokeWidth = getStrokeWidth();
     axes.forEach(({
         axis,
         isTop
     }) => {
         const factor = getArcFactor(axis);
         const mag = Math.abs(factor);
-        ctx.lineWidth = Math.max(2, r * 0.06);
-        ctx.strokeStyle = axis === arcAxis ? 'rgba(117,227,255,0.95)' : 'rgba(117,227,255,0.55)';
+        ctx.lineWidth = strokeWidth;
+        ctx.strokeStyle = getStrokeColor();
         ctx.beginPath();
         if (mag <= 0.001) {
             if (isTop) {
@@ -234,7 +249,10 @@ function drawArc() {
     ctx.restore();
 }
 
-function render() {
+function render(options = {}) {
+    const {
+        showHandles = true
+    } = options;
     if (!state.img) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         return;
@@ -243,7 +261,7 @@ function render() {
     drawImage();
     drawArc();
     drawCircle();
-    drawAxes();
+    drawAxes(showHandles);
 }
 
 // Hit-testing
@@ -461,41 +479,9 @@ window.addEventListener('touchend', () => {
     passive: true
 });
 
-// Axis toggle (Top/Right)
-axisBtn.addEventListener('click', () => {
-    const next = state.circle.arcAxis === 'top' ? 'right' : 'top';
-    setArcAxis(next);
-    render();
-});
-updateAxisButton();
-
-// Fit & Reset
-fitBtn.addEventListener('click', () => {
-    if (!state.img) return;
-    sizeCanvasToImage(state.img);
-    centerCircle();
-    syncSliderFromCircle();
-    render();
-});
-resetBtn.addEventListener('click', resetCircle);
-
 function centerCircle() {
     state.circle.cx = canvas.width / 2;
     state.circle.cy = canvas.height / 2;
-}
-
-function resetCircle() {
-    if (!state.img) return;
-    centerCircle();
-    state.circle.r = Math.round(Math.min(canvas.width, canvas.height) * 0.25);
-    state.circle.angleOffset = 0;
-    state.circle.arcFactors = {
-        top: 1,
-        right: 1
-    };
-    setArcAxis('top');
-    syncSliderFromCircle();
-    render();
 }
 
 // Slider ↔ circle radius (width = 2r)
@@ -506,10 +492,40 @@ function syncSliderFromCircle() {
         bubbles: true
     }));
 }
+
+function syncStrokeControl() {
+    if (!strokeInput) return;
+    const sw = state.circle.strokeWidth ?? 1;
+    strokeInput.value = sw.toString();
+}
+
+function syncColorControl() {
+    if (!colorInput) return;
+    const col = getStrokeColor();
+    colorInput.value = col;
+}
 range.addEventListener('input', () => {
     state.circle.r = clamp(parseFloat(range.value) / 2, 10, 1000);
     render();
 });
+if (strokeInput) {
+    strokeInput.addEventListener('input', () => {
+        const val = clamp(parseFloat(strokeInput.value) || 1, 1, 40);
+        state.circle.strokeWidth = val;
+        render();
+    });
+    syncStrokeControl();
+}
+if (colorInput) {
+    colorInput.addEventListener('input', () => {
+        const col = colorInput.value;
+        if (typeof col === 'string' && col) {
+            state.circle.strokeColor = col;
+            render();
+        }
+    });
+    syncColorControl();
+}
 
 // File loading
 fileInput.addEventListener('change', async (e) => {
@@ -542,6 +558,9 @@ fileInput.addEventListener('change', async (e) => {
 exportBtn.addEventListener('click', () => {
     if (!state.img) return;
     try {
+        render({
+            showHandles: false
+        });
         const dataURL = canvas.toDataURL('image/jpeg', 0.92);
         const a = document.createElement('a');
         a.href = dataURL;
@@ -551,6 +570,8 @@ exportBtn.addEventListener('click', () => {
         a.remove();
     } catch (err) {
         alert('Export failed: ' + err.message);
+    } finally {
+        render();
     }
 });
 
