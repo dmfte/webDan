@@ -105,6 +105,7 @@ canvas {
     height: auto;
     background: #000;
     border-radius: 12px;
+    touch-action: none;
 }
 
 .ploomis-footer {
