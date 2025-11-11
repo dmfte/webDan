@@ -12,20 +12,15 @@
     <div class="ploomis-toolbar">
       <input class="pl-file" id="pl-file" type="file" accept="image/png,image/jpeg,image/webp" />
       <div class="pl-sep" role="separator" aria-hidden="true"></div>
-      <div id="pl-color-wrap">
-        <label for="pl-color">Line color</label>
-        <input type="color" id="pl-color" name="pl-color" value="#75E3FF">
-      </div>
+      <button class="pl-btn" id="pl-fit" title="Fit to view">Fit</button>
+      <button class="pl-btn" id="pl-reset" title="Reset circle">Reset circle</button>
       <div class="pl-sep" role="separator" aria-hidden="true"></div>
       <div class="pl-slider-wrap">
         <label for="pl-range">Circle width</label>
         <input id="pl-range" class="pl-range" type="range" min="20" max="1000" step="1" />
       </div>
       <div class="pl-sep" role="separator" aria-hidden="true"></div>
-      <div class="pl-slider-wrap">
-        <label for="pl-stroke">Line width</label>
-        <input id="pl-stroke" class="pl-range" type="range" min="1" max="40" step="1" value="6" />
-      </div>
+      <button class="pl-btn" id="pl-axis">Arc axis: Top</button>
       <button class="pl-btn" id="pl-export" disabled>Export JPG</button>
     </div>
   </header>
