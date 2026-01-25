@@ -18,7 +18,7 @@
 
   --sidebar-width: 350px;
   --mobile-topbar-height: 50px;
-  --mobile-control-size: 50px;
+  --mobile-control-size: 70px;
   --transition-speed: 0.3s;
 }
 
@@ -249,7 +249,10 @@ body {
   }
 
   .mobile-btn {
+    display: flex;
     flex: 1;
+    justify-content: center;
+    align-items: center;
     max-width: 150px;
     padding: 0.5rem 1rem;
     background-color: var(--color-primary);

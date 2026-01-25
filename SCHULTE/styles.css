@@ -149,6 +149,10 @@ button.reset:focus,
     outline-offset: 2px;
 }
 
+.cell:focus {
+    z-index: 1;
+}
+
 #message {
     min-height: 1.6em;
     font-weight: 800;

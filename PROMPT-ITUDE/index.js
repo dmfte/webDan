@@ -7,12 +7,19 @@ const COPY_NOTIFICATION_DURATION = 2000; // milliseconds
 const DEBOUNCE_DELAY = 500; // milliseconds
 const DEFAULT_CATEGORY = 'Sin categoría';
 
-// State
+// State - All prompts now use XML/tags structure: { id, name, category, tags: [{name, content}], createdAt }
 let state = {
     prompts: [],
     categories: [DEFAULT_CATEGORY],
     viewMode: 'all', // 'all' or 'category'
     sortMode: 'alpha', // 'alpha' or 'date'
+};
+
+// XML Editor State (not persisted)
+let xmlEditorState = {
+    currentPromptId: null, // null = new prompt
+    tags: [], // Array of { name, content }
+    selectedTagIndex: null,
 };
 
 // ============================================
@@ -34,25 +41,64 @@ function loadFromLocalStorage() {
     if (saved) {
         try {
             const data = JSON.parse(saved);
-            state.prompts = data.prompts || [];
             state.categories = data.categories || [DEFAULT_CATEGORY];
             state.viewMode = data.viewMode || 'all';
             state.sortMode = data.sortMode || 'alpha';
+
+            // Migrate: combine old prompts and xmlPrompts into unified format
+            let allPrompts = [];
+
+            // Migrate old-style prompts (with 'text' field) to new format (with 'tags')
+            if (data.prompts && data.prompts.length > 0) {
+                data.prompts.forEach(p => {
+                    if (p.tags) {
+                        // Already in new format
+                        allPrompts.push(p);
+                    } else if (p.text !== undefined) {
+                        // Old format - convert text to a single 'prompt' tag
+                        allPrompts.push({
+                            id: p.id,
+                            name: p.name,
+                            category: p.category || DEFAULT_CATEGORY,
+                            tags: [{ name: 'prompt', content: p.text }],
+                            createdAt: p.createdAt
+                        });
+                    }
+                });
+            }
+
+            // Also include any xmlPrompts (from previous version)
+            if (data.xmlPrompts && data.xmlPrompts.length > 0) {
+                data.xmlPrompts.forEach(p => {
+                    allPrompts.push({
+                        id: p.id,
+                        name: p.name,
+                        category: p.category || DEFAULT_CATEGORY,
+                        tags: p.tags || [],
+                        createdAt: p.createdAt
+                    });
+                });
+            }
+
+            state.prompts = allPrompts;
 
             // Restore view mode
             document.getElementById(`view-${state.viewMode === 'all' ? 'all' : 'category'}`).checked = true;
             // Restore sort mode
             document.getElementById(`sort-${state.sortMode}`).checked = true;
+
+            // Save migrated data
+            saveToLocalStorage();
         } catch (e) {
             console.error('Error loading data:', e);
         }
     } else {
-        // First time - add default prompt
+        // First time - add default prompt in new format
         state.prompts = [{
             id: Date.now(),
             name: 'Hola AI',
             category: DEFAULT_CATEGORY,
-            text: '¿Podrías hacerme un café mientras procesas esto? ☕',
+            tags: [{ name: 'prompt', content: '¿Podrías hacerme un café mientras procesas esto?' }],
             createdAt: new Date().toISOString()
         }];
         saveToLocalStorage();
@@ -115,6 +161,9 @@ function initEventListeners() {
     document.getElementById('confirm-no').addEventListener('click', () => {
         document.getElementById('confirm-dialog').close();
     });
+
+    // XML Editor event listeners
+    initXmlEditorListeners();
 }
 
 // ============================================
@@ -122,145 +171,24 @@ function initEventListeners() {
 // ============================================
 
 function createNewPrompt() {
-    const viewAllRadio = document.getElementById('view-all');
-    viewAllRadio.checked = true;
-    state.viewMode = 'all';
-    document.getElementById("tab-lista").click();
-    
-    const newPrompt = {
-        id: Date.now(),
-        name: '',
-        category: '',
-        text: '',
-        createdAt: new Date().toISOString()
-    };
+    // Switch to XML tab for creating new prompts
+    document.getElementById('tab-xml').checked = true;
 
-    state.prompts.unshift(newPrompt);
-    saveToLocalStorage();
+    // Reset editor state for new prompt
+    xmlEditorState.currentPromptId = null;
+    xmlEditorState.tags = [];
+    xmlEditorState.selectedTagIndex = null;
+
     render();
 
-    // Expand the new prompt and focus the name input
+    // Focus the prompt name input
     setTimeout(() => {
-        const promptRadio = document.getElementById(`prompt-${newPrompt.id}`);
-        if (promptRadio) {
-            promptRadio.checked = true;
-
-            // Focus the name input for this specific prompt
-            const promptItem = document.querySelector(`.prompt-item[data-prompt-id="${newPrompt.id}"]`);
-            if (promptItem) {
-                const nameInput = promptItem.querySelector('.input-name');
-                if (nameInput) {
-                    nameInput.focus();
-                }
-            }
+        const nameInput = document.getElementById('xml-prompt-name');
+        if (nameInput) {
+            nameInput.value = '';
+            nameInput.focus();
         }
     }, 100);
-}
-
-function savePromptChanges(promptItem) {
-    const id = parseInt(promptItem.dataset.promptId);
-    const prompt = state.prompts.find(p => p.id === id);
-    if (!prompt) return;
-
-    // Get values directly from inputs using class selectors
-    const nameInput = promptItem.querySelector('.input-name');
-    const categoryInput = promptItem.querySelector('.input-category');
-    const textInput = promptItem.querySelector('.input-text');
-
-    if (!nameInput || !categoryInput || !textInput) return;
-
-    const name = nameInput.value.trim();
-    const category = categoryInput.value.trim() || DEFAULT_CATEGORY;
-    const text = textInput.value;
-
-    // Safeguard for empty prompts
-    if (!text.trim()) {
-        alert('El prompt no puede estar vacío');
-        return;
-    }
-
-    // Handle name uniqueness
-    if (!name) {
-        prompt.name = '';
-    } else {
-        // Check for duplicate names
-        const duplicate = state.prompts.find(p => p.id !== id && p.name === name);
-        if (duplicate) {
-            // Find a unique name by adding (1), (2), etc.
-            let counter = 1;
-            let uniqueName = `${name} (${counter})`;
-            while (state.prompts.find(p => p.name === uniqueName)) {
-                counter++;
-                uniqueName = `${name} (${counter})`;
-            }
-            prompt.name = uniqueName;
-            nameInput.value = uniqueName;
-        } else {
-            prompt.name = name;
-        }
-    }
-
-    // Update category
-    prompt.category = category;
-    if (!state.categories.includes(category)) {
-        state.categories.push(category);
-    }
-
-    // Update text
-    prompt.text = text;
-
-    saveToLocalStorage();
-
-    // Update header to reflect final saved name
-    const headerSpan = promptItem.querySelector('.prompt-header-name');
-    if (headerSpan) {
-        headerSpan.textContent = prompt.name || 'Sin nombre';
-    }
-    showNotification('¡Guardado!');
-}
-
-function updatePrompt(promptItem, field, value) {
-    const id = parseInt(promptItem.dataset.promptId);
-    const prompt = state.prompts.find(p => p.id === id);
-    if (!prompt) return;
-
-    // Handle name uniqueness
-    if (field === 'name') {
-        const trimmedValue = value.trim();
-        if (!trimmedValue) {
-            prompt.name = '';
-            saveToLocalStorage();
-            return;
-        }
-
-        // Check for duplicate names
-        const duplicate = state.prompts.find(p => p.id !== id && p.name === trimmedValue);
-        if (duplicate) {
-            // Find a unique name by adding (1), (2), etc.
-            let counter = 1;
-            let uniqueName = `${trimmedValue} (${counter})`;
-            while (state.prompts.find(p => p.name === uniqueName)) {
-                counter++;
-                uniqueName = `${trimmedValue} (${counter})`;
-            }
-            prompt.name = uniqueName;
-        } else {
-            prompt.name = trimmedValue;
-        }
-    } else if (field === 'category') {
-        const trimmedValue = value.trim() || DEFAULT_CATEGORY;
-        prompt.category = trimmedValue;
-
-        // Add new category if it doesn't exist
-        if (!state.categories.includes(trimmedValue)) {
-            state.categories.push(trimmedValue);
-        }
-    } else if (field === 'text') {
-        prompt.text = value;
-    }
-
-    saveToLocalStorage();
-    render();
 }
 
 function deletePrompt(id) {
@@ -359,6 +287,8 @@ function render() {
         renderPrompts();
     } else if (activeTab === 'tab-categorias') {
         renderCategories();
+    } else if (activeTab === 'tab-xml') {
+        renderXmlEditor();
     }
 }
 
@@ -425,6 +355,7 @@ function createPromptHTML(prompt, isNested = false) {
     const radioName = isNested ? `nested-${prompt.category}` : 'collapsible';
     const promptId = `prompt-${prompt.id}`;
     const displayName = prompt.name || 'Sin nombre';
+    const xmlContent = generateXmlFromTags(prompt.tags || []);
 
     return `
         <div class="prompt-item" data-prompt-id="${prompt.id}">
@@ -436,34 +367,20 @@ function createPromptHTML(prompt, isNested = false) {
             <div class="collapsible-content">
                 <div class="prompt-details">
                     <div class="prompt-field">
-                        <label>Nombre:</label>
-                        <input type="text"
-                               class="input-name"
-                               value="${escapeHTML(prompt.name)}"
-                               placeholder="Nombre del prompt">
+                        <label>Categoría: <span class="category-display">${escapeHTML(prompt.category || DEFAULT_CATEGORY)}</span></label>
                     </div>
 
                     <div class="prompt-field">
-                        <label>Categoría:</label>
-                        <input type="text"
-                               class="input-category"
-                               list="categories-datalist"
-                               value="${escapeHTML(prompt.category)}"
-                               placeholder="Categoría">
-                    </div>
-
-                    <div class="prompt-field">
-                        <label>Prompt:</label>
-                        <textarea class="input-text"
-                                  placeholder="Escribe tu prompt aquí...">${escapeHTML(prompt.text)}</textarea>
+                        <label>Vista previa XML:</label>
+                        <pre class="xml-list-preview">${escapeHTML(xmlContent)}</pre>
                     </div>
 
                     <div class="prompt-actions">
-                        <button class="btn-primary btn-save">
-                            Guardar
+                        <button class="btn-secondary btn-edit">
+                            Editar
                         </button>
                         <button class="btn-secondary btn-copy">
-                            📋 Copiar
+                            Copiar
                         </button>
                         <button class="btn-delete">✕</button>
                     </div>
@@ -471,6 +388,19 @@ function createPromptHTML(prompt, isNested = false) {
             </div>
         </div>
     `;
+}
+
+function generateXmlFromTags(tags) {
+    if (!tags || tags.length === 0) return '';
+
+    return tags.map(tag => {
+        const content = (tag.content || '').trim();
+        if (!content) {
+            return `<${tag.name}>\n</${tag.name}>`;
+        }
+        const indentedContent = content.split('\n').map(line => '  ' + line).join('\n');
+        return `<${tag.name}>\n${indentedContent}\n</${tag.name}>`;
+    }).join('\n');
 }
 
 function renderCategories() {
@@ -516,37 +446,34 @@ function renderCategories() {
 }
 
 function attachPromptEventListeners() {
-    // Update header text in real-time as user types the name
-    document.querySelectorAll('.input-name').forEach(input => {
-        input.addEventListener('input', (e) => {
-            const promptItem = e.target.closest('.prompt-item');
+    // Edit buttons - switch to XML tab and load the prompt
+    document.querySelectorAll('.btn-edit').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const promptItem = e.currentTarget.closest('.prompt-item');
             if (promptItem) {
-                const headerSpan = promptItem.querySelector('.prompt-header-name');
-                if (headerSpan) {
-                    headerSpan.textContent = e.target.value.trim() || 'Sin nombre';
+                const id = parseInt(promptItem.dataset.promptId);
+                const prompt = state.prompts.find(p => p.id === id);
+                if (prompt) {
+                    // Switch to XML tab
+                    document.getElementById('tab-xml').checked = true;
+                    // Load the prompt into editor
+                    xmlEditorState.currentPromptId = prompt.id;
+                    xmlEditorState.tags = prompt.tags ? prompt.tags.map(t => ({ name: t.name, content: t.content })) : [];
+                    xmlEditorState.selectedTagIndex = xmlEditorState.tags.length > 0 ? 0 : null;
+                    render();
                 }
             }
         });
     });
 
-    // Save buttons
-    document.querySelectorAll('.btn-save').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const promptItem = e.currentTarget.closest('.prompt-item');
-            if (promptItem) {
-                savePromptChanges(promptItem);
-            }
-        });
-    });
-
-    // Copy buttons
+    // Copy buttons - copy the XML content
     document.querySelectorAll('.btn-copy').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const promptItem = e.currentTarget.closest('.prompt-item');
             if (promptItem) {
-                const textInput = promptItem.querySelector('.input-text');
-                if (textInput) {
-                    copyPromptText(textInput.value);
+                const preview = promptItem.querySelector('.xml-list-preview');
+                if (preview) {
+                    copyPromptText(preview.textContent);
                 }
             }
         });
@@ -787,6 +714,322 @@ function formatTime(date) {
     const minutes = String(date.getMinutes()).padStart(2, '0');
     const seconds = String(date.getSeconds()).padStart(2, '0');
     return `${hours}-${minutes}-${seconds}`;
+}
+
+// ============================================
+// XML Editor
+// ============================================
+
+function initXmlEditorListeners() {
+    // Prompt selector
+    document.getElementById('xml-prompt-select').addEventListener('change', handleXmlPromptSelect);
+
+    // Tag management buttons
+    document.getElementById('xml-add-tag').addEventListener('click', addXmlTag);
+    document.getElementById('xml-tag-up').addEventListener('click', moveXmlTagUp);
+    document.getElementById('xml-tag-down').addEventListener('click', moveXmlTagDown);
+    document.getElementById('xml-tag-delete').addEventListener('click', deleteXmlTag);
+
+    // Tag name input
+    document.getElementById('xml-tag-name-input').addEventListener('input', handleTagNameChange);
+
+    // Tag content textarea
+    document.getElementById('xml-tag-content').addEventListener('input', handleTagContentChange);
+
+    // Action buttons
+    document.getElementById('xml-save-btn').addEventListener('click', saveXmlPrompt);
+    document.getElementById('xml-copy-btn').addEventListener('click', copyXmlPrompt);
+    document.getElementById('xml-delete-btn').addEventListener('click', deleteXmlPrompt);
+}
+
+function renderXmlEditor() {
+    renderXmlPromptSelector();
+    renderXmlTagsList();
+    renderXmlTagEditor();
+    renderXmlPreview();
+}
+
+function renderXmlPromptSelector() {
+    const select = document.getElementById('xml-prompt-select');
+    const nameInput = document.getElementById('xml-prompt-name');
+    const categoryInput = document.getElementById('xml-prompt-category');
+
+    // Build options
+    let optionsHtml = '<option value="new">-- Nuevo --</option>';
+    state.prompts.forEach(prompt => {
+        const selected = xmlEditorState.currentPromptId === prompt.id ? 'selected' : '';
+        optionsHtml += `<option value="${prompt.id}" ${selected}>${escapeHTML(prompt.name || 'Sin nombre')}</option>`;
+    });
+    select.innerHTML = optionsHtml;
+
+    // Set name and category inputs
+    if (xmlEditorState.currentPromptId) {
+        const currentPrompt = state.prompts.find(p => p.id === xmlEditorState.currentPromptId);
+        nameInput.value = currentPrompt ? currentPrompt.name : '';
+        categoryInput.value = currentPrompt ? (currentPrompt.category || DEFAULT_CATEGORY) : DEFAULT_CATEGORY;
+    } else {
+        nameInput.value = '';
+        categoryInput.value = DEFAULT_CATEGORY;
+    }
+}
+
+function renderXmlTagsList() {
+    const container = document.getElementById('xml-tags-list');
+
+    if (xmlEditorState.tags.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+
+    container.innerHTML = xmlEditorState.tags.map((tag, index) => {
+        const selectedClass = xmlEditorState.selectedTagIndex === index ? 'selected' : '';
+        return `<div class="xml-tag-item ${selectedClass}" data-index="${index}">&lt;${escapeHTML(tag.name)}&gt;</div>`;
+    }).join('');
+
+    // Attach click listeners to tags
+    container.querySelectorAll('.xml-tag-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            const index = parseInt(e.currentTarget.dataset.index);
+            selectXmlTag(index);
+        });
+    });
+}
+
+function renderXmlTagEditor() {
+    const nameInput = document.getElementById('xml-tag-name-input');
+    const contentTextarea = document.getElementById('xml-tag-content');
+
+    if (xmlEditorState.selectedTagIndex !== null && xmlEditorState.tags[xmlEditorState.selectedTagIndex]) {
+        const tag = xmlEditorState.tags[xmlEditorState.selectedTagIndex];
+        nameInput.value = tag.name;
+        nameInput.disabled = false;
+        contentTextarea.value = tag.content;
+        contentTextarea.disabled = false;
+    } else {
+        nameInput.value = '';
+        nameInput.disabled = true;
+        contentTextarea.value = '';
+        contentTextarea.disabled = true;
+    }
+}
+
+function renderXmlPreview() {
+    const preview = document.getElementById('xml-preview');
+
+    if (xmlEditorState.tags.length === 0) {
+        preview.textContent = '';
+        return;
+    }
+
+    const xmlLines = xmlEditorState.tags.map(tag => {
+        const content = tag.content.trim();
+        if (!content) {
+            return `<${tag.name}>\n</${tag.name}>`;
+        }
+        // Indent content lines
+        const indentedContent = content.split('\n').map(line => '  ' + line).join('\n');
+        return `<${tag.name}>\n${indentedContent}\n</${tag.name}>`;
+    });
+
+    preview.textContent = xmlLines.join('\n');
+}
+
+function handleXmlPromptSelect(e) {
+    const value = e.target.value;
+
+    if (value === 'new') {
+        // New prompt
+        xmlEditorState.currentPromptId = null;
+        xmlEditorState.tags = [];
+        xmlEditorState.selectedTagIndex = null;
+    } else {
+        // Load existing prompt
+        const promptId = parseInt(value);
+        const prompt = state.prompts.find(p => p.id === promptId);
+        if (prompt) {
+            xmlEditorState.currentPromptId = prompt.id;
+            // Deep clone tags to avoid reference issues
+            xmlEditorState.tags = prompt.tags ? prompt.tags.map(t => ({ name: t.name, content: t.content })) : [];
+            xmlEditorState.selectedTagIndex = xmlEditorState.tags.length > 0 ? 0 : null;
+        }
+    }
+
+    renderXmlEditor();
+}
+
+function selectXmlTag(index) {
+    xmlEditorState.selectedTagIndex = index;
+    renderXmlTagsList();
+    renderXmlTagEditor();
+}
+
+function addXmlTag() {
+    // Generate a unique default name
+    let baseName = 'tag';
+    let counter = 1;
+    let newName = baseName;
+    while (xmlEditorState.tags.some(t => t.name === newName)) {
+        newName = `${baseName}${counter}`;
+        counter++;
+    }
+
+    xmlEditorState.tags.push({ name: newName, content: '' });
+    xmlEditorState.selectedTagIndex = xmlEditorState.tags.length - 1;
+
+    renderXmlTagsList();
+    renderXmlTagEditor();
+    renderXmlPreview();
+
+    // Focus the name input
+    document.getElementById('xml-tag-name-input').focus();
+    document.getElementById('xml-tag-name-input').select();
+}
+
+function moveXmlTagUp() {
+    if (xmlEditorState.selectedTagIndex === null || xmlEditorState.selectedTagIndex <= 0) return;
+
+    const index = xmlEditorState.selectedTagIndex;
+    [xmlEditorState.tags[index - 1], xmlEditorState.tags[index]] =
+        [xmlEditorState.tags[index], xmlEditorState.tags[index - 1]];
+    xmlEditorState.selectedTagIndex = index - 1;
+
+    renderXmlTagsList();
+    renderXmlPreview();
+}
+
+function moveXmlTagDown() {
+    if (xmlEditorState.selectedTagIndex === null ||
+        xmlEditorState.selectedTagIndex >= xmlEditorState.tags.length - 1) return;
+
+    const index = xmlEditorState.selectedTagIndex;
+    [xmlEditorState.tags[index], xmlEditorState.tags[index + 1]] =
+        [xmlEditorState.tags[index + 1], xmlEditorState.tags[index]];
+    xmlEditorState.selectedTagIndex = index + 1;
+
+    renderXmlTagsList();
+    renderXmlPreview();
+}
+
+function deleteXmlTag() {
+    if (xmlEditorState.selectedTagIndex === null) return;
+
+    xmlEditorState.tags.splice(xmlEditorState.selectedTagIndex, 1);
+
+    // Adjust selection
+    if (xmlEditorState.tags.length === 0) {
+        xmlEditorState.selectedTagIndex = null;
+    } else if (xmlEditorState.selectedTagIndex >= xmlEditorState.tags.length) {
+        xmlEditorState.selectedTagIndex = xmlEditorState.tags.length - 1;
+    }
+
+    renderXmlTagsList();
+    renderXmlTagEditor();
+    renderXmlPreview();
+}
+
+function handleTagNameChange(e) {
+    if (xmlEditorState.selectedTagIndex === null) return;
+
+    const newName = e.target.value.replace(/[<>\s]/g, ''); // Remove invalid XML chars
+    xmlEditorState.tags[xmlEditorState.selectedTagIndex].name = newName;
+
+    renderXmlTagsList();
+    renderXmlPreview();
+}
+
+function handleTagContentChange(e) {
+    if (xmlEditorState.selectedTagIndex === null) return;
+
+    xmlEditorState.tags[xmlEditorState.selectedTagIndex].content = e.target.value;
+    renderXmlPreview();
+}
+
+function saveXmlPrompt() {
+    const nameInput = document.getElementById('xml-prompt-name');
+    const categoryInput = document.getElementById('xml-prompt-category');
+    const name = nameInput.value.trim();
+    const category = categoryInput.value.trim() || DEFAULT_CATEGORY;
+
+    if (!name) {
+        alert('Por favor, ingresa un nombre para el prompt.');
+        nameInput.focus();
+        return;
+    }
+
+    if (xmlEditorState.tags.length === 0) {
+        alert('Agrega al menos un tag antes de guardar.');
+        return;
+    }
+
+    // Add category if new
+    if (!state.categories.includes(category)) {
+        state.categories.push(category);
+    }
+
+    // Deep clone tags for storage
+    const tagsToSave = xmlEditorState.tags.map(t => ({ name: t.name, content: t.content }));
+
+    if (xmlEditorState.currentPromptId) {
+        // Update existing
+        const prompt = state.prompts.find(p => p.id === xmlEditorState.currentPromptId);
+        if (prompt) {
+            prompt.name = name;
+            prompt.category = category;
+            prompt.tags = tagsToSave;
+        }
+    } else {
+        // Create new
+        const newPrompt = {
+            id: Date.now(),
+            name: name,
+            category: category,
+            tags: tagsToSave,
+            createdAt: new Date().toISOString()
+        };
+        state.prompts.push(newPrompt);
+        xmlEditorState.currentPromptId = newPrompt.id;
+    }
+
+    saveToLocalStorage();
+    renderXmlPromptSelector();
+    showNotification('¡Guardado!');
+}
+
+function copyXmlPrompt() {
+    const preview = document.getElementById('xml-preview');
+    const text = preview.textContent;
+
+    if (!text) {
+        alert('No hay contenido para copiar.');
+        return;
+    }
+
+    navigator.clipboard.writeText(text).then(() => {
+        showNotification('¡XML copiado!');
+    }).catch(err => {
+        console.error('Error copying to clipboard:', err);
+    });
+}
+
+function deleteXmlPrompt() {
+    if (!xmlEditorState.currentPromptId) {
+        // Just clear the editor for new prompt
+        xmlEditorState.tags = [];
+        xmlEditorState.selectedTagIndex = null;
+        document.getElementById('xml-prompt-name').value = '';
+        renderXmlEditor();
+        return;
+    }
+
+    showConfirmDialog('¿Eliminar este XML prompt?', () => {
+        state.prompts = state.prompts.filter(p => p.id !== xmlEditorState.currentPromptId);
+        xmlEditorState.currentPromptId = null;
+        xmlEditorState.tags = [];
+        xmlEditorState.selectedTagIndex = null;
+
+        saveToLocalStorage();
+        renderXmlEditor();
+    });
 }
 
 // Re-render when switching tabs

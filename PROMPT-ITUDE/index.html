@@ -7,11 +7,6 @@
     <title>Mi Prompt-itud</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="/assets/css/nav.css">
-
-    <!-- Google fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -21,7 +16,7 @@
         <header class="hero">
             <div class="title-block">
                 <p class="eyebrow">Mi Prompt-itud</p>
-                <h1>Biblioteca de prompts lista para copiar</h1>
+                <h2>Biblioteca de prompts lista para copiar</h2>
                 <p class="lede">Guarda, agrupa y comparte tus snippets en formato listo para ser usado.</p>
             </div>
             <div class="hero-actions">
@@ -41,6 +36,9 @@
 
             <input type="radio" name="tab" id="tab-categorias">
             <label for="tab-categorias" class="tab-button">Categorías</label>
+
+            <input type="radio" name="tab" id="tab-xml">
+            <label for="tab-xml" class="tab-button">XML Prompt</label>
         </div>
 
         <!-- Two Column Layout -->
@@ -82,16 +80,71 @@
             <div class="tab-content" id="content-categorias">
                 <div class="panel list-panel">
                     <div class="categories-header">
-                        <h2>Gestión de Categorías</h2>
+                        <h3>Gestión de Categorías</h3>
                         <p class="help-text">Edita o elimina categorías. Los prompts huérfanos irán a "Sin categoría".</p>
                     </div>
                     <div id="categories-container" class="categories-list"></div>
                 </div>
             </div>
 
+            <!-- XML Prompt Tab Content -->
+            <div class="tab-content" id="content-xml">
+                <div class="panel xml-panel">
+                    <!-- Saved XML Prompts Selector -->
+                    <div class="xml-prompts-header">
+                        <div class="xml-prompt-selector">
+                            <label>Prompt:</label>
+                            <select id="xml-prompt-select">
+                                <option value="new">-- Nuevo --</option>
+                            </select>
+                            <input type="text" id="xml-prompt-name" placeholder="Nombre del prompt">
+                            <input type="text" id="xml-prompt-category" list="categories-datalist" placeholder="Categoría">
+                        </div>
+                        <div class="xml-prompt-actions">
+                            <button id="xml-save-btn" class="btn-primary">Guardar</button>
+                            <button id="xml-copy-btn" class="btn-secondary">Copiar XML</button>
+                            <button id="xml-delete-btn" class="btn-delete">✕</button>
+                        </div>
+                    </div>
+
+                    <!-- 3-Column Editor -->
+                    <div class="xml-editor">
+                        <!-- Column 1: Tag List -->
+                        <div class="xml-tags-panel">
+                            <div class="xml-tags-header">
+                                <h4>Tags</h4>
+                                <button id="xml-add-tag" class="btn-small">+ Agregar</button>
+                            </div>
+                            <div id="xml-tags-list" class="xml-tags-list"></div>
+                            <div class="xml-tags-controls">
+                                <button id="xml-tag-up" class="btn-small" title="Mover arriba">↑</button>
+                                <button id="xml-tag-down" class="btn-small" title="Mover abajo">↓</button>
+                                <button id="xml-tag-delete" class="btn-small btn-danger" title="Eliminar tag">✕</button>
+                            </div>
+                        </div>
+
+                        <!-- Column 2: Tag Content Editor -->
+                        <div class="xml-content-panel">
+                            <div class="xml-content-header">
+                                <label>Nombre del tag:</label>
+                                <input type="text" id="xml-tag-name-input" placeholder="Selecciona un tag">
+                            </div>
+                            <label>Contenido:</label>
+                            <textarea id="xml-tag-content" placeholder="Selecciona un tag para editar su contenido..."></textarea>
+                        </div>
+
+                        <!-- Column 3: XML Preview -->
+                        <div class="xml-preview-panel">
+                            <h4>Vista previa XML</h4>
+                            <pre id="xml-preview" class="xml-preview-content"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Info Panel (Right Column) -->
             <aside class="panel info-panel">
-                <h2>Modo de uso</h2>
+                <h3>Modo de uso</h3>
                 <ul class="helper-list">
                     <li>Crea un prompt con el botón "+ Nuevo Prompt".</li>
                     <li>Abre el acordeón para editar nombre, categoría y texto.</li>
