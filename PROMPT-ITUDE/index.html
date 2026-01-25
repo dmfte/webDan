@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Prompt-itud</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/assets/css/nav.css">
+
+    <!-- Google fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Main Container -->
+    <main class="app-shell">
+        <!-- Hero Section -->
+        <header class="hero">
+            <div class="title-block">
+                <p class="eyebrow">Mi Prompt-itud</p>
+                <h1>Biblioteca de prompts lista para copiar</h1>
+                <p class="lede">Guarda, agrupa y comparte tus snippets en formato listo para ser usado.</p>
+            </div>
+            <div class="hero-actions">
+                <button id="nuevo-prompt" class="btn primary">+ Nuevo Prompt</button>
+                <div class="export-stack">
+                    <button id="export-btn" class="btn ghost">↓ Exportar</button>
+                    <button id="import-btn" class="btn ghost">↑ Importar</button>
+                    <input type="file" id="import-file" accept=".json" style="display: none;">
+                </div>
+            </div>
+        </header>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <input type="radio" name="tab" id="tab-lista" checked>
+            <label for="tab-lista" class="tab-button">Lista</label>
+
+            <input type="radio" name="tab" id="tab-categorias">
+            <label for="tab-categorias" class="tab-button">Categorías</label>
+        </div>
+
+        <!-- Two Column Layout -->
+        <section class="columns">
+            <!-- Lista Tab Content -->
+            <div class="tab-content" id="content-lista">
+                <div class="panel list-panel">
+                    <!-- Controls -->
+                    <div class="controls">
+                        <div class="swatches-group">
+                            <label>Vista:</label>
+                            <div class="swatches">
+                                <input type="radio" name="view-mode" id="view-all" value="all" checked>
+                                <label for="view-all" class="swatch">Todos</label>
+
+                                <input type="radio" name="view-mode" id="view-category" value="category">
+                                <label for="view-category" class="swatch">Por Categoría</label>
+                            </div>
+                        </div>
+
+                        <div class="swatches-group">
+                            <label>Orden:</label>
+                            <div class="swatches">
+                                <input type="radio" name="sort-mode" id="sort-alpha" value="alpha" checked>
+                                <label for="sort-alpha" class="swatch">A-Z</label>
+
+                                <input type="radio" name="sort-mode" id="sort-date" value="date">
+                                <label for="sort-date" class="swatch">Fecha</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Prompts List -->
+                    <div id="prompts-container" class="prompts-list"></div>
+                </div>
+            </div>
+
+            <!-- Categorías Tab Content -->
+            <div class="tab-content" id="content-categorias">
+                <div class="panel list-panel">
+                    <div class="categories-header">
+                        <h2>Gestión de Categorías</h2>
+                        <p class="help-text">Edita o elimina categorías. Los prompts huérfanos irán a "Sin categoría".</p>
+                    </div>
+                    <div id="categories-container" class="categories-list"></div>
+                </div>
+            </div>
+
+            <!-- Info Panel (Right Column) -->
+            <aside class="panel info-panel">
+                <h2>Modo de uso</h2>
+                <ul class="helper-list">
+                    <li>Crea un prompt con el botón "+ Nuevo Prompt".</li>
+                    <li>Abre el acordeón para editar nombre, categoría y texto.</li>
+                    <li>Usa "Guardar" para confirmar cambios.</li>
+                    <li>Usa "Copiar" para mandar el texto al portapapeles.</li>
+                    <li>Exporta en JSON para guardarlo o compartirlo.</li>
+                    <li>Gestiona categorías en la pestaña "Categorías".</li>
+                </ul>
+            </aside>
+        </section>
+    </main>
+
+    <!-- Copy Notification -->
+    <div id="copy-notification" class="copy-notification">¡Copiado!</div>
+
+    <!-- Confirmation Dialog -->
+    <dialog id="confirm-dialog" class="dialog">
+        <p id="confirm-message"></p>
+        <div class="dialog-buttons">
+            <button id="confirm-yes" class="btn-primary">Sí</button>
+            <button id="confirm-no" class="btn-secondary">No</button>
+        </div>
+    </dialog>
+
+    <!-- Import Dialog -->
+    <dialog id="import-dialog" class="dialog">
+        <p>¿Cómo deseas importar los prompts?</p>
+        <div class="dialog-buttons">
+            <button id="import-merge" class="btn-primary">Combinar</button>
+            <button id="import-replace" class="btn-secondary">Reemplazar</button>
+            <button id="import-cancel" class="btn-secondary">Cancelar</button>
+        </div>
+    </dialog>
+
+    <!-- Export Dialog -->
+    <dialog id="export-dialog" class="dialog">
+        <p>¿Cómo deseas exportar?</p>
+        <div class="dialog-buttons">
+            <button id="export-download" class="btn-primary">Descargar</button>
+            <button id="export-share" class="btn-secondary">Compartir</button>
+            <button id="export-cancel" class="btn-secondary">Cancelar</button>
+        </div>
+    </dialog>
+
+    <script src="index.js"></script>
+</body>
+
+</html>
