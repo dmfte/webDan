@@ -11,7 +11,8 @@
  *   step: 5,
  *   def: 50,
  *   title: 'Speed',
- *   color: '#3d98c2', // optional custom accent color
+ *   color: '#3d98c2', // optional custom accent color,
+*    progressColorBlend: true  // soft transition of colors in the track bar
  * });
  *
  * slider.onValueChange(newValue => {
@@ -49,6 +50,7 @@ class RangeSlider {
     #colorFilledEnd;
     #colorEmptyBeginning;
     #colorEmptyEnd;
+    #secondPercent;
     #currentValue;
     #currentPercent;
     #lastHoverValue = null;
@@ -60,7 +62,7 @@ class RangeSlider {
     constructor(parent, params) {
         if (!RangeSlider.#stylesInjected) {
             const style = document.createElement('style');
-            style.textContent = '@import url(https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap);range-slider,range-slider *{box-sizing:border-box;user-select:none;touch-action:none;font-family:Quicksand,sans-serif}range-slider{display:grid;grid-template-rows:1fr 1fr;width:100%;height:100%;position:relative;border-radius:1rem}range-slider .rs-labels{display:flex;justify-content:space-between;align-items:center;padding:0 .5em}range-slider .rs-track-container{display:flex;position:relative; padding: 1px; cursor: pointer;}range-slider .rs-track{position:relative;width:100%;background:linear-gradient(to right,#3d98c2 49%,#6fcaff 50%,#abe0ff 50%)}range-slider .rs-track .rs-pixel{position:absolute;top:50%;width:1px;height:1px;opacity:0}range-slider .rs-track .rs-pixel.beginning{left:0}range-slider .rs-track .rs-pixel.end{right:0}range-slider .rs-track .floating-thumb{position:absolute;top:-60%;display:none;justify-content:center;align-items:center;background-color:#fff;border-radius:10px;padding:.3em;min-width:2em;height:1.5em;width:fit-content;box-shadow:0 0 5px rgba(0,0,0,.5)}range-slider .rs-track .floating-thumb::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#fff}range-slider .rs-track-container>span{position:absolute;bottom:0;aspect-ratio:1;display:flex;justify-content:center;align-items:center;font-weight:bolder;cursor:pointer;height:100%}range-slider .rs-track-container>span:hover{box-shadow:0 0 5px rgba(0,0,0,.5)}range-slider .rs-track-container>span.minus{left:0;border-radius:50% 0 0 50%}range-slider .rs-track-container>span.plus{right:0;border-radius:0 50% 50% 0}'
+            style.textContent = '@import url(https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap);range-slider,range-slider *{box-sizing:border-box;user-select:none;touch-action:none;font-family:Quicksand,sans-serif}range-slider{display:grid;grid-template-rows:1fr 1fr;width:100%;height:100%;position:relative;border-radius:1rem}range-slider .rs-labels{display:flex;justify-content:space-between;align-items:center;padding:0 .5em}range-slider .rs-track-container{display:flex;position:relative; padding: 1px; cursor: pointer;}range-slider .rs-track{position:relative;width:100%;background:linear-gradient(to right,#3d98c2 49%,#6fcaff 50%,#abe0ff 50%)}range-slider .rs-track .rs-pixel{position:absolute;top:50%;width:1px;height:1px;opacity:0}range-slider .rs-track .rs-pixel.beginning{left:0}range-slider .rs-track .rs-pixel.end{right:0}range-slider .rs-track .floating-thumb{position:absolute;bottom:50%;display:none;justify-content:center;align-items:center;background-color:#fff;border-radius:10px;padding:.3em;min-width:2em;height:1.5em;width:fit-content;box-shadow:0 0 5px rgba(0,0,0,.5)}range-slider .rs-track .floating-thumb::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#fff}range-slider .rs-track-container>span{position:absolute;bottom:0;aspect-ratio:1;display:flex;justify-content:center;align-items:center;font-weight:bolder;cursor:pointer;height:100%}range-slider .rs-track-container>span:hover{box-shadow:0 0 5px rgba(0,0,0,.5)}range-slider .rs-track-container>span.minus{left:0;border-radius:50% 0 0 50%}range-slider .rs-track-container>span.plus{right:0;border-radius:0 50% 50% 0}'
             document.head.appendChild(style);
             RangeSlider.#stylesInjected = true;
         }
@@ -105,6 +107,7 @@ class RangeSlider {
 
         this.#valueLabel = document.createElement('div');
         this.#valueLabel.className = 'rs-units';
+
 
         this.#maxLabel = document.createElement('div');
         this.#maxLabel.className = 'rs-mm max';
@@ -160,6 +163,7 @@ class RangeSlider {
         this.#colorFilledEnd = rgb;
         this.#colorEmptyBeginning = this.#addValueToColor(rgb, +70);
         this.#colorEmptyEnd = this.#addValueToColor(rgb, +100);
+        this.#secondPercent = this.#params.progressColorBlend == true ? 1 : 0;
     }
 
     #applyInitialStyles() {
@@ -168,6 +172,11 @@ class RangeSlider {
         this.#plusButton.style.color = this.#colorFilledBeginning;
         this.#container.style.backgroundColor = this.#colorContainer;
         this.#track.style.border = `1px solid ${this.#colorFilledBeginning}`;
+        this.#minLabel.style.color = this.#colorFilledBeginning;
+        this.#maxLabel.style.color = this.#colorFilledBeginning;
+        this.#valueLabel.style.color = this.#colorFilledBeginning;
+        this.#thumb.style.color = this.#colorFilledBeginning;
+        this.#thumb.style.borderColor = this.#colorFilledBeginning;
 
         const isFlexColumn = getComputedStyle(this.#labels).flexDirection === 'column';
         const size = isFlexColumn ? this.#container.offsetWidth : this.#container.offsetHeight;
@@ -281,8 +290,7 @@ class RangeSlider {
         // this.#currentPercent = ((this.#currentValue - this.#params.min)/(this.#params.max - this.#params.min))*100;
         this.#valueLabel.textContent = `${this.#params.title}: ${this.#currentValue}`;
         const perct = (this.#currentValue - this.#params.min) / (this.#params.max - this.#params.min) * 100;
-        
-        this.#track.style.background = `linear-gradient(to right, ${this.#colorFilledBeginning} 0%, ${this.#colorFilledEnd} ${perct}%, ${this.#colorEmptyBeginning} ${perct+1}%, ${this.#colorEmptyEnd} 100%)`;
+        this.#track.style.background = `linear-gradient(to right, ${this.#colorFilledBeginning} 0%, ${this.#colorFilledEnd} ${perct}%, ${this.#colorEmptyBeginning} ${perct + this.#secondPercent}%, ${this.#colorEmptyEnd} 100%)`;
 
         if (this.#changeCallback) this.#changeCallback(this.#currentValue, ...this.#changeCallbackArgs);
     }
