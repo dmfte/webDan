@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>&lt;Tagger &gt;</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/assets/css/nav.css">
+</head>
+
+<body>
+    <div id="app">
+        <!-- Controls bar (sibling of UI). Visibility & theme are CSS-driven only via :checked -->
+        <div id="controls-bar">
+            <div class="cluster left">
+
+            </div>
+
+            <!-- Centered tabs -->
+            <div class="cluster mid">
+                <input type="radio" name="tab" id="tab-workbench" checked />
+                <input type="radio" name="tab" id="tab-settings" />
+                <div id="tabs" role="tablist" aria-label="Main sections">
+                    <label class="tab" for="tab-workbench" role="tab">🧰 Workbench</label>
+                    <label class="tab" for="tab-settings" role="tab">⚙️ Settings</label>
+                </div>
+            </div>
+
+            <div class="cluster right">
+                <label class="global-control" title="Toggle dark mode">
+                    <span>🌓</span>
+                    <!-- Using checkbox (checked = LIGHT), CSS :has toggles tokens above -->
+                    <input id="dm-toggle" type="checkbox" />
+                </label>
+                <button id="copyAll" class="btn" title="Copy all tagged text">📋 Copy</button>
+            </div>
+        </div>
+
+        <!-- Main UI container -->
+        <div id="ui">
+            <!-- Workbench -->
+            <section id="workbench" class="content" tab-for="workbench">
+                <div id="controls-pane">
+                    <div>Rule changes are applied automatically. Manual tags will be overridden.</div>
+                    <div class="ctrl-container" title="Tag to apply to every block">
+                        <span>🏷️</span>
+                        <label for="txtApplyAll">Apply to all</label>
+                        &#60;<input id="txtApplyAll" type="text" value="p" aria-label="tag for apply to all" placeholder="p"/>&#62;
+                    </div>
+                    <div class="ctrl-container" title="Tag to the first line only">
+                        <label for="txtApply1stLine">Apply to the 1st line</label>
+                        &#60;<input type="text" id="txtApply1stLine" aria-label="tag to the first line" placeholder="h2">&#62;
+                    </div>
+                    <div class="ctrl-container" title="Tag for short lines">
+                        <label for="txtLessThan_tag">Apply &#60;<input type="text" placeholder="h3" id="txtLessThan_tag">&#62; to a line with</label></br>
+                            <label for="txtLessThan_number">less than <input type="text" placeholder="5" id="txtLessThan_number"> words</label>
+                    </div>
+                    <div class="ctrl-container" title="Tag for uppercase lines">
+                        <label for="txtAllUppercase">Apply &#60;<input type="text" placeholder="h3" id="txtAllUppercase">&#62; to an all uppercase line</label>
+                    </div>
+                    <div class="ctrl-container" title="Auto identify bullet lists">
+                        <label for="cbAutoTagList" class="label-with-input">Auto tag lists
+                            <span class="cb-pill">
+                                <input type="checkbox" id="cbAutoTagList">
+                            </span>
+                        </label>
+                    </div>
+                    <div class="ctrl-container" title="Auto identify numbered lists">
+                        <label for="cbAutoTagNumList" class="label-with-input">Auto tag numbered lists
+                            <span class="cb-pill">
+                                <input type="checkbox" id="cbAutoTagNumList">
+                            </span>
+                        </label>
+                    </div>
+                    <div class="ctrl-container" title="Auto identify URLs">
+                        <label for="cbAutoTagUrl" class="label-with-input">Auto tag URLs
+                            <span class="cb-pill">
+                                <input type="checkbox" id="cbAutoTagUrl">
+                            </span>
+                        </label>
+                    </div>
+                </div>
+                <div id="input-pane" class="pane">
+                    <textarea id="plain" placeholder="Paste or type your text here. Each non-empty line becomes a block." autofocus></textarea>
+                </div>
+                <div id="output-pane" class="pane" tabindex="0" aria-label="Tagged output (click to open contextual menu)"></div>
+                <div id="ctxmenu" class="hidden" role="menu" aria-label="Contextual tags menu">
+                    <div class="ctx-tags"></div>
+                    <hr/>
+                    <div class="ctx-fxs">
+                        <div class="fx" id="fx-footnote">
+                            <button>Footnotes</button>
+                        </div>
+                        <div class="fx" id="fx-delete">
+                            <button>Delete</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="attr-popup" class="hidden" role="dialog" aria-label="Add attributes">
+                    <div class="attr-popup-header">
+                        <span class="attr-popup-title">Add Attributes</span>
+                        <button type="button" class="attr-popup-close" aria-label="Close">&times;</button>
+                    </div>
+                    <div class="attr-popup-body">
+                        <div class="attr-fields"></div>
+                        <button type="button" class="attr-add-btn" title="Add another attribute">+</button>
+                    </div>
+                    <div class="attr-popup-footer">
+                        <button type="button" class="attr-cancel-btn">Cancel</button>
+                        <button type="button" class="attr-apply-btn">Apply</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings -->
+            <section id="settings" class="content" tab-for="settings">
+                <div class="settings-panel">
+                    <div class="hint" style="margin-bottom:8px;">Define tag, single-character shortcut, and optional classes (comma-separated). Changes auto-save to <code>localStorage["dmfte_tagger"]</code>.</div>
+                    <div class="table" id="settings-table">
+
+                        <div class="hdr">Tag</div>
+                        <div class="hdr">Shortcut</div>
+                        <div class="hdr">Classes (comma separated)</div>
+                        <template id="settings-table-row">
+                            <div class="row">
+                                <input type="text" class="tag">
+                                <input type="text" class="shortkey" maxlength="1">
+                                <input type="text" class="classes">
+                            </div>
+                        </template>
+                        <!-- Rows injected by JS -->
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="../assets/js/utilitytools.js"></script>
+    <script src="index.js"></script>
+</body>
+
+</html>

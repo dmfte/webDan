@@ -1,49 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pseudo-Loomis</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pseudo Loomis</title>
+  <link rel="stylesheet" href="../assets/css/nav.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="ploomis-header">
-    <div class="ploomis-title">Pseudo-Loomis</div>
-    <div class="ploomis-toolbar">
-      <input class="pl-file" id="pl-file" type="file" accept="image/png,image/jpeg,image/webp" />
-      <div class="pl-sep" role="separator" aria-hidden="true"></div>
-      <div id="pl-color-wrap">
-        <label for="pl-color">Line color</label>
-        <input type="color" id="pl-color" name="pl-color" value="#75E3FF">
+  <!-- Navigation -->
+  <nav>
+    <div class="navbar">
+      <div class="navbar__logo">
+        <a href="../" class="logo-link">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <text x="50" y="70" font-size="60" text-anchor="middle" fill="currentColor">PL</text>
+          </svg>
+        </a>
       </div>
-      <div class="pl-sep" role="separator" aria-hidden="true"></div>
-      <div class="pl-slider-wrap">
-        <label for="pl-range">Circle width</label>
-        <input id="pl-range" class="pl-range" type="range" min="20" max="1000" step="1" />
-      </div>
-      <div class="pl-sep" role="separator" aria-hidden="true"></div>
-      <div class="pl-slider-wrap">
-        <label for="pl-stroke">Line width</label>
-        <input id="pl-stroke" class="pl-range" type="range" min="1" max="40" step="1" value="6" />
-      </div>
-      <button class="pl-btn" id="pl-export" disabled>Export JPG</button>
+      <ul class="navbar__menu">
+        <li class="menu-item" tabindex="0">Pseudo Loomis</li>
+      </ul>
+      <div class="navbar__icons"></div>
     </div>
-  </header>
+  </nav>
 
-  <main class="ploomis-stage">
-    <div class="pl-canvas-wrap">
-      <canvas id="pl-canvas" width="0" height="0" aria-label="Pseudo-Loomis canvas"></canvas>
-      <div class="pl-help" id="pl-help">Load an image to begin</div>
+  <main class="app-container">
+    <!-- Desktop Sidebar Controls -->
+    <aside class="controls-sidebar">
+      <h2 class="controls-title">Controls</h2>
+
+      <!-- Image Input -->
+      <div class="control-group">
+        <label class="control-label" for="imageInput">Load Image</label>
+        <input type="file" id="imageInput" accept="image/*" class="file-input">
+        <label for="imageInput" class="file-input-label">Choose File</label>
+      </div>
+
+      <!-- Rotation Slider -->
+      <div class="control-group">
+        <label class="control-label">Rotation</label>
+        <div id="rotationSlider" class="slider-container"></div>
+      </div>
+
+      <!-- Size Slider -->
+      <div class="control-group">
+        <label class="control-label">Circle Size</label>
+        <div id="sizeSlider" class="slider-container"></div>
+      </div>
+
+      <!-- Stroke Width Slider -->
+      <div class="control-group">
+        <label class="control-label">Stroke Width</label>
+        <div id="strokeSlider" class="slider-container"></div>
+      </div>
+
+      <!-- Color Picker -->
+      <div class="control-group">
+        <label class="control-label" for="colorPicker">Stroke Color</label>
+        <input type="color" id="colorPicker" value="#87CEEB" class="color-input">
+      </div>
+
+      <!-- Download Button -->
+      <button id="downloadBtn" class="download-btn" disabled>Download Image</button>
+    </aside>
+
+    <!-- Mobile Top Bar -->
+    <div class="mobile-top-bar">
+      <input type="file" id="mobileImageInput" accept="image/*" class="file-input">
+      <label for="mobileImageInput" class="mobile-btn">Load</label>
+      <button id="mobileDownloadBtn" class="mobile-btn" disabled>Download</button>
     </div>
+
+    <!-- Workbench (Canvas Area) -->
+    <section class="workbench">
+      <div class="canvas-wrapper">
+        <canvas id="mainCanvas"></canvas>
+        <div class="placeholder-text" id="placeholder">
+          <p>Load an image to begin</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mobile Sidebar Controls -->
+    <aside class="mobile-controls">
+      <!-- Rotation -->
+      <div class="mobile-control-item" data-control="rotation">
+        <div class="mobile-control-icon">&#x1F504;</div>
+        <div class="mobile-control-slider">
+          <div id="mobileRotationSlider" class="slider-container"></div>
+        </div>
+      </div>
+
+      <!-- Size -->
+      <div class="mobile-control-item" data-control="size">
+        <div class="mobile-control-icon">&#x1F4D0;</div>
+        <div class="mobile-control-slider">
+          <div id="mobileSizeSlider" class="slider-container"></div>
+        </div>
+      </div>
+
+      <!-- Stroke Width -->
+      <div class="mobile-control-item" data-control="stroke">
+        <div class="mobile-control-icon">&#x270F;</div>
+        <div class="mobile-control-slider">
+          <div id="mobileStrokeSlider" class="slider-container"></div>
+        </div>
+      </div>
+
+      <!-- Color -->
+      <div class="mobile-control-item" data-control="color">
+        <div class="mobile-control-icon">&#x1F3A8;</div>
+        <div class="mobile-control-slider">
+          <input type="color" id="mobileColorPicker" value="#87CEEB" class="color-input mobile-color">
+        </div>
+      </div>
+    </aside>
   </main>
 
-  <footer class="ploomis-footer">
-    “The name of the web app should be ‘Pseudo-Loomis’. Use class names that go according to that name; it is OK not to use the full name in the classes, as long as the names make sense and resemble the name of the app.”
-  </footer>
-
-  <!-- IMPORTANT: place RangeSlider.js in the same folder as this HTML file -->
-  
-  <script src="index.js"></script>
-  <!-- <script type="module" src="index.js"></script> -->
+  <script type="module" src="index.js"></script>
 </body>
 </html>

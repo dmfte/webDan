@@ -1,0 +1,596 @@
+/* -------------------------
+Design tokens
+------------------------- */
+:root {
+
+    --shadow: 0px 0px 23px -6px;
+    --shadow-up: inset 0px 5px 10px -5px;
+    --shadow-down: inset 0px -5px 10px -5px;
+    --radius: 14px;
+
+    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --sans: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+
+    --pane-gap: 14px;
+    --controls-h: 56px;
+}
+
+/* Light mode variables will be activated via :has(#dm-toggle:checked) below */
+body:has(#dm-toggle:checked) {
+    /* DARK default */
+    --bg: #0b0c0f;
+    --panel: #14171f;
+    --context: #272c3a;
+    --ctrl-inputs: #323749;
+    --ink: 232, 235, 241;
+    --muted: #a9b1c3;
+    --accent: #6aa7ff;
+    --selected: #7bd7c4;
+    --modified: #ffff62;
+    --border: #1f2330;
+    --hover: #202533;
+}
+
+body:not(:has(#dm-toggle:checked)) {
+    /* LIGHT */
+    --bg: #f6f8fb;
+    --panel: #ffffff;
+    --ctrl-inputs: #eef2fb;
+    --ink: #0f1320;
+    --muted: #4d5567;
+    --accent: #2b72ff;
+    --selected: #1ea885;
+    --modified: ffff62;
+    --border: #e6eaf2;
+    --hover: #eef2fb;
+    --shadow: 0 6px 22px rgba(28, 44, 64, 0.12);
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: var(--sans);
+    color: rgb(var(--ink));
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* -------------------------
+App layout
+------------------------- */
+#app {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Controls bar at the top */
+#controls-bar {
+    height: var(--controls-h);
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    /* left cluster, centered tabs, right cluster */
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    /* box-shadow: var(--shadow); */
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+
+.cluster {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.global-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 6px 10px;
+    border-radius: 999px;
+}
+
+#controls-pane {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ctrl-container {
+    border: 1px solid var(--ctrl-inputs);
+    border-radius: 10px;
+    padding: 5px 10px;
+    font-size: 0.8em;
+}
+
+.ctrl-container input[type="text"] {
+    background: var(--ctrl-inputs);
+    border: none;
+    color: rgb(var(--ink));
+    outline: none;
+    min-width: 2ch;
+    width: 8ch;
+    font-family: var(--mono);
+}
+
+.label-with-input {
+    display: flex;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.btn {
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--panel), var(--bg));
+    color: rgb(var(--ink));
+    padding: 6px 10px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.btn:hover {
+    background: var(--hover);
+}
+
+/* Tabs in the middle */
+#tabs {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px;
+}
+
+/* Hide the radios; we still use them for CSS-only tab visibility */
+#tab-workbench,
+#tab-settings {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.tab {
+    padding: 6px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    user-select: none;
+    color: var(--muted);
+}
+
+/* Selected states via :has on ancestors */
+#app:has(#tab-workbench:checked) label[for="tab-workbench"],
+#app:has(#tab-settings:checked) label[for="tab-settings"] {
+    background: var(--accent);
+    color: white;
+}
+
+/* --------------- Main area --------------- */
+#ui {
+    min-height: 0;
+    /* important so children can size */
+    flex: 1;
+    display: grid;
+}
+
+.content {
+    display: none;
+    min-height: 0;
+}
+
+/* CSS-only visibility selection using :has / [tab-for] */
+#app:has(#tab-workbench:checked) #ui .content[tab-for="workbench"],
+#app:has(#tab-settings:checked) #ui .content[tab-for="settings"] {
+    display: grid;
+}
+
+/* Workbench split panes */
+#workbench {
+    grid-template-columns: 250px 1fr 1fr;
+    grid-template-rows: 100%;
+    gap: var(--pane-gap);
+    padding: var(--pane-gap);
+}
+
+.pane {
+    overflow: hidden;
+}
+
+#input-pane,
+#output-pane {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+#input-pane textarea {
+    width: 100%;
+    height: 100%;
+    min-height: 240px;
+    border: 0;
+    outline: 0;
+    resize: none;
+    font: 14px/1.5 var(--mono);
+    padding: 14px;
+    color: rgb(var(--ink));
+    background: transparent;
+    overflow: auto;
+    box-sizing: border-box;
+}
+
+#output-pane {
+    position: relative;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow: auto;
+}
+
+.block {
+    position: relative;
+    padding: 16px 24px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.block:hover {
+    background: var(--hover);
+    border-color: var(--border);
+}
+
+/* Selection visualization (optional subtle) */
+.block.sel::before {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border-radius: 10px;
+    border: 2px dashed var(--accent);
+}
+
+.block.modified::before {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border-radius: 10px;
+    border: 2px dashed var(--modified);
+}
+
+.block.focused {
+    background: var(--hover);
+}
+
+.block.focused::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 5px;
+    bottom: 5px;
+    width: 3px;
+    background: var(--accent);
+    border-radius: 0 3px 3px 0;
+}
+
+/* Context menu */
+#ctxmenu {
+    position: fixed;
+    inset: 0 auto auto 0;
+    /* will be repositioned via JS */
+    background: var(--context);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    min-width: 240px;
+    z-index: 20;
+}
+
+#ctxmenu .ctx-tags,
+#ctxmenu .ctx-fxs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+}
+
+#ctxmenu hr {
+    border-color: var(--muted);
+    width: 100%;
+    margin: 0;
+}
+
+#ctxmenu button {
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: rgb(var(--ink));
+    border-radius: 10px;
+    width: 100%;
+    padding: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+#ctxmenu .ctx-tags button {
+    text-transform: lowercase;
+}
+
+#ctxmenu button:hover {
+    background: var(--hover);
+}
+
+#ctxmenu.hidden {
+    inset: 0 auto auto -100vw !important;
+}
+
+/* Attribute popup */
+#attr-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--context);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    min-width: 320px;
+    max-width: 90vw;
+    z-index: 30;
+    box-shadow: var(--shadow);
+}
+
+#attr-popup.hidden {
+    display: none;
+}
+
+.attr-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.attr-popup-title {
+    font-weight: 600;
+    font-size: 1.1em;
+}
+
+.attr-popup-close {
+    background: none;
+    border: none;
+    color: rgb(var(--ink));
+    font-size: 1.5em;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.attr-popup-close:hover {
+    color: var(--accent);
+}
+
+.attr-popup-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.attr-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.attr-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 8px;
+    align-items: center;
+}
+
+.attr-row input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: rgb(var(--ink));
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-family: var(--mono);
+    font-size: 0.9em;
+}
+
+.attr-row input:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+}
+
+.attr-row .attr-remove-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1.2em;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+
+.attr-row .attr-remove-btn:hover {
+    color: #ff6b6b;
+}
+
+.attr-add-btn {
+    align-self: flex-start;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    font-size: 1.5em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.attr-add-btn:hover {
+    background: var(--hover);
+}
+
+.attr-popup-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.attr-popup-footer button {
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: rgb(var(--ink));
+    border-radius: 8px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.attr-popup-footer button:hover {
+    background: var(--hover);
+}
+
+.attr-apply-btn {
+    background: var(--accent) !important;
+    color: white !important;
+    border-color: var(--accent) !important;
+}
+
+.attr-apply-btn:hover {
+    opacity: 0.9;
+}
+
+/* Settings table-like layout */
+#settings {
+    grid-template-rows: auto 1fr;
+    gap: 12px;
+    padding: var(--pane-gap);
+}
+
+.settings-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px;
+    overflow: auto;
+}
+
+.table {
+    display: grid;
+    grid-template-columns: 2fr 100px 2fr;
+    gap: 8px;
+    align-items: center;
+}
+
+.table .hdr {
+    font-weight: 800;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: 12px;
+}
+
+.table input {
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: rgb(var(--ink));
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-family: var(--mono);
+}
+
+.row {
+    display: contents;
+}
+
+.hint {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+/* Pill checkbox */
+.cb-pill input {
+    display: none;
+}
+
+.cb-pill {
+    --pill-w: 1em;
+    --pill-p: 2px;
+    /*   Aspect ratio width should be greater than its height */
+    --aspect-ratio-w: 2;
+    --aspect-ratio-h: 1;
+    --pill-transl-perct: calc(var(--aspect-ratio-w)/var(--aspect-ratio-h) - 1);
+
+    background-color: var(--ctrl-inputs);
+    transition: background-color 300ms ease;
+    display: flex;
+    min-height: 0;
+    height: var(--pill-w);
+    padding: var(--pill-p);
+    border-radius: var(--pill-w);
+    cursor: pointer;
+    aspect-ratio: var(--aspect-ratio-w)/var(--aspect-ratio-h);
+}
+
+.cb-pill::before {
+    content: "";
+    position: relative;
+    left: 0;
+    background-color: #fff;
+    width: var(--pill-w);
+    height: var(--pill-w);
+    border-radius: var(--pill-w);
+    transition: left 300ms ease;
+}
+
+.cb-pill:has(input:checked) {
+    background-color: var(--accent);
+}
+
+.cb-pill:has(input:checked)::before {
+    left: calc(var(--pill-transl-perct) * var(--pill-w));
+}
+
+/* Responsive under 800px */
+@media (max-width: 800px) {
+    #workbench {
+        grid-template-columns: 1fr;
+    }
+
+    #input-pane {
+        max-height: 300px;
+    }
+
+    #output-pane {
+        min-height: calc(100dvh - var(--controls-h) - 300px - 3*var(--pane-gap));
+    }
+
+    #ctxmenu {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}

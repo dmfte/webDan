@@ -159,11 +159,29 @@ class RangeSlider {
         document.body.removeChild(div);
 
         this.#colorContainer = this.#addValueToColor(rgb, +150);
-        this.#colorFilledBeginning = this.#addValueToColor(rgb, -50);
-        this.#colorFilledEnd = rgb;
-        this.#colorEmptyBeginning = this.#addValueToColor(rgb, +70);
-        this.#colorEmptyEnd = this.#addValueToColor(rgb, +100);
-        this.#secondPercent = this.#params.progressColorBlend == true ? 1 : 0;
+
+        if (this.#params.color2) {
+            // When color2 is provided, use color for filled and color2 for empty (no gradients)
+            const div2 = document.createElement('div');
+            div2.style.backgroundColor = this.#params.color2;
+            div2.style.display = 'none';
+            document.body.appendChild(div2);
+            const rgb2 = window.getComputedStyle(div2).backgroundColor;
+            document.body.removeChild(div2);
+
+            this.#colorFilledBeginning = rgb;
+            this.#colorFilledEnd = rgb;
+            this.#colorEmptyBeginning = rgb2;
+            this.#colorEmptyEnd = rgb2;
+            this.#secondPercent = 0; // Force progressColorBlend to false
+        } else {
+            // Original behavior when no color2 is provided
+            this.#colorFilledBeginning = this.#addValueToColor(rgb, -50);
+            this.#colorFilledEnd = rgb;
+            this.#colorEmptyBeginning = this.#addValueToColor(rgb, +70);
+            this.#colorEmptyEnd = this.#addValueToColor(rgb, +100);
+            this.#secondPercent = this.#params.progressColorBlend == true ? 1 : 0;
+        }
     }
 
     #applyInitialStyles() {

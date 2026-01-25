@@ -20,11 +20,22 @@ html {
     font-size: 18px;
 }
 
+body {
+    background-color: hsla(161, 77%, 83%, 1);
+    background-image: radial-gradient(circle at 7% 81%, hsla(172, 91%, 91%, 1) 16%, transparent 53%), radial-gradient(circle at 5% 1%, hsla(238, 76%, 61%, 1) 7%, transparent 84%), radial-gradient(circle at 39% 52%, hsla(137, 93%, 64%, 1) 6%, transparent 68%), radial-gradient(circle at 11% 29%, hsla(201, 97%, 75%, 1) 8%, transparent 74%), radial-gradient(circle at 90% 50%, hsla(106, 94%, 89%, 1) 2%, transparent 85%);
+    background-blend-mode: normal, normal, normal, normal, normal;
+}
+
+
 .section-container {
     width: 100%;
     overflow: hidden;
 
     &.tagger {
+        color: #fff;
+    }
+
+    /* &.tagger {
         background-color: hsla(173, 77%, 83%, 1);
         background-image: radial-gradient(circle at 5% 1%, hsla(250, 76%, 61%, 1) 7%, transparent 84%), radial-gradient(circle at 7% 81%, hsla(184, 91%, 91%, 1) 16%, transparent 53%), radial-gradient(circle at 11% 29%, hsla(213, 97%, 75%, 1) 8%, transparent 74%), radial-gradient(circle at 39% 52%, hsla(149, 93%, 64%, 1) 6%, transparent 68%), radial-gradient(circle at 90% 50%, hsla(118, 94%, 89%, 1) 2%, transparent 85%);
         background-blend-mode: normal, normal, normal, normal, normal;
@@ -36,14 +47,22 @@ html {
         background-blend-mode: normal, normal, normal, normal, normal;
     }
 
+    &.schulte-table {
+        background-color: hsla(357, 100%, 50%, 1);
+        background-image: radial-gradient(circle at 0% 99%, hsla(41, 100%, 50%, 1) 0%, transparent 67%), radial-gradient(circle at 46% 94%, hsla(357, 100%, 50%, 1) 0%, transparent 81%), radial-gradient(circle at 93% 95%, hsla(266, 100%, 23%, 1) 0%, transparent 66%), radial-gradient(circle at 89% 8%, hsla(236, 100%, 9%, 1) 0%, transparent 150%);
+        background-blend-mode: normal, normal, normal, normal;
+    } */
+
     & .block-link {
         display: flex;
         width: 100%;
         height: 100%;
         text-decoration: none;
+        color: inherit;
 
         & .block {
             display: flex;
+
         }
     }
 }
