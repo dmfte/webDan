@@ -3,13 +3,18 @@
    ============================================ */
 
 @font-face {
-  font-family: Orbitron;
-  src: url(../assets/fonts/Orbitron.ttf);
+  font-family: vt323;
+  src: url(../assets/fonts/VT323.ttf);
 }
 @font-face {
-  font-family: SpaceMono;
-  src: url(../assets/fonts/SpaceMono-Regular.ttf);
+  font-family: Chivo Mono;
+  src: url(../assets/fonts/Chivo_Mono.ttf);
 }
+@font-face {
+  font-family: Kode Mono;
+  src: url(../assets/fonts/Kode_Mono.ttf);
+}
+
 :root {
   /* Dark Retro Color Palette */
   --bg-1: #0f1a2b;
@@ -46,9 +51,7 @@ body {
       var(--bg-2) 18px,
       var(--bg-2) 36px
     );
-  /* font-family: "VT323", "Major Mono Display", monospace; */
-  /* font-family: 'Jersey 10'; */
-  font-family: 'Orbitron';
+  font-family: 'vt323';
   line-height: 1.4;
   letter-spacing: 0.04em;
 }
@@ -86,28 +89,28 @@ a {
   margin: 0 0 8px;
   color: var(--accent-hi);
   text-transform: uppercase;
-  font-size: 0.75rem;
+  font-size: 1.2rem;
 }
 
 h1 {
   margin: 0 0 10px;
-  font-size: 1.75rem;
+  font-size: 3rem;
 }
 
 h2 {
   margin: 0 0 12px;
-  font-size: 1.4rem;
+  font-size: 2.5rem;
 }
 
 h3 {
   margin: 0 0 8px;
-  font-size: 1.2rem;
+  font-size: 2rem;
 }
 
 .lede {
   margin: 0;
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: 1.2rem;
 }
 
 .hero-actions {
@@ -149,7 +152,7 @@ h3 {
   cursor: pointer;
   text-align: center;
   font-family: inherit;
-  font-size: 0.85rem;
+  font-size: 1.5rem;
   text-transform: uppercase;
   box-shadow: 4px 4px 0 var(--shadow);
   transition: transform 0.1s ease, box-shadow 0.1s ease;
@@ -176,8 +179,18 @@ h3 {
 }
 
 .tabs:has(#tab-lista:checked) ~ .columns #content-lista,
-.tabs:has(#tab-categorias:checked) ~ .columns #content-categorias {
+.tabs:has(#tab-categorias:checked) ~ .columns #content-categorias,
+.tabs:has(#tab-xml:checked) ~ .columns #content-xml {
   display: block;
+}
+
+/* Hide info panel and make XML tab full width */
+.tabs:has(#tab-xml:checked) ~ .columns {
+  grid-template-columns: 1fr;
+}
+
+.tabs:has(#tab-xml:checked) ~ .columns .info-panel {
+  display: none;
 }
 
 .columns {
@@ -206,7 +219,7 @@ h3 {
   padding-left: 20px;
   margin: 0;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 1.2rem;
 }
 
 .helper-list li {
@@ -235,7 +248,7 @@ h3 {
 
 .swatches-group label:first-child {
   font-weight: bold;
-  font-size: 0.9rem;
+  font-size: 1.5rem;
   color: var(--ink);
 }
 
@@ -254,7 +267,7 @@ h3 {
   border: 2px solid var(--line);
   color: var(--muted);
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 1.5rem;
   font-family: inherit;
   transition: all 0.1s;
   user-select: none;
@@ -284,7 +297,7 @@ h3 {
   color: var(--ink);
   cursor: pointer;
   font-family: inherit;
-  font-size: 0.85rem;
+  font-size: 1.5rem;
   text-transform: uppercase;
   box-shadow: 4px 4px 0 var(--shadow);
   transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
@@ -312,7 +325,7 @@ h3 {
   border: 3px solid var(--line);
   cursor: pointer;
   font-family: inherit;
-  font-size: 0.85rem;
+  font-size: 1.5rem;
   text-transform: uppercase;
   box-shadow: 4px 4px 0 var(--shadow);
   transition: transform 0.1s ease, box-shadow 0.1s ease;
@@ -355,6 +368,10 @@ h3 {
     inset -2px -2px 0 var(--shadow);
 }
 
+.prompt-item .collapsible-header {
+  font-size: 1.5rem;
+}
+
 /* ============================================
    Category Groups
    ============================================ */
@@ -370,7 +387,7 @@ h3 {
 .group-title {
   margin: 0 0 8px;
   color: var(--accent-hi);
-  font-size: 1rem;
+  font-size: 2rem;
 }
 
 .group-list {
@@ -408,7 +425,7 @@ h3 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.95rem;
+  font-size: 1.7rem;
   user-select: none;
   transition: background 0.1s;
 }
@@ -432,7 +449,7 @@ h3 {
 }
 
 .collapsible-arrow {
-  font-size: 1rem;
+  font-size: 2rem;
   transition: transform 0.3s;
 }
 
@@ -458,14 +475,13 @@ h3 {
 
 .prompt-field {
   margin-bottom: 12px;
-  font-family: SpaceMono;
 }
 
 .prompt-field label {
   display: block;
   font-weight: bold;
   margin-bottom: 6px;
-  font-size: 0.9rem;
+  font-size: 1.4rem;
   color: var(--muted);
 }
 
@@ -478,7 +494,7 @@ h3 {
   color: var(--ink);
   border: 2px solid var(--line);
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: 1.2rem;
 }
 
 .prompt-field textarea {
@@ -516,7 +532,7 @@ h3 {
   border: 2px solid var(--line);
   color: var(--muted);
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: bold;
   transition: all 0.1s;
 }
@@ -546,7 +562,7 @@ h3 {
 }
 
 .help-text {
-  font-size: 0.9rem;
+  font-size: 1.9rem;
   color: var(--muted);
   margin: 0;
 }
@@ -574,7 +590,7 @@ h3 {
   background: var(--bg-1);
   color: var(--ink);
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: 1.5rem;
 }
 
 .category-item input:focus {
@@ -589,7 +605,7 @@ h3 {
 }
 
 .category-count {
-  font-size: 0.8rem;
+  font-size: 1.3rem;
   color: var(--muted);
   padding: 4px 8px;
   background: var(--bg-1);
@@ -609,7 +625,7 @@ h3 {
   padding: 40px 20px;
   text-align: center;
   color: var(--muted);
-  font-size: 1rem;
+  font-size: 5.3rem;
 }
 
 /* ============================================
@@ -627,7 +643,7 @@ h3 {
   border: 3px solid var(--accent-dark);
   box-shadow: 6px 6px 0 var(--shadow);
   font-weight: bold;
-  font-size: 0.85rem;
+  font-size: 1.5rem;
   opacity: 0;
   transition: all 0.3s;
   pointer-events: none;
@@ -663,7 +679,7 @@ dialog::backdrop {
 
 .dialog p {
   margin-bottom: 16px;
-  font-size: 1rem;
+  font-size: 2rem;
   text-align: center;
   color: var(--ink);
 }
@@ -676,6 +692,294 @@ dialog::backdrop {
 
 .dialog-buttons button {
   flex: 1;
+}
+
+/* ============================================
+   XML Prompt Editor
+   ============================================ */
+
+.xml-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.xml-prompts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(13, 23, 38, 0.4);
+  border: 2px solid var(--line);
+}
+
+.xml-prompt-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.xml-prompt-selector label {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: var(--muted);
+}
+
+.xml-prompt-selector select,
+.xml-prompt-selector input {
+  padding: 8px 12px;
+  background: var(--bg-1);
+  border: 2px solid var(--line);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 1.2rem;
+}
+
+.xml-prompt-selector select {
+  min-width: 180px;
+  cursor: pointer;
+}
+
+.xml-prompt-selector input {
+  min-width: 200px;
+}
+
+.xml-prompt-selector select:focus,
+.xml-prompt-selector input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--bg-2);
+}
+
+.xml-prompt-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.xml-editor {
+  display: grid;
+  grid-template-columns: 200px 1fr 1fr;
+  gap: 12px;
+  min-height: 400px;
+}
+
+/* Tags Panel */
+.xml-tags-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-2);
+  border: 2px solid var(--line);
+  padding: 12px;
+}
+
+.xml-tags-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.xml-tags-header h4 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: var(--accent-hi);
+}
+
+.xml-tags-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+}
+
+.xml-tag-item {
+  padding: 8px 12px;
+  background: var(--bg-1);
+  border: 2px solid var(--line);
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.1s;
+  user-select: none;
+}
+
+.xml-tag-item:hover {
+  background: var(--panel);
+  border-color: var(--muted);
+}
+
+.xml-tag-item.selected {
+  background: var(--accent);
+  color: var(--bg-1);
+  border-color: var(--accent-dark);
+  font-weight: bold;
+}
+
+.xml-tags-controls {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.btn-small {
+  padding: 6px 10px;
+  background: var(--bg-1);
+  border: 2px solid var(--line);
+  color: var(--ink);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1.1rem;
+  transition: all 0.1s;
+}
+
+.btn-small:hover {
+  background: var(--panel);
+  border-color: var(--muted);
+  box-shadow: 2px 2px 0 var(--shadow);
+  transform: translate(-1px, -1px);
+}
+
+.btn-small.btn-danger:hover {
+  background: var(--accent-dark);
+  border-color: var(--accent);
+}
+
+/* Content Panel */
+.xml-content-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-2);
+  border: 2px solid var(--line);
+  padding: 12px;
+}
+
+.xml-content-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.xml-content-header label {
+  font-size: 1.2rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.xml-content-panel > label {
+  font-size: 1.2rem;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+#xml-tag-name-input {
+  flex: 1;
+  padding: 8px 12px;
+  background: var(--bg-1);
+  border: 2px solid var(--line);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 1.2rem;
+}
+
+#xml-tag-name-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--bg-2);
+}
+
+#xml-tag-content {
+  flex: 1;
+  padding: 12px;
+  background: var(--bg-1);
+  border: 2px solid var(--line);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 1.2rem;
+  resize: none;
+  min-height: 200px;
+}
+
+#xml-tag-content:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--bg-2);
+}
+
+#xml-tag-content:disabled,
+#xml-tag-name-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Preview Panel */
+.xml-preview-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-2);
+  border: 2px solid var(--line);
+  padding: 12px;
+}
+
+.xml-preview-panel h4 {
+  margin: 0 0 12px;
+  font-size: 1.4rem;
+  color: var(--accent-hi);
+}
+
+.xml-preview-content {
+  flex: 1;
+  padding: 12px;
+  background: var(--bg-1);
+  border: 2px solid var(--line);
+  color: var(--ink);
+  font-family: 'Chivo Mono', monospace;
+  font-size: 1rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+}
+
+/* Empty state for XML */
+.xml-tags-list:empty::after {
+  content: "No hay tags. Agrega uno.";
+  display: block;
+  padding: 20px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 1.1rem;
+}
+
+.xml-preview-content:empty::after {
+  content: "Agrega tags para ver la vista previa";
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* XML Preview in Lista view */
+.xml-list-preview {
+  padding: 12px;
+  background: var(--bg-1);
+  border: 2px solid var(--line);
+  color: var(--ink);
+  font-family: 'Chivo Mono', monospace;
+  font-size: 1rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+  max-height: 300px;
+}
+
+.category-display {
+  color: var(--accent-hi);
+  font-weight: normal;
 }
 
 /* ============================================
@@ -694,6 +998,24 @@ dialog::backdrop {
 
   .info-panel {
     order: -1;
+  }
+
+  .xml-editor {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+  }
+
+  .xml-tags-panel {
+    min-height: 150px;
+  }
+
+  .xml-tags-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .xml-tag-item {
+    flex: 0 0 auto;
   }
 }
 

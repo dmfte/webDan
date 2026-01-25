@@ -145,6 +145,11 @@
 
     function onCellClick(e) {
         const cell = e.currentTarget;
+        // Remove focus from button after 500ms, focus the grid instead
+        setTimeout(() => {
+            cell.blur();
+            boardEl.focus();
+        }, 500);
         if (finished) {
             newGame();
             return;
