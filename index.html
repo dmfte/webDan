@@ -4,81 +4,54 @@
 <head>
    <meta charset="utf-8">
    <title>WebDan</title>
-
-   <!-- Google fonts -->
-   <link rel="preconnect" href="https://fonts.googleapis.com">
-   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-   <link href="https://fonts.googleapis.com/css2?family=Cousine:wght@700&display=swap" rel="stylesheet">
-
-   <!-- Own styles -->
    <link rel="stylesheet" href="styles.css">
-   <link rel="stylesheet" href="RangeSlider.css">
 </head>
 
 <body>
-   <canvas id="canvBg"></canvas>
-   <div class="cont flaps">
-      <div class="wrap-flap" id="webClicker">
-         <div class="flap">
-            <div class="overlay"></div>
-
-            <div class="title">Clicker</div>
-            <div class="description">
-               <a href="./CLICKER/index.html">
-                  <img class="floatleft" src="Clicker thumbnail 01.png" alt="clicker counter">
-                     Contador manual. Empieza de 0 o de cualquier número ingresado. Puede ir incrementando o decrementando. Resultado se copia al portapapeles.
-               </a>
+   <div class="section-container tagger">
+      <a class="block-link" href="./TAGGER/index.html">
+         <div class="block block-description">
+            <div class="description-text">
+               <h2>Tagger</h2>
+               Añade tags HTML al texto pegado. Puedes incluir reglas como hacer título la primera línea, usar tags de
+               listas, etc.
             </div>
          </div>
-      </div>
-      <div class="wrap-flap" id="outliner">
-         <div class="flap">
-            <div class="overlay"></div>
-            <div class="title">Outliner</div>
-            <div class="description">
-               <a href="./OUTLINER/index.html">
-                  <img class="floatright" src="Outliner thumbnail 02.png" alt="Área de trabajo dividad en 2.">
-                     Crea un HTML descargable con secciones desplegables para llevar un control de la disertación. Incluye cronómetro, funcionalidad de realtado de texto, y ventanas emergentes.
-               </a>
-            </div>
+         <div class="block block-preview">
+            <img src="https://picsum.photos/400/400" alt="">
          </div>
-      </div>
-      <div class="wrap-flap" id="webCsv">
-         <div class="flap">
-            <div class="overlay"></div>
-            <div class="title">Generador CSV Hacienda</div>
-            <div class="description">
-               <a href="./GENERADOR CSV HACIENDA/index.html">
-                  <img class="floattop" src="CSV thumbnail 01.png" alt="Pesa;as con celdas">
-                     Crea una archivo CSV. Sigue las reglas para los archivos de declaración de impuestos según el <a href="https://www.transparenciafiscal.gob.sv/downloads/pdf/700-DGII-MN-2021-26031.pdf/" target="_blank">Ministerio de Hacienda de El Salvador</a>.
-               </a>
-            </div>
-         </div>
-      </div>
-      <div class="wrap-flap" id="webPictunator">
-         <div class="flap">
-            <div class="overlay"></div>
-            <div class="title">PICTUNATOR</div>
-            <div class="description">
-               <a href="./PICTUNATOR/index.html">
-                  <img class="floatright" src="Pictunator thumbnail 01.png" alt="workspace to convert pictures">
-                     Genera una imagen apartir de un imagen cargada por el usuario y le aplica diversos efectos como pixeleado, escala de grises, y entramado (hatching o crosshatching).
-               </a>
-            </div>
-         </div>
-      </div>
+      </a>
    </div>
 
-   <!-- <div class="contslider" id="padding">
-      <div class="wrapper"></div>
+   <!-- PDF-INADOR -->
+   <div class="section-container reverse pdf-inador">
+      <a class="block-link" href="./PDF_INADOR/index.html">
+         <div class="block block-description">
+            <div class="description-text">
+               <h2>PDF-INADOR</h2>
+               Edita PDFs: mover y eliminar páginas, dividir libro en pequeños folletos.
+            </div>
+         </div>
+         <div class="block block-preview">
+            <img src="https://picsum.photos/400/400" alt="">
+         </div>
+      </a>
    </div>
-   <div class="contslider" id="height">
-      <div class="wrapper"></div>
+
+   <!-- Schulte Table -->
+   <div class="section-container pdf-inador">
+      <a class="block-link" href="./SCHULTE/index.html">
+         <div class="block block-description">
+            <div class="description-text">
+               <h2>Tabla Schulte</h2>
+               Ejercita con la Tabla Schulte. Varía el tamaño de la cuadrícula.
+            </div>
+         </div>
+         <div class="block block-preview">
+            <img src="https://picsum.photos/400/400" alt="">
+         </div>
+      </a>
    </div>
-   <div class="contslider" id="angle">
-      <div class="wrapper"></div>
-   </div>
-   <script src="RangeSlider.js"></script> -->
    <script src="index.js"></script>
 </body>
 
