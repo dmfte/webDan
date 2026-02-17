@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Schulte Table</title>
+  <title>Tabla Schulte</title>
 
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -11,25 +11,25 @@
   <div class="wrap">
     <main class="panel" aria-live="polite">
       <header>
-        <h1>Schulte Table</h1>
-        <div id="bestbar" class="bestbar" aria-live="polite" aria-label="Best times"></div>
-        <p>Find numbers in ascending order. If you tap the correct number, the table shuffles.</p>
+        <h1>Tabla Schulte</h1>
+        <div id="bestbar" class="bestbar" aria-live="polite" aria-label="Mejores tiempos"></div>
+        <p>Encuentra los números en orden ascendente. Si tocas el número correcto, la tabla se mezcla.</p>
       </header>
 
-      <div class="controls" role="group" aria-label="Board settings">
-        <label for="size">Size</label>
-        <select id="size" name="size" aria-label="Board size"></select>
-        <button class="reset" id="resetBtn" type="button" title="Reset board">Reset</button>
+      <div class="controls" role="group" aria-label="Ajustes del tablero">
+        <label for="size">Tamaño</label>
+        <select id="size" name="size" aria-label="Tamaño del tablero"></select>
+        <button class="reset" id="resetBtn" type="button" title="Reiniciar tablero">Reiniciar</button>
       </div>
 
-      <h2 id="message" aria-live="assertive">Great! You cleared the board. Tap again to play.</h2>
+      <h2 id="message" aria-live="assertive">¡Genial! Completaste el tablero. Toca de nuevo para jugar.</h2>
 
-      <section id="board" class="board" aria-label="Schulte grid" role="grid"></section>
+      <section id="board" class="board" aria-label="Cuadrícula Schulte" role="grid"></section>
 
       <div class="statusbar">
-        Next: <span class="kbd" id="nextNum">1</span>
+        Siguiente: <span class="kbd" id="nextNum">1</span>
         <span aria-hidden="true">·</span>
-        Size: <span class="kbd" id="sizeInfo">3×3</span>
+        Tamaño: <span class="kbd" id="sizeInfo">3×3</span>
       </div>
     </main>
   </div>
