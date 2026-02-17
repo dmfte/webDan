@@ -53,8 +53,7 @@ const AppState = {
     isDraggingCircle: false,
     isDraggingYNode: false,
     isDraggingXNode: false,
-    hoverTarget: null,  // 'circle', 'yNode', 'xNode', or null
-    lastPointerPos: { x: 0, y: 0 }  // For delta-based circle dragging
+    hoverTarget: null  // 'circle', 'yNode', 'xNode', or null
   },
 
   // Canvas display state (for coordinate transformations)
@@ -70,50 +69,6 @@ const AppState = {
 // ========================================
 const RANGE_SLIDER_FILL = '#210F37';
 const RANGE_SLIDER_EMPTY = '#DCA06D';
-
-// ========================================
-// NODE RADIUS CALIBRATION
-// ========================================
-// Adjust these values to calibrate node (handle) size
-const NODE_CONFIG = {
-  // Mobile: size based on viewport width (vw units)
-  mobileVw: 5,              // <- CALIBRATE: mobile node size in vw (e.g., 3 = 3vw)
-  mobileBreakpoint: 749,    // <- CALIBRATE: max-width for mobile mode (matches CSS)
-
-  // Desktop: size based on stroke width
-  desktopMin: 5,            // <- CALIBRATE: minimum node radius on desktop
-  desktopMax: 30,           // <- CALIBRATE: maximum node radius on desktop
-  desktopMultiplier: 6      // <- CALIBRATE: strokeWidth * this = node radius
-};
-
-// ========================================
-// CIRCLE DRAG VELOCITY CALIBRATION
-// ========================================
-// Controls how fast the circle moves relative to pointer/touch drag distance
-const DRAG_CONFIG = {
-  velocity: 1.0             // <- CALIBRATE: 1.0 = 1:1 movement, 2.0 = 2x faster, 0.5 = half speed
-};
-
-/**
- * Get the node radius based on screen size
- * Mobile: uses viewport-based sizing (vw)
- * Desktop: uses stroke-width-based sizing
- */
-function getNodeRadius() {
-  const isMobile = window.innerWidth <= NODE_CONFIG.mobileBreakpoint;
-
-  if (isMobile) {
-    // Convert vw to pixels: (vw * viewportWidth) / 100
-    return (NODE_CONFIG.mobileVw * window.innerWidth) / 100;
-  } else {
-    // Desktop: based on stroke width
-    const { strokeWidth } = AppState.circle;
-    return Math.max(
-      NODE_CONFIG.desktopMin,
-      Math.min(NODE_CONFIG.desktopMax, strokeWidth * NODE_CONFIG.desktopMultiplier)
-    );
-  }
-}
 
 // ========================================
 // UTILITY FUNCTIONS
@@ -298,7 +253,7 @@ const Renderer = {
     // --- Draw nodes (only in edit mode, not for download) ---
     if (includeNodes) {
       const nodeColor = getComplementaryColor(strokeColor);
-      const nodeRadius = getNodeRadius();
+      const nodeRadius = Math.max(8, strokeWidth * 1.5);
 
       // Y-axis node (moves along Y axis)
       const yNodeY = -yPosition * radius;
@@ -470,7 +425,7 @@ const InputHandler = {
     const { yPosition, xPosition } = AppState.nodes;
     const local = this.imageToCircleLocal(imgX, imgY);
 
-    const nodeRadius = getNodeRadius();
+    const nodeRadius = Math.max(8, strokeWidth * 1.5);
     const hitPadding = 10;
 
     // Y-axis node position
@@ -498,8 +453,6 @@ const InputHandler = {
 
   /**
    * Handle pointer down (mouse or touch)
-   * - Clicking on nodes: drag that specific node
-   * - Clicking anywhere else: drag circle using delta movement
    */
   handlePointerDown(e) {
     if (!AppState.image) return;
@@ -513,18 +466,14 @@ const InputHandler = {
     } else if (target === 'xNode') {
       AppState.interaction.isDraggingXNode = true;
       this.canvas.classList.add('dragging-node');
-    } else {
-      // Drag circle from anywhere (delta-based movement)
+    } else if (target === 'circle') {
       AppState.interaction.isDraggingCircle = true;
-      AppState.interaction.lastPointerPos = { x: pos.x, y: pos.y };
       this.canvas.classList.add('dragging-circle');
     }
   },
 
   /**
    * Handle touch start
-   * - Touching nodes: drag that specific node
-   * - Touching anywhere else: drag circle using delta movement
    */
   handleTouchStart(e) {
     if (!AppState.image || e.touches.length !== 1) return;
@@ -538,10 +487,8 @@ const InputHandler = {
       AppState.interaction.isDraggingYNode = true;
     } else if (target === 'xNode') {
       AppState.interaction.isDraggingXNode = true;
-    } else {
-      // Drag circle from anywhere (delta-based movement)
+    } else if (target === 'circle') {
       AppState.interaction.isDraggingCircle = true;
-      AppState.interaction.lastPointerPos = { x: pos.x, y: pos.y };
     }
   },
 
@@ -553,16 +500,10 @@ const InputHandler = {
 
     const pos = this.screenToImage(e.clientX, e.clientY);
 
-    // Handle circle dragging (delta-based movement)
+    // Handle dragging
     if (AppState.interaction.isDraggingCircle) {
-      const lastPos = AppState.interaction.lastPointerPos;
-      const deltaX = (pos.x - lastPos.x) * DRAG_CONFIG.velocity;
-      const deltaY = (pos.y - lastPos.y) * DRAG_CONFIG.velocity;
-
-      AppState.circle.x += deltaX;
-      AppState.circle.y += deltaY;
-      AppState.interaction.lastPointerPos = { x: pos.x, y: pos.y };
-
+      AppState.circle.x = pos.x;
+      AppState.circle.y = pos.y;
       Renderer.render();
       return;
     }
@@ -594,16 +535,9 @@ const InputHandler = {
     const touch = e.touches[0];
     const pos = this.screenToImage(touch.clientX, touch.clientY);
 
-    // Handle circle dragging (delta-based movement)
     if (AppState.interaction.isDraggingCircle) {
-      const lastPos = AppState.interaction.lastPointerPos;
-      const deltaX = (pos.x - lastPos.x) * DRAG_CONFIG.velocity;
-      const deltaY = (pos.y - lastPos.y) * DRAG_CONFIG.velocity;
-
-      AppState.circle.x += deltaX;
-      AppState.circle.y += deltaY;
-      AppState.interaction.lastPointerPos = { x: pos.x, y: pos.y };
-
+      AppState.circle.x = pos.x;
+      AppState.circle.y = pos.y;
       Renderer.render();
       return;
     }
@@ -794,10 +728,10 @@ const UIController = {
     // Stroke width slider (1 to 20, step 1)
     if (strokeContainer) {
       const strokeSlider = new RangeSlider(strokeContainer, {
-        min: 3,
-        max: 30,
+        min: 1,
+        max: 20,
         step: 1,
-        def: 7,
+        def: 5,
         title: 'px',
         color: RANGE_SLIDER_FILL,
         color2: RANGE_SLIDER_EMPTY
@@ -892,11 +826,6 @@ const UIController = {
 
     mobileItems.forEach(item => {
       item.addEventListener('click', (e) => {
-        // Don't toggle if clicking inside the slider area (e.g., plus/minus buttons)
-        if (e.target.closest('.mobile-control-slider')) {
-          return;
-        }
-
         // Close other open items
         mobileItems.forEach(other => {
           if (other !== item) {
