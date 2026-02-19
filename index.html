@@ -1,104 +1,142 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-
+<html lang="es" dir="ltr">
 <head>
-   <meta charset="utf-8">
-   <title>WebDan</title>
-   <link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WebDan</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
-   <div class="section-container tagger">
-      <a class="block-link" href="./TAGGER/index.html">
-         <div class="block block-description">
-            <div class="description-text">
-               <h2>Tagger</h2>
-               Añade tags HTML al texto pegado. Puedes incluir reglas como hacer título la primera línea, usar tags de
-               listas, etc.
-            </div>
-         </div>
-         <div class="block block-preview">
-            <img src="./assets/thumbnails/tagger.jpg" alt="">
-         </div>
-      </a>
-   </div>
+  <main class="portfolio-app">
+    <header class="hero">
+      <p class="hero-lead">Portfolio</p>
+      <h1 class="hero-title">WebDan</h1>
+      <p class="hero-description">
+        Herramientas web pequenas, claras y utiles para tareas reales.
+      </p>
+      <div class="hero-meta">
+        <span class="hero-pill">6 proyectos</span>
+        <span class="hero-pill">Minimal + funcional</span>
+      </div>
+    </header>
 
-   <!-- PDF-INADOR -->
-   <div class="section-container reverse pdf-inador">
-      <a class="block-link" href="./PDF_INADOR/index.html">
-         <div class="block block-description">
-            <div class="description-text">
-               <h2>PDF-INADOR</h2>
-               Edita PDFs: conviértelos a folletos plegables imprimibles en una sola página.
-            </div>
-         </div>
-         <div class="block block-preview">
-            <img src="./assets/thumbnails/pdf-inador.jpg" alt="">
-         </div>
-      </a>
-   </div>
+    <section class="projects" aria-label="Proyectos">
+      <article class="portfolio-section align-left tone-cyan">
+        <a class="section-link" href="./TAGGER/index.html" aria-label="Tagger: abrir proyecto">
+          <figure class="project-media">
+            <img src="./assets/thumbnails/tagger.jpg" alt="Vista previa de Tagger" loading="lazy" decoding="async">
+          </figure>
+          <div class="project-content">
+            <p class="project-topline">
+              <span class="project-index">01</span>
+              <span class="project-type">Text Utility</span>
+            </p>
+            <h2 class="project-title">Tagger</h2>
+            <p class="project-description">
+              Anade tags HTML al texto pegado con reglas rapidas para titulos, listas y bloques.
+            </p>
+            <span class="project-cta" aria-hidden="true">Abrir proyecto</span>
+          </div>
+        </a>
+      </article>
 
-   <!-- Schulte Table -->
-   <div class="section-container schulte-table">
-      <a class="block-link" href="./SCHULTE/index.html">
-         <div class="block block-description">
-            <div class="description-text">
-               <h2>Tabla Schulte</h2>
-               Ejercita con la Tabla Schulte. Varía el tamaño de la cuadrícula.
-            </div>
-         </div>
-         <div class="block block-preview">
-            <img src="./assets/thumbnails/tabla-schulte.jpg" alt="">
-         </div>
-      </a>
-   </div>
+      <article class="portfolio-section align-right tone-blue">
+        <a class="section-link" href="./PDF_INADOR/index.html" aria-label="PDF-INADOR: abrir proyecto">
+          <figure class="project-media">
+            <img src="./assets/thumbnails/pdf-inador.jpg" alt="Vista previa de PDF-INADOR" loading="lazy" decoding="async">
+          </figure>
+          <div class="project-content">
+            <p class="project-topline">
+              <span class="project-index">02</span>
+              <span class="project-type">PDF Workflow</span>
+            </p>
+            <h2 class="project-title">PDF-INADOR</h2>
+            <p class="project-description">
+              Transforma PDFs en folletos plegables para imprimir en una sola hoja.
+            </p>
+            <span class="project-cta" aria-hidden="true">Abrir proyecto</span>
+          </div>
+        </a>
+      </article>
 
-   <!-- Prompt-itude -->
-   <div class="section-container reverse schulte-table">
-      <a class="block-link" href="./PROMPT-ITUDE/index.html">
-         <div class="block block-description">
-            <div class="description-text">
-               <h2>Mi Prompt-itud</h2>
-               Guarda y edita prompts para fácil acceso. Créalos de forma estructurada con XML.
-            </div>
-         </div>
-         <div class="block block-preview">
-            <img src="./assets/thumbnails/mi-prompt-itud.jpg" alt="">
-         </div>
-      </a>
-   </div>
+      <article class="portfolio-section align-left tone-orange">
+        <a class="section-link" href="./SCHULTE/index.html" aria-label="Tabla Schulte: abrir proyecto">
+          <figure class="project-media">
+            <img src="./assets/thumbnails/tabla-schulte.jpg" alt="Vista previa de Tabla Schulte" loading="lazy" decoding="async">
+          </figure>
+          <div class="project-content">
+            <p class="project-topline">
+              <span class="project-index">03</span>
+              <span class="project-type">Focus Training</span>
+            </p>
+            <h2 class="project-title">Tabla Schulte</h2>
+            <p class="project-description">
+              Ejercita atencion y velocidad visual con grillas configurables y sesiones cortas.
+            </p>
+            <span class="project-cta" aria-hidden="true">Abrir proyecto</span>
+          </div>
+        </a>
+      </article>
 
-   <!-- Pseudo Loomis -->
-   <div class="section-container reverse schulte-table">
-      <a class="block-link" href="./PSEUDO_LOOMIS/index.html">
-         <div class="block block-description">
-            <div class="description-text">
-               <h2>Pseudo Loomis</h2>
-               Añade un círculo base de Loomis a la imagen.
-            </div>
-         </div>
-         <div class="block block-preview">
-            <img src="./assets/thumbnails/pseudo-loomis.jpg" alt="">
-         </div>
-      </a>
-   </div>
+      <article class="portfolio-section align-right tone-purple">
+        <a class="section-link" href="./PROMPT-ITUDE/index.html" aria-label="Mi Prompt-itud: abrir proyecto">
+          <figure class="project-media">
+            <img src="./assets/thumbnails/mi-prompt-itud.jpg" alt="Vista previa de Mi Prompt-itud" loading="lazy" decoding="async">
+          </figure>
+          <div class="project-content">
+            <p class="project-topline">
+              <span class="project-index">04</span>
+              <span class="project-type">Prompt Library</span>
+            </p>
+            <h2 class="project-title">Mi Prompt-itud</h2>
+            <p class="project-description">
+              Organiza y edita prompts en una estructura clara para reutilizarlos rapido.
+            </p>
+            <span class="project-cta" aria-hidden="true">Abrir proyecto</span>
+          </div>
+        </a>
+      </article>
 
-   <!-- Generador CSV para Hacienda -->
-   <div class="section-container reverse schulte-table">
-      <a class="block-link" href="./GENERADOR CSV HACIENDA/index.html">
-         <div class="block block-description">
-            <div class="description-text">
-               <h2>Generador CSV para Hacienda</h2>
-               Genera un archivo CSV para subir declaraciones al Ministerio de Hacienda de El Salvador.
-            </div>
-         </div>
-         <div class="block block-preview">
-            <img src="./assets/thumbnails/generador-csv-hacienda.jpg" alt="">
-         </div>
-      </a>
-   </div>
+      <article class="portfolio-section align-left tone-green">
+        <a class="section-link" href="./PSEUDO_LOOMIS/index.html" aria-label="Pseudo Loomis: abrir proyecto">
+          <figure class="project-media">
+            <img src="./assets/thumbnails/pseudo-loomis.jpg" alt="Vista previa de Pseudo Loomis" loading="lazy" decoding="async">
+          </figure>
+          <div class="project-content">
+            <p class="project-topline">
+              <span class="project-index">05</span>
+              <span class="project-type">Art Helper</span>
+            </p>
+            <h2 class="project-title">Pseudo Loomis</h2>
+            <p class="project-description">
+              Superpone una base de Loomis para estudiar proporciones directamente en imagenes.
+            </p>
+            <span class="project-cta" aria-hidden="true">Abrir proyecto</span>
+          </div>
+        </a>
+      </article>
 
-   <script src="index.js"></script>
+      <article class="portfolio-section align-right tone-rose">
+        <a class="section-link" href="./GENERADOR CSV HACIENDA/index.html" aria-label="Generador CSV para Hacienda: abrir proyecto">
+          <figure class="project-media">
+            <img src="./assets/thumbnails/generador-csv-hacienda.jpg" alt="Vista previa de Generador CSV para Hacienda" loading="lazy" decoding="async">
+          </figure>
+          <div class="project-content">
+            <p class="project-topline">
+              <span class="project-index">06</span>
+              <span class="project-type">Gov Utility</span>
+            </p>
+            <h2 class="project-title">Generador CSV para Hacienda</h2>
+            <p class="project-description">
+              Crea archivos CSV listos para declaraciones en el Ministerio de Hacienda.
+            </p>
+            <span class="project-cta" aria-hidden="true">Abrir proyecto</span>
+          </div>
+        </a>
+      </article>
+    </section>
+
+    <footer class="site-footer">(c) 2026 WebDan</footer>
+  </main>
 </body>
-
 </html>
