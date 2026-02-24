@@ -4,6 +4,15 @@
 
     --eff-bar-w: 300px;
     --eff-bar-btns-mob-size: 60px;
+
+    --clr-900: #355872;
+    --clr-700: #4f7897;
+    --clr-500: #7aaace;
+    --clr-300: #9cd5ff;
+    --clr-200: #c6e8ff;
+    --clr-100: #e7f3fc;
+    --clr-050: #f7f8f0;
+    --clr-overlay: rgb(53 88 114 / 48%);
 }
 * {
     margin: 0;
@@ -16,7 +25,8 @@ html,
 body {
     width: 100%;
     height: 100%;
-    background-color: lightpink;
+    background: linear-gradient(155deg, var(--clr-050), var(--clr-100));
+    color: var(--clr-900);
     display: flex;
     flex-direction: column;
 }
@@ -24,7 +34,8 @@ body {
 nav {
     width: 100%;
     height: 40px;
-    background-color: gray;
+    background: linear-gradient(90deg, var(--clr-900), var(--clr-700));
+    border-bottom: 1px solid var(--clr-500);
 }
 
 .for-dialog {
@@ -68,6 +79,141 @@ input:checked + label svg [id$='_off'] {
     }
 }
 
+#btn_download[disabled] {
+    cursor: not-allowed;
+}
+
+#common_controls .btn-wrapper label,
+#common_controls .btn-wrapper button,
+#effects_bar #btn_effects_label_mobile,
+#effects_bar .effect > label,
+#effects_bar .effect .eff-btn > label,
+dialog.dialog-shell .diag-close,
+dialog.dialog-shell .diag-btn {
+    transition: background-color 180ms ease, color 180ms ease, box-shadow 180ms ease, border-color 180ms ease, transform 100ms ease;
+}
+
+#common_controls .btn-wrapper label,
+#common_controls .btn-wrapper button {
+    background-color: var(--clr-050);
+    color: var(--clr-900);
+}
+
+#common_controls .btn-wrapper label:hover,
+#common_controls .btn-wrapper button:hover:not([disabled]) {
+    background-color: var(--clr-200);
+}
+
+#common_controls .btn-wrapper label:active,
+#common_controls .btn-wrapper button:active:not([disabled]) {
+    background-color: var(--clr-300);
+}
+
+#effects_bar #btn_effects_label_mobile:hover,
+#effects_bar .effect > label:hover,
+#effects_bar .effect .eff-btn > label:hover {
+    background-color: var(--clr-300);
+}
+
+#effects_bar #btn_effects_label_mobile:active,
+#effects_bar .effect > label:active,
+#effects_bar .effect .eff-btn > label:active {
+    background-color: var(--clr-500);
+    color: var(--clr-050);
+}
+
+#common_controls .btn-wrapper label:focus-visible,
+#common_controls .btn-wrapper button:focus-visible,
+#effects_bar #btn_effects_label_mobile:focus-visible,
+#effects_bar .effect > label:focus-visible,
+dialog.dialog-shell .diag-close:focus-visible,
+dialog.dialog-shell .diag-btn:focus-visible {
+    outline: 2px solid var(--clr-500);
+    outline-offset: -2px;
+}
+
+#common_controls label svg path:not([id$='_off'])[fill='none'],
+#effects_bar .eff-btn label svg path:not([id$='_off'])[fill='none'] {
+    stroke: var(--clr-900);
+}
+
+#common_controls label svg path:not([id$='_off']):not([fill='none']):not([stroke='none']),
+#effects_bar .eff-btn label svg path:not([id$='_off']):not([fill='none']):not([stroke='none']) {
+    fill: var(--clr-900);
+    stroke: var(--clr-900);
+}
+
+#common_controls label svg path:not([id$='_off']):not([fill='none'])[stroke='none'],
+#effects_bar .eff-btn label svg path:not([id$='_off']):not([fill='none'])[stroke='none'] {
+    fill: var(--clr-900);
+    stroke: none;
+}
+
+#common_controls label svg path[id$='_off'][fill='none'],
+#effects_bar .eff-btn label svg path[id$='_off'][fill='none'] {
+    stroke: var(--clr-500);
+}
+
+#common_controls label svg path[id$='_off']:not([fill='none']):not([stroke='none']),
+#effects_bar .eff-btn label svg path[id$='_off']:not([fill='none']):not([stroke='none']) {
+    fill: var(--clr-500);
+    stroke: var(--clr-500);
+}
+
+#common_controls label svg path[id$='_off']:not([fill='none'])[stroke='none'],
+#effects_bar .eff-btn label svg path[id$='_off']:not([fill='none'])[stroke='none'] {
+    fill: var(--clr-500);
+    stroke: none;
+}
+
+#effects_bar label[for='cb_px_smooth'] svg g:not(#group_px_blur_off) path {
+    fill: var(--clr-900);
+}
+
+#effects_bar label[for='cb_px_smooth'] svg #group_px_blur_off path {
+    fill: var(--clr-500);
+}
+
+dialog.dialog-shell {
+    background-color: var(--clr-050);
+    color: var(--clr-900);
+    border: 1px solid var(--clr-500);
+
+    &::backdrop {
+        background-color: var(--clr-overlay);
+    }
+
+    & .diag-header,
+    & .diag-body {
+        border-color: var(--clr-500);
+    }
+
+    & .diag-close:hover {
+        background-color: var(--clr-200);
+    }
+
+    & .diag-close:active {
+        background-color: var(--clr-300);
+    }
+
+    & .diag-close svg path {
+        stroke: var(--clr-900);
+    }
+
+    & .diag-btn {
+        color: var(--clr-900);
+    }
+
+    & .diag-btn:hover {
+        background-color: var(--clr-200);
+        opacity: 1;
+    }
+
+    & .diag-btn:active {
+        background-color: var(--clr-300);
+    }
+}
+
 /* PIXELATE inputs */
 input#cb_px_horzvert + label {
 
@@ -100,23 +246,23 @@ input#cb_gray_only_gray {
             }
 
             &.gray_stripe1 {
-                background-color: #444;
+                background-color: var(--clr-900);
             }
             &.gray_stripe2 {
-                background-color: #777;
+                background-color: var(--clr-500);
             }
             &.gray_stripe3 {
-                background-color: #ccc;
+                background-color: var(--clr-300);
             }
 
             &.bw_stripe1 {
-                background-color: #000;
+                background-color: var(--clr-900);
             }
             &.bw_stripe2 {
-                background-color: #777;
+                background-color: var(--clr-500);
             }
             &.bw_stripe3 {
-                background-color: #fff;
+                background-color: var(--clr-050);
             }
 
         }
@@ -156,7 +302,7 @@ input#cb_px_horzvert:checked + label {
     main {
         flex: 1;
         min-height: 0;
-        border: 3px solid red;
+        border: 3px solid var(--clr-700);
         display: grid;
 
         grid-template-areas: 'common common' 'effects pictures';
@@ -165,12 +311,12 @@ input#cb_px_horzvert:checked + label {
 
         & section#common_controls {
             grid-area: common;
-            background-color: lightgreen;
+            background-color: var(--clr-100);
             display: flex;
             align-items: stretch;
 
             .btn-wrapper {
-                border: 1px solid black;
+                border: 1px solid var(--clr-700);
                 display: flex;
                 align-items: stretch;
 
@@ -252,7 +398,7 @@ input#cb_px_horzvert:checked + label {
 
         & section#effects_bar {
             grid-area: effects;
-            background-color: aliceblue;
+            background-color: var(--clr-050);
             pointer-events: none;
             opacity: 0.5;
 
@@ -266,7 +412,9 @@ input#cb_px_horzvert:checked + label {
                 align-items: stretch;
                 
                 & > label {
-                    border: 1px solid green;
+                    border: 1px solid var(--clr-500);
+                    background-color: var(--clr-100);
+                    color: var(--clr-900);
                     padding: 20px 10px;
                     display: flex;
                     align-items: center;
@@ -278,12 +426,12 @@ input#cb_px_horzvert:checked + label {
                         width: 20px;
                         height: 20px;
                         border-radius: 50%;
-                        background-color: #ccc;
+                        background-color: var(--clr-200);
                     }
                 }
 
                 & .effect-btns {
-                    border: 1px solid blue;
+                    border: 1px solid var(--clr-500);
                     display: grid;
                     grid-template-columns: repeat(4, 1fr);
                     overflow: hidden;
@@ -291,12 +439,13 @@ input#cb_px_horzvert:checked + label {
                     transition: max-height 500ms linear;
 
                     & .eff-btn {
-                        border: 1px solid orange;
+                        border: 1px solid var(--clr-700);
                         height: calc(var(--eff-bar-w) / 4);
 
 
                         & label {
-                            background-color: #adff2f;
+                            background-color: var(--clr-200);
+                            color: var(--clr-900);
                             display: flex;
                             width: 100%;
                             height: 100%;
@@ -319,7 +468,7 @@ input#cb_px_horzvert:checked + label {
                 & input:checked + label {
 
                     & .on-dot {
-                        background-color: #adff2f;
+                        background-color: var(--clr-700);
                     }
                 }
 
@@ -335,7 +484,7 @@ input#cb_px_horzvert:checked + label {
 
         & section#pictures_area {
             grid-area: pictures;
-            background-color: cyan;
+            background-color: var(--clr-100);
             position: relative;
 
             & .pic-area {
@@ -343,7 +492,7 @@ input#cb_px_horzvert:checked + label {
                 transition: 300ms ease-in-out;
 
                 & canvas {
-                    border: 1px solid red;
+                    border: 1px solid var(--clr-500);
                     position: absolute;
                     left: 50%;
                     top: 50%;
@@ -355,7 +504,7 @@ input#cb_px_horzvert:checked + label {
             }
 
             & .pic-area.img-in {
-                background-color: yellow;
+                background-color: var(--clr-200);
                 top: 0;
                 left: 0;
                 right: 50%;
@@ -363,7 +512,7 @@ input#cb_px_horzvert:checked + label {
                 z-index: 2;
             }
             & .pic-area.img-out {
-                background-color:chocolate;
+                background-color: var(--clr-300);
                 top: 0;
                 left: 50%;
                 right: 0;
@@ -409,19 +558,19 @@ input#cb_px_horzvert:checked + label {
     main {
         flex: 1;
         min-height: 0;
-        border: 3px solid red;
+        border: 3px solid var(--clr-700);
         display: flex;
         flex-direction: column;
         position: relative;
 
         & section#common_controls {
-            background-color: #adff2f;
+            background-color: var(--clr-100);
             height: var(--cc-bar-mob-h);
             display: flex;
             align-items: stretch;
 
             & .btn-wrapper {
-                border: 1px solid black;
+                border: 1px solid var(--clr-700);
                 display: flex;
                 
                 & label {
@@ -509,7 +658,7 @@ input#cb_px_horzvert:checked + label {
 
         & #overlay_effects_menu_mobile:has(+#effects_bar.toggled) {
             position: absolute;
-            background-color: #00000077;
+            background-color: var(--clr-overlay);
             top: 0;
             right: 0;
             bottom: 0;
@@ -518,7 +667,7 @@ input#cb_px_horzvert:checked + label {
         }
 
         & section#effects_bar {
-            background-color: aquamarine;
+            background-color: var(--clr-050);
             display: flex;
             flex-direction: column;
             position: absolute;
@@ -529,6 +678,9 @@ input#cb_px_horzvert:checked + label {
             & #btn_effects_label_mobile {
                 border: none;
                 outline: none;
+                background-color: var(--clr-100);
+                color: var(--clr-900);
+                box-shadow: 0 0 0 1px var(--clr-500) inset;
                 font-size: 20px;
                 padding: 20px;
                 cursor: pointer;
@@ -548,7 +700,9 @@ input#cb_px_horzvert:checked + label {
                 }
                 
                 & > label {
-                    border: 1px solid green;
+                    border: 1px solid var(--clr-500);
+                    background-color: var(--clr-050);
+                    color: var(--clr-900);
                     padding: 10px 20px;
                     display: none;
                     justify-content: center;
@@ -562,7 +716,7 @@ input#cb_px_horzvert:checked + label {
                 }
 
                 & .effect-btns {
-                    border: 1px solid blue;
+                    border: 1px solid var(--clr-500);
                     display: flex;
                     max-height: 0;
                     flex-direction: column;
@@ -570,7 +724,7 @@ input#cb_px_horzvert:checked + label {
                     transition: max-height 1100ms ease-in-out ;
 
                     & .eff-btn {
-                        border: 1px solid orange;
+                        border: 1px solid var(--clr-700);
                         width: var(--eff-bar-btns-mob-size);
                         height: var(--eff-bar-btns-mob-size);
                         border-radius: 50%;
@@ -607,7 +761,8 @@ input#cb_px_horzvert:checked + label {
                         }
 
                         & label {
-                            background-color: #adff2f;
+                            background-color: var(--clr-200);
+                            color: var(--clr-900);
                             display: flex;
                             width: 100%;
                             height: 100%;
@@ -651,7 +806,7 @@ input#cb_px_horzvert:checked + label {
                         display: flex;
                         margin: 0;
                         font-size: 30px;
-                        color: red;
+                        color: var(--clr-900);
                     }
 
                     & .effect-btns {
@@ -675,7 +830,7 @@ input#cb_px_horzvert:checked + label {
                 transition: 300ms ease-in-out;
 
                 & canvas {
-                    border: 1px solid red;
+                    border: 1px solid var(--clr-500);
                     position: absolute;
                     left: 50%;
                     top: 50%;
@@ -687,7 +842,7 @@ input#cb_px_horzvert:checked + label {
             }
 
             & .pic-area.img-in {
-                background-color: yellow;
+                background-color: var(--clr-200);
                 top: 0;
                 left: 0;
                 right: 50%;
@@ -695,7 +850,7 @@ input#cb_px_horzvert:checked + label {
                 z-index: 2;
             }
             & .pic-area.img-out {
-                background-color:chocolate;
+                background-color: var(--clr-300);
                 top: 0;
                 left: 50%;
                 right: 0;
