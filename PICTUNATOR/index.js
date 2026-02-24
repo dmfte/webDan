@@ -7,6 +7,8 @@ const span_file_name = document.getElementById('span_file_name');
 const btn_download = document.getElementById('btn_download');
 
 const effects_bar = document.getElementById('effects_bar');
+const overlay_effects_no_image = document.getElementById('overlay_effects_no_image');
+
 const btn_effects_label_mobile = document.getElementById('btn_effects_label_mobile');
 btn_effects_label_mobile.addEventListener('click', ()=>{
     effects_bar.classList.toggle('toggled');
@@ -49,6 +51,7 @@ function changeState(state='') {
             btn_download.removeAttribute('disabled');
             setImageToCanvas(image_in, canvas_in);
             setImageToCanvas(image_in, canvas_out);
+            overlay_effects_no_image.style.display = 'none';
             break;
     
         default:
