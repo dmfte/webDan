@@ -1,1075 +1,738 @@
-@font-face {
-    font-family: "NovaMono";
-    src: url(./fonts/NovaMono-Regular.ttf);
-}
+:root {
+    --cc-bar-h: 80px;
+    --cc-bar-mob-h: 45px;
 
+    --eff-bar-w: 300px;
+    --eff-bar-btns-mob-size: 60px;
+}
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     user-select: none;
-    font-family: NovaMono;
-    font-weight: 100;
 }
-:root {
-    --controlsbar-w: 45px;
-    --all-grid-columns: 1fr var(--controlsbar-w);
-    --controlsbar-padd: 1px;
-    --controls-padd: 1px;
-    --rs-width: 350px;
-    --topbar-height: 20px;
-    --topbar-padd-y: 0rem;
-    --topbar-padd-x: 0.2rem;
-    --navbar-submenu-w: 200px;
-
-    --navheight-lg: 55px;
-    --navheight-md: 65px;
-    --navheight-tab: 50px;
-    --navheight-cel: 40px;
-
-    --globalbarh-cel: 35px;
-    --globalbarh-tab: 45px;
-    --globalbarh-md: 50px;
-    --globalbarh-lg: 60px;
-
-    --controlsBar-cel: 45px;
-    --controlsBar-tab: 55px;
-    --controlsBar-md: 350px;
-    --controlsBar-lg: 400px;
-
-    --downloadbar-cel: 40px;
-    --downloadbar-tab: 50px;
-    --downloadbar-md: 45px;
-    --downloadbar-lg: 50px;
-
-    --floaty-display-x: 50px;
-    --floaty-display-y: 50px;
-    --floaty-display-w: 150px;
-    --floaty-display-h: 150px;
-
-    --color-on: red;
-    --color-off: rgb(250, 91, 91);
-
-    --color-global-bg: rgb(47, 57, 95);
-    --color-global-btn-bg: rgb(59, 79, 80);
-    --color-global-btn-color: rgb(142, 167, 231);
-    --color-global-btn-outline: #719B9B;
-    --color-global-btn-hover: rgb(34, 45, 46);
-    --color-global-btn-active: rgb(90, 123, 124);
-
-    --color-ctrlsbar-bg: #1e2c2c;
-    --color-effects-rb-bg-off: #3c5151;
-    --color-effects-rb-bg-on: #617c7c;
-    --color-controls-btn: rgb(121, 145, 206);
-    --color-controls-btn-hover: rgb(142, 167, 231);
-    --color-controls-btn-active: #c5e8e8;
-    --color-controls-btn-checked: #9dcaca;
-    --color-effects-rb-color-on: #ACE6E6;
-    --color-effects-rb-inside: rgb(92, 166, 173);
-    --color-controls-bg: #8fbcbd;
-
-    --color-slider-bg: rgb(87, 107, 158);
-    --color-slider-bg-ligher: rgb(107, 127, 178);
-    --color-slider-color: rgb(187, 207, 255);
-
-    --color-display-in-bg: #374949;
-    --color-display-out-bg: #3d4f4f;
-
-    --color-dlbar-bg: #576b9e;
-    --color-dlbar-btn-bg: #97a5c6;
-    --color-dlbar-btn-bg-hover: #aab7d5;
-    --color-dlbar-btn-bg-active: #becae6;
-}
-
-@media only screen and (max-width: 600px) {
-    :root {
-        --controlsbar-w: 45px;
-        --all-grid-columns: 1fr var(--controlsbar-w);
-        --controlsbar-padd: 1px;
-        --controls-padd: 1px;
-        --rs-width: 350px;
-        --topbar-height: 20px;
-        --topbar-padd-y: 0rem;
-        --topbar-padd-x: 0.2rem;
-        --navbar-submenu-w: 200px;
-    }
-}
-
-@media only screen and (min-width: 601px) and (max-width: 1024px) {
-    :root {
-        --controlsbar-w: 55px;
-        --all-grid-columns: 1fr var(--controlsbar-w);
-        --controls-padd: 0.1rem;
-        --controlsbar-padd: 0.2rem;
-        --rs-width: 400px;
-        --topbar-height: 30px;
-        --topbar-padd-y: 0.1rem;
-        --topbar-padd-x: 0.2rem;
-        --navbar-submenu-w: 250px;
-    }
-}
-
-@media only screen and (min-width: 1025px) and (max-width: 1440px) {
-    :root {
-        --controlsbar-w: 350px;
-        --all-grid-columns: var(--controlsbar-w) 1fr;
-        --controls-padd: 0.2rem;
-        --controlsbar-padd: 0.3rem;
-        --rs-width: 100%;
-        --topbar-height: 35px;
-        --topbar-padd-y: 0.2rem;
-        --topbar-padd-x: 0.5rem;
-        --navbar-submenu-w: 300px;
-    }
-}
-
-@media only screen and (min-width: 1441px) {
-    :root {
-        --controlsbar-w: 400px;
-        --all-grid-columns: var(--controlsbar-w) 1fr;
-        --controls-padd: 0.2rem;
-        --controlsbar-padd: 0.4rem;
-        --rs-width: 100%;
-        --topbar-height: 45px;
-        --topbar-padd-y: 0.2rem;
-        --topbar-padd-x: 0.5rem;
-        --navbar-submenu-w: 350px;
-    }
-}
-
 
 html,
 body {
+    width: 100%;
     height: 100%;
-}
-
-body {
+    background-color: lightpink;
     display: flex;
     flex-direction: column;
 }
 
+nav {
+    width: 100%;
+    height: 40px;
+    background-color: gray;
+}
 
-#top-bar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background-color: rgb(26, 26, 46);
-    display: flex;
-    flex-direction: row;
-    justify-content: start;
-    align-items: stretch;
-    padding: var(--topbar-padd-y) var(--topbar-padd-x);
-    height: var(--topbar-height);
-    overflow: visible;
+.for-dialog {
+    display: none;
+}
 
+/* BUTTONS BEHAVIOR, ACROSS ANY MEDIA-QUERY */
 
-    & a#logoDmfte {
-        position: relative;
-        background-color: white;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        border: 1px solid gray;
-        padding: 5px;
+/* Every input will have a corresopnding label for styles */
+input {
+    display: none;
+}
 
-        @media only screen and (max-width: 600px) {
-            width: calc(var(--topbar-height) * 2);
-            border-radius: calc(var(--topbar-height) / 2);
-        }
+/* Some toggle-inputs will have two <path>, for on/off styles */
+input:checked + label svg [id$='_off'] {
+    display: none;
+}
 
-        @media only screen and (min-width: 601px) and (max-width: 1024px) {
-            width: calc(var(--topbar-height) * 2);
-            border-radius: calc(var(--topbar-height) / 2);
-        }
+/* Input file label */
+[for='if_load_image'] {
+    align-items: center;
+    overflow-wrap: anywhere;
+    font-size: 12px;
 
-        @media only screen and (min-width: 1025px) and (max-width: 1440px) {
-            width: calc(var(--topbar-height) * 2);
-            border-radius: calc(var(--topbar-height) / 2);
-        }
-
-        @media only screen and (min-width: 1441px) {
-            width: calc(var(--topbar-height) * 2);
-            border-radius: calc(var(--topbar-height) / 2);
-        }
+    & svg {
+        flex-shrink: 0;
     }
+}
 
+/* The download button will be disabled until an image is loaded */
+#btn_download {
+    
+    &:not([disabled]) {
 
+        & svg {
 
-    & .topbar-items {
-        margin-left: auto;
-        display: flex;
-        justify-content: flex-end;
-
-        & .topbar-i {
-            max-height: 100%;
-            width: calc(var(--topbar-height) - (var(--topbar-padd-y) * 2));
-            /* margin: 0 0.2rem; */
-            /* display: flex;
-            justify-content: center;
-            align-items: stretch; */
-            cursor: pointer;
-
-
-            & svg path {
-                fill: rgb(67, 101, 139);
+            & path[id$='_off'] {
+                display: none;
             }
-        }
-
-        & .topbar-i:hover svg path {
-            fill: rgb(233, 69, 96);
-        }
-
-        & .topbar-i:active svg path {
-            fill: rgb(233, 69, 96);
         }
     }
 }
 
+/* PIXELATE inputs */
+input#cb_px_horzvert + label {
 
+    & svg {
 
-#containerAll {
-    margin-top: var(--topbar-height);
-    flex: 1;
-    display: grid;
-    grid-template-columns: var(--all-grid-columns);
-    overflow: hidden;
+        & path#path_px_pixels_tall {
+            display: none;
+        }
 
-    @media only screen and (max-width: 600px) {
-        /* grid-template-columns: 1fr var(--all-grid-columns); */
-        grid-template-rows: var(--globalbarh-cel) var(--globalbarh-cel) 1fr;
-        grid-template-areas: "global global""effects effects""pictures controls";
+        & path#path_px_pixels_wide {
+            display: block;
+        }
     }
+}
 
-    @media only screen and (min-width: 601px) and (max-width: 1024px) {
-        /* grid-template-columns: 1fr var(--all-grid-columns); */
-        grid-template-rows: var(--globalbarh-tab) var(--globalbarh-tab) 1fr;
-        grid-template-areas: "global global""effects effects""pictures controls";
-    }
+/* GRAYSCALE inputs */
 
-    @media only screen and (min-width: 1025px) and (max-width: 1440px) {
-        /* grid-template-columns: var(--all-grid-columns) 1fr; */
-        grid-template-rows: var(--globalbarh-md) var(--globalbarh-md) 1fr;
-        grid-template-areas: "global global""effects effects""controls pictures";
-    }
+input#cb_gray_only_gray {
 
-    @media only screen and (min-width: 1441px) {
-        /* grid-template-columns: var(--all-grid-columns) 1fr; */
-        grid-template-rows: var(--globalbarh-lg) var(--globalbarh-lg) 1fr;
-        grid-template-areas: "global global""effects effects""controls pictures";
-    }
-
-    & #globalControls {
-        --gctrls-padd: 5px;
-
-        grid-area: global;
-        background-color: var(--color-global-bg);
-        padding: var(--gctrls-padd) 0.5rem;
+    & + label {
         display: flex;
-        justify-content: flex-start;
-        align-items: stretch;
-        z-index: 4;
 
-        & .g-ctrl {
-            outline: none;
-            background-color: var(--color-global-btn-bg);
-            border: 1px solid var(--color-global-btn-outline);
-            color: var(--color-global-btn-color);
-            margin: 0 var(--gctrls-padd) 0 0;
+        & span {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
+            flex: 1;
+            height: 100%;
 
-            & svg {
-                max-height: 100%;
-
-                & path {
-                    /* Colors are handled innline in HTML. */
-                }
-            }
-        }
-
-        & .g-ctrl:hover {
-            background-color: var(--color-global-btn-hover);
-        }
-
-        & .g-ctrl:active {
-            background-color: var(--color-global-btn-active);
-        }
-
-
-        & label[for=ifLoadImg] {
-            /* Label for the button to load image. */
-            font-size: 0.8em;
-            cursor: pointer;
-            display: flex;
-            flex-direction: row;
-            justify-content: flex-start;
-            align-items: stretch;
-            overflow: hidden;
-
-            & svg {
-                margin-right: 0.2em;
+            &[class^='gray_'] {
+                display: none;
             }
 
-            & span {
-                /* For the name of the image file. */
+            &.gray_stripe1 {
+                background-color: #444;
+            }
+            &.gray_stripe2 {
+                background-color: #777;
+            }
+            &.gray_stripe3 {
+                background-color: #ccc;
+            }
+
+            &.bw_stripe1 {
+                background-color: #000;
+            }
+            &.bw_stripe2 {
+                background-color: #777;
+            }
+            &.bw_stripe3 {
+                background-color: #fff;
+            }
+
+        }
+        
+    }
+
+    &:checked {
+
+        & + label {
+
+            & span[class^='gray_'] {
                 display: flex;
-                align-items: center;
-                flex: 1;
-                color: var(--color-global-btn-color);
+            }
+
+            & span[class^='bw_'] {
+                display: none;
             }
         }
+    }
+}
 
-        & label[for=ifLoadImg]:hover {
-            background-color: var(--color-global-btn-hover);
+input#cb_px_horzvert:checked + label {
+
+    & svg {
+
+        & path#path_px_pixels_tall {
+            display: block;
         }
 
-        & label[for=ifLoadImg]:active {
-            background-color: var(--color-global-btn-active);
+        & path#path_px_pixels_wide {
+            display: none;
         }
+    }   
+}
 
-        & #dlDownload {
+@media (min-width: 750px) {
+    main {
+        flex: 1;
+        min-height: 0;
+        border: 3px solid red;
+        display: grid;
+
+        grid-template-areas: 'common common' 'effects pictures';
+        grid-template-columns: var(--eff-bar-w) auto;
+        grid-template-rows: var(--cc-bar-h) 1fr;
+
+        & section#common_controls {
+            grid-area: common;
+            background-color: lightgreen;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 0;
-            margin: 0 0 0 auto;
+            align-items: stretch;
 
-            & svg {
-                margin: 0;
-                /* border: 1px solid red; */
+            .btn-wrapper {
+                border: 1px solid black;
+                display: flex;
+                align-items: stretch;
 
-                @media only screen and (max-width: 1024px) {
-                    padding: 0.1rem;
-                    height: 120%;
-                }
-
-                @media only screen and (min-width: 1025px) {
-                    padding: 0.4rem;
+                & label {
+                    width: 100%;
                     height: 100%;
-                }
-
-            }
-        }
-
-        /* Classes to define different widths inside of the Global Actions bar. */
-        & .gctrl1 {
-            @media only screen and (max-width: 600px) {
-                width: calc(var(--globalbarh-cel) - (var(--gctrls-padd) * 2));
-            }
-
-            @media only screen and (min-width: 601px) and (max-width: 1024px) {
-                width: calc(var(--globalbarh-tab) - (var(--gctrls-padd) * 2));
-            }
-
-            @media only screen and (min-width: 1025px) and (max-width: 1440px) {
-                width: calc(var(--globalbarh-md) - (var(--gctrls-padd) * 2));
-            }
-
-            @media only screen and (min-width: 1441px) {
-                width: calc(var(--globalbarh-lg) - (var(--gctrls-padd) * 2));
-            }
-        }
-
-        & .gctrl2 {
-            @media only screen and (max-width: 600px) {
-                width: calc((var(--globalbarh-cel) - (var(--gctrls-padd) * 2)) * 2);
-            }
-
-            @media only screen and (min-width: 601px) and (max-width: 1024px) {
-                width: calc((var(--globalbarh-tab) - (var(--gctrls-padd) * 2)) * 2);
-            }
-
-            @media only screen and (min-width: 1025px) and (max-width: 1440px) {
-                width: calc((var(--globalbarh-md) - (var(--gctrls-padd) * 2)) * 2);
-            }
-
-            @media only screen and (min-width: 1441px) {
-                width: calc((var(--globalbarh-lg) - (var(--gctrls-padd) * 2)) * 2);
-            }
-        }
-
-        & .gctrl3 {
-            @media only screen and (max-width: 600px) {
-                width: calc((var(--globalbarh-cel) - (var(--gctrls-padd) * 2)) * 3);
-            }
-
-            @media only screen and (min-width: 601px) and (max-width: 1024px) {
-                width: calc((var(--globalbarh-tab) - (var(--gctrls-padd) * 2)) * 3);
-            }
-
-            @media only screen and (min-width: 1025px) and (max-width: 1440px) {
-                width: calc((var(--globalbarh-md) - (var(--gctrls-padd) * 2)) * 3);
-            }
-
-            @media only screen and (min-width: 1441px) {
-                width: calc((var(--globalbarh-lg) - (var(--gctrls-padd) * 2)) * 3);
-            }
-        }
-
-        & .gctrl6 {
-            @media only screen and (max-width: 600px) {
-                width: calc((var(--globalbarh-cel) - (var(--gctrls-padd) * 2)) * 6);
-            }
-
-            @media only screen and (min-width: 601px) and (max-width: 1024px) {
-                width: calc((var(--globalbarh-tab) - (var(--gctrls-padd) * 2)) * 6);
-            }
-
-            @media only screen and (min-width: 1025px) and (max-width: 1440px) {
-                width: calc((var(--globalbarh-md) - (var(--gctrls-padd) * 2)) * 6);
-            }
-
-            @media only screen and (min-width: 1441px) {
-                width: calc((var(--globalbarh-lg) - (var(--gctrls-padd) * 2)) * 6);
-            }
-        }
-
-        & input#cbEraser:checked~.g-ctrl {
-            background-color: var(--color-global-btn-hover);
-        }
-    }
-
-    & input:is([type=checkbox], [type=file]) {
-        display: none;
-    }
-
-
-    & #globalControls:not(:has(#cbHorzVert:checked))~#picturesArea {
-        flex-direction: row;
-
-        & .display {
-            width: 50%;
-            height: 100%;
-        }
-    }
-
-    & #globalControls:has(#cbHorzVert:checked)~#picturesArea {
-        flex-direction: column;
-
-        & .display {
-            width: 100%;
-            height: 50%;
-        }
-    }
-
-    & #globalControls:has(#cbFloatOriginal:checked)~#picturesArea {
-
-        & .display.img-in {
-            transition: none;
-            /* transition will dynamically change in JS when the #cbGridHorzVert is checked/unchecked. */
-            touch-action: none;
-            cursor: move;
-            left: var(--floaty-display-x);
-            top: var(--floaty-display-y);
-            width: var(--floaty-display-w);
-            height: var(--floaty-display-h);
-        }
-
-        & .display.img-out {
-            width: 100%;
-            height: 100%;
-        }
-    }
-
-    & #effectsBar {
-        grid-area: effects;
-        background-color: var(--color-ctrlsbar-bg);
-        padding: 0.2rem 0.3rem;
-        display: flex;
-        overflow: auto;
-
-        & .effect-title {
-            border-radius: 25px;
-            background-color: var(--color-effects-rb-bg-on);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 0 0.8rem;
-            margin: 0 0.2rem;
-            white-space: nowrap;
-            cursor: pointer;
-        }
-    }
-
-    & #effectsBar:has(~ #controlsBar #rgEffGrid:checked) label[for=rgEffGrid] {
-        background-color: var(--color-effects-rb-bg-on);
-    }
-
-    & #effectsBar:has(~ #controlsBar #rgEffPixelate:checked) label[for=rgEffPixelate] {
-        background-color: var(--color-effects-rb-bg-on);
-    }
-
-    & #effectsBar:has(~ #controlsBar #rgEffGrays:checked) label[for=rgEffGrays] {
-        background-color: var(--color-effects-rb-bg-on);
-    }
-
-    & #effectsBar:has(~ #controlsBar #rgEffHatching:checked) label[for=rgEffHatching] {
-        background-color: var(--color-effects-rb-bg-on);
-    }
-
-    & #effectsBar:has(~ #controlsBar #rgEffCrossh:checked) label[for=rgEffCrossh] {
-        background-color: var(--color-effects-rb-bg-on);
-    }
-
-
-    & #controlsBar {
-        position: relative;
-        grid-area: controls;
-        background-color: var(--color-ctrlsbar-bg);
-        padding: var(--controlsbar-padd);
-        width: var(--controlsbar-w);
-        z-index: 20;
-
-        @media only screen and (max-width: 1024px) {
-            overflow: visible;
-        }
-
-        @media only screen and (min-width: 1025px) {
-            overflow: auto;
-        }
-
-        & input:not([type=text]) {
-            display: none;
-        }
-
-        & .controls {
-            /* --controls-padd: 0.2rem; */
-            background-color: var(--color-controls-bg);
-            /* width: 100%; */
-            border-radius: 0.5rem;
-            padding: var(--controls-padd);
-            display: none;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: stretch;
-            /* overflow: visible; */
-
-            & .title {
-                /* display: flex; */
-                justify-content: center;
-                font-size: 1.5em;
-
-                @media only screen and (max-width: 1024px) {
-                    display: none;
-                }
-
-                @media only screen and (min-width: 1025px) {
                     display: flex;
-                }
-
-            }
-
-            & .btns {
-                display: flex;
-                margin-bottom: 2px;
-
-                @media only screen and (max-width: 600px) {
-                    flex-direction: column;
-                    align-items: center;
-                }
-
-                @media only screen and (min-width: 601px) and (max-width: 1024px) {
-                    align-items: center;
-                    flex-direction: column;
-                }
-
-                @media only screen and (min-width: 1025px) and (max-width: 1440px) {
-                    flex-direction: row;
-                }
-
-                @media only screen and (min-width: 1441px) {
-                    flex-direction: row;
-                }
-
-                & input~label:hover {
-                    background-color: var(--color-controls-btn-hover);
-                }
-
-                & input:checked+label {
-                    background-color: var(--color-controls-btn-checked);
-                    /* scale: 0.85; */
-                }
-
-                & input~label:active {
-                    background-color: var(--color-controls-btn-active);
-                }
-
-                & .btn {
-                    background-color: var(--color-controls-btn);
-                    border-radius: 0.5rem;
-                    position: relative;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    padding: 0;
-                    overflow: hidden;
                     cursor: pointer;
-
-                    @media only screen and (max-width: 1024px) {
-                        width: calc(var(--controlsbar-w) - (var(--controlsbar-padd) * 2) - (var(--controls-padd) * 2));
-                        height: calc(var(--controlsbar-w) - (var(--controlsbar-padd) * 2) - (var(--controls-padd) * 2));
-                        margin-bottom: 2px;
-                    }
-
-                    @media only screen and (min-width: 1025px) {
-                        width: calc((var(--controlsbar-w) - (var(--controlsbar-padd) * 2) - var(--controls-padd) * 2) / 7);
-                        height: calc((var(--controlsbar-w) - (var(--controlsbar-padd) * 2) - var(--controls-padd) * 2) / 7);
-                        margin-right: 1px;
-                    }
 
                     & svg {
-                        width: 100%;
-                        height: 100%;
+                        max-width: 100%;
+                        max-height: 100%;
                     }
 
+                    &[for='if_load_image'] {
+                        padding: 5px;
+                        gap: 10px;
+                    }
                 }
 
-                & .btn:hover:not(.icolor, [for=cbGraysBlack]) {
-                    background-color: var(--color-controls-btn-hover);
-                }
-
-                & .btn:active {
-                    background-color: var(--color-controls-btn-active);
-                }
-
-                & .btn.supermenu {
-                    position: relative;
-                    overflow: hidden;
-                    z-index: 2;
+                & button {
+                    width: 100%;
+                    height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
+                    cursor: pointer;
 
-                    & .submenu-activator {
-                        width: 100%;
-                        height: 100%;
+                    & svg {
+                        max-width: 100%;
+                        max-height: 100%;
                     }
 
-                    & .submenu {
-                        position: absolute;
-                        background-color: var(--color-controls-btn);
-                        overflow: hidden;
-                        display: flex;
-                        flex-direction: row;
-                        justify-content: flex-start;
-                        align-items: stretch;
-                        max-width: 0;
-                        box-shadow: none;
-                        transition: max-width 300ms ease-in-out;
+                    &#btn_download {
+                        padding: 8px 0px;
 
-                        @media only screen and (max-width: 1024px) {
-                            top: 0;
-                            left: unset;
-                            right: 115%;
-                        }
-
-                        @media only screen and (min-width: 1025px) {
-                            top: 100%;
-                            left: 0;
-                            right: unset;
-                        }
-
-                        & input~label {
-                            cursor: pointer;
-                            width: calc((350px - (var(--controlsbar-padd) * 2) - var(--controls-padd) * 2) / 8);
-                            height: calc((350px - (var(--controlsbar-padd) * 2) - var(--controls-padd) * 2) / 8);
-                        }
                     }
                 }
 
-                & .btn.supermenu:focus-within {
-                    overflow: visible;
-
-                    & .submenu {
-                        max-width: 350px;
-                        box-shadow: 0 0 15px 15px var(--color-controls-btn-active);
-                    }
+                &.w1 {
+                    aspect-ratio: 1/1;
+                    width: var(--cc-bar-h);
                 }
 
-                & .btn.icolor {
-                    /* background-color will be defined in JavaScript. */
-                    border-radius: 50%;
-                    border: 5px solid white;
+                &.w2 {
+                    aspect-ratio: 2/1;
+                    width: calc(2 * var(--cc-bar-h));
                 }
 
-                & .btn[for=cbGraysBlack] {
+                &.w3 {
+                    aspect-ratio: 3/1;
+                    width: calc(3 * var(--cc-bar-h));
+                }
+
+                &.w4 {
+                    aspect-ratio: 4/1;
+                    width: calc(4 * var(--cc-bar-h));
+                }
+
+                &.w5 {
+                    aspect-ratio: 5/1;
+                    width: calc(5 * var(--cc-bar-h));
+                }
+
+                &.w6 {
+                    aspect-ratio: 6/1;
+                    width: calc(6 * var(--cc-bar-h));
+                }
+
+                &.right {
+                    margin-left: auto;
+                }
+            }
+        }
+
+        & #overlay_effects_menu_mobile {
+            display: none;
+        }
+
+        & section#effects_bar {
+            grid-area: effects;
+            background-color: aliceblue;
+            pointer-events: none;
+            opacity: 0.5;
+
+            #btn_effects_label_mobile {
+                display: none;
+            }
+            
+            & .effect {
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                
+                & > label {
+                    border: 1px solid green;
+                    padding: 20px 10px;
                     display: flex;
-                    align-items: stretch;
+                    align-items: center;
+                    gap: 15px;
+                    cursor: pointer;
 
-                    & span {
-                        flex: 1;
-                    }
-
-                    & span.stripe1 {
-                        background-color: rgb(54, 54, 54);
-                    }
-
-                    & span.stripe2 {
-                        background-color: rgb(160, 160, 160);
-                    }
-
-                    & span.stripe3 {
-                        background-color: rgb(197, 197, 197);
+                    & .on-dot {
+                        display: inline-block;
+                        width: 20px;
+                        height: 20px;
+                        border-radius: 50%;
+                        background-color: #ccc;
                     }
                 }
 
-                & input:checked~.btn[for=cbGraysBlack] {
+                & .effect-btns {
+                    border: 1px solid blue;
+                    display: grid;
+                    grid-template-columns: repeat(4, 1fr);
+                    overflow: hidden;
+                    max-height: 0;
+                    transition: max-height 500ms linear;
 
-                    & span.stripe1 {
-                        background-color: rgb(0, 0, 0);
-                    }
+                    & .eff-btn {
+                        border: 1px solid orange;
+                        height: calc(var(--eff-bar-w) / 4);
 
-                    & span.stripe3 {
-                        background-color: rgb(255, 255, 255);
-                    }
-                }
 
-                & .btn#hatchDirs {
-
-                    & #hatchCurrentDir {
-                        position: relative;
-                        width: 100%;
-                        height: 100%;
-                        scale: 0.9;
-                        overflow: hidden;
-                        /* border: 1px solid red; */
-
-                        #svghatchdirections {
+                        & label {
+                            background-color: #adff2f;
+                            display: flex;
+                            width: 100%;
                             height: 100%;
-                            width: 400%;
-                            position: relative;
-                            left: 0;
-                            transition: left 300ms ease-in-out;
+                            padding: 10px;
+                            cursor: pointer;
+
+                            & svg {
+                                max-width: 100%;
+                                max-height: 100%;
+                            }
                         }
                     }
+                }
 
-                    & #hatchCurrentDir:has(~.submenu #hatchdirDLUR:checked) #svghatchdirections {
-                        left: 0;
+                & .eff-slider {
+                    overflow: hidden;
+                    max-height: 0;
+                }
 
-                    }
+                & input:checked + label {
 
-                    & #hatchCurrentDir:has(~.submenu #hatchdirLR:checked) #svghatchdirections {
-                        left: -100%;
-
-                    }
-
-                    & #hatchCurrentDir:has(~.submenu #hatchdirULDR:checked) #svghatchdirections {
-                        left: -200%;
-
-                    }
-
-                    & #hatchCurrentDir:has(~.submenu #hatchdirUD:checked) #svghatchdirections {
-                        left: -300%;
-
+                    & .on-dot {
+                        background-color: #adff2f;
                     }
                 }
 
-                & .btn#cbgCrosshDirs:has(.submenu #crosshdirDLUR) {
-
-                    & #svgpCrosshDLUR {
-                        display: none;
-                    }
+                & input:checked ~ .effect-btns {
+                     max-height: 40vh;
                 }
 
-                & .btn#cbgCrosshDirs:has(.submenu #crosshdirDLUR:checked) {
-
-                    & #svgpCrosshDLUR {
-                        display: inherit;
-                    }
+                & input:checked ~ .effect-slider {
+                     max-height: 40vh;
                 }
+            }
+        }
 
-                /* --- */
+        & section#pictures_area {
+            grid-area: pictures;
+            background-color: cyan;
+            position: relative;
 
-                & .btn#cbgCrosshDirs:has(.submenu #crosshdirLR) {
+            & .pic-area {
+                position: absolute;
+                transition: 300ms ease-in-out;
 
-                    & #svgpCrosshLR {
-                        display: none;
-                    }
-                }
+                & canvas {
+                    border: 1px solid red;
+                    position: absolute;
+                    left: 50%;
+                    top: 50%;
+                    transform: translate(-50%, -50%);
+                    max-width: 95%;
+                    max-height: 95%;
 
-                & .btn#cbgCrosshDirs:has(.submenu #crosshdirLR:checked) {
-
-                    & #svgpCrosshLR {
-                        display: inherit;
-                    }
-                }
-
-                /* --- */
-
-                & .btn#cbgCrosshDirs:has(.submenu #crosshdirULDR) {
-
-                    & #svgpCrosshULDR {
-                        display: none;
-                    }
-                }
-
-                & .btn#cbgCrosshDirs:has(.submenu #crosshdirULDR:checked) {
-
-                    & #svgpCrosshULDR {
-                        display: inherit;
-                    }
-                }
-
-                /* --- */
-
-                & .btn#cbgCrosshDirs:has(.submenu #crosshdirUD) {
-
-                    & #svgpCrosshUD {
-                        display: none;
-                    }
-                }
-
-                & .btn#cbgCrosshDirs:has(.submenu #crosshdirUD:checked) {
-
-                    & #svgpCrosshUD {
-                        display: inherit;
-                    }
                 }
             }
 
-            & .rs-wrapper {
-                position: relative;
-                margin-bottom: 0.2rem;
-                font-family: monospace;
-                border-radius: 0.5rem;
-                background-color: var(--color-controls-btn);
+            & .pic-area.img-in {
+                background-color: yellow;
+                top: 0;
+                left: 0;
+                right: 50%;
+                bottom: 0;
+                z-index: 2;
+            }
+            & .pic-area.img-out {
+                background-color:chocolate;
+                top: 0;
+                left: 50%;
+                right: 0;
+                bottom: 0;
+            }
+        }
 
-                @media only screen and (max-width: 1024px) {
-                    cursor: pointer;
-                    width: calc(var(--controlsbar-w) - (var(--controlsbar-padd) * 2) - (var(--controls-padd) * 2));
-                    height: calc(var(--controlsbar-w) - (var(--controlsbar-padd) * 2) - (var(--controls-padd) * 2));
-                    margin-bottom: 2px;
+        & section#common_controls:has(#cb_horz_vert:checked) ~ section#pictures_area {
+
+            & .pic-area.img-in {
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 50%;
+            }
+            & .pic-area.img-out {
+                top: 50%;
+                left: 0;
+                right: 0;
+                bottom: 0;
+            }
+        }
+
+        & section#common_controls:has(#cb_float:checked) ~ section#pictures_area {
+
+            & .pic-area.img-in {
+                top: 20px;
+                left: 20px;
+                right: calc(100% - 20px - 150px);
+                bottom: calc(100% - 20px - 150px);
+            }
+            & .pic-area.img-out {
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+            }
+        }
+    }
+}
+
+@media (max-width: 749px) {
+    main {
+        flex: 1;
+        min-height: 0;
+        border: 3px solid red;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+
+        & section#common_controls {
+            background-color: #adff2f;
+            height: var(--cc-bar-mob-h);
+            display: flex;
+            align-items: stretch;
+
+            & .btn-wrapper {
+                border: 1px solid black;
+                display: flex;
+                
+                & label {
+                    width: 100%;
+                    height: 100%;
                     display: flex;
-                    justify-content: center;
-                    align-items: stretch;
+                    cursor: pointer;
+
+                    & svg {
+                        max-width: 100%;
+                        max-height: 100%;
+                    }
+
+                    &[for='if_load_image'] {
+                        padding: 3px;
+                        gap: 6px;
+                    }
                 }
 
-                & .mobile-label {
-                    border-radius: 0.5rem;
-                    font-size: 1.4em;
+                & button {
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    cursor: pointer;
+
+                    & svg {
+                        max-width: 100%;
+                        max-height: 100%;
+                    }
+
+                    &#btn_download {
+                        padding: 1px 0px;
+                        
+                        &:not([disabled]) {
+
+                            & svg {
+
+                                & path[id$='_off'] {
+                                    display: none;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                &.w1 {
+                    aspect-ratio: 1/1;
+                    width: var(--cc-bar-mob-h);
+                }
+
+                &.w2 {
+                    aspect-ratio: 2/1;
+                    width: calc(2 * var(--cc-bar-mob-h));
+                }
+
+                &.w3 {
+                    aspect-ratio: 3/1;
+                    width: calc(3 * var(--cc-bar-mob-h));
+                }
+
+                &.w4 {
+                    aspect-ratio: 4/1;
+                    width: calc(4 * var(--cc-bar-mob-h));
+                }
+
+                &.w5 {
+                    aspect-ratio: 5/1;
+                    width: calc(5 * var(--cc-bar-mob-h));
+                }
+
+                &.w6 {
+                    aspect-ratio: 6/1;
+                    width: calc(6 * var(--cc-bar-mob-h));
+                }
+
+                &.right {
+                    margin-left: auto;
+                }
+                
+            }
+        }
+
+
+        & #overlay_effects_menu_mobile:has(+#effects_bar.toggled) {
+            position: absolute;
+            background-color: #00000077;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left:0;
+            z-index: 3;
+        }
+
+        & section#effects_bar {
+            background-color: aquamarine;
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            right: 10px;
+            top: calc(var(--cc-bar-mob-h) + 10px);
+            z-index: 3;
+
+            & #btn_effects_label_mobile {
+                border: none;
+                outline: none;
+                font-size: 20px;
+                padding: 20px;
+                cursor: pointer;
+
+                & ~ .effect:has([name='rbgEffects']:checked) {
+                    display: flex;
+                }
+            }
+
+            & .effect {
+                display: none;
+                flex-direction: column;
+                align-items: flex-end;
+
+                &:has([name='rbgEffects']:checked) {
+                    display: flex;
+                }
+                
+                & > label {
+                    border: 1px solid green;
+                    padding: 10px 20px;
                     display: none;
                     justify-content: center;
                     align-items: center;
-                    flex: 1;
+                    margin-bottom: 10px;
+                    cursor: pointer;
 
-                    @media only screen and (max-width: 600px) {
-                        display: flex;
+                    & .on-dot {
+                        display: none;
                     }
-
-                    @media only screen and (min-width: 601px) and (max-width: 1024px) {
-                        display: flex;
-                    }
-
-                    @media only screen and (min-width: 1025px) and (max-width: 1440px) {}
-
-                    @media only screen and (min-width: 1441px) {}
                 }
 
-
-                & .slider {
-                    overflow: hidden;
-                    border-radius: 0.5rem;
-
-                    @media only screen and (max-width: 1024px) {
-                        width: 0;
-                        position: absolute;
-                        right: 115%;
-
-                    }
-
-                    @media only screen and (min-width: 1025px) {
-                        width: 100%;
-                        position: relative;
-                        right: unset;
-                    }
-
-                    & .rs-min,
-                    .rs-max {
-                        font-size: 0.8em;
-                    }
-
-                    & .rs-title {}
-
-                    & .rs-track {}
-                }
-            }
-
-            & .rs-wrapper:focus-within {
-
-                & .slider {
-
-                    @media only screen and (max-width: 1024px) {
-                        width: var(--rs-width);
-                        transition: width 300ms ease-in-out;
-                    }
-
-                }
-            }
-        }
-
-        & .controls:has(input[name=rbgEffects]:checked) {
-            display: flex;
-        }
-    }
-
-
-    & #picturesArea {
-        background-color: rgb(0, 0, 0);
-        position: relative;
-        grid-area: pictures;
-        display: flex;
-        z-index: 2;
-
-        & .display {
-            position: absolute;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            transition: 500ms ease-in-out;
-
-            & canvas {
-                /* border: 5px solid purple; */
-                max-width: 97%;
-                max-height: 97%;
-            }
-        }
-
-        & .display.img-in {
-            background-color: var(--color-display-in-bg);
-            top: 0;
-            left: 0;
-            z-index: 2;
-
-            & .palette-container{
-                border: 1px solid red;
-                position: absolute;
-                top: 2em;
-                left: 2em;
-                display: flex;
-                flex-direction: column;
-                justify-content: stretch;
-                width: 100px;
-                max-height: 80%;
-                font-size: 0.7em;
-
-                & .resolution{
+                & .effect-btns {
                     border: 1px solid blue;
+                    display: flex;
+                    max-height: 0;
+                    flex-direction: column;
+                    gap: 10px;
+                    transition: max-height 1100ms ease-in-out ;
 
+                    & .eff-btn {
+                        border: 1px solid orange;
+                        width: var(--eff-bar-btns-mob-size);
+                        height: var(--eff-bar-btns-mob-size);
+                        border-radius: 50%;
+                        overflow: hidden;
+
+                        & input#cb_px_horzvert + label {
+
+                            & svg {
+
+                                & path#path_px_pixels_tall {
+                                    display: none;
+                                }
+
+                                & path#path_px_pixels_wide {
+                                    display: block;
+                                }
+                            }
+                            
+                        }
+
+                        & input#cb_px_horzvert:checked + label {
+
+                            & svg {
+
+                                & path#path_px_pixels_tall {
+                                    display: block;
+                                }
+
+                                & path#path_px_pixels_wide {
+                                    display: none;
+                                }
+                            }
+                            
+                        }
+
+                        & label {
+                            background-color: #adff2f;
+                            display: flex;
+                            width: 100%;
+                            height: 100%;
+                            padding: 12px;
+                            cursor: pointer;
+
+                            & svg {
+                                max-width: 100%;
+                                max-height: 100%;
+                            }
+                        }
+                    }
                 }
 
-                & .color-list{
-                    border: 1px solid orange;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: stretch;
+                & .eff-slider {
+                    overflow: hidden;
+                    max-height: 0;
+                }
 
-                    & .color{
-                        border: 1px solid green;
+                & input:checked ~ .effect-btns {
+                    max-height: 80vh;
+                }
+
+                & input:checked ~ .effect-slider {
+                    max-height: 80vh;
+                }
+            }
+
+            &.toggled {
+                transform: translate(-100px, 0);
+
+                & #btn_effects_label_mobile {
+                    display: none;
+                }
+
+                & .effect {
+                    display: flex;
+                    gap: 5px;
+
+                    & label {
+                        display: flex;
+                        margin: 0;
+                        font-size: 30px;
+                        color: red;
+                    }
+
+                    & .effect-btns {
+                        display: none;
+                    }
+
+                    & .effect-slider {
+                        display: none;
                     }
                 }
             }
         }
 
-        & .display.img-out {
-            background-color: var(--color-display-out-bg);
-            bottom: 0;
-            right: 0;
-            z-index: 1;
-        }
-    }
-}
+        & section#pictures_area {
+            position: relative;
+            flex: 1;
+            min-height: 0;
 
+            & .pic-area {
+                position: absolute;
+                transition: 300ms ease-in-out;
 
-dialog {
+                & canvas {
+                    border: 1px solid red;
+                    position: absolute;
+                    left: 50%;
+                    top: 50%;
+                    transform: translate(-50%, -50%);
+                    max-width: 95%;
+                    max-height: 95%;
 
-    @media only screen and (max-width: 600px) {
-        width: 90vw;
-        height: 60vh;
-    }
+                }
+            }
 
-    @media only screen and (min-width: 601px) and (max-width: 1024px) {
-        width: 80vw;
-        height: 50vh;
-    }
-
-    @media only screen and (min-width: 1025px) and (max-width: 1440px) {
-        width: 50vw;
-        height: 35vh;
-    }
-
-    @media only screen and (min-width: 1441px) {
-        width: 40vw;
-        height: 30vh;
-    }
-
-    .wrapper {
-
-        & .body {
-            padding: 1.5rem;
-            background-color: var(--color-global-bg);
-            color: var(--color-global-btn-color);
-            font-weight: bolder;
-
-            & a,
-            a:visited {
-                color: var(--color-dlbar-btn-bg-active);
+            & .pic-area.img-in {
+                background-color: yellow;
+                top: 0;
+                left: 0;
+                right: 50%;
+                bottom: 0;
+                z-index: 2;
+            }
+            & .pic-area.img-out {
+                background-color:chocolate;
+                top: 0;
+                left: 50%;
+                right: 0;
+                bottom: 0;
             }
         }
 
-        & .footer {
+        & section#common_controls:has(#cb_horz_vert:checked) ~ section#pictures_area {
 
-            & button {
-                font-weight: bolder;
-                color: var(--color-global-btn-color);
+            & .pic-area.img-in {
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 50%;
+            }
+            & .pic-area.img-out {
+                top: 50%;
+                left: 0;
+                right: 0;
+                bottom: 0;
             }
         }
-    }
-}
 
-dialog::backdrop {
-    background-color: #000000;
-    opacity: 0.5;
-}
+        & section#common_controls:has(#cb_float:checked) ~ section#pictures_area {
 
-dialog#diagInfo {
-
-    & .wrapper {
-
-        & .body {}
-    }
-}
-
-dialog#diagContactme {
-
-    & .wrapper {
-
-        & .body {
-            user-select: text;
+            & .pic-area.img-in {
+                top: 20px;
+                left: 20px;
+                right: calc(100% - 20px - 150px);
+                bottom: calc(100% - 20px - 150px);
+            }
+            & .pic-area.img-out {
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+            }
         }
-    }
-}
-
-@keyframes glow-add {
-    from {
-        background-color: rgb(128, 128, 192);
-    }
-
-    to {
-        background-color: rgb(51, 51, 185);
-    }
-}
-
-@keyframes glow-remove {
-    from {
-        background-color: rgb(196, 140, 140);
-    }
-
-    to {
-        background-color: rgb(185, 77, 77);
     }
 }

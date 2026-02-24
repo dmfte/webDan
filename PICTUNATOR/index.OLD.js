@@ -1,254 +1,337 @@
-//  SECTIONS
-const secToolbar = document.getElementById("secToolbar");
-const secDisplay = document.getElementById("secDisplay");
-
-//  CONTAINERS
-
-
-//  GLOBAL VARIABLES
-var imageOriginal;  //  Image to be loaded to the browser.
-var canvOriginal = document.getElementById("canvOriginal");
-var co = canvOriginal.getContext("2d", { willReadFrequently: true });
-var canvFinal = document.getElementById("canvFinal");
-var cf = canvFinal.getContext("2d", { willReadFrequently: true });
-var originalData, finalData, dataI, dataF;  // Image data.
-
-//   NAVBAR
-const navBtnInfo = document.querySelector(".nav-i#gaBtnInfo");
-const diagInfo = document.getElementById("diagInfo");
-const paramsDiagInfo = { trigger: navBtnInfo, title: "Information", dialog: diagInfo, glyph: "hercon", ok: false, cancel: false }
-const adInfo = new AutoDialog(paramsDiagInfo);
-
-// Mailto
-const navBtnContactme = document.getElementById("navBtnContactme");
-navBtnContactme.addEventListener("click", () => {
-    let ta = document.createElement("textarea");
-    ta.style.position = "absolute";
-    ta.style.transform = "scale(0)";
-    ta.innerText = "dmfte.dev@gmail.com";
-    document.body.appendChild(ta);
-    ta.focus();
-    ta.select();
-    document.execCommand("copy");
-    showTooltip(navBtnContactme, 2000);
-    document.body.removeChild(ta);
+// VARIABLES
+var canvIn = document.getElementById("canvIn");
+// var ctxIn = canvIn.getContext("2d", {willReadFrequently: true});
+var canvOut = document.getElementById("canvOut");
+var ctxOut = canvOut.getContext("2d", {
+    willReadFrequently: true
 });
+var imageIn;
 
-function showTooltip(elem, timeMs) {
-    // Will add the .active class to the already styled tooltip and remvoe it after the provided time in milisecons.
-    let tooltip = elem.querySelector(".tooltip");
-    tooltip.classList.add("active");
-    window.setTimeout(() => {
-        tooltip.classList.remove("active");
-    }, timeMs)
-}
+var SMALLEST_DIM, RATIO;
 // ---------
 
-//  GLOBAL ACTIONS
-function smallestDimension(img) {
-    return (img.width < img.height) ? img.width : img.height;
-}
-function getLoadedImage(evt) {
-    return new Promise((res, rej) => {
-        let img = new Image();
-        img.onload = () => res(img);
-        let URL = window.URL.createObjectURL(evt.target.files[0]);
-        img.src = URL;
-    });
-}
+// GLOBAL ACTION BAR.
 
-// To display canvases aligned horizontally or vertically.
-const cbGaHorzVert = document.getElementById("cbGaHorzVert");
-cbGaHorzVert.addEventListener("click", () => {
-    if (cbGaHorzVert.checked) {
-        secDisplay.classList.add("horizontal");
-        secDisplay.classList.remove("vertical");
+// Checkbox to display images side to side or one on top of the other.
+const pathHorzvertLeftsquare = document.getElementById("pathHorzvertLeftSquare");
+const pathHorzvertRighttsquare = document.getElementById("pathHorzvertRightSquare");
+
+const mpHLS = new MorphPath({
+    path: pathHorzvertLeftsquare,
+    arrayd: [
+        "M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z",
+        "M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z",
+        "M 2 4 C 2 3 3 2 4 2 L 14 2 C 15 2 16 3 16 4 L 16 8 L 2 8 C 2 8 2 8 2 8 Z",
+        "M 2 4 C 2 3 3 2 4 2 L 14 2 C 15 2 16 3 16 4 L 16 8 L 2 8 C 2 8 2 8 2 8 Z",
+        "M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z"
+    ],
+    dur: 1000,
+    keytimes: [0, 0.2, 0.5, 0.8, 1]
+});
+const mpHRS = new MorphPath({
+    path: pathHorzvertRighttsquare,
+    arrayd: [
+        "M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 C 10 16 10 16 10 16 Z",
+        "M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 C 10 16 10 16 10 16 Z",
+        "M 2 10 L 16 10 C 16 10 16 10 16 10 L 16 14 C 16 15 15 16 14 16 L 4 16 C 3 16 2 15 2 14 Z",
+        "M 2 10 L 16 10 C 16 10 16 10 16 10 L 16 14 C 16 15 15 16 14 16 L 4 16 C 3 16 2 15 2 14 Z",
+        "M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 C 10 16 10 16 10 16 Z"
+    ],
+    dur: 1000,
+    keytimes: [0, 0.2, 0.5, 0.8, 1]
+});
+
+const cbHorzVert = document.getElementById("cbHorzVert");
+const lbHorzVert = document.querySelector("[for=cbHorzVert]");
+lbHorzVert.addEventListener("pointerenter", () => {
+    startPaths([mpHLS, mpHRS]);
+});
+lbHorzVert.addEventListener("pointerleave", () => {
+    stopPaths([mpHLS, mpHRS]);
+    if (cbHorzVert.checked) {
+        // Horizontal.
+        pathHorzvertLeftsquare.setAttribute("d", "M 2 4 C 2 3 3 2 4 2 L 14 2 C 15 2 16 3 16 4 L 16 8 L 2 8 C 2 8 2 8 2 8 Z");
+        pathHorzvertRighttsquare.setAttribute("d", "M 2 10 L 16 10 C 16 10 16 10 16 10 L 16 14 C 16 15 15 16 14 16 L 4 16 C 3 16 2 15 2 14 Z");
     } else {
-        secDisplay.classList.remove("horizontal");
-        secDisplay.classList.add("vertical");
+        // Vertical.
+        pathHorzvertLeftsquare.setAttribute("d", "M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z");
+        pathHorzvertRighttsquare.setAttribute("d", "M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 C 10 16 10 16 10 16 Z");
     }
 });
-const svgHorzVert = document.getElementById("svgHorzVert");
-svgHorzVert.addEventListener("pointerenter", svgAnimateStart);
-svgHorzVert.addEventListener("pointerleave", svgAnimateStop);
 
-// To make the original image float.
-const svgFloatSquare = document.getElementById("svgFloatSquare");
-svgFloatSquare.addEventListener("pointerenter", svgAnimateStart);
-svgFloatSquare.addEventListener("pointerleave", svgAnimateStop);
-//  --  to make left display draggable.
-var gaFloatDispLeft = 5;
-var gaFloatDispTop = 5;
-const displayLeft = document.querySelector(".disp.left");
-const cbGaSmallFloat = document.getElementById("cbGaSmallFloat");
-cbGaSmallFloat.addEventListener("click", () => {
-    if (cbGaSmallFloat.checked) {
-        secDisplay.classList.add("float");
-        displayLeft.style.left = `${gaFloatDispLeft}px`;
-        displayLeft.style.top = `${gaFloatDispTop}px`;
+// Checkbox to show the original image as floating or embeded.
+const pathFloatoriginalLeftSquare = document.getElementById("pathFloatoriginalLeftSquare");
+const pathFloatoriginalRightSquare = document.getElementById("pathFloatoriginalRightSquare");
+
+const mpFLS = new MorphPath({
+    path: pathFloatoriginalLeftSquare,
+    arrayd: [
+        "M 2 2 C 2 2 2 2 2 2 L 7 2 C 7 2 7 2 7 2 L 7 7 L 2 7 C 2 7 2 7 2 7 Z",
+        "M 2 2 C 2 2 2 2 2 2 L 7 2 C 7 2 7 2 7 2 L 7 7 L 2 7 C 2 7 2 7 2 7 Z",
+        "M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z",
+        "M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z",
+        "M 2 2 C 2 2 2 2 2 2 L 7 2 C 7 2 7 2 7 2 L 7 7 L 2 7 C 2 7 2 7 2 7 Z"
+    ],
+    dur: 1000,
+    keytimes: [0, 0.2, 0.5, 0.8, 1],
+});
+const mpFRR = new MorphPath({
+    path: pathFloatoriginalRightSquare,
+    arrayd: [
+        "M 9 4 L 16 4 C 16 4 16 4 16 4 L 16 16 C 16 16 16 16 16 16 L 4 16 L 4 9 L 9 9 Z",
+        "M 9 4 L 16 4 C 16 4 16 4 16 4 L 16 16 C 16 16 16 16 16 16 L 4 16 L 4 9 L 9 9 Z",
+        "M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 L 10 14 L 10 11 Z",
+        "M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 L 10 14 L 10 11 Z",
+        "M 9 4 L 16 4 C 16 4 16 4 16 4 L 16 16 C 16 16 16 16 16 16 L 4 16 L 4 9 L 9 9 Z"
+    ],
+    dur: 1000,
+    keytimes: [0, 0.2, 0.5, 0.8, 1],
+});
+
+const displayImgIn = document.querySelector(".display.img-in");
+const cbFloatOriginal = document.getElementById("cbFloatOriginal");
+const lbFloatOriginal = document.querySelector("[for=cbFloatOriginal]");
+lbFloatOriginal.addEventListener("pointerenter", () => {
+    startPaths([mpFLS, mpFRR]);
+});
+
+lbFloatOriginal.addEventListener("pointerleave", () => {
+    stopPaths([mpFLS, mpFRR]);
+    if (cbFloatOriginal.checked) {
+        // Floating.
+        pathFloatoriginalLeftSquare.setAttribute("d", "M 2 2 C 2 2 2 2 2 2 L 7 2 C 7 2 7 2 7 2 L 7 7 L 2 7 C 2 7 2 7 2 7 Z");
+        pathFloatoriginalRightSquare.setAttribute("d", "M 9 4 L 16 4 C 16 4 16 4 16 4 L 16 16 C 16 16 16 16 16 16 L 4 16 L 4 9 L 9 9 Z");
+
     } else {
-        secDisplay.classList.remove("float");
-        if (secDisplay.classList.contains("vertical")) {
-            displayLeft.style.right = "0";
-            displayLeft.style.top = "0";
-            displayLeft.style.left = "0";
-        }
-        if (secDisplay.classList.contains("horizontal")) {
-            displayLeft.style.left = "0";
-            displayLeft.style.top = "0";
-            displayLeft.style.bottom = "0";
-        }
+        // Side to side.
+        pathFloatoriginalLeftSquare.setAttribute("d", "M 2 4 C 2 3 3 2 4 2 L 8 2 C 8 2 8 2 8 2 L 8 16 L 4 16 C 3 16 2 15 2 14 Z");
+        pathFloatoriginalRightSquare.setAttribute("d", "M 10 2 L 14 2 C 15 2 16 3 16 4 L 16 14 C 16 15 15 16 14 16 L 10 16 L 10 14 L 10 11 Z");
+
     }
 });
 
-displayLeft.addEventListener("pointerdown", (downEvt) => {
-    if (secDisplay.classList.contains("float")) {
-        // #secDisplay .disp { transition-duration: 300ms }
-        displayLeft.style.transitionDuration = "0ms";
-        let limitBox = secDisplay.getBoundingClientRect();
-        let limitDisplay = secDisplay.querySelector(".disp.left").getBoundingClientRect();
-        let styleDisplay = window.getComputedStyle(displayLeft);
+// Checkbox to erase in original image.
+var pointerEraser = false;
 
-        let offsXleft = downEvt.clientX - limitBox.left - displayLeft.offsetLeft;
-        let offsXright = parseInt(styleDisplay.width) + parseInt(styleDisplay.borderWidth) - offsXleft;
-        let offsYtop = downEvt.clientY - limitDisplay.top;
-        let offsYbottom = parseInt(styleDisplay.height) + parseInt(styleDisplay.borderWidth) - offsYtop;
-
-        displayLeft.addEventListener("pointermove", moveStart);
-        displayLeft.addEventListener("pointerup", moveEnd, { once: true });
-        function moveStart(moveEvt) {
-            displayLeft.setPointerCapture(moveEvt.pointerId);
-            if (moveEvt.clientX - offsXleft >= limitBox.left + 5 &&
-                moveEvt.clientX + offsXright < limitBox.right - 5) {
-                gaFloatDispLeft = moveEvt.clientX - limitBox.left - offsXleft
-                displayLeft.style.left = `${gaFloatDispLeft}px`;
-            }
-            if (moveEvt.clientY - offsYtop >= limitBox.top + 5 &&
-                moveEvt.clientY + offsYbottom < limitBox.bottom - 5) {
-                gaFloatDispTop = moveEvt.clientY - limitBox.top - offsYtop;
-                displayLeft.style.top = `${gaFloatDispTop}px`;
-            }
-        }
-        function moveEnd(upEvt) {
-            displayLeft.removeEventListener("pointermove", moveStart);
-            // #secDisplay .disp { transition-duration: 300ms }
-            displayLeft.style.transitionDuration = "300ms";
-        }
+const cbEraser = document.getElementById("cbEraser");
+cbEraser.addEventListener("input", () => {
+    if (imageIn == undefined) return;
+    if (cbEraser.checked) {
+        pointerEraser = true;
+    } else {
+        pointerEraser = false;
     }
 });
 
-function svgAnimateStart(evt) {
-    let svg = evt.currentTarget;
-    let animate = svg.querySelectorAll("animate");
-    animate.forEach(anim => {
-        let dur = anim.dataset.dur;
-        anim.setAttribute("dur", dur);
-        let path = anim.closest("path");
-        path.innerHTML = "";
-        path.appendChild(anim);
-    });
-}
-function svgAnimateStop(evt) {
-    let svg = evt.currentTarget;
-    let animate = svg.querySelectorAll("animate");
-    animate.forEach(anim => {
-        anim.setAttribute("dur", 0);
-        let path = anim.closest("path");
-        path.innerHTML = "";
-        path.appendChild(anim);
-    });
-}
-// ---------
-//  TOOLBAR RADIO BUTTONS
-const arrRbEffect = document.querySelectorAll(".effect input[name=rgEffects]");
+canvIn.addEventListener("click", (evt) => {
+    if (!pointerEraser) return;
 
-const arrEffects = document.querySelectorAll(".effect");
-
-// Styling for when in desktop setting.
-arrRbEffect.forEach(rb => {
-    rb.addEventListener("click", () => {
-        if (rb.checked) {
-            arrEffects.forEach(eff => {
-                eff.classList.remove("active");
-            });
-            let effect = rb.closest(".effect");
-            effect.classList.add("active");
-            if (effect.dataset.btnDown !== undefined) {
-                btnDownImg.setAttribute("class", "");
-                btnDownImg.classList.add("effect");
-                btnDownImg.classList.add(effect.dataset.btnDown);
-            } else {
-                btnDownImg.setAttribute("class", "");
-                btnDownImg.classList.add("effect");
-            }
-        }
-        if (secToolbar.classList.contains("expanded")) {
-            secToolbar.classList.remove("expanded");
-        } else {
-            secToolbar.classList.add("expanded");
-        }
-    });
 });
-// ---------
 
-//  GRID EFFECT
+
+// ------------
+var displayImgInOffsetLeft, displayImgInOffsetTop;
+var marginedLeft = 15,
+    marginedTop = 15;
+
+cbFloatOriginal.addEventListener("input", () => {
+    if (cbFloatOriginal.checked) {
+        // Floating
+        displayImgIn.style.transition = "500ms ease-in-out";
+        displayImgIn.style.left = `${marginedLeft}px`;
+        displayImgIn.style.top = `${marginedTop}px`;
+    } else {
+        // Side to side
+        displayImgIn.style.transition = "500ms ease-in-out";
+        displayImgIn.style.top = "0";
+        displayImgIn.style.left = "0";
+    }
+});
+
+displayImgIn.addEventListener("pointerdown", (downEvt) => {
+    if (cbFloatOriginal.checked) {
+        let bcr = displayImgIn.getBoundingClientRect();
+        displayImgInOffsetLeft = downEvt.x - bcr.x;
+        displayImgInOffsetTop = downEvt.y - bcr.y;
+        displayImgIn.addEventListener("pointerup", () => {
+            displayImgIn.removeEventListener("pointermove", onMovedisplayImgIn);
+        });
+        displayImgIn.addEventListener("pointermove", onMovedisplayImgIn);
+    }
+});
+
+function onMovedisplayImgIn(moveEvt) {
+    displayImgIn.style.transition = "none";
+    let parent = displayImgIn.parentElement;
+    let parentBcr = parent.getBoundingClientRect();
+    let pureLeft = moveEvt.x - parentBcr.x - displayImgInOffsetLeft;
+    let pureTop = moveEvt.y - parentBcr.y - displayImgInOffsetTop;
+    marginedLeft = getMinMax(pureLeft, [0, parseInt(getComputedStyle(parent).width) - parseInt(getComputedStyle(displayImgIn).width)]);
+    marginedTop = getMinMax(pureTop, [0, parseInt(getComputedStyle(parent).height) - parseInt(getComputedStyle(displayImgIn).height)]);
+    displayImgIn.style.left = `${marginedLeft}px`;
+    displayImgIn.style.top = `${marginedTop}px`;
+}
+// Checkbox: image to process lowered to 500px or use original size.
+const pathOriginaldimensionsNob = document.getElementById("pathOriginaldimensionsNobLeft");
+
+const mpONL = new MorphPath({
+    path: pathOriginaldimensionsNobLeft,
+    arrayd: [
+        "M 17 17 A 1 1 -65 0 0 19 11 L 7 9 Z",
+        "M 15 14 A 1 1 0 0 0 21 14 L 18 2 Z",
+        "M 17 11 A 1 1 65 0 0 19 17 L 29 9 Z"
+    ],
+    dur: 300,
+    keytimes: [0, 0.5, 1],
+    repeatcount: 1
+});
+const mpONR = new MorphPath({
+    path: pathOriginaldimensionsNobLeft,
+    arrayd: [
+        "M 17 11 A 1 1 65 0 0 19 17 L 29 9 Z",
+        "M 15 14 A 1 1 0 0 0 21 14 L 18 2 Z",
+        "M 17 17 A 1 1 -65 0 0 19 11 L 7 9 Z"
+    ],
+    dur: 300,
+    keytimes: [0, 0.5, 1],
+    repeatcount: 1
+});
+const cbOriginalDimensions = document.getElementById("cbOriginalDimensions");
+const lbOriginalDimensions = document.querySelector("[for=cbOriginalDimensions]");
+
+cbOriginalDimensions.addEventListener("change", () => {
+    if (cbOriginalDimensions.checked) {
+        mpONL.start();
+    } else {
+        mpONR.start();
+    }
+});
+// ------------
+
+// GRID EFFECT
 var paramsGrid = {
+    amnt: 3,
     color: "#ff0000",
     linew: 5,
-    side: "height"
+    atdg: undefined,
+    vert: true
 }
-var atsg;  //  Array To Start Grid.
-const contGridAmtSqrs = document.querySelector("#effectGrid .cont.slider#gridAmtSqrs .wrapper");
-const contGridLinew = document.querySelector("#effectGrid .cont.slider#gridLinew .wrapper");
-const cbGridWOrH = document.getElementById("cbGridWOrH");
+
+//-- Radio Button from the Effects group.
+const rgEffGrid = document.getElementById("rgEffGrid");
+rgEffGrid.addEventListener("input", async () => {
+    if (imageIn == undefined) return;
+    paramsGrid.atdg = await getArrayToDrawGrid(imageIn, paramsGrid);
+    drawGrid(canvOut, paramsGrid);
+});
+
+//-- Color picker behavior.
 const icGridColor = document.getElementById("icGridColor");
-const lbGridColor = document.querySelector("label[for=icGridColor]");
-const rbGrid = document.getElementById("rbGrid");
-var rsGridAmtSqrs = new RangeSlider(contGridAmtSqrs, { title: "Number of squares", min: 2, step: 1, max: 30, def: 5, color1: "#2c5270", color2: "#DDE6ED" });
-var rsGridLinew = new RangeSlider(contGridLinew, { title: "Line width", min: 1, step: 1, max: 30, def: 2, color1: "#2c5270", color2: "#DDE6ED" });
-
-rsGridAmtSqrs.onslide = onGridSlide;
-rsGridLinew.onslide = onGridSlide;
-
-cbGridWOrH.addEventListener("input", () => {
-    onGridSlide();
-});
-icGridColor.value = paramsGrid.color;
-lbGridColor.style.backgroundColor = icGridColor.value;
+const lbIcGridColor = document.querySelector("[for=icGridColor]");
+lbIcGridColor.style.backgroundColor = paramsGrid.color;
 icGridColor.addEventListener("input", () => {
+    lbIcGridColor.style.backgroundColor = icGridColor.value;
     paramsGrid.color = icGridColor.value;
-    lbGridColor.style.backgroundColor = icGridColor.value;
-    if (atsg !== undefined) drawATSG(atsg, cf, paramsGrid);
-});
-rbGrid.addEventListener("click", (evt) => {
-    if (imageOriginal !== undefined) onGridSlide();
+    drawGrid(canvOut, paramsGrid);
 });
 
-// Functions
-async function onGridSlide() {
-    if (imageOriginal !== undefined) {
-        atsg = await getArrayToStartGrid(imageOriginal.width, imageOriginal.height, rsGridAmtSqrs.val);
-        paramsGrid.linew = rsGridLinew.val;
-        cf.drawImage(imageOriginal, 0, 0, canvFinal.width, canvFinal.height);
-        drawATSG(atsg, cf, paramsGrid);
+//-- Button to draw exact amount of squares along width or height.
+const cbGridHorzvert = document.getElementById("cbGridHorzvert");
+const lbGridlbHorzVert = document.querySelector("[for=cbGridHorzvert]");
+const pathGridHorzvert = document.getElementById("pathGridHorzvert");
+//-- -- SVG animation
+var mpGHh = new MorphPath({
+    path: pathGridHorzvert,
+    arrayd: [
+        "M 2 3 H 14 V 13 H 2 Z M 8 3 V 13 M 14 3 V 13 M 2 9 H 14 M 2 13 H 14",
+        "M 2 3 H 14 V 13 H 2 Z M 7 3 V 13 M 12 3 V 13 M 2 8 H 14 M 2 13 H 14"
+    ],
+    dur: 300,
+    keytimes: [0, 1],
+    repeatcount: 1
+});
+
+var mpGHv = new MorphPath({
+    path: pathGridHorzvert,
+    arrayd: [
+        "M 2 3 H 14 V 13 H 2 Z M 7 3 V 13 M 12 3 V 13 M 2 8 H 14 M 2 13 H 14",
+        "M 2 3 H 14 V 13 H 2 Z M 8 3 V 13 M 14 3 V 13 M 2 9 H 14 M 2 13 H 14"
+    ],
+    dur: 300,
+    keytimes: [0, 1],
+    repeatcount: 1
+});
+cbGridHorzvert.addEventListener("input", async () => {
+    if (cbGridHorzvert.checked) {
+        //  Horizontal squares distribution
+        mpGHh.start();
+    } else {
+        //  Vertical squares distribution.
+        mpGHv.start();
     }
+    if (imageIn == undefined) return;
+    paramsGrid.vert = cbGridHorzvert.checked;
+    paramsGrid.atdg = await getArrayToDrawGrid(imageInData, paramsGrid);
+    drawGrid(canvOut, paramsGrid);
+});
+
+
+//-- Slider for amoaunt of squares.
+const containerGridSquares = document.getElementById("containerGridSquares");
+const labelForContainerGridSquares = document.querySelector("[label-for=containerGridSquares]");
+var rsGridSquares = new RangeSlider(containerGridSquares, {
+    title: "Grid",
+    min: 2,
+    max: 20,
+    def: paramsGrid.amnt,
+    step: 1,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+});
+labelForContainerGridSquares.innerText = rsGridSquares.val;
+rsGridSquares.onslide = async function () {
+    labelForContainerGridSquares.innerText = rsGridSquares.val;
+    if (imageIn == undefined) return;
+    paramsGrid.amnt = rsGridSquares.val;
+    paramsGrid.atdg = await getArrayToDrawGrid(imageInData, paramsGrid);
+    drawGrid(canvOut, paramsGrid);
+};
+
+//-- Slider for the width of the grid line.
+const containerGridLinew = document.getElementById("containerGridLinew");
+const labelForContainerGridLinew = document.querySelector("[label-for=containerGridLinew]");
+var rsGridLinew = new RangeSlider(containerGridLinew, {
+    title: "Line Width",
+    min: 1,
+    step: 1,
+    max: 30,
+    def: paramsGrid.linew,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+});
+labelForContainerGridLinew.innerText = rsGridLinew.val;
+rsGridLinew.onslide = function () {
+    labelForContainerGridLinew.innerText = rsGridLinew.val;
+    paramsGrid.linew = rsGridLinew.val;
+    drawGrid(canvOut, paramsGrid);
 }
 
-function getArrayToStartGrid(w, h, amnt) {
+//-- Functions
+function getArrayToDrawGrid(data, params) {
     return new Promise((res, rej) => {
+        let w = data.width;
+        let h = data.height;
         let arr = [];
         let square = 0;
         let forX = 0;
         let forY = 0;
-        // if (strSide == "height") {
-        if (cbGridWOrH.checked) {
-            square = h / amnt;
+        if (params.vert) {
+            square = h / params.amnt;
             forX = Math.ceil(w / square);
-            forY = amnt;
+            forY = params.amnt;
         } else {
-            // if (strSide == "width") {
-            square = w / amnt;
-            forX = amnt;
+            square = w / params.amnt;
+            forX = params.amnt;
             forY = Math.ceil(h / square);
         }
         for (let i = 0; i <= forY; i++) {
@@ -271,10 +354,19 @@ function getArrayToStartGrid(w, h, amnt) {
     });
 }
 
-function drawATSG(atsg, ctx, params) {
+function drawGrid(canvas, params) {
+    if (imageIn == undefined) return;
+    if (canvas.width !== imageIn.width || canvas.height !== imageIn.height) {
+        canvas.width = imageIn.width;
+        canvas.height = imageIn.height;
+    }
+    ctx = canvas.getContext("2d", {
+        willReadFrequently: true
+    });
+    ctx.drawImage(imageIn, 0, 0);
     ctx.strokeStyle = params.color;
     ctx.lineWidth = params.linew;
-    atsg.forEach(obj => {
+    params.atdg.forEach(obj => {
         ctx.save();
         ctx.translate(obj.movetoX, obj.movetoY);
         ctx.beginPath();
@@ -286,198 +378,223 @@ function drawATSG(atsg, ctx, params) {
 }
 
 //  PIXELATE EFFECT
-var paramsPixelate = {
-    title: "1/x size",
-    min: 2,
+var paramsPx = {
+    smooth: false,
+    dimension: 10,
+    horizontal: false,
+    grid: true,
+    palete: true
+}
+var canv0 = document.createElement("canvas");
+var c0 = canv0.getContext("2d", { willReadFrequently: true });
+var pxPalette = {};
+
+//-- Radio Button from the Effects group.
+const rgEffPixelate = document.getElementById("rgEffPixelate");
+rgEffPixelate.addEventListener("input", () => {
+    canv0 = getPixelatedCanvas(paramsPx);
+    applyPixelation(canvOut, canv0, paramsPx);
+});
+
+//-- Blur/Sharp checkbox
+const cbPxSmooth = document.getElementById("cbPxSmooth");
+cbPxSmooth.addEventListener("input", () => {
+    if (cbPxSmooth.checked) {
+        document.querySelector("[for=cbPxSmooth] svg g").setAttribute("filter", "url(#svgFilterBlur)");
+    } else {
+        document.querySelector("[for=cbPxSmooth] svg g").setAttribute("filter", "none");
+    }
+    paramsPx.smooth = cbPxSmooth.checked;
+    applyPixelation(canvOut, canv0, paramsPx);
+});
+
+const cbPxHorizontal = document.getElementById("cbPxHorizontal");
+cbPxHorizontal.addEventListener("click", () => {
+    paramsPx.horizontal = cbPxHorizontal.checked;
+
+    canv0 = getPixelatedCanvas(paramsPx);
+    applyPixelation(canvOut, canv0, paramsPx);
+});
+
+const cbPxGrid = document.getElementById("cbPxGrid");
+cbPxGrid.addEventListener("click", () => {
+    paramsPx.grid = cbPxGrid.checked;
+    canv0 = getPixelatedCanvas(paramsPx);
+    applyPixelation(canvOut, canv0, paramsPx);
+});
+
+const cbPxPalette = document.getElementById("cbPxPalette");
+cbPxPalette.addEventListener("click", () => {
+    if (!cbPxPalette.checked) return;
+    if (imageIn == undefined) return;
+    let imagedata = c0.getImageData(0, 0, canv0.width, canv0.height).data;
+    for (let i = 0; i < imagedata.length; i += 4) {
+        let r = imagedata[i + 0];
+        let g = imagedata[i + 1];
+        let b = imagedata[i + 2];
+        // let a = imagedata[i + 3];
+        let rgb = `${r}, ${g}, ${b}`;
+        if (!pxPalette.hasOwnProperty(rgb))  pxPalette[rgb] = [];
+        pxPalette[rgb].push(i);
+    }
+    console.log(pxPalette);
+    for (const key in pxPalette) {
+        if (Object.prototype.hasOwnProperty.call(pxPalette, key)) {
+            const rgb = pxPalette[key];
+            
+        }
+    }
+    
+});
+
+//-- Range slider controlling level of pixelation
+var paramsPxLevel = {
+    title: "Dimension",
+    min: 8,
     step: 1,
-    // Max will be re-set as a tenth  of the img smallest dimention.
-    max: 4,
-    // Default value will be modified as a fourth of max.
-    def: 3,
-    color1: "#2c5270",
-    color2: "#DDE6ED"
+    max: 128,
+    def: 32,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
 };
-const contPixelateSlider = document.querySelector("#effectPixelate .cont.slider .wrapper");
-const rbPixelate = document.getElementById("rbPixelate");
-var rsPixelate = new RangeSlider(contPixelateSlider, paramsPixelate);
 
-rbPixelate.addEventListener("click", () => {
-    if (imageOriginal !== undefined) onPixelateSlide();
-});
+const containerPxLevel = document.getElementById("containerPxLevel");
+const labelForContainerPxLevel = document.querySelector("[label-for=containerPxLevel]");
+var rsPxLevel = new RangeSlider(containerPxLevel, paramsPxLevel);
+rsPxLevel.onslide = function () {
+    labelForContainerPxLevel.innerText = rsPxLevel.val;
+    paramsPx.dimension = rsPxLevel.val;
+    canv0 = getPixelatedCanvas(paramsPx);
 
-// Functions
-async function onPixelateSlide() {
-    let canv0 = document.createElement("canvas");
-    canv0.width = Math.floor(imageOriginal.width / rsPixelate.val);
-    canv0.height = Math.floor(imageOriginal.height / rsPixelate.val);
-    let c0 = canv0.getContext("2d", {
-        willReadFrequentdirectionY: true
+    applyPixelation(canvOut, canv0, paramsPx);
+}
+labelForContainerPxLevel.innerText = rsPxLevel.val;
+
+function getPixelatedCanvas(params) {
+    if (imageIn == undefined) return undefined;
+    
+    canv0.width = (params.horizontal) ? params.dimension : parseInt(params.dimension / RATIO);
+    canv0.height = (params.horizontal) ? parseInt(params.dimension * RATIO) : params.dimension;
+    c0 = canv0.getContext("2d", {
+        willReadFrequently: true
     });
-    c0.imageSmoothingEnabled = false;
-    c0.drawImage(imageOriginal, 0, 0, canv0.width, canv0.height);
-    cf.imageSmoothingEnabled = false;
-    cf.drawImage(canv0, 0, 0, canvFinal.width, canvFinal.height);
+    c0.imageSmoothingEnabled = params.smooth;
+    c0.drawImage(imageIn, 0, 0, canv0.width, canv0.height);
+    return canv0;
 }
 
+function applyPixelation(canvasTarget, canvasPixelated, params) {
+    if (imageIn == undefined) return;
+    let block = (params.horizontal) ? parseInt(imageIn.width / params.dimension) : parseInt(imageIn.height / params.dimension);
+    let pw = canvasPixelated.width * block;
+    let ph = canvasPixelated.height * block;
+    canvasTarget.width = pw;
+    canvasTarget.height = ph;
 
-//  MONOCHROME EFFECT
-const rbMonochrome = document.getElementById("rbMonochrome");
-rbMonochrome.addEventListener("click", onMonochromeSlide);
+    let ctx = canvasTarget.getContext("2d", {
+        willReadFrequently: true
+    });
+    ctx.imageSmoothingEnabled = params.smooth;
+    ctx.drawImage(canvasPixelated, 0, 0, canvOut.width, canvOut.height);
 
-const icMonoColor = document.getElementById("icMonoColor");
-const lbMonoColor = document.querySelector("[for=icMonoColor]");
-icMonoColor.value = "#000000";
-lbMonoColor.style.backgroundColor = icMonoColor.value;
-var arrMonoColorRgb = getarrRGB(icMonoColor.value);
-icMonoColor.addEventListener("input", () => {
-    lbMonoColor.style.backgroundColor = icMonoColor.value;
-    arrMonoColorRgb = getarrRGB(icMonoColor.value);
-    onMonochromeSlide();
-});
-
-const icMonoBg = document.getElementById("icMonoBg");
-const lbMonoBg = document.querySelector("[for=icMonoBg]");
-icMonoBg.value = "#FFFFFF";
-lbMonoBg.style.backgroundColor = icMonoBg.value;
-icMonoBg.addEventListener("input", () => {
-    lbMonoBg.style.backgroundColor = icMonoBg.value;
-    onMonochromeSlide();
-});
-
-const contMonoSeparation = document.querySelector("#monoSeparation .wrapper");
-var rsMonoSeparation = new RangeSlider(contMonoSeparation, { title: "separation", min: 3, max: 50, step: 1, def: 10, color1: "#2c5270", color2: "#DDE6ED" });
-rsMonoSeparation.onslide = onMonochromeSlide;
-
-const contMonoShades = document.querySelector("#monoShades .wrapper");
-var rsMonoShades = new RangeSlider(contMonoShades, { title: "Shades", min: 1, max: 20, step: 1, def: 3, color1: "#2c5270", color2: "#DDE6ED" });
-rsMonoShades.onslide = onMonochromeSlide;
-
-const contMonoSenitivity = document.querySelector("#monoSensitivity .wrapper");
-var rsMonoSensitivity = new RangeSlider(contMonoSenitivity, { title: "Sensitivity", min: -250, max: 250, step: 5, def: 0, color1: "#2c5270", color2: "#DDE6ED" });
-rsMonoSensitivity.onslide = onMonochromeSlide;
-
-async function onMonochromeSlide() {
-    if (imageOriginal !== undefined) {
-        let canvFinal = document.createElement("canvas");
-        canvFinal.width = canvOriginal.width;
-        canvFinal.height = canvOriginal.height;
-        cf.fillStyle = icMonoBg.value;
-        cf.fillRect(0, 0, canvFinal.width, canvFinal.height);
-        let finalData = cf.getImageData(0, 0, canvFinal.width, canvFinal.height);
-        let atm = await getArrayToMonochrome(originalData, rsMonoSeparation.val);
-        let monoData = await getMonocrhomedData(atm, finalData, rsMonoShades.val, rsMonoSensitivity.val, arrMonoColorRgb);  //  Shape.
-        cf.putImageData(monoData, 0, 0);
+    if (params.grid) {
+        for (let i = 1; i < canvasPixelated.height; i++) {
+            let x = 0;
+            let y = i * block
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(canvOut.width, y);
+            ctx.stroke();
+        }
+        for (let i = 1; i < canvasPixelated.width; i++) {
+            let x = i * block;
+            let y = 0;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x, canvOut.height);
+            ctx.stroke();
+        }
     }
 }
 
-async function getArrayToMonochrome(data = new Object, separation = 0) {
-    return new Promise((res, rej) => {
-        let arr = [];
-        for (let x = 0; x < data.width; x++) {
-            if (x % separation !== 0) continue;
-            for (let y = 0; y < data.height; y++) {
-                if (y % separation !== 0) continue;
-                let idx = getImagedataIndex(x, y, data.width);
-                let r = data.data[idx + 0];
-                let g = data.data[idx + 1];
-                let b = data.data[idx + 2];
-                let gs = getGrayscale(r, g, b);
-                arr.push([x, y, gs]);
-            }
-        }
-        res(arr);
-    });
+//  GRAYSCALE
+var paramsGrays = {
+    black: true,
+    levels: 4,
+    sens: 0
 }
-
-function getMonocrhomedData(atm = [], data = new Object, shades = 0, sensitivity = 0, colorArr = new Object) {
-    return new Promise(async (res, rej) => {
-        let buckets = await get255Buckets(shades + 1, sensitivity);
-        // let arr = [];
-        for (let i = 0; i < atm.length; i++) {
-            const x = atm[i][0];
-            const y = atm[i][1];
-            const gs = atm[i][2];
-            for (let b = 1; b < buckets.length; b++) {
-                const buck = buckets[b];
-                if (gs >= buck[0] && gs <= buck[1]) {
-                    // Rhombus
-                    for (let m = 0; m <= b; m++) {
-                        let x1 = x - m;
-                        let x2 = x + m;
-                        let y1 = y - (b - m);
-                        let y2 = y - (b - m);
-                        getPurePxDrawnData(x1, y1, x2, y2, data, imageOriginal.width, colorArr);
-                        let y3 = y + (b - m);
-                        let y4 = y + (b - m);
-                        getPurePxDrawnData(x1, y3, x2, y4, data, imageOriginal.width, colorArr);
-                    }
-
-                    // Circle
-                    // for (let m = 0; m <=b; m++) {
-
-                    // }
-                }
-            }
-        }
-        res(data);
-    });
-}
-
-//   GRAYSCALING
-const rbGrayscaling = document.getElementById("rbGrayscaling");
-const cbGrayscalingBnw = document.getElementById("cbGrayscalingBnw");
-const contGrayscalingLevels = document.querySelector("#effectGrayscaling .cont.slider#gsLevels .wrapper");
-const contGrayscalingSensitivity = document.querySelector("#effectGrayscaling .cont.slider#gsSensitivity .wrapper");
-
-rbGrayscaling.addEventListener("click", () => {
-    if (imageOriginal !== undefined) onGrayscalingSlide();
+//-- Radio Button from the Effects group.
+const rgEffGrays = document.getElementById("rgEffGrays");
+rgEffGrays.addEventListener("input", () => {
+    applyGrayscaling(paramsGrays);
 });
 
-cbGrayscalingBnw.addEventListener("input", onGrayscalingSlide);
+//-- Checkbox to ex/include black, or just gray tones.
+const cbGraysBlack = document.getElementById("cbGraysBlack");
+cbGraysBlack.addEventListener("input", async () => {
+    paramsGrays.black = cbGraysBlack.checked;
+    applyGrayscaling(paramsGrays);
+});
 
-var rsGrayscalingLevels = new RangeSlider(contGrayscalingLevels, { title: "Levels of gray", min: 2, max: 20, step: 1, def: 3, color1: "#2c5270", color2: "#DDE6ED" });
+
+//-- Slider for gray levels.
+const containerGraysLevels = document.getElementById("containerGraysLevels");
+const labelForContainerGraysLevels = document.querySelector("[label-for=containerGraysLevels]");
+const rsGraysLevels = new RangeSlider(containerGraysLevels, {
+    title: "Levels of gray",
+    min: 2,
+    max: 20,
+    step: 1,
+    def: paramsGrays.levels,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+});
 //  More than 20 grayscale tones are barely distinguishable.
-var rsGrayScalingSensitivity = new RangeSlider(contGrayscalingSensitivity, { title: "Sensitivity", min: -254, step: 1, max: 254, def: 0, color1: "#2c5270", color2: "#DDE6ED" });
-rsGrayscalingLevels.onslide = onGrayscalingSlide;
-rsGrayScalingSensitivity.onslide = onGrayscalingSlide;
-
-async function onGrayscalingSlide() {
-    if (imageOriginal !== undefined) {
-        let newImgData = await getGrayscalledImgData(rsGrayscalingLevels.val, rsGrayScalingSensitivity.val, cbGrayscalingBnw.checked);
-        cf.putImageData(newImgData, 0, 0);
-    }
+labelForContainerGraysLevels.innerText = rsGraysLevels.val;
+rsGraysLevels.onslide = function () {
+    labelForContainerGraysLevels.innerText = rsGraysLevels.val;
+    paramsGrays.levels = rsGraysLevels.val;
+    applyGrayscaling(paramsGrays);
 }
 
-function getGrayscalledImgData(how_many, sensitivity, boolBnw) {
-    return new Promise(async (res, rej) => {
-        let arrBucket = await get255Buckets(how_many, sensitivity);
-        let arrValues = new Array(how_many);
-        let bucket = (boolBnw) ? 255 / (how_many - 1) : 255 / (how_many + 1);
-        if (boolBnw) {
-            for (let i = 0; i < arrValues.length; i++) {
-                arrValues[arrValues.length - 1 - i] = parseInt(Math.max(Math.min(i * bucket, 255), 0));
-            }
-        } else {
-            for (let i = 1; i <= arrValues.length; i++) {
-                arrValues[arrValues.length - i] = parseInt(Math.max(Math.min(i * bucket, 255), 0));
-            }
-        }
+//-- Slider for gray sensitivity.
+const containerGraysSensitivity = document.getElementById("containerGraysSensitivity");
+const labelForContainerGraysSensitivity = document.querySelector("[label-for=containerGraysSensitivity]");
+const rsGraysSensitivity = new RangeSlider(containerGraysSensitivity, {
+    title: "Sensitivity",
+    min: -254,
+    step: 1,
+    max: 254,
+    def: paramsGrays.levels,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+});
+labelForContainerGraysSensitivity.innerText = rsGraysSensitivity.val;
+rsGraysSensitivity.onslide = function () {
+    labelForContainerGraysSensitivity.innerText = rsGraysSensitivity.val;
+    paramsGrays.sens = rsGraysSensitivity.val;
+    applyGrayscaling(paramsGrays);
+}
 
-        let newImgdata = structuredClone(originalData);
+
+function getGrayscaledImgData(imagedata, levels = 2, sens = 2, black = true) {
+    return new Promise(async (res, rej) => {
+        let arrBuckets = await get255Buckets(levels, sens);
+        let arrValues = new Array(levels);
+        let bucketSize = (black) ? 255 / (levels - 1) : 255 / (levels + 1);
+        for (let i = 0; i < arrValues.length; i++) {
+            let factor = (black) ? i : i + 1;
+            arrValues[i] = parseInt(getMinMax(factor * bucketSize, [0, 255]));
+        }
+        let newImgdata = structuredClone(imagedata);
         for (let i = 0; i < newImgdata.data.length; i += 4) {
             let r = newImgdata.data[i + 0];
             let g = newImgdata.data[i + 1];
             let b = newImgdata.data[i + 2];
             // let a = newImgdata.data[i + 3];
-            let grayScale = parseInt(r * 0.299 + g * 0.587 + b * 0.114);
-            let newGs = 0;
-            for (let j = 0; j < arrValues.length; j++) {
-                const val = arrValues[j];
-                if (grayScale >= arrBucket[j][0] && grayScale <= arrBucket[j][1]) {
-                    newGs = val;
-                    break;
-                }
-            }
+            let grayScale = getGrayscale(r, g, b);
+            let buck = getBucketPosition(grayScale, arrBuckets);
+            let newGs = arrValues[buck];
             newImgdata.data[i + 0] = newGs;
             newImgdata.data[i + 1] = newGs;
             newImgdata.data[i + 2] = newGs;
@@ -486,235 +603,204 @@ function getGrayscalledImgData(how_many, sensitivity, boolBnw) {
     });
 }
 
-// ---------
+async function applyGrayscaling(params) {
+    if (imageIn == undefined) return;
+    if (canvOut.width !== imageIn.width || canvOut.height !== imageIn.height) {
+        canvOut.width = imageIn.width;
+        canvOut.height = imageIn.height;
+    }
+    ctx = canvOut.getContext("2d", {
+        willReadFrequently: true
+    });
+    ctx.imageSmoothingEnabled = false;
+    let newData = await getGrayscaledImgData(imageInData, params.levels, params.sens, params.black);
+    ctx.putImageData(newData, 0, 0);
+}
+// ------------
 
-// HATCHING
+
+//  HATCHING
 var paramsHatch = {
     bg: "#FFFFFF",
     color: "#000000",
     linew: 2,
-    buckets: [[192, 255], [128, 191], [64, 127], [0, 63]],  //  This is what get255Buckets will return with default how_many lines value of 3 + 1.
+    buckets: [
+        [0, 85],
+        [86, 170]
+    ], //  This is what get255Buckets will return with default how_many lines value of 3 minus the last (brightest) bucket.
+    direction: "DLUR",
+    separation: 3,
+    sensitivity: 0,
     atdh: undefined
 }
-
-const rbHatching = document.getElementById("rbHatching");
-rbHatching.addEventListener("click", async () => {
-    if (imageOriginal == undefined) return;
-    paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, paramsHatch.buckets);
-    onHatchSlide(paramsHatch);
+// Radio button from the Effects group.
+const rgEffHatching = document.getElementById("rgEffHatching");
+rgEffHatching.addEventListener("input", async () => {
+    if (imageIn == undefined) return;
+    labelForContainerHatchSeparation.innerText = rsHatchSeparation.val;
+    paramsHatch.separation = rsHatchSeparation.val;
+    paramsHatch.atdh = await getArrToDrawHatch(paramsHatch);
+    applyHatching(paramsHatch);
 });
 
-// var paramsHatch = { atdh: undefined, color: "#000000", bg: "#FFFFFF", dir: "DLUR", separation: 5, linew: 3, how_many: 3 };
-
-const icHatchColor = document.getElementById("icHatchColor");
-icHatchColor.value = paramsHatch.color;
-const lbHatchColor = document.querySelector("[for=icHatchColor]");
-lbHatchColor.style.backgroundColor = paramsHatch.color;
-icHatchColor.addEventListener("input", () => {
-    lbHatchColor.style.backgroundColor = icHatchColor.value;
-    paramsHatch.color = icHatchColor.value;
-    onHatchSlide(paramsHatch);
+const hatchRbgDirections = document.querySelectorAll("[name=rgHatchDir]");
+hatchRbgDirections.forEach(rb => {
+    rb.addEventListener("input", async () => {
+        paramsHatch.direction = rb.value;
+        if (imageIn == undefined) return;
+        paramsHatch.atdh = await getArrToDrawHatch(paramsHatch);
+        applyHatching(paramsHatch);
+    });
 });
 
 const icHatchBg = document.getElementById("icHatchBg");
-icHatchBg.value = paramsHatch.bg;
-const lbHatchBg = document.querySelector("[for=icHatchBg]");
-lbHatchBg.style.backgroundColor = paramsHatch.bg;
-icHatchBg.addEventListener("input", () => {
-    lbHatchBg.style.backgroundColor = icHatchBg.value;
+const lbIcHatchBg = document.querySelector("[for=icHatchBg]");
+lbIcHatchBg.style.backgroundColor = paramsHatch.bg;
+icHatchBg.addEventListener("input", async () => {
     paramsHatch.bg = icHatchBg.value;
-    onHatchSlide(paramsHatch);
+    lbIcHatchBg.style.backgroundColor = paramsHatch.bg;
+    if (imageIn == undefined) return;
+    applyHatching(paramsHatch);
 });
 
-const contHatchHowmanyw = document.querySelector("#hatchHowmanyw .wrapper");
-var rsHatchHowmanyw = new RangeSlider(contHatchHowmanyw, { title: "Lines", min: 1, max: 10, def: 3, step: 1, color1: "#2c5270", color2: "#DDE6ED" });
-rsHatchHowmanyw.onslide = async () => {
-    paramsHatch.buckets = await get255Buckets(rsHatchHowmanyw.val + 1, rsHatchSensitivity.val);
-    paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, paramsHatch.buckets);
-    onHatchSlide(paramsHatch);
-});
-const contHatchSensitivity = document.querySelector("#hatchSensitivity .wrapper");
-var rsHatchSensitivity = new RangeSlider(contHatchSensitivity, { title: "Sensitivity", min: -250, max: 250, step: 5, def: 0, color1: "#2c5270", color2: "#DDE6ED" });
-rsHatchSensitivity.onslide = async () => {
-    paramsHatch.buckets = await get255Buckets(rsHatchHowmanyw.val + 1, rsHatchSensitivity.val);
-    paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, paramsHatch.buckets);
-    onHatchSlide(paramsHatch);
+const icHatchColor = document.getElementById("icHatchColor");
+const lbIcHatchColor = document.querySelector("[for=icHatchColor]");
+lbIcHatchColor.style.backgroundColor = paramsHatch.color
+icHatchColor.addEventListener("input", async () => {
+    paramsHatch.color = icHatchColor.value;
+    lbIcHatchColor.style.backgroundColor = paramsHatch.color;
+    if (imageIn == undefined) return;
+    applyHatching(paramsHatch);
 });
 
-const contHatchSeparation = document.querySelector("#hatchSeparation .wrapper");
-var rsHatchSeparation = new RangeSlider(contHatchSeparation, { title: "Separation", min: 2, max: 3, step: 1, def: 3, color1: "#2c5270", color2: "#DDE6ED" });  //  Will be reinitialized when image is loaded.
-rsHatchSeparation.onslide = async () => {
-    paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, paramsHatch.buckets);
-    onHatchSlide(paramsHatch);
+// Slider for how many different widths being hatched
+const containerHatchHowmany = document.querySelector("#containerHatchHowmany");
+const labelForContainerHatchHowmany = document.querySelector("[label-for=containerHatchHowmany]");
+var rsHatchHowmanyw = new RangeSlider(containerHatchHowmany, {
+    title: "Lines",
+    min: 1,
+    max: 10,
+    def: paramsHatch.buckets.length,
+    step: 1,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
 });
+labelForContainerHatchHowmany.innerText = rsHatchHowmanyw.val;
+rsHatchHowmanyw.onslide = async function () {
+    labelForContainerHatchHowmany.innerText = rsHatchHowmanyw.val;
+    if (imageIn == undefined) return;
+    paramsHatch.buckets = await get255Buckets(rsHatchHowmanyw.val + 1, paramsHatch.sensitivity);
+    paramsHatch.buckets.pop(); //  One more bucket is added for absolute white values, but then removed so it is not hatched.
+    paramsHatch.atdh = await getArrToDrawHatch(paramsHatch);
+    applyHatching(paramsHatch);
+};
 
-const contHatchLinewidth = document.querySelector("#hatchLinewidth .wrapper");
-var rsHatchLinewidth = new RangeSlider(contHatchLinewidth, { title: "Width", min: 1, max: 15, def: paramsHatch.linew, step: 1, color1: "#2c5270", color2: "#DDE6ED" });
-rsHatchLinewidth.onslide = () => {
+// Hatch separation slider.
+const containerHatchSeparation = document.getElementById("containerHatchSeparation");
+const labelForContainerHatchSeparation = document.querySelector("[label-for=containerHatchSeparation]");
+var rsHatchSeparation = new RangeSlider(containerHatchSeparation, {
+    title: "Separation",
+    min: 2,
+    max: 3,
+    step: 1,
+    def: paramsHatch.separation,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+}); //  Will be reinitialized when image is loaded.
+labelForContainerHatchSeparation.innerText = rsHatchSeparation.val;
+rsHatchSeparation.onslide = async function () {
+    labelForContainerHatchSeparation.innerText = rsHatchSeparation.val;
+    if (imageIn == undefined) return;
+    paramsHatch.separation = rsHatchSeparation.val;
+    paramsHatch.atdh = await getArrToDrawHatch(paramsHatch);
+    applyHatching(paramsHatch);
+};
+
+// Width factor slider.
+const containerHatchLinew = document.getElementById("containerHatchLinew");
+const labelForContainerHatchLinew = document.querySelector("[label-for=containerHatchLinew]");
+var rsHatchLinewidth = new RangeSlider(containerHatchLinew, {
+    title: "Width",
+    min: 1,
+    max: 15,
+    def: paramsHatch.linew,
+    step: 1,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+});
+labelForContainerHatchLinew.innerText = rsHatchLinewidth.val;
+rsHatchLinewidth.onslide = function () {
+    labelForContainerHatchLinew.innerText = rsHatchLinewidth.val;
     paramsHatch.linew = rsHatchLinewidth.val;
-    onHatchSlide(paramsHatch);
+    applyHatching(paramsHatch);
+};
+
+// Sensitivity slider.
+const containerHatchSensitivity = document.getElementById("containerHatchSensitivity");
+const labelForContainerHatchSensitivity = document.querySelector("[label-for=containerHatchSensitivity]");
+var rsHatchSensitivity = new RangeSlider(containerHatchSensitivity, {
+    title: "Sensitivity",
+    min: -250,
+    max: 250,
+    step: 1,
+    def: paramsHatch.sensitivity,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
 });
+labelForContainerHatchSensitivity.innerText = rsHatchSensitivity.val;
+rsHatchSensitivity.onslide = async function () {
+    labelForContainerHatchSensitivity.innerText = rsHatchSensitivity.val;
+    if (imageIn == undefined) return;
+    paramsHatch.sensitivity = rsHatchSensitivity.val;
+    // let howmany = paramsHatch.buckets.length;
+    paramsHatch.buckets = await get255Buckets(paramsHatch.buckets.length + 1, paramsHatch.sensitivity);
+    paramsHatch.buckets.pop(); //  One more bucket is added for absolute white values but then removed so it is not hatched.
+    paramsHatch.atdh = await getArrToDrawHatch(paramsHatch);
+    applyHatching(paramsHatch);
+};
 
 
-var strHatchDir = "DLUR";
-const currentdirection = document.getElementById("currentdirection");
-const svgCurrDir = currentdirection.querySelector("svg");
-const rbtnsHatchDirections = currentdirection.closest(".cont.other .btn.with-submenu").querySelectorAll("input[type=radio]");
-
-//  Click and animation for the hatch-direction button.
-rbtnsHatchDirections.forEach(bthd => {
-    bthd.addEventListener("click", async () => {
-        let diff = parseInt(bthd.dataset.vb) - parseInt(currentdirection.dataset.vb);
-        let diff10 = diff / 10;
-        let interval = null;
-        let count = 1;
-        let fx = () => {
-            if (count >= 10) window.clearInterval(interval);
-            currentdirection.dataset.vb = parseInt(currentdirection.dataset.vb) + diff10;
-            svgCurrDir.setAttribute("viewBox", `${currentdirection.dataset.vb} 0 10 10`);
-            count++;
-        }
-        interval = window.setInterval(fx, 50);
-        strHatchDir = bthd.value;
-        paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, paramsHatch.buckets);
-        onHatchSlide(paramsHatch);
+async function applyHatching(params) {
+    if (imageIn == undefined || paramsHatch.atdh == undefined) return;
+    canvOut.imageSmoothingEnabled = false;
+    canvOut.width = imageIn.width;
+    canvOut.height = imageIn.height;
+    ctxOut = canvOut.getContext("2d", {
+        willReadFrequently: true
     });
-});
+    ctxOut.fillStyle = params.bg;
+    ctxOut.fillRect(0, 0, canvOut.width, canvOut.height);
+    ctxOut.strokeStyle = paramsHatch.color;
+    ctxOut.lineCap = "square";
 
-svgCurrDir.setAttribute("viewBox", "0 0 10 10");
+    drawAtdh(params.atdh, params.linew);
+}
 
-async function onHatchSlide(params) {
-    if (imageOriginal == undefined || paramsHatch.atdh == undefined) return;
-    if (imageOriginal !== undefined) {
-        canvFinal.imageSmoothingEnabled = false;
-        canvFinal.width = canvOriginal.width;
-        canvFinal.height = canvOriginal.height;
-        cf = canvFinal.getContext("2d", { willReadFrequently: true });
-        cf.fillStyle = params.bg;
-        cf.fillRect(0, 0, canvFinal.width, canvFinal.height);
-        // cf.strokeStyle = paramsHatch.color;
-
-        let blankImagedata = cf.getImageData(0, 0, canvFinal.width, canvFinal.height);
-        let diwATDH = await returnsDrawnImagedataWithATDH(blankImagedata, params);
-        cf.putImageData(diwATDH, 0, 0);
+function drawAtdh(atdh, linew) {
+    for (let i = 0; i < atdh.length; i++) {
+        const arr = atdh[i];
+        for (let j = 0; j < arr.length; j++) {
+            const obj = arr[j];
+            ctxOut.save();
+            ctxOut.lineWidth = obj.linew * linew;
+            ctxOut.beginPath();
+            ctxOut.moveTo(obj.x, obj.y);
+            ctxOut.lineTo(obj.lx, obj.ly);
+            ctxOut.stroke();
+            ctxOut.restore();
+        }
     }
 }
 
-function returnsDrawnImagedataWithATDH(imagedatafinal, params) {
+async function getObjToStartHatching(dir = "", separation = 0) {
     return new Promise((res, rej) => {
-        let arrRGB = getarrRGB(params.color);
-        for (let i = 0; i < params.atdh.length; i++) {
-            const subArr = params.atdh[i];
-            for (let j = 0; j < subArr.length; j++) {
-                const obj = subArr[j];
-                let linew = obj.linew * params.linew;
-
-                // let bool = await getPurePxDrawnData(obj.x, obj.y, obj.lx, obj.ly, imagedatafinal, linew, arrRGB);
-                getPurePxDrawnData(obj.x, obj.y, obj.lx, obj.ly, imagedatafinal, linew, arrRGB);
-            }
-        }
-        res(imagedatafinal);
-    });
-}
-async function getHatchedData(otdh, data, buckets) {
-    return new Promise(async (res, rej) => {
-        let canv0 = document.createElement("canvas");
-        canv0.width = imageOriginal.width;
-        canv0.height = imageOriginal.height;
-        let c0 = canv0.getContext("2d", { willReadFrequently: true });
-        c0.fillStyle = icHatchBg.value;
-        c0.fillRect(0, 0, canv0.width, canv0.height);
-        // c0.strokeStyle = paramsHatch.color;
-        let data0 = c0.getImageData(0, 0, canv0.width, canv0.height);
-
-        // let arr = [];
-        let arrRGB = getarrRGB(icHatchColor.value);
-        for (let h = 0; h < otdh.arrXyLim.length; h++) {
-            const obj = otdh.arrXyLim[h];
-            // arr.push([]);
-            // let width = 0;
-            for (let i = 0; i < obj.lim; i++) {
-                let x = obj.x + i * otdh.dirx;
-                let y = obj.y + i * otdh.diry;
-                let idx = getImagedataIndex(x, y, data.width);
-                let r = data.data[idx + 0];
-                let g = data.data[idx + 1];
-                let b = data.data[idx + 2];
-                // let a = data.data[idx + 3];
-                let gs = getGrayscale(r, g, b);
-                // const last = arr.length - 1;
-                for (let j = 1; j < buckets.length; j++) {
-                    const buck = buckets[j];
-                    if (gs >= buck[0] && gs <= buck[1]) {
-                        // This is to hatch without the degradated pixels next to the line.
-                        let offset = Math.floor((j * rsHatchLinewidth.val) / 2);
-                        let start = 0;
-                        if ((j * rsHatchLinewidth.val) % 2 == 0) {
-                            start = -(offset - 1);
-                        } else {
-                            start = -offset;
-                        }
-                        for (let m = start; m <= offset; m++) {
-                            if (x + m < 0 || x + m >= data0.width) continue;
-                            for (let n = start; n <= offset; n++) {
-                                if (y + n < 0 || y + n >= data0.height) continue;
-                                let idx2 = getImagedataIndex(x + m, y + n, data.width);
-                                data0.data[idx2 + 0] = arrRGB[0];
-                                data0.data[idx2 + 1] = arrRGB[1];
-                                data0.data[idx2 + 2] = arrRGB[2];
-                            }
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-        res(data0);
-    });
-}
-
-function get255Buckets(how_many_buckets = 0, sensitivity = 0) {
-    return new Promise((res, rej) => {
-        let arr = new Array(how_many_buckets);
-        let bucket = Math.ceil(255 / arr.length);
-        for (let i = arr.length - 1; i >= 0; i--) {
-            let lowerLim = maxMin(i * bucket + sensitivity, [0, 255]);
-            let upperLim = maxMin((i + 1) * bucket - 1 + sensitivity, [0, 255]);
-            arr[arr.length - 1 - i] = [lowerLim, upperLim];
-        }
-        arr[0][1] = 255;
-        arr[arr.length - 1][0] = 0;
-        res(arr);
-    });
-}
-
-function maxMin(value = 0, range = []) {
-    return Math.min(range[1], Math.max(range[0], value));
-}
-
-function getImagedataIndex(x, y, width) {
-    return (y * width + x) * 4;
-}
-
-async function getObjectToStartHatching(dir = "", separation = 0) {
-    return new Promise((res, rej) => {
-        // Returns:
-        // obj = {
-        //     arrXyLim: [{
-        //         x: X coord to start evaluating pixel.
-        //         y: Y coord to start evaluating pixel.
-        //         lim: limit to the pixel-by=pixel evaluation.
-        //     }],
-        //     dirx: direction in X where the next pixel to evaluate is.
-        //     diry: direction in Y where the next pixel to evaluate is.
-        // }
         let obj = {
             arrXyLim: [],
             dirx: 0,
             diry: 0
         }
-        let width = originalData.width;
-        let height = originalData.height;
+        let width = imageInData.width;
+        let height = imageInData.height;
         let leftover;
         switch (dir) {
             case "DLUR":
@@ -784,196 +870,18 @@ async function getObjectToStartHatching(dir = "", separation = 0) {
     });
 }
 
-//  CROSSHATCHING
-var paramsCrossh = {
-    linew: 2,
-    bg: "white",
-    color: "#000000",
-    atdh: undefined
-}
-
-var paramsCrossh = { bg: "#FFFFFF", color: "#000000", linew: 2, atdh: undefined }  //  Buckets will be defined on onCrosshSlide depending on amount of directions.
-var strCrosshDirections = ["ULDR", "LR", "DLUR", "UD"];
-
-// const bucketCrossh = [[0, 255], [0, 204], [0, 153], [0, 102], [0, 51]];
-
-const crosshSubmenuer = document.querySelector("#effectCrossh .submenuer");
-const crosshDirectionsSubmenuee = document.querySelector("#crosshDirections .submenuee");
-const cbgrpCrosshDirection = crosshDirectionsSubmenuee.querySelectorAll("[name=cbgrpCrosshDirection]");
-cbgrpCrosshDirection.forEach(cb => {
-    cb.addEventListener("change", function (evt) {
-        let label = document.querySelector(`[for=${cb.id}]`);
-        let use = crosshSubmenuer.querySelector(`#usefor${cb.dataset.dir}`);
-        if (cb.checked) {
-            strCrosshDirections.push(cb.dataset.dir);
-            label.classList.add("checked");
-            use.style.display = "inline";
-        } else {
-            idx = strCrosshDirections.indexOf(cb.dataset.dir);
-            strCrosshDirections.splice(idx, 1);
-            label.classList.remove("checked");
-            use.style.display = "none";
-        }
-        onCrosshSlide();
-    });
-});
-
-const rbCrosshatch = document.getElementById("rbCrosshatch");
-rbCrosshatch.addEventListener("input", () => {
-    if (rbCrosshatch.checked) onCrosshSlide();
-});
-
-const icCrosshColor = document.getElementById("icCrosshColor");
-icCrosshColor.value = paramsCrossh.color;
-const lbCrosshColor = document.querySelector("[for=icCrosshColor");
-lbCrosshColor.style.backgroundColor = paramsCrossh.color;
-icCrosshColor.addEventListener("input", () => {
-    lbCrosshColor.style.backgroundColor = icCrosshColor.value;
-    paramsCrossh.color = icCrosshColor.value;
-    onCrosshSlide(paramsCrossh);
-});
-
-const icCrosshBg = document.getElementById("icCrosshBg");
-icCrosshBg.value = paramsCrossh.bg;
-const lbCrosshBg = document.querySelector("[for=icCrosshBg]");
-lbCrosshBg.style.backgroundColor = paramsCrossh.bg;
-icCrosshBg.addEventListener("input", () => {
-    lbCrosshBg.style.backgroundColor = icCrosshBg.value;
-    paramsCrossh.bg = icCrosshBg.value;
-    onCrosshSlide(paramsCrossh);
-});
-
-const contCroshSeparation = document.querySelector("#crosshSeparation .wrapper");
-var rsCrosshSeparation = new RangeSlider(contCroshSeparation, { title: "Separation", min: 3, max: 4, step: 1, color1: "#2c5270", color2: "#DDE6ED" });
-rsCrosshSeparation.onslide = onCrosshSlide;
-
-const contCrosshLinew = document.querySelector("#crosshLinew .wrapper");
-const rsCrosshLinew = new RangeSlider(contCrosshLinew, { title: "Width", min: 1, max: 10, def: 2, step: 1, color1: "#2c5270", color2: "#DDE6ED" });
-rsCrosshLinew.onslide = () => {
-    paramsCrossh.linew = rsCrosshLinew.val;
-    onCrosshSlide();
-});
-const contCrosshSensitivity = document.querySelector("#crosshSensitivity .wrapper");
-const rsCrosshSensitivity = new RangeSlider(contCrosshSensitivity, { title: "Sensitivity", min: -250, max: 250, def: 0, step: 5, color1: "#2c5270", color2: "#DDE6ED" });
-rsCrosshSensitivity.onslide = onCrosshSlide;
-
-var objForSvg = {};
-var downloadSvg = true;
-
-async function onCrosshSlide() {
-    if (imageOriginal == undefined) return;
-    canvFinal.imageSmoothingEnabled = true;
-    canvFinal.width = canvOriginal.width;
-    canvFinal.height = canvOriginal.height;
-    cf = canvFinal.getContext("2d", { willReadFrequently: true });
-    cf.fillStyle = paramsCrossh.bg;
-    cf.fillRect(0, 0, canvFinal.width, canvFinal.height);
-    cf.strokeStyle = paramsCrossh.color;
-    cf.lineWidth = rsCrosshLinew.val;
-
-    // let blankImagedata = cf.getImageData(0, 0, canvFinal.width, canvFinal.height);
-    objForSvg = {};
-    for (let i = 0; i < strCrosshDirections.length; i++) {
-        const dir = strCrosshDirections[i];
-        const blankLimit = maxMin((255 - (i + 1) * 51) + 1 + rsCrosshSensitivity.val, [0, 255]);
-        const buck = [[blankLimit, 255], [0, Math.max(blankLimit - 1, 0)]];
-        paramsCrossh.atdh = await getArrToDrawHatch(dir, rsCrosshSeparation.val, buck);
-        paramsCrossh.atdh.forEach(tdh => {
-            tdh.forEach(dh => {
-                cf.save();
-                cf.beginPath();
-                cf.moveTo(dh.x, dh.y);
-                cf.lineTo(dh.lx, dh.ly);
-                cf.stroke();
-                cf.restore();
-            });
-        });
-        // let diwATDH = await returnsDrawnImagedataWithATDH(blankImagedata, paramsCrossh);
-        // cf.putImageData(diwATDH, 0, 0);
-    }
-    //  20, 5, -20
-}
-
-function getSerializedSvg(objforsvg) {
-    return new Promise((res) => {
-        let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svg.setAttribute("viewBox", `0 0 ${canvFinal.width} ${canvFinal.height}`);
-        for (const direction in objforsvg) {
-            let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            path.setAttribute("fill", "none");
-            path.setAttribute("stroke", "black");
-            path.setAttribute("stroke-width", rsCrosshLinew.val);
-            path.classList.add(direction);
-            let d = "";
-            if (Object.hasOwnProperty.call(objforsvg, direction)) {
-                const dir = objforsvg[direction];
-                for (let i = 0; i < dir.length; i++) {
-                    const obj = dir[i];
-                    d += `M ${obj.x} ${obj.y} L ${obj.lx} ${obj.ly} `;
-                }
-            }
-            path.setAttribute("d", d);
-            svg.appendChild(path);
-        }
-        res(svg);
-    });
-}
-
-// function getArrToDrawCrossh(directions, separation) {
-//     return new Promise(async (res, rej) => {
-//         let arr = [];
-//         for (let i = 0; i < directions.length; i++) {
-//             const dir = directions[i];
-//             let otsh = await getObjectToStartHatching(dir, separation);
-//             arr.push(otsh);
-//         }
-//         res(arr);
-//     });
-// }
-// async function onCrosshatching() {
-//     if (imageOriginal == undefined) return;
-//     let aotdch = await getArrObjToDrawCrossh()
-//     //  TEST getArrToDrawHatch ON Hatching, with purePixel().
-// }
-
-// function getArrObjToDrawCrossh(arrDirections, separation, how_many, sensitivity) {
-//     return new Promise(async (res, rej) => {
-//         let arr = [];
-//         for (let i = 0; i < arrDirections.length; i++) {
-//             const dir = arrDirections[i];
-//             let otdch = await getArrToDrawHatch(dir, separation, how_many, sensitivity);
-//             arr.push(otdch);
-//         }
-//         res(arr);
-//     });
-// }
-
-// function getArrbucketsToCrosshatch(how_many, sensitivity) {
-//     return new Promise(async (res, rej) => {
-//         let arr = [];
-//         let every = parseInt(255 / (how_many + 1)); //  +1 because the first bucket will not be hatched, as it is the brightest area. 
-//         for (let i = 1; i < how_many + 1; i++) {
-//             let lim = maxMin((255 - (every * i) + sensitivity), [0, 255]);
-//             let unhatched = [lim + 1, 255];
-//             let hatched = [0, lim];
-//             arr.push([unhatched, hatched]);
-//         }
-//         res(arr);
-//     });
-// }
-
-// function getArrToDrawHatch(otsh, imagedata, buckets) {
-async function getArrToDrawHatch(direction, separation, buckets) {
+async function getArrToDrawHatch(params) {
     return new Promise(async (res, rej) => {
-        let width = originalData.width;
-        let data = originalData.data;
-        let otsh = await getObjectToStartHatching(direction, separation);
+        let width = imageInData.width;
+        let data = imageInData.data;
+        let otsh = await getObjToStartHatching(params.direction, params.separation);
         let arr = [];
-        if (!objForSvg[direction]) objForSvg[direction] = [];
+        // if (!objForSvg[params.direction]) objForSvg[params.direction] = [];
+
         for (let h = 0; h < otsh.arrXyLim.length; h++) {
             const obj = otsh.arrXyLim[h];
             arr.push([]);
-            let linewidth = 0;
+            let previousbucket = -1;
             for (let i = 0; i < obj.lim; i++) {
                 let x = obj.x + i * otsh.dirx;
                 let y = obj.y + i * otsh.diry;
@@ -984,307 +892,515 @@ async function getArrToDrawHatch(direction, separation, buckets) {
                 // let a = data.data[idx + 3];
                 let gs = getGrayscale(r, g, b);
                 const last = arr.length - 1;
-                for (let j = 0; j < buckets.length; j++) {
-                    const buck = buckets[j];
-                    if (gs >= buck[0] && gs <= buck[1]) {
-                        if (j == 0) {  //  It means it found the brightest pixel so it won't hatch it.
-                            linewidth = 0;
-                            break;
-                        }
-                        // This generates an array with each x, y coord, its length and width.
-                        if (j !== linewidth) {  //  The j counter for buckets[] is equal to the linewidth, that's why it it skips it if it is zero.
-                            arr[last].push({
-                                x: x,
-                                y: y,
-                                lx: x,
-                                ly: y,
-                                linew: j
-                            });
-                            linewidth = j;
-                            objForSvg[direction].push({ x: x, y: y, lx: x, ly: y, linew: j });
-                        } else {  //  It means j == the previous linewidth.
-                            arr[last][arr[last].length - 1].lx += otsh.dirx;
-                            arr[last][arr[last].length - 1].ly += otsh.diry;
-                            objForSvg[direction][objForSvg[direction].length - 1].lx += otsh.dirx;
-                            objForSvg[direction][objForSvg[direction].length - 1].ly += otsh.diry;
-                        }
-                        break;
-                    }
+                const buck = getBucketPosition(gs, params.buckets);
+                if (buck == -1) { //  It means it didn't found a bucket, which means a line should not be hatched (brightest value).
+                    previousbucket = -1;
+                    continue;
                 }
+                if (buck == previousbucket) { //  If the current value is the same as the previous one, it means the same line (hatch) continues.
+                    arr[last][arr[last].length - 1].lx += otsh.dirx;
+                    arr[last][arr[last].length - 1].ly += otsh.diry;
+                    // objForSvg[params.direction][objForSvg[params.direction].length - 1].lx += otsh.dirx;
+                    // objForSvg[params.direction][objForSvg[params.direction].length - 1].ly += otsh.diry;
+                    continue;
+                }
+                // If code runs at this point, it means the width of the line (hatch) changes.
+                arr[last].push({
+                    x: x,
+                    y: y,
+                    lx: x,
+                    ly: y,
+                    linew: params.buckets.length - buck //  Buckets are arranged from 0 to 255 (decreasing light value).
+                });
+                previousbucket = buck;
+                // objForSvg[params.direction].push({ x: x, y: y, lx: x, ly: y, linew: j });
+                continue;
+
+
 
             }
         }
-        let cleanArr = arr.filter(ar => {  //  Remove lines in which there was no hatching at all.
+        let cleanArr = arr.filter(ar => { //  Remove lines in which there was no hatching at all.
             return ar.length > 0;
         });
         res(cleanArr);
     });
 }
-// ---------
 
-//  DECOLORATE
-
-const contDecolorTolerance = document.querySelector("#decolorHowmany .wrapper");
-const rsDecolorTolerance = new RangeSlider(contDecolorTolerance, { title: "Tolerancy", min: 5, max: 100, def: 30, step: 5 });
-rsDecolorTolerance.onslide = onDecolorate);
-
-const rbDecolor = document.getElementById("rbDecolorate");
-rbDecolor.addEventListener("click", () => {
-    if (rbDecolor.checked) onDecolorate();
-});
-
-var temp = 30;
-
-async function onDecolorate() {
-    let aworc = await getArrWithObjRgbCount(dataI);
-    let ae = await getArryEntries(aworc);
-    let aed = await getArrayEntriesDescendent(ae);
-    let b255 = await getBucketed255(aed, 10);
-
-    return;
-    for (let i = 0; i < dataI.length; i += 4) {
-        const pxR = dataI[i];
-        const pxG = dataI[i + 1];
-        const pxB = dataI[i + 2];
-        let rx = parseInt(most10[0].split(",")[0]);
-        let gx = parseInt(most10[0].split(",")[1]);
-        let bx = parseInt(most10[0].split(",")[2]);
-        let distMin = Math.sqrt((pxR - rx) ** 2 + (pxG - gx) ** 2 + (pxB - bx) ** 2);
-        let closestColor = {};
-        for (let j = 1; j < most10.length; j++) {
-            const rx = parseInt(most10[j].split(",")[0]);
-            const gx = parseInt(most10[j].split(",")[1]);
-            const bx = parseInt(most10[j].split(",")[2]);
-            const dist = Math.sqrt((pxR - rx) ** 2 + (pxG - gx) ** 2 + (pxB - bx) ** 2);
-            if (dist < distMin) {
-                distMin = dist;
-                closestColor = { rx, gx, bx };
+function returnsDrawnImagedataWithATDH(ctx, params) {
+    return new Promise((res, rej) => {
+        let arrRGB = getarrRGB(params.color);
+        for (let i = 0; i < params.atdh.length; i++) {
+            const subArr = params.atdh[i];
+            for (let j = 0; j < subArr.length; j++) {
+                const obj = subArr[j];
+                let linew = obj.linew * params.linew;
+                getPurePxDrawnData(obj.x, obj.y, obj.lx, obj.ly, imagedatafinal, linew, arrRGB);
             }
         }
-        dataF[i] = closestColor.rx;
-        dataF[i + 1] = closestColor.gx;
-        dataF[i + 2] = closestColor.bx;
-    }
-    cf.putImageData(finalData, 0, 0);
+        res(imagedatafinal);
+    });
 }
 
-function getArryEntries(aworc) {
-    return new Promise((res, rej) => {
-        let arr = [];
-        aworc.forEach(orc => {
-            arr.push([orc.color, orc.count]);
-        });
+// CROSS HATCHING
+
+var paramsCrossh = {
+    bg: "#FFFFFF",
+    color: "#000000",
+    linew: 2,
+    arr_direction: ["DLUR", "LR", "ULDR", "UD"],
+    buckets: [
+        [0, 51],
+        [52, 102],
+        [103, 153],
+        [154, 204],
+        [205, 255]
+    ],
+    separation: 3,
+    sensitivity: 0,
+    atch: undefined
+}
+
+
+const rgEffCrossh = document.getElementById("rgEffCrossh");
+rgEffCrossh.addEventListener("input", async () => {
+    if (imageIn == undefined) return;
+    paramsCrossh.atch = await getArrToCrossh(paramsCrossh);
+    applyCrossh(paramsCrossh);
+});
+
+const cbgCrosshatchDir = document.querySelectorAll("[name=cbgCrosshatchDir]");
+cbgCrosshatchDir.forEach(cb => {
+    cb.addEventListener("input", async () => {
+        if (cb.checked && !paramsCrossh.arr_direction.includes(cb.value)) {
+            paramsCrossh.arr_direction.push(cb.value);
+        } else {
+            let idx = paramsCrossh.arr_direction.indexOf(cb.value);
+            if (idx !== -1) paramsCrossh.arr_direction.splice(idx, 1);
+        }
+        if (imageIn == undefined) return;
+        paramsCrossh.atch = await getArrToCrossh(paramsCrossh);
+        applyCrossh(paramsCrossh);
+    });
+});
+
+const icCrosshBg = document.getElementById("icCrosshBg");
+const lbIcCrosshBg = document.querySelector("[for=icCrosshBg]");
+lbIcCrosshBg.style.backgroundColor = paramsCrossh.bg;
+icCrosshBg.addEventListener("input", () => {
+    paramsCrossh.bg = icCrosshBg.value;
+    lbIcCrosshBg.style.backgroundColor = paramsCrossh.bg;
+    applyCrossh(paramsCrossh);
+});
+
+const icCrosshColor = document.getElementById("icCrosshColor");
+const lbIcCrosshColor = document.querySelector("[for=icCrosshColor]");
+lbIcCrosshColor.style.backgroundColor = paramsCrossh.color;
+icCrosshColor.addEventListener("input", () => {
+    paramsCrossh.color = icCrosshColor.value;
+    lbIcCrosshColor.style.backgroundColor = paramsCrossh.color;
+    applyCrossh(paramsCrossh)
+});
+
+const containerCrosshSeparation = document.getElementById("containerCrosshSeparation");
+const labelForContainerCrosshSeparation = document.querySelector("[label-for=containerCrosshSeparation]");
+var rsCrosshSeparation = new RangeSlider(containerCrosshSeparation, {
+    title: "Separation",
+    min: 3,
+    max: 4,
+    def: 3,
+    step: 1,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+});
+labelForContainerCrosshSeparation.innerText = rsCrosshSeparation.val;
+rsCrosshSeparation.onslide = async function () {
+    labelForContainerCrosshSeparation.innerText = rsCrosshSeparation.val;
+    paramsCrossh.separation = rsCrosshSeparation.val;
+    applyCrossh(paramsCrossh);
+}
+
+const containerCrosshWidth = document.getElementById("containerCrosshWidth");
+const labelForContainerCrosshWidth = document.querySelector("[label-for=containerCrosshWidth]");
+var rsCrosshWidth = new RangeSlider(containerCrosshWidth, {
+    title: "Width",
+    min: 1,
+    max: 10,
+    def: 2,
+    step: 1,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+});
+labelForContainerCrosshWidth.innerText = rsCrosshWidth.val;
+rsCrosshWidth.onslide = function () {
+    labelForContainerCrosshWidth.innerText = rsCrosshWidth.val;
+    paramsCrossh.linew = rsCrosshWidth.val;
+    applyCrossh(paramsCrossh);
+}
+
+const containerCrosshSensitivity = document.getElementById("containerCrosshSensitivity");
+const labelForContainerCrosshSensitivity = document.querySelector("[label-for=containerCrosshSensitivity]");
+var rsCrosshSensitivity = new RangeSlider(containerCrosshSensitivity, {
+    title: "Sensitivity",
+    min: -254,
+    max: 254,
+    def: 0,
+    step: 1,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+});
+labelForContainerCrosshSensitivity.innerText = rsCrosshSensitivity.val;
+rsCrosshSensitivity.onslide = async function () {
+    labelForContainerCrosshSensitivity.innerText = rsCrosshSensitivity.val;
+    if (imageIn == undefined) return;
+    paramsCrossh.sensitivity = rsCrosshSensitivity.val;
+    paramsCrossh.buckets = await get255Buckets(5, paramsCrossh.sensitivity);
+    paramsCrossh.atch = await getArrToCrossh(paramsCrossh);
+    applyCrossh(paramsCrossh);
+}
+
+function getArrToCrossh(params) {
+    return new Promise(async (res, rej) => {
+        let arr = new Array(params.arr_direction.length);
+        for (let i = 0; i < arr.length; i++) {
+            let hatch_bucket = params.buckets[4 - i];
+            let bucket = [0, hatch_bucket[0]];
+            let buckets = [bucket];
+            const direction = params.arr_direction[i];
+            const separation = params.separation;
+            const sensitivity = params.sensitivity;
+            var atdh = await getArrToDrawHatch({
+                direction,
+                separation,
+                buckets,
+                sensitivity
+            });
+            arr[i] = (atdh);
+        }
         res(arr);
     });
 }
 
-function getArrayEntriesDescendent(ae) {
-    return new Promise((res, rej) => {
-        ae.sort((a, b) => {
-            return b[1] - a[1];
-        });
-        res(ae);
+function getCrosshBuckets(arrBuckets) {
+    let arr = arrBuckets.map((buck) => {
+        let x = getMinMax(buck[1], [0, 255]);
+        let darkest = [0, x];
+        let brightest = [x + 1, 255];
+        return [darkest, brightest];
     });
+    return arr;
 }
-function getBucketed255(aed, n) {
-    return new Promise((res, rej) => {
-        let bucket = parseInt(255 / n);
-        let buckArr = [];
-        let gotit = [];
-        for (let i = 0; i < aed.length; i++) {
-            const entry = aed[i];
-            if (gotit.includes(i)) continue;
-            gotit.push(i);
-            buckArr.push([entry]);
-            let ri = parseInt(entry[0].split(",")[0]);
-            let gi = parseInt(entry[0].split(",")[1]);
-            let bi = parseInt(entry[0].split(",")[2]);
-            for (let j = i + 1; j < aed.length; j++) {
-                const subEntry = aed[j];
-                let rj = parseInt(subEntry[0].split(",")[0]);
-                let gj = parseInt(subEntry[0].split(",")[1]);
-                let bj = parseInt(subEntry[0].split(",")[2]);
+async function applyCrossh(params) {
+    if (imageIn == undefined || params.atch == undefined) return;
+    canvOut.imageSmoothingEnabled = false;
+    canvOut.width = imageIn.width;
+    canvOut.height = imageIn.height;
+    ctxOut.fillStyle = params.bg;
+    ctxOut.fillRect(0, 0, canvOut.width, canvOut.height);
+    ctxOut.strokeStyle = params.color;
+    ctxOut.lineCap = "square";
+    for (let i = 0; i < params.atch.length; i++) {
+        const atdh = params.atch[i];
+        drawAtdh(atdh, params.linew);
+    }
+}
+//  ---------
 
-                let dist = Math.sqrt((ri - rj) ** 2 + (gi - gj) ** 2 + (bi - bj) ** 2);
-
-                if (dist <= bucket) {
-                    gotit.push(j);
-                    buckArr[buckArr.length - 1].push(subEntry);
-                }
-            }
-        }
-        res(buckArr);
-    });
+// GLYPHATE
+var paramsGlyph = {
+    bg: "#ffffff",
+    color: "#000000",
+    text: "dmfte",
+    rand: false,
+    detail: 12,
+    fontsize: 3.0
 }
 
-function getaeddescending(aed) {
-    return new Promise((res, rej) => {
-        aed.sort((a, b) => {
-            return b[1] - a[1];
-        });
-        res(aed);
+const icGlyphBg = document.getElementById("icGlyphBg");
+const lbIcGlyphBg = document.querySelector("[for=icGlyphBg]");
+lbIcGlyphBg.style.backgroundColor = paramsGlyph.bg;
+icGlyphBg.addEventListener("input", () => {
+    lbIcGlyphBg.style.backgroundColor = paramsGlyph.bg;
+    paramsGlyph.bg = icGlyphBg.value;
+    applyGlyph(paramsGlyph);
+});
+
+const icGlyphColor = document.getElementById("icGlyphColor");
+const lbIcGlyphColor = document.querySelector("[for=icGlyphColor]");
+lbIcGlyphColor.style.backgroundColor = paramsGlyph.color;
+icGlyphColor.addEventListener("input", () => {
+    lbIcGlyphColor.style.backgroundColor = paramsGlyph.color;
+    paramsGlyph.color == icGlyphColor.value;
+    applyGlyph(paramsGlyph);
+});
+
+const containerGlyphDetail = document.getElementById("containerGlyphDetail");
+const labelForContainerGlyphDetail = document.querySelector("[label-for=containerGlyphDetail]");
+var rsGlyphDetail = new RangeSlider(containerGlyphDetail, {
+    title: "Detail",
+    min: 8,
+    max: 20,
+    step: 1,
+    def: paramsGlyph.detail,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+});
+labelForContainerGlyphDetail.innerText = rsGlyphDetail.val;
+
+const containerGlyphFontsize = document.getElementById("containerGlyphFontsize");
+const labelForContainerGlyphFontsize = document.querySelector("[label-for=containerGlyphFontsize]");
+var rsGlyphFontsize = new RangeSlider(containerGlyphFontsize, {
+    title: "Font Size",
+    min: 1.0,
+    max: 20.0,
+    ste: 0.1,
+    def: paramsGlyph.fontsize,
+    color1: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+});
+labelForContainerGlyphFontsize.innerText = rsGlyphFontsize.val;
+
+async function applyGlyph(params) {
+    if (imageIn == undefined) return;
+    let canv0 = document.createElement("canvas");
+    let c0 = canv0.getContext("2d", {
+        willReadFrequently: true
     });
+    canv0.width = parseInt(imageIn.width / params.detail);
+    canv0.height = parseInt(imageIn.height / params.detail);
+    c0.drawImage(imageIn, 0, 0, canv0.width, canv0.height);
+    let canv0Data = c0.getImageData(0, 0, canv0.width, canv0.height);
+    let atg = await getArrayToGlyph(canv0Data, params.detail);
+
+    canvOut.width = canv0.width * params.detail;
+    canvOut.height = canv0.height * params.detail;
+    c0.fillStyle = params.bg;
+    canvOut.fillRect(0, 0, canvOut.width, canvOut.height);
 }
-function getArrWithObjRgbCount(data) {
+
+function getArrayToGlyph(imagedata, factor) {
     return new Promise((res, rej) => {
-        let rgbColors = {};
+        let w = imagedata.width;
+        let levels = factor - 4;
+        const data = getGrayscaledImgData(imagedata);
+        let arr = [];
         for (let i = 0; i < data.length; i += 4) {
-            const pxR = data[i + 0];
-            const pxG = data[i + 1];
-            const pxB = data[i + 2];
-            let rgbString = `${pxR}, ${pxG}, ${pxB}`;
-            if (rgbColors[rgbString]) {
-                rgbColors[rgbString]++;
-            } else {
-                rgbColors[rgbString] = 1;
-            }
+
         }
-        let arrEntries = [];
-        for (let rgb in rgbColors) {
-            arrEntries.push({ color: rgb, count: rgbColors[rgb] });
-        }
-        res(arrEntries);
     });
 }
 
-// ---------
-// ---------
-//  DOWNLOAD BAR
-const lbDownImgSvg = document.querySelector("[for=cbDownImgSvg]");
-const pathLbDownImgSvg = lbDownImgSvg.querySelector("path");
-const m_pathLbDownImgSvg = new MorphPath({
-    path: path1,
-    arrayd: ["M 2 11 L 5 11 L 5 8 L 8 8 L 8 5 L 11 5 L 11 2 C 12 2 13 2 14 2 L 14 5 L 11 5 L 11 8 L 8 8 L 8 11 L 5 11 L 5 14 L 5 14 L 2 14 C 2 13 2 12 2 11",
-        "M 2 11 L 5 11 L 5 8 L 8 8 L 8 5 L 11 5 L 11 2 C 12 2 13 2 14 2 L 14 5 L 11 5 L 11 8 L 8 8 L 8 11 L 5 11 L 5 14 L 5 14 L 2 14 C 2 13 2 12 2 11",
-        "M 2 11 L 4 9 L 5 8 L 7 6 L 8 5 L 10 3 L 11 2 C 13 0 16 3 14 5 L 14 5 L 13 6 L 11 8 L 10 9 L 8 11 L 7 12 L 5 14 L 5 14 L 5 14 C 3 16 0 13 2 11",
-        "M 2 11 L 4 9 L 5 8 L 7 6 L 8 5 L 10 3 L 11 2 C 13 0 16 3 14 5 L 14 5 L 13 6 L 11 8 L 10 9 L 8 11 L 7 12 L 5 14 L 5 14 L 5 14 C 3 16 0 13 2 11",
-        "M 2 11 L 5 11 L 5 8 L 8 8 L 8 5 L 11 5 L 11 2 C 12 2 13 2 14 2 L 14 5 L 11 5 L 11 8 L 8 8 L 8 11 L 5 11 L 5 14 L 5 14 L 2 14 C 2 13 2 12 2 11"
-    ],
-    dur: 900,
-    keytimes: [0, 0.2, 0.5, 0.7, 1],
-    repeatcount: Infinity
-})
-lbDownImgSvg.addEventListener("pointerenter", () => {
-    m_pathLbDownImgSvg.start();
-    lbDownImgSvg.addEventListener("pointerleave", () => {
-        let step = (downloadSvg) ? 2 : 0;
-        m_pathLbDownImgSvg.stop(step);
-    });
-});
-
-const cbDownImgSvg = document.getElementById("cbDownImgSvg");
-cbDownImgSvg.addEventListener("click", () => {
-    if (cbDownImgSvg.checked) {
-        downloadSvg = true;
-        // pathLbDownImgSvg.setAttribute("d", "M 2 11 L 4 9 L 5 8 L 7 6 L 8 5 L 10 3 L 11 2 C 13 0 16 3 14 5 L 14 5 L 13 6 L 11 8 L 10 9 L 8 11 L 7 12 L 5 14 L 5 14 L 5 14 C 3 16 0 13 2 11");
-    } else {
-        downloadSvg = false;
-        // pathLbDownImgSvg.setAttribute("d", "M 2 11 L 5 11 L 5 8 L 8 8 L 8 5 L 11 5 L 11 2 C 12 2 13 2 14 2 L 14 5 L 11 5 L 11 8 L 8 8 L 8 11 L 5 11 L 5 14 L 5 14 L 2 14 C 2 13 2 12 2 11");
-    }
-});
-
-
-const btnDownImg = document.getElementById("btnDownImg");
-btnDownImg.addEventListener("click", async () => {
-    if (cbDownImgSvg.checked) {
-        let svg = await getSerializedSvg(objForSvg);
-        let serializer = new XMLSerializer();
-        let str = serializer.serializeToString(svg);
-        let dataUri = `data:image/svg+xml;base64,${btoa(str)}`;
-        let a = document.createElement("a");
-        a.style.display = "none";
-        a.href = dataUri;
-        a.download = getName("svg");
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    } else {
-        let link = document.createElement("a");
-        link.download = getName("png");
-        link.href = canvFinal.toDataURL();
-        link.click();
-    }
-});
-
-function getName(strExt) {
-    let now = new Date();
-    let date = `${now.getFullYear()}-${now.getMonth()}-${(now.getDate() < 10) ? "0" + now.getDate() : now.getDate()}`;
-    let time = `${now.getHours()}.${now.getMinutes()}.${(now.getMilliseconds()).toFixed(2)}`;
-    return `Pictunator ${date} ${time}.${strExt}`;
+//  ---------
+// FUNCTIONS
+function getImagedataIndex(x, y, width) {
+    return (y * width + x) * 4;
 }
-
-// ---------
-// LOADING IMAGE
-// To load image into the browser.
-const ifGaImage = document.getElementById("ifGaImage");
-const ifGaImageName = document.getElementById("ifGaImageName");
-var smallestDim;
-
-ifGaImage.addEventListener("input", async (evt) => {
-    imageOriginal = await getLoadedImage(evt);
-    smallestDim = smallestDimension(imageOriginal);
-    ifGaImageName.innerText = evt.target.files[0].name;
-    canvOriginal.width = imageOriginal.width;
-    canvOriginal.height = imageOriginal.height;
-    canvFinal.width = imageOriginal.width;
-    canvFinal.height = imageOriginal.height;
-    co.drawImage(imageOriginal, 0, 0, canvOriginal.width, canvOriginal.height);
-    originalData = co.getImageData(0, 0, canvOriginal.width, canvOriginal.height);
-    dataI = originalData.data;
-
-    // cf.drawImage(imageOriginal, 0, 0, canvOriginal.width, canvOriginal.height);
-    finalData = cf.getImageData(0, 0, canvOriginal.width, canvOriginal.height);
-    dataF = finalData.data;
-
-    // Grid settings.
-    if (rbGrid.checked) onGridSlide();
-
-    // Pixelate settings.
-    paramsPixelate.max = smallestDim / 10;
-    paramsPixelate.def = paramsPixelate.max / 4;
-    rsPixelate = new RangeSlider(contPixelateSlider, paramsPixelate);
-    rsPixelate.onslide = onPixelateSlide;
-    if (rbPixelate.checked) onGridSlide();
-
-    // Black & White settings.
-    rsMonoSensitivity.onslide = onMonochromeSlide;
-    if (rbMonochrome.checked) onMonochromeSlide();
-
-    // Gray-scaling settings.
-    if (rbGrayscaling.checked) onGrayscalingSlide();
-
-    //  Hatching settings.
-    let newMax = parseInt(smallestDim / 10);
-    let newDef = parseInt(newMax / 3);
-    rsHatchSeparation = new RangeSlider(contHatchSeparation, { title: "Separation", min: 2, max: newMax, step: 1, def: newDef, color1: "#2c5270", color2: "#DDE6ED" });
-    rsHatchSeparation.onslide = async () => {
-        paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, paramsHatch.buckets);
-        onHatchSlide(paramsHatch);
-    });
-
-    if (rbHatching.checked) {
-        paramsHatch.atdh = await getArrToDrawHatch(strHatchDir, rsHatchSeparation.val, paramsHatch.buckets);
-        onHatchSlide(paramsHatch);
-    }
-
-    //  Crosshatching settings.
-    let crosshSepMax = parseInt(smallestDim / (10));
-    let crosshSepDef = parseInt(crosshSepMax / 10 * 4);
-    rsCrosshSeparation = new RangeSlider(contCroshSeparation, { title: "Separation", min: 3, max: crosshSepMax, step: 1, def: crosshSepDef, color1: "#2c5270", color2: "#DDE6ED" });
-    rsCrosshSeparation.onslide = () => {
-        onCrosshSlide(paramsCrossh);
-    });
-    if (rbCrosshatch.checked) onCrosshSlide(paramsCrossh);
-
-    //  Decolorate settings.
-    if (rbDecolor.checked) onDecolorate();
-});
-
-// GENERAL FUNCTIONS
 
 function getGrayscale(r, g, b) {
     // return parseInt(r * 0.2426 + g * 0.7152 + b * 0.0822);
     return parseInt(0.299 * r + 0.587 * g + 0.114 * b);
+}
+
+function getBucketPosition(val, arrBuckets) {
+    // return new Promise((res, rej)=>{
+    let buckIndex = -1;
+    for (let i = 0; i < arrBuckets.length; i++) {
+        const bucket = arrBuckets[i];
+        if (bucket[0] == bucket[1]) continue;
+        if (val >= bucket[0] && val <= bucket[1]) {
+            buckIndex = i;
+            break;
+        }
+    }
+    // res(buckIndex);
+    return buckIndex;
+    // });
+}
+
+
+// ------------
+// Input File.
+const spanFileName = document.getElementById("spanFileName");
+const ifLoadImg = document.getElementById("ifLoadImg");
+ifLoadImg.addEventListener("input", onceImageLoads);
+
+var imageInData;
+
+async function onceImageLoads(inputFileEvent) {
+    imageIn = await getLoadedImage(inputFileEvent);
+    SMALLEST_DIM = Math.min(imageIn.width, imageIn.height);
+    RATIO = imageIn.height / imageIn.width;
+    // if (cbOriginalDimensions.checked) {
+    //     canvIn.width = imageIn.width;
+    //     canvIn.height = imageIn.height;
+    // }
+    // if (!cbOriginalDimensions.checked) {
+    //     let ratio = imageIn.height / imageIn.width;
+    //     if (imageIn.width >= imageIn.height) {
+    //         canvIn.width = 500;
+    //         canvIn.height = 500 * ratio;
+    //     } else {
+    //         canvIn.height = 500;
+    //         canvIn.width = 500 / ratio;
+    //     }
+    // }
+    canvIn.width = imageIn.width;
+    canvIn.height = imageIn.height;
+    ctxIn = canvIn.getContext("2d", {
+        willReadFrequently: true
+    });
+    ctxIn.drawImage(imageIn, 0, 0, canvIn.width, canvIn.height);
+    imageInData = ctxIn.getImageData(0, 0, canvIn.width, canvIn.height);
+    spanFileName.innerText = inputFileEvent.target.files[0].name;
+
+    // Grid Effect
+    if (rgEffGrid.checked) {
+        // canvOut.width = imageIn.width;
+        // canvOut.height = imageIn.height;
+        // ctxOut = canvOut.getContext("2d", { willReadFrequently: true });
+        paramsGrid.atdg = await getArrayToDrawGrid(imageInData, paramsGrid);
+        drawGrid(canvOut, paramsGrid);
+    }
+
+    // Pixelate Effect
+    //-- Re-create slider according to image dimensions.
+    // paramsPxLevel.max = Math.floor(SMALLEST_DIM / 10);
+    // paramsPxLevel.def = Math.floor(paramsPxLevel.max / 4);
+    // rsPxLevel = new RangeSlider(containerPxLevel, paramsPxLevel);
+    // labelForContainerPxLevel.innerText = rsPxLevel.val;
+    // rsPxLevel.onslide = function () {
+    //     // Since slider is re-created, onslide function has to be added, again.
+    //     labelForContainerPxLevel.innerText = rsPxLevel.val;
+    //     paramsPx.dimension = rsPxLevel.val;
+    //     canv0 = getPixelatedCanvas(paramsPx);
+    //     applyPixelation(canvOut, canv0, paramsPx);
+    // }
+    if (rgEffPixelate.checked) {
+        rsPxLevel.onslide();
+    }
+
+    // Grayscaling Effect
+    if (rgEffGrays.checked) {
+        applyGrayscaling(paramsGrays);
+    }
+
+    // For Hatching and Cross-hatching
+    let newMax = parseInt(SMALLEST_DIM / 10);
+    let newDef = parseInt(newMax / 4);
+
+    //  Hatching Effect.
+    rsHatchSeparation = new RangeSlider(containerHatchSeparation, {
+        title: "Separation",
+        min: 2,
+        max: newMax,
+        step: 1,
+        def: newDef,
+        color1: "#576b9e",
+        color2: "rgb(142, 167, 231)"
+    });
+    paramsHatch.separation = rsHatchSeparation.val;
+    labelForContainerHatchSeparation.innerText = rsHatchSeparation.val;
+    rsHatchSeparation.onslide = async function () {
+        labelForContainerHatchSeparation.innerText = rsHatchSeparation.val;
+        paramsHatch.separation = rsHatchSeparation.val;
+        paramsHatch.atdh = await getArrToDrawHatch(paramsHatch);
+        applyHatching(paramsHatch);
+    };
+    if (rgEffHatching.checked) {
+        paramsHatch.atdh = await getArrToDrawHatch(paramsHatch);
+        applyHatching(paramsHatch);
+    }
+
+    //  Cross-hatching Effect.
+    rsCrosshSeparation = new RangeSlider(containerCrosshSeparation, {
+        title: "Separation",
+        min: 3,
+        max: newMax,
+        step: 1,
+        def: newDef,
+        color1: "#576b9e",
+        color2: "rgb(142, 167, 231)"
+    });
+    labelForContainerCrosshSeparation.innerText = rsCrosshSeparation.val;
+    rsCrosshSeparation.onslide = async function () {
+        labelForContainerCrosshSeparation.innerText = rsCrosshSeparation.val;
+        paramsCrossh.separation = rsCrosshSeparation.val;
+        paramsCrossh.atch = await getArrToCrossh(paramsCrossh);
+        applyCrossh(paramsCrossh);
+    }
+    paramsCrossh.separation = rsCrosshSeparation.val;
+    if (rgEffCrossh.checked) {
+        paramsCrossh.atch = await getArrToCrossh(paramsCrossh);
+        applyCrossh(paramsCrossh);
+    }
+}
+
+//  DOWNLOAD BUTTON
+const dlDownload = document.getElementById("dlDownload");
+dlDownload.addEventListener("click", () => {
+    let link = document.createElement("a");
+    link.download = getName("png");
+    link.href = canvOut.toDataURL();
+    link.click();
+});
+
+
+// FUNCTIONS
+
+// For SVG animation inside Global Actions Bar buttons.
+function startPaths(morphPaths = []) {
+    morphPaths.forEach(mp => {
+        mp.start();
+    });
+}
+
+function stopPaths(morphPaths = []) {
+    morphPaths.forEach(mp => {
+        mp.stop();
+    });
+}
+
+// For the input file control
+function getLoadedImage(evt) {
+    return new Promise((res, rej) => {
+        let img = new Image();
+        img.onload = () => res(img);
+        let URL = window.URL.createObjectURL(evt.target.files[0]);
+        img.src = URL;
+    });
+}
+
+//  Returns the passed value, but if it is lower than the minimum, returns the minimum; if it is higher than the maximum, returns the maximum.
+function getMinMax(val = 0, [min = 0, max = 0]) {
+    return Math.min(max, Math.max(min, val));
+}
+
+
+// Returns an array of buckets given how many buckets are needed from the 0 - 255 range; it also adds/substract sensitivity.
+function get255Buckets(how_many_buckets = 0, sensitivity = 0) {
+    return new Promise((res, rej) => {
+        let arr = new Array(how_many_buckets);
+        let bucketSize = parseInt(255 / arr.length);
+        // for (let i = arr.length - 1; i >= 0; i--) {
+        //     let lowerLim = getMinMax(i * bucket + sensitivity, [0, 255]);
+        //     let upperLim = getMinMax((i + 1) * bucket - 1 + sensitivity, [0, 255]);
+        //     arr[arr.length - 1 - i] = [lowerLim, upperLim];
+        // }
+        for (let i = 0; i < how_many_buckets; i++) {
+            const factor = i * bucketSize;
+            const lowerLim = (i == 0) ? 0 : getMinMax(factor + 1 + sensitivity, [0, 255]);
+            const higherLim = (i == how_many_buckets - 1) ? 255 : getMinMax(factor + bucketSize + sensitivity, [0, 255]);
+            arr[i] = [lowerLim, higherLim];
+        }
+        // for (let i = arr.length - 1; i >= 0; i--) {
+        //     let lowerLim = getMinMax(i * bucket + sensitivity, [0, 255]);
+        //     let upperLim = getMinMax((i + 1) * bucket - 1 + sensitivity, [0, 255]);
+        //     arr[arr.length - 1 - i] = [lowerLim, upperLim];
+        // }
+        // arr[0][0] = 0;
+        // arr[arr.length - 1][1] = 255;
+        res(arr);
+    });
 }
 
 function getarrRGB(color) {
@@ -1295,64 +1411,45 @@ function getarrRGB(color) {
     let rgbStr = window.getComputedStyle(element).backgroundColor;
     // rgb(255, 255, 255)
     document.body.removeChild(element);
-    let rgb = rgbStr.split(",");
-    if (rgb.length > 3) {
-        // ['rgba(255', ' 255', ' 255', ' 255)']
-        rgb.splice(3, rgb.length);
-        // ['rgba(255', ' 255', ' 255']
-    }
-    let parenthesis = rgb[0].match(/\(/).index;
-    // 'rgba(255' index of '('.
-    let arr0 = rgb[0].split("");
-    arr0.splice(0, parenthesis + 1);
-    rgb[0] = parseInt(arr0.join(""));
-    // ' 255'
-
-    rgb[1] = parseInt(rgb[1]);   // '  255'
-    rgb[2] = parseInt(rgb[2]);   // '  255)'
-    return rgb;
+    let regexp = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/;
+    let rgb = rgbStr.match(regexp);
+    return rgb.slice(1);
 }
 
-function getPurePxDrawnData(x1, y1, x2, y2, imagedata, linew, arrRGB) {
-    const width = imagedata.width;
-    const dx = x2 - x1;
-    const dy = y2 - y1;
-    const m = dy / dx || Infinity;
-    const b = y1 - m * x1;
-    const offset = linew - 1;
-    // return new Promise((res, rej) => {
-    for (let i = 0; i < Math.abs(dx) + 1; i++) {
-        let x = x1 + i * Math.sign(dx);
-        let prevX = x - Math.sign(dx);
-        let startY = parseInt(prevX * m + b) + Math.sign(dy);
-        let endY = parseInt(x * m + b);
-        if (m == Infinity) {
-            startY = y1;
-            endY = y2;
-        }
-        for (let y = startY; y <= endY; y++) {
-            for (let m = -offset; m <= offset; m++) {
-                // let idx = (y * width + (x + m)) * 4;
-                // data[idx + 0] = arrRGB[0];
-                // data[idx + 1] = arrRGB[1];
-                // data[idx + 2] = arrRGB[2];
-                for (let n = 0; n <= offset; n++) {
-                    let subIdx1 = ((y + n) * width + (x + m)) * 4;
-                    imagedata.data[subIdx1 + 0] = arrRGB[0];
-                    imagedata.data[subIdx1 + 1] = arrRGB[1];
-                    imagedata.data[subIdx1 + 2] = arrRGB[2];
-                    let subIdx2 = ((y - n) * width + (x + m)) * 4;
-                    imagedata.data[subIdx2 + 0] = arrRGB[0];
-                    imagedata.data[subIdx2 + 1] = arrRGB[1];
-                    imagedata.data[subIdx2 + 2] = arrRGB[2];
-                }
-            }
-
-            // data[idx + 0] = arrRGB[0];
-            // data[idx + 1] = arrRGB[1];
-            // data[idx + 2] = arrRGB[2];
-        }
-    }
-    //     res(true);
-    // });
+function getName(strExt) {
+    let now = new Date();
+    let date = `${now.getFullYear()}-${now.getMonth()}-${(now.getDate() < 10) ? "0" + now.getDate() : now.getDate()}`;
+    let time = `${now.getHours()}.${now.getMinutes()}.${(now.getMilliseconds()).toFixed(0)}`;
+    return `Pictunator ${date} ${time}.${strExt}`;
 }
+
+// DIALOGS
+
+
+const bodyDiagInfo = document.getElementById("diagInfo");
+const topbarBtnInfo = document.getElementById("topbarBtnInfo");
+const diagInfo = new AutoDialog({
+    dialog: bodyDiagInfo,
+    title: "Info",
+    trigger: topbarBtnInfo,
+    ok: false,
+    cancel: false
+});
+
+const bodyDiagContactme = document.getElementById("diagContactme");
+const topbarBtnContactme = document.getElementById("topbarBtnContactme");
+const diagContactme = new AutoDialog({
+    dialog: bodyDiagContactme,
+    title: "Contactarme",
+    trigger: topbarBtnContactme,
+    ok: false,
+    cancel: false
+});
+topbarBtnContactme.addEventListener("click", () => {
+    let body = bodyDiagContactme.querySelector(".body");
+    let sel = window.getSelection();
+    let range = new Range();
+    range.selectNodeContents(body);
+    sel.removeAllRanges();
+    sel.addRange(range);
+});
