@@ -222,7 +222,10 @@ const popup = {
                     action: () => {
                         const input = document.getElementById("popup-tag-input");
                         const newName = sanitizeTagName(input.value);
-                        if (newName) onSave(newName);
+                        if (newName) {
+                            onSave(newName);
+                            setTimeout(() => document.getElementById("contenido-etiqueta")?.focus(), 0);
+                        }
                     }
                 }
             ],
@@ -239,6 +242,7 @@ const popup = {
                 if (newName) {
                     onSave(newName);
                     this.close();
+                    document.getElementById("contenido-etiqueta")?.focus();
                 }
             }
         });
@@ -259,6 +263,7 @@ const popup = {
                     a.download = `mi-prompt-itud-${new Date().toISOString().slice(0, 10)}.json`;
                     a.click();
                     URL.revokeObjectURL(url);
+                    showEditorFeedback("Datos exportados");
                 }
             }
         ];
@@ -419,6 +424,16 @@ function moveTagDown() {
 // Editor: Save, Clear, Copy, Import/Export
 // ============================================
 
+/** Briefly shows a status message in the panel-preview header. */
+function showEditorFeedback(message) {
+    const el = document.getElementById("editor-feedback");
+    if (!el) return;
+    el.textContent = message;
+    el.classList.add("is-visible");
+    clearTimeout(el._timer);
+    el._timer = setTimeout(() => el.classList.remove("is-visible"), 2500);
+}
+
 /** Saves or updates a prompt with current editor tags, name, and category. */
 function savePrompt() {
     const categoriaNueva = document.getElementById("categoria-nueva").value.trim();
@@ -441,20 +456,25 @@ function savePrompt() {
             existingPrompt.tags = JSON.parse(JSON.stringify(state.editor.tags));
             existingPrompt.updatedAt = Date.now();
         }
+        showEditorFeedback("Prompt actualizado");
     } else {
+        const newId = generateId();
         state.prompts.unshift({
-            id: generateId(),
+            id: newId,
             title,
             date: getCurrentDate(),
             category,
             tags: JSON.parse(JSON.stringify(state.editor.tags)),
             createdAt: Date.now()
         });
+        state.editor.editingPromptId = newId;
+        showEditorFeedback("Prompt guardado");
     }
 
     document.getElementById("categoria-nueva").value = "";
     saveState();
     renderPromptsList();
+    updateEditorUI();
 }
 
 /** Resets the editor. Uses CREA tags or a single blank tag based on config. */
@@ -531,6 +551,7 @@ function handleImport(event) {
             renderTags();
             renderPromptsList();
             applySavedConfig();
+            showEditorFeedback("Datos importados");
         } catch (err) {
             console.error("Error importing:", err);
             alert("Error al importar el archivo. Verifica que sea un JSON válido.");
