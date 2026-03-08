@@ -851,6 +851,20 @@ h3 {
     justify-content: flex-end;
 }
 
+/* Editor feedback message (save / import / export) */
+.editor-feedback {
+    font-size: 0.78rem;
+    color: var(--accent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.editor-feedback.is-visible {
+    opacity: 1;
+}
+
 /* ============================================
    Animations
    ============================================ */
