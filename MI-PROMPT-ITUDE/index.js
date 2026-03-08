@@ -185,7 +185,7 @@ const popup = {
         if (options.focusInput) {
             setTimeout(() => {
                 const input = this.content.querySelector("input");
-                if (input) input.focus();
+                if (input) { input.focus(); input.select(); }
             }, 50);
         }
     },
@@ -367,10 +367,6 @@ function createTag() {
             renderTags();
         }
     });
-    setTimeout(() => {
-        const input = document.getElementById("popup-tag-input");
-        if (input) input.select();
-    }, 60);
 }
 
 /** Opens the rename popup for the currently selected tag. */
