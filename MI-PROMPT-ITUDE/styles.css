@@ -513,35 +513,20 @@ h3 {
     font-size: 0.85rem;
 }
 
-/* Blinking cursor decoration on focused textareas */
+/* Blinking block cursor for the contenteditable editor */
 .cursor-field {
     position: relative;
     display: block;
 }
 
-.cursor-field::after {
-    content: "";
+.block-cursor {
     position: absolute;
-    right: 0.75rem;
-    bottom: 0.75rem;
-    width: 0.6em;
-    height: 2px;
+    width: 0.55em;
     background-color: var(--code-text);
-    opacity: 0;
+    opacity: 0.85;
     pointer-events: none;
-    font-family: var(--font-primary);
-}
-
-.cursor-field:focus-within::after {
-    content: "_";
-    width: auto;
-    height: auto;
-    background-color: transparent;
-    color: var(--code-text);
-    opacity: 1;
     animation: blink-caret 1s steps(1, end) infinite;
-    font-size: 1rem;
-    line-height: 1;
+    z-index: 1;
 }
 
 .prompt-editor {
@@ -554,12 +539,21 @@ h3 {
     padding: 0.8rem;
     font-family: var(--font-primary);
     font-size: 0.9rem;
-    resize: vertical;
-    caret-color: var(--code-text);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow: auto;
+    outline: none;
+    caret-color: transparent;
 }
 
 .prompt-editor:focus {
     outline: 1px solid var(--accent);
+}
+
+.prompt-editor[data-placeholder]:empty::before {
+    content: attr(data-placeholder);
+    color: var(--muted);
+    pointer-events: none;
 }
 
 /* Prompt preview (read-only XML output) */

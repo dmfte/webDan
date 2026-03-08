@@ -329,18 +329,18 @@ function renderTags() {
     updatePreview();
 }
 
-/** Syncs the content textarea with the currently selected tag. */
+/** Syncs the content editor with the currently selected tag. */
 function updateEditorContent() {
     const selectedTag = state.editor.tags[state.editor.selectedTagIndex];
     const labelContenido = document.getElementById("label-contenido");
-    const textarea = document.getElementById("contenido-etiqueta");
+    const field = document.getElementById("contenido-etiqueta");
 
     if (selectedTag) {
         labelContenido.textContent = `<${selectedTag.name}>`;
-        textarea.value = selectedTag.content;
+        field.textContent = selectedTag.content;
     } else {
         labelContenido.textContent = "<etiqueta>";
-        textarea.value = "";
+        field.textContent = "";
     }
 }
 
@@ -971,6 +971,115 @@ async function sendToAI() {
 }
 
 // ============================================
+// Contenteditable: plain-text enforcement & block cursor
+// ============================================
+
+/**
+ * Sets up the contenteditable field so that:
+ * - Pasted/dropped content is always stripped to plain text.
+ * - Enter inserts a literal newline instead of creating block elements.
+ * - Any HTML nodes that slip in are immediately replaced with plain text.
+ * - A blinking block cursor tracks the real caret position.
+ */
+function initContentEditable(field) {
+    // --- Block cursor ---
+    const cursorEl = document.createElement("div");
+    cursorEl.className = "block-cursor";
+    cursorEl.hidden = true;
+    field.parentElement.appendChild(cursorEl);
+
+    function positionCursor() {
+        if (document.activeElement !== field) {
+            cursorEl.hidden = true;
+            return;
+        }
+        const sel = window.getSelection();
+        if (!sel || !sel.rangeCount) { cursorEl.hidden = true; return; }
+
+        const range = sel.getRangeAt(0);
+        if (!field.contains(range.startContainer)) { cursorEl.hidden = true; return; }
+
+        const r = range.cloneRange();
+        r.collapse(true);
+        let caretRect = r.getBoundingClientRect();
+
+        // Fallback when rect is zero (empty field, or first position in line)
+        if (!caretRect.height) {
+            const fieldRect = field.getBoundingClientRect();
+            const style = getComputedStyle(field);
+            caretRect = {
+                top: fieldRect.top + parseFloat(style.paddingTop),
+                left: fieldRect.left + parseFloat(style.paddingLeft),
+                height: parseFloat(style.fontSize) * parseFloat(style.lineHeight) || 20
+            };
+        }
+
+        const containerRect = field.parentElement.getBoundingClientRect();
+        cursorEl.hidden = false;
+        cursorEl.style.top  = (caretRect.top  - containerRect.top)  + "px";
+        cursorEl.style.left = (caretRect.left - containerRect.left) + "px";
+        cursorEl.style.height = caretRect.height + "px";
+    }
+
+    document.addEventListener("selectionchange", positionCursor);
+    field.addEventListener("focus", positionCursor);
+    field.addEventListener("blur",  () => { cursorEl.hidden = true; });
+    field.addEventListener("scroll", positionCursor);
+
+    // --- Plain text only ---
+
+    // Paste: strip formatting, insert as plain text
+    field.addEventListener("paste", (e) => {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData("text/plain");
+        document.execCommand("insertText", false, text);
+    });
+
+    // Enter: insert a literal \n instead of letting the browser create a new block element
+    field.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            document.execCommand("insertText", false, "\n");
+        }
+    });
+
+    // Drop: strip formatting
+    field.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const text = e.dataTransfer.getData("text/plain");
+        document.execCommand("insertText", false, text);
+    });
+
+    // Defensive sanitizer: if any non-text node sneaks in, flatten to innerText
+    field.addEventListener("input", () => {
+        const hasNonText = [...field.childNodes].some(n => n.nodeType !== Node.TEXT_NODE);
+        if (!hasNonText) return;
+
+        // Measure caret offset (character count from field start) before touching the DOM
+        const sel = window.getSelection();
+        let caretOffset = 0;
+        if (sel && sel.rangeCount && field.contains(sel.getRangeAt(0).startContainer)) {
+            const pre = document.createRange();
+            pre.selectNodeContents(field);
+            pre.setEnd(sel.getRangeAt(0).startContainer, sel.getRangeAt(0).startOffset);
+            caretOffset = pre.toString().length;
+        }
+
+        field.textContent = field.innerText;
+
+        // Restore caret to the same character offset
+        const textNode = field.firstChild;
+        if (textNode && caretOffset) {
+            const r = document.createRange();
+            r.setStart(textNode, Math.min(caretOffset, textNode.length));
+            r.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(r);
+        }
+    });
+}
+
+// ============================================
 // Initialization
 // ============================================
 
@@ -997,10 +1106,13 @@ function init() {
     }
 
     // --- Editor event listeners ---
-    document.getElementById("contenido-etiqueta").addEventListener("input", (e) => {
+    const contentField = document.getElementById("contenido-etiqueta");
+    initContentEditable(contentField);
+
+    contentField.addEventListener("input", () => {
         const selectedTag = state.editor.tags[state.editor.selectedTagIndex];
         if (selectedTag) {
-            selectedTag.content = e.target.value;
+            selectedTag.content = contentField.textContent;
             updatePreview();
             saveState();
         }
