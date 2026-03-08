@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<!-- saved from url=(0033)https://mi-prompt-itud.pages.dev/ -->
+<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Prompt-itud</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="app-header panel">
+            <div>
+                <p class="eyebrow">Editor estructurado XML</p>
+                <h1>Mi Prompt-itud</h1>
+            </div>
+            <div class="config-menu">
+                <button type="button" class="btn btn-config-toggle" aria-label="Configuración">
+                    <span class="top-bun"></span>
+                    <span class="meat"></span>
+                    <span class="bottom-bun"></span>
+                </button>
+                <div class="config-dropdown">
+                    <div class="config-item">
+                        <span class="config-label">Modo:</span>
+                        <div class="theme-toggle">
+                            <input type="radio" name="tema" id="tema-oscuro" class="theme-choice" checked="">
+                            <label for="tema-oscuro" class="toggle-chip">Dark</label>
+                            <input type="radio" name="tema" id="tema-claro" class="theme-choice">
+                            <label for="tema-claro" class="toggle-chip">Light</label>
+                        </div>
+                    </div>
+                    <div class="config-item">
+                        <label class="config-switch">
+                            <span class="config-label">Iniciar con CREA</span>
+                            <input type="checkbox" id="config-crea" checked="">
+                            <span class="config-slider"></span>
+                        </label>
+                    </div>
+                    <div class="config-item">
+                        <button type="button" class="btn btn-danger btn-reset-storage">Borrar datos</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="wrapper panel">
+            <section class="tabs-container panel">
+                <input type="radio" name="main-tab" id="tab-editor" class="tab-toggle" checked="">
+                <label for="tab-editor" class="tab-label">Editor</label>
+                <input type="radio" name="main-tab" id="tab-prompts" class="tab-toggle">
+                <label for="tab-prompts" class="tab-label">Prompts</label>
+            </section>
+
+            <main class="workspace">
+                <section class="tab-panel panel-editor">
+                    <div class="editor-workspace">
+                        <aside class="panel panel-ai">
+                            <h2>Asistente AI</h2>
+                            <p>Utiliza AI para rescribir el prompt con las siguientes características:</p>
+                            <label class="switch-option">
+                                <input type="checkbox" id="ai-crea" class="ai-option" checked="">
+                                <span>Método CREA (Contexto, Rol, Especificidad, Acciones). Esto sobreescribirá las
+                                    etiquetas actuales.</span>
+                            </label>
+                            <label class="switch-option">
+                                <input type="checkbox" id="ai-example" class="ai-option">
+                                <span>Incluir un ejemplo del resultado basado en mi prompt.</span>
+                            </label>
+                            <label class="switch-option">
+                                <input type="checkbox" id="ai-econ-tokens" class="ai-option">
+                                <span>Ahorrar tokens: hacer el prompt tan breve como sea posible conservando
+                                    instrucciones y detalles.</span>
+                            </label>
+                            <button type="button" class="btn btn-primary btn-ai-send">Enviar</button>
+                            <p class="ai-status" id="ai-status"></p>
+                        </aside>
+
+                        <section class="panel panel-tags">
+                            <div class="panel-header">
+                                <h2>Etiquetas</h2>
+                                <div class="tag-actions">
+                                    <button type="button" class="btn btn-create-tag">Crear</button>
+                                    <button type="button" class="btn btn-edit-tag">Editar</button>
+                                    <button type="button" class="btn btn-danger btn-delete-tag">Eliminar</button>
+                                </div>
+                            </div>
+
+                            <div class="tag-list-container">
+                                <div class="tag-move-buttons">
+                                    <button type="button" class="btn btn-move-up" title="Mover arriba">↑</button>
+                                    <button type="button" class="btn btn-move-down" title="Mover abajo">↓</button>
+                                </div>
+                                <div class="tag-list" id="tag-list"><input type="radio" name="tag-activa" id="tag-0" class="tag-choice"><label for="tag-0">&lt;prompt&gt;</label><input type="radio" name="tag-activa" id="tag-1" class="tag-choice"><label for="tag-1">&lt;task&gt;</label><input type="radio" name="tag-activa" id="tag-2" class="tag-choice"><label for="tag-2">&lt;output&gt;</label><input type="radio" name="tag-activa" id="tag-3" class="tag-choice"><label for="tag-3">&lt;constrains&gt;</label><input type="radio" name="tag-activa" id="tag-4" class="tag-choice"><label for="tag-4">&lt;important&gt;</label></div>
+                            </div>
+                        </section>
+
+                        <section class="panel panel-content">
+                            <h2>Contenido de etiqueta seleccionada</h2>
+                            <div class="editor-block">
+                                <label id="label-contenido">&lt;prompt&gt;</label>
+                                <div class="cursor-field">
+                                    <textarea id="contenido-etiqueta" class="prompt-editor" placeholder="Escribe el contenido de la etiqueta aquí..."></textarea>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="panel panel-preview">
+                            <div class="panel-header">
+                                <h2>Prompt completo</h2>
+
+                                <div class="preview-actions">
+                                    <button type="button" class="btn btn-primary btn-save-editor">Actualizar</button>
+                                    <button type="button" class="btn btn-new-editor">Nuevo</button>
+                                    <button type="button" class="btn btn-copy-editor">Copiar</button>
+                                    <button type="button" class="btn btn-export-editor">Exportar</button>
+                                    <button type="button" class="btn btn-import-editor">Importar</button>
+                                    <input type="file" id="import-file" accept=".json" style="display:none">
+                                </div>
+                            </div>
+
+                            <div class="prompt-name-row">
+                                <label for="prompt-nombre">Nombre del prompt</label>
+                                <input id="prompt-nombre" type="text" placeholder="Ej: Asistente de código, Generador de ideas...">
+                            </div>
+                            <div class="category-row">
+                                <label for="categoria-nueva">Categoría</label>
+                                <input id="categoria-nueva" type="text" placeholder="Ej: Marketing, Desarrollo, Personal...">
+                                <label for="categoria-existente">o selecciona</label>
+                                <select id="categoria-existente"><option>Sin categoría</option><option>SUPER LEARN</option></select>
+                            </div>
+
+                            <pre class="prompt-preview" id="prompt-preview">&lt;prompt&gt;
+- Read all the tags before you start generating the summary.
+- Understand how all tags relate to each other before analyzing the source material.
+&lt;/prompt&gt;
+&lt;task&gt;
+- Please provide a concise summary of the main learning points of the attached transcript (or pasted text). Focus on the key ideas, actionable insights, or step-by-step methods the speaker shares.
+- Include concepts and definitions provided.
+- Avoid filler, repetition; include anecdotes only if they are key to understand a concept or subject.
+- Include references to other materials mentioned, such as podcasts, books, online courses, etc.
+- The resulting document should enable me to be familiar with the knowledge from transcript without me having to read the transcript.
+&lt;/task&gt;
+&lt;output&gt;
+- An HTML document as a downloadable link.
+- Use HTML hierarchy to convey the relationship of he material; broad concepts are higher than more detailed descriptions.
+- Use HTML structure for nested information; steps as bullet points, details about each step in a nested bullet points list.
+- Include a discrete time-stamp on each sub-title, like hh:mm:ss.
+- Don't include styles. Only use semantic tags, including, but not limited to: &lt;em&gt;, &lt;strong&gt;, &lt;u&gt;, etc.
+&lt;/output&gt;
+&lt;constrains&gt;
+- Don't infer details. Don't research (web) information. Include content only from the attached transcript.
+- Don't translate the material. Output information in the same language of the input text.
+&lt;/constrains&gt;
+&lt;important&gt;
+- Double check the validity of the download link you provide.
+&lt;/important&gt;</pre>
+                        </section>
+                    </div>
+                </section>
+
+                <section class="tab-panel panel-prompts">
+                    <div class="prompts-workspace">
+                        <section class="panel prompts-toolbar" style="grid-area: list;">
+                            <input type="radio" name="vista-prompts" id="vista-todos" class="view-choice" checked="">
+                            <label for="vista-todos" class="toggle-chip">Todos los prompts</label>
+                            <input type="radio" name="vista-prompts" id="vista-categorias" class="view-choice">
+                            <label for="vista-categorias" class="toggle-chip">Por categorías</label>
+
+                            <div class="sort-ui">
+                                <span>Orden:</span>
+                                <button type="button" class="btn btn-sort" data-sort="az-asc">A-Z ↑</button>
+                                <button type="button" class="btn btn-sort" data-sort="az-desc">A-Z ↓</button>
+                                <button type="button" class="btn btn-sort" data-sort="date-asc">Fecha ↑</button>
+                                <button type="button" class="btn btn-sort is-active" data-sort="date-desc">Fecha ↓</button>
+                            </div>
+                        </section>
+
+                        <section class="panel panel-categories" style="grid-area: categories;">
+                            <h2>Lista de categorías</h2>
+                            <p class="categories-hint">Cambios se guardan automáticamente. Editar una categoría no
+                                cambia sus prompts. Borrarla, no elimina los prompts.</p>
+                            <textarea id="categories-editor" class="categories-textarea" spellcheck="false"></textarea>
+                        </section>
+
+                        <section class="panel actions-fixed" style="grid-area: actions;">
+                            <p>Acciones del prompt seleccionado</p>
+                            <div class="action-buttons">
+                                <button type="button" class="btn btn-copy-prompts">Copiar</button>
+                                <button type="button" class="btn btn-edit-prompts">Editar</button>
+                                <button type="button" class="btn btn-danger btn-delete-prompts">Borrar</button>
+                            </div>
+                        </section>
+
+                        <section class="panel prompts-scroll" style="grid-area: prompts;">
+                            <div class="prompt-view view-todos" id="prompts-list-todos">
+        <article class="prompt-item">
+            <input type="radio" name="prompt-seleccionado" id="prompt-mm0vks07n3lxh" class="accordion-input" checked="">
+            <label for="prompt-mm0vks07n3lxh" class="accordion-label" tabindex="0">
+                <span>Transcript extract</span>
+                <small>2026-02-24</small>
+            </label>
+            <div class="accordion-body">
+                <p class="meta-line">Categoría: SUPER LEARN</p>
+                <pre>&lt;prompt&gt;
+- Read all the tags before you start generating the summary.
+- Understand how all tags relate to each other before analyzing the source material.
+&lt;/prompt&gt;
+&lt;task&gt;
+- Please provide a concise summary of the main learning points of the attached transcript (or pasted text). Focus on the key ideas, actionable insights, or step-by-step methods the speaker shares.
+- Include concepts and definitions provided.
+- Avoid filler, repetition; include anecdotes only if they are key to understand a concept or subject.
+- Include references to other materials mentioned, such as podcasts, books, online courses, etc.
+- The resulting document should enable me to be familiar with the knowledge from transcript without me having to read the transcript.
+&lt;/task&gt;
+&lt;output&gt;
+- An HTML document as a downloadable link.
+- Use HTML hierarchy to convey the relationship of he material; broad concepts are higher than more detailed descriptions.
+- Use HTML structure for nested information; steps as bullet points, details about each step in a nested bullet points list.
+- Include a discrete time-stamp on each sub-title, like hh:mm:ss.
+- Don't include styles. Only use semantic tags, including, but not limited to: &lt;em&gt;, &lt;strong&gt;, &lt;u&gt;, etc.
+&lt;/output&gt;
+&lt;constrains&gt;
+- Don't infer details. Don't research (web) information. Include content only from the attached transcript.
+- Don't translate the material. Output information in the same language of the input text.
+&lt;/constrains&gt;
+&lt;important&gt;
+- Double check the validity of the download link you provide.
+&lt;/important&gt;</pre>
+            </div>
+        </article>
+    </div>
+
+                            <div class="prompt-view view-categorias" id="prompts-list-categorias">
+        <section class="category-item">
+            <input type="checkbox" id="cat-superlearn" class="accordion-input category-input">
+            <label for="cat-superlearn" class="category-label" tabindex="0">SUPER LEARN</label>
+            <div class="category-body">
+                
+                    <article class="prompt-item">
+                        <input type="radio" name="prompt-seleccionado-cat" id="prompt-cat-mm0vks07n3lxh" class="accordion-input" checked="">
+                        <label for="prompt-cat-mm0vks07n3lxh" class="accordion-label" tabindex="0">
+                            <span>Transcript extract</span>
+                            <small>2026-02-24</small>
+                        </label>
+                        <div class="accordion-body">
+                            <pre>&lt;prompt&gt;
+- Read all the tags before you start generating the summary.
+- Understand how all tags relate to each other before analyzing the source material.
+&lt;/prompt&gt;
+&lt;task&gt;
+- Please provide a concise summary of the main learning points of the attached transcript (or pasted text). Focus on the key ideas, actionable insights, or step-by-step methods the speaker shares.
+- Include concepts and definitions provided.
+- Avoid filler, repetition; include anecdotes only if they are key to understand a concept or subject.
+- Include references to other materials mentioned, such as podcasts, books, online courses, etc.
+- The resulting document should enable me to be familiar with the knowledge from transcript without me having to read the transcript.
+&lt;/task&gt;
+&lt;output&gt;
+- An HTML document as a downloadable link.
+- Use HTML hierarchy to convey the relationship of he material; broad concepts are higher than more detailed descriptions.
+- Use HTML structure for nested information; steps as bullet points, details about each step in a nested bullet points list.
+- Include a discrete time-stamp on each sub-title, like hh:mm:ss.
+- Don't include styles. Only use semantic tags, including, but not limited to: &lt;em&gt;, &lt;strong&gt;, &lt;u&gt;, etc.
+&lt;/output&gt;
+&lt;constrains&gt;
+- Don't infer details. Don't research (web) information. Include content only from the attached transcript.
+- Don't translate the material. Output information in the same language of the input text.
+&lt;/constrains&gt;
+&lt;important&gt;
+- Double check the validity of the download link you provide.
+&lt;/important&gt;</pre>
+                        </div>
+                    </article>
+                
+            </div>
+        </section>
+    </div>
+                        </section>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Popup reutilizable -->
+    <div class="popup-overlay" id="popup-overlay">
+        <div class="popup panel">
+            <h3 class="popup-title" id="popup-title">Título</h3>
+            <div class="popup-content" id="popup-content">
+                <!-- Contenido dinámico -->
+            </div>
+            <div class="popup-actions" id="popup-actions">
+                <!-- Botones dinámicos -->
+            </div>
+        </div>
+    </div>
+
+    <script src="index.js"></script>
+
+
+</body></html>

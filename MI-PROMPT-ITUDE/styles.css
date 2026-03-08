@@ -1,0 +1,1001 @@
+/* ============================================
+   Variables & Theme
+   ============================================ */
+
+:root {
+    --font-primary: "JetBrains Mono", "IBM Plex Mono", monospace;
+    --font-secondary: "IBM Plex Mono", "JetBrains Mono", monospace;
+
+    --bg: #04110b;
+    --shell-bg: #081b13;
+    --panel-bg: #0f291e;
+    --surface: #173a2b;
+    --surface-strong: #21503d;
+    --line: #2b5b47;
+    --text: #d9ffe6;
+    --muted: #97c6a7;
+    --accent: #73ff98;
+    --accent-2: #38ca72;
+    --danger: #ff6d78;
+
+    --code-bg: #173b2c;
+    --code-text: #c2ffd7;
+}
+
+/* Overrides all CSS variables when light theme is selected */
+.app-shell:has(#tema-claro:checked) {
+    --bg: #eaf2ea;
+    --shell-bg: #f2f8f1;
+    --panel-bg: #f7fbf5;
+    --surface: #fcfffb;
+    --surface-strong: #ffffff;
+    --line: #bfd8bf;
+    --text: #153122;
+    --muted: #3d6d53;
+    --accent: #166a39;
+    --accent-2: #248b4e;
+    --danger: #a23742;
+
+    --code-bg: #f7fcf4;
+    --code-text: #0d5a2d;
+}
+
+/* ============================================
+   Reset & Base
+   ============================================ */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 1rem;
+    font-family: var(--font-primary);
+    background-color: var(--bg);
+}
+
+h1,
+h2,
+h3 {
+    margin: 0;
+}
+
+h1 {
+    font-size: clamp(1.4rem, 2vw, 2.1rem);
+}
+
+h2 {
+    font-size: 1rem;
+}
+
+h3 {
+    font-size: 0.95rem;
+}
+
+/* ============================================
+   Layout: Shell & Panels
+   ============================================ */
+
+.app-shell {
+    max-width: 1380px;
+    margin: 0 auto;
+    background-color: var(--shell-bg);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 0.75rem;
+    color: var(--text);
+}
+
+.panel {
+    background-color: var(--panel-bg);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+}
+
+.wrapper {
+    margin-top: 10px;
+    padding: 10px;
+}
+
+.workspace {
+    margin-top: 0.9rem;
+}
+
+.workspace .panel {
+    background-color: var(--surface);
+}
+
+/* ============================================
+   Header
+   ============================================ */
+
+.app-header {
+    padding: 1rem 1.15rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+}
+
+.eyebrow {
+    margin: 0;
+    color: var(--muted);
+    font-family: var(--font-secondary);
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+}
+
+/* ============================================
+   Config Menu (Hamburger)
+   ============================================ */
+
+.config-menu {
+    position: relative;
+}
+
+.btn-config-toggle {
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    padding: 0;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    gap: 5px;
+    line-height: 1;
+}
+
+.btn-config-toggle > span {
+    width: 24px;
+}
+
+.btn-config-toggle .top-bun,
+.btn-config-toggle .meat,
+.btn-config-toggle .bottom-bun {
+    display: block;
+    height: 2px;
+    border-radius: 999px;
+    background-color: var(--text);
+    transition: transform 0.2s ease, opacity 0.2s ease, width 0.2s ease;
+}
+
+.btn-config-toggle .top-bun {
+    transform-origin: right top;
+}
+
+.btn-config-toggle .bottom-bun {
+    transform-origin: right bottom;
+}
+
+/* Hamburger → X animation when dropdown is open */
+.config-menu:has(.config-dropdown.is-open) .btn-config-toggle {
+    border-color: var(--accent);
+    background-color: color-mix(in srgb, var(--accent) 15%, var(--surface-strong));
+}
+
+.config-menu:has(.config-dropdown.is-open) .btn-config-toggle .top-bun {
+    transform: translate(-3px, 2px) rotate(-45deg);
+}
+
+.config-menu:has(.config-dropdown.is-open) .btn-config-toggle .meat {
+    opacity: 0;
+    transform: scaleX(0.2);
+}
+
+.config-menu:has(.config-dropdown.is-open) .btn-config-toggle .bottom-bun {
+    transform: translate(-3px, -2px) rotate(45deg);
+}
+
+.config-dropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    min-width: 220px;
+    background-color: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 0.7rem;
+    display: none;
+    z-index: 100;
+}
+
+.config-dropdown.is-open {
+    display: block;
+}
+
+.config-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.45rem 0;
+}
+
+.config-item + .config-item {
+    border-top: 1px solid var(--line);
+}
+
+.config-item .btn-reset-storage {
+    width: 100%;
+    margin-top: 0.2rem;
+}
+
+.config-label {
+    color: var(--muted);
+    font-size: 0.82rem;
+    white-space: nowrap;
+}
+
+/* Toggle switch (used for config settings) */
+.config-switch {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    width: 100%;
+    cursor: pointer;
+}
+
+.config-switch input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.config-slider {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    background-color: var(--surface-strong);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    flex-shrink: 0;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.config-slider::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    background-color: var(--muted);
+    border-radius: 50%;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.config-switch input:checked + .config-slider {
+    background-color: color-mix(in srgb, var(--accent) 25%, var(--surface-strong));
+    border-color: var(--accent);
+}
+
+.config-switch input:checked + .config-slider::after {
+    transform: translateX(16px);
+    background-color: var(--accent);
+}
+
+/* ============================================
+   Tabs & Shared Controls
+   ============================================ */
+
+.tabs-container {
+    margin-top: 0.9rem;
+    padding: 0.6rem;
+}
+
+.tabs-container.panel {
+    margin-top: 0;
+    border: none;
+    background-color: transparent !important;
+}
+
+/* Visually hidden radio/checkbox inputs used for CSS-only state */
+.tab-toggle,
+.theme-choice,
+.tag-choice,
+.view-choice,
+.accordion-input {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Tab panel visibility controlled via CSS :has() */
+.tab-panel {
+    display: none;
+}
+
+.app-shell:has(#tab-editor:checked) .panel-editor,
+.app-shell:has(#tab-prompts:checked) .panel-prompts {
+    display: block;
+}
+
+/* ============================================
+   Buttons & Chips
+   ============================================ */
+
+.tab-label,
+.toggle-chip,
+.btn {
+    border: 1px solid var(--line);
+    background-color: var(--panel-bg);
+    color: var(--text);
+    padding: 0.45rem 0.72rem;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.82rem;
+    line-height: 1.2;
+    cursor: pointer;
+}
+
+.tab-label {
+    background-color: var(--bg);
+}
+
+.btn:hover,
+.tab-label:hover,
+.toggle-chip:hover {
+    border-color: var(--accent);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.is-active {
+    border-color: var(--accent);
+    background-color: color-mix(in srgb, var(--accent) 15%, var(--surface-strong));
+}
+
+.btn-primary {
+    background-color: var(--accent);
+    border-color: var(--accent-2);
+    color: #06120c;
+    font-weight: 700;
+}
+
+.btn-danger {
+    border-color: color-mix(in srgb, var(--danger) 65%, var(--line));
+    color: var(--danger);
+}
+
+/* Active state for CSS-only toggles (tabs, theme, view mode) */
+.app-shell:has(#tab-editor:checked) label[for="tab-editor"],
+.app-shell:has(#tab-prompts:checked) label[for="tab-prompts"],
+.app-shell:has(#tema-oscuro:checked) label[for="tema-oscuro"],
+.app-shell:has(#tema-claro:checked) label[for="tema-claro"],
+.panel-prompts:has(#vista-todos:checked) label[for="vista-todos"],
+.panel-prompts:has(#vista-categorias:checked) label[for="vista-categorias"] {
+    border-color: var(--accent);
+    background-color: color-mix(in srgb, var(--accent) 18%, var(--surface-strong));
+}
+
+/* Shared flex layout for inline control groups */
+.theme-toggle,
+.tabs-container,
+.sort-ui,
+.action-buttons,
+.tag-actions,
+.preview-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.sort-ui {
+    margin-top: 20px;
+}
+
+/* ============================================
+   Editor Workspace (Grid Layout)
+   ============================================ */
+
+.editor-workspace {
+    display: grid;
+    grid-template-columns: 280px 1fr 1fr;
+    grid-template-areas:
+        "ai tags content"
+        "ai preview preview";
+    gap: 0.8rem;
+}
+
+.panel-ai,
+.panel-tags,
+.panel-content,
+.panel-preview {
+    padding: 0.9rem;
+}
+
+.panel-ai { grid-area: ai; }
+.panel-tags { grid-area: tags; }
+.panel-content { grid-area: content; }
+.panel-preview { grid-area: preview; }
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.8rem;
+    flex-wrap: wrap;
+}
+
+/* AI Assistant panel */
+.panel-ai p,
+.actions-fixed p {
+    margin-top: 0.4rem;
+    margin-bottom: 0.8rem;
+    color: var(--muted);
+    font-size: 0.7rem;
+}
+
+.switch-option {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    margin-bottom: 0.7rem;
+    font-size: 0.7rem;
+}
+
+.ai-status {
+    margin-top: 0.6rem;
+    font-size: 0.8rem;
+    min-height: 1.2em;
+}
+
+.panel-ai .btn-ai-send {
+    margin-top: 0.5rem;
+}
+
+/* Tag list & move buttons */
+.tag-list-container {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+
+.tag-move-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.tag-move-buttons .btn {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.9rem;
+    line-height: 1;
+}
+
+.tag-list {
+    flex: 1;
+    display: grid;
+    gap: 0.4rem;
+    background-color: var(--panel-bg);
+    padding: 5px;
+    width: 100%;
+    border-radius: 15px;
+}
+
+.tag-list label {
+    padding: 0.6rem 0.7rem;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background-color: var(--surface-strong);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: border-color 0.15s, background-color 0.15s;
+}
+
+.tag-list label:hover {
+    border-color: var(--accent);
+}
+
+.tag-list input[type="radio"]:checked + label {
+    border-color: var(--accent);
+    background-color: color-mix(in srgb, var(--accent) 15%, var(--surface-strong));
+}
+
+/* Editor block (tag content textarea) */
+.editor-block label {
+    display: block;
+    margin: 0 0 0.55rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+/* Blinking cursor decoration on focused textareas */
+.cursor-field {
+    position: relative;
+    display: block;
+}
+
+.cursor-field::after {
+    content: "";
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    width: 0.6em;
+    height: 2px;
+    background-color: var(--code-text);
+    opacity: 0;
+    pointer-events: none;
+    font-family: var(--font-primary);
+}
+
+.cursor-field:focus-within::after {
+    content: "_";
+    width: auto;
+    height: auto;
+    background-color: transparent;
+    color: var(--code-text);
+    opacity: 1;
+    animation: blink-caret 1s steps(1, end) infinite;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.prompt-editor {
+    width: 100%;
+    min-height: 190px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background-color: var(--bg);
+    color: var(--code-text);
+    padding: 0.8rem;
+    font-family: var(--font-primary);
+    font-size: 0.9rem;
+    resize: vertical;
+    caret-color: var(--code-text);
+}
+
+.prompt-editor:focus {
+    outline: 1px solid var(--accent);
+}
+
+/* Prompt preview (read-only XML output) */
+.prompt-preview {
+    margin: 0;
+    max-height: 280px;
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 0.85rem;
+    background-color: var(--code-bg);
+    color: var(--code-text);
+    font-family: var(--font-secondary);
+    font-size: 0.84rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* Prompt name & category input rows */
+.prompt-name-row,
+.category-row {
+    margin-top: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.42rem;
+    margin-bottom: 20px;
+}
+
+.prompt-name-row {
+    margin-bottom: 0.8rem;
+}
+
+.prompt-name-row label,
+.category-row label {
+    color: var(--muted);
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.prompt-name-row input,
+.category-row input,
+.category-row select {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background-color: var(--surface-strong);
+    color: var(--text);
+    padding: 0.45rem 0.55rem;
+    font-family: inherit;
+}
+
+.prompt-name-row input:focus,
+.category-row input:focus {
+    outline: 1px solid var(--accent);
+    border-color: var(--accent);
+}
+
+/* ============================================
+   Prompts Workspace (Grid Layout)
+   ============================================ */
+
+.prompts-workspace {
+    display: grid;
+    grid-template-areas:
+        "list       categories"
+        "actions    categories"
+        "prompts    prompts";
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: auto auto 1fr;
+    gap: 0.8rem;
+}
+
+.prompts-toolbar,
+.actions-fixed {
+    padding: 0.8rem;
+}
+
+/* Categories editor panel */
+.panel-categories {
+    padding: 0.9rem;
+}
+
+.categories-hint {
+    margin-top: 0.4rem;
+    margin-bottom: 0.8rem;
+    color: var(--muted);
+    font-size: 0.84rem;
+}
+
+.categories-textarea {
+    width: 100%;
+    min-height: 160px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background-color: var(--bg);
+    color: var(--code-text);
+    padding: 0.8rem;
+    font-family: var(--font-primary);
+    font-size: 0.9rem;
+    resize: vertical;
+    caret-color: var(--code-text);
+    line-height: 1.5;
+}
+
+.categories-textarea:focus {
+    outline: 1px solid var(--accent);
+}
+
+/* Scrollable prompts list */
+.prompts-scroll {
+    padding: 0.8rem;
+    max-height: min(58vh, 560px);
+    overflow: auto;
+}
+
+.prompt-view {
+    display: grid;
+    gap: 0.6rem;
+}
+
+/* View mode toggle via CSS :has() */
+.view-categorias {
+    display: none;
+}
+
+.panel-prompts:has(#vista-categorias:checked) .view-categorias {
+    display: grid;
+}
+
+.panel-prompts:has(#vista-categorias:checked) .view-todos {
+    display: none;
+}
+
+/* ============================================
+   Prompt Items & Accordion
+   ============================================ */
+
+.prompt-item,
+.category-item {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background-color: var(--surface-strong);
+}
+
+.prompt-item:has(input[type="radio"]:checked) {
+    border-color: var(--accent);
+    background-color: color-mix(in srgb, var(--accent) 12%, var(--surface-strong));
+}
+
+.accordion-label,
+.category-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.7rem;
+    align-items: center;
+    cursor: pointer;
+    padding: 0.72rem 0.82rem;
+    font-size: 0.86rem;
+}
+
+.accordion-label small {
+    color: var(--muted);
+    font-size: 0.73rem;
+}
+
+.accordion-label::after,
+.category-label::after {
+    content: "+";
+    color: var(--accent);
+    font-size: 1rem;
+}
+
+/* Accordion expand/collapse via hidden radio/checkbox */
+.accordion-body,
+.category-body {
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 0.82rem;
+    transition: max-height 0.35s ease, padding 0.35s ease;
+}
+
+.prompt-item:has(input[type="radio"]:checked) .accordion-body {
+    max-height: 420px;
+    padding: 0.55rem 0.82rem 0.82rem;
+}
+
+.category-item:has(.category-input:checked) .category-body {
+    max-height: 900px;
+    padding: 0 0.6rem 0.6rem;
+}
+
+.prompt-item:has(input[type="radio"]:checked) .accordion-label::after,
+.category-item:has(.category-input:checked) .category-label::after {
+    content: "−";
+}
+
+.meta-line {
+    margin: 0 0 0.45rem;
+    color: var(--muted);
+    font-size: 0.77rem;
+}
+
+.accordion-body pre {
+    margin: 0;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    padding: 0.6rem;
+    background-color: var(--code-bg);
+    color: var(--code-text);
+    overflow: auto;
+    font-size: 0.77rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* ============================================
+   Popup
+   ============================================ */
+
+.popup-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+}
+
+.popup-overlay.is-visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.popup {
+    width: 90%;
+    max-width: 400px;
+    padding: 1.2rem;
+    background-color: var(--surface);
+    animation: popup-in 0.2s ease-out;
+}
+
+@keyframes popup-in {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.popup-title {
+    margin-bottom: 1rem;
+    color: var(--text);
+}
+
+.popup-content {
+    margin-bottom: 1rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.popup-content input[type="text"] {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background-color: var(--surface-strong);
+    color: var(--text);
+    padding: 0.6rem 0.8rem;
+    font-family: inherit;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.popup-content input[type="text"]:focus {
+    outline: 1px solid var(--accent);
+    border-color: var(--accent);
+}
+
+.popup-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+
+@keyframes blink-caret {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+}
+
+/* ============================================
+   Empty State
+   ============================================ */
+
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+/* ============================================
+   Responsive: Tablet (≤1100px)
+   ============================================ */
+
+@media (max-width: 1100px) {
+    .editor-workspace {
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+            "ai ai"
+            "tags content"
+            "preview preview";
+    }
+}
+
+/* ============================================
+   Responsive: Mobile (≤750px)
+   ============================================ */
+
+@media (max-width: 750px) {
+    body {
+        padding: 0.7rem;
+    }
+
+    .app-shell {
+        padding: 0;
+        border: none;
+        background: transparent;
+    }
+
+    .app-header {
+        padding: 7px 15px;
+        align-items: stretch;
+    }
+
+    .config-menu {
+        display: flex;
+        align-items: stretch;
+    }
+
+    .config-menu > .btn-config-toggle {
+        display: flex;
+        width: 52px;
+        min-width: 52px;
+        justify-content: space-around;
+        align-items: center;
+        padding: 8px;
+    }
+
+    .config-menu > .btn-config-toggle > span {
+        width: 24px;
+    }
+
+    .workspace {
+        margin-top: 0.1rem;
+    }
+
+    .editor-workspace {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "ai"
+            "tags"
+            "content"
+            "preview";
+    }
+
+    .panel-ai,
+    .panel-tags,
+    .panel-content,
+    .panel-preview {
+        padding: 0.9rem 0.5rem;
+    }
+
+    .panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .preview-actions {
+        width: 100%;
+    }
+
+    .preview-actions .btn {
+        flex: 1;
+        text-align: center;
+    }
+
+    .prompt-editor {
+        min-height: 170px;
+    }
+
+    .prompts-workspace {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "list"
+            "categories"
+            "actions"
+            "prompts";
+    }
+
+    .prompts-scroll {
+        max-height: none;
+    }
+
+    .sort-ui {
+        flex-wrap: wrap;
+        margin-top: 0.8rem;
+    }
+
+    .tag-list-container {
+        flex-direction: column-reverse;
+    }
+
+    .tag-move-buttons {
+        flex-direction: row;
+        width: 100%;
+    }
+
+    .tag-move-buttons .btn {
+        flex: 1;
+    }
+
+    .prompt-name-row,
+    .category-row {
+        margin-top: 0.8rem;
+        display: grid;
+        gap: 0.42rem;
+    }
+}
