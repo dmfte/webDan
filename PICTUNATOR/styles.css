@@ -73,7 +73,25 @@ input + label {
     transition: background-color 300ms ease;
 }
 
+input[type='color'] + label span {
+    max-width: 100%;
+    max-height: 100%;
+    aspect-ratio: 1 / 1;
+    border: 3px solid var(--clr-700);
+    border-radius: 50%;
+    /* background-color will be set in JS */
+}
+
 /* Some toggle-inputs will have two <path>, for on/off styles */
+input + label svg [id$='_on'] {
+    display: none;
+}
+input + label svg [id$='_off'] {
+    display: block;
+}
+input:checked + label svg [id$='_on'] {
+    display: block;
+}
 input:checked + label svg [id$='_off'] {
     display: none;
 }
@@ -297,8 +315,12 @@ input#cb_px_horzvert:checked + label {
         & section#effects_bar {
             position: relative;
             grid-area: effects;
-            background-color: var(--clr-900);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background-color: var(--clr-600);
             color: var(--clr-text-on-dark);
+            padding: 20px 10px;
 
             & #overlay_effects_no_image {
                 position: absolute;
@@ -324,19 +346,16 @@ input#cb_px_horzvert:checked + label {
                 display: flex;
                 flex-direction: column;
                 align-items: stretch;
-                margin-bottom: 10px;
-                
-                & input[name='rbgEffects']:checked + label {
-                    pointer-events: none;
-                }
 
                 & > label {
-                    background-color: var(--clr-600);
+                    background-color: transparent;
                     color: var(--clr-text-on-dark);
                     padding: 20px 10px;
                     display: flex;
                     align-items: center;
                     gap: 15px;
+                    border-radius: 10px;
+                    box-shadow: 0px 6px 18px -2px var(--clr-800), 0px -2px 9px 6px #e8e2dbaa, inset 0px -8px 16px -10px var(--clr-800);
                     cursor: pointer;
 
                     & .on-dot {
@@ -356,8 +375,8 @@ input#cb_px_horzvert:checked + label {
                     transition: max-height 500ms linear;
 
                     & .eff-btn {
-                        height: calc(var(--eff-bar-w) / 4);
 
+                        height: calc(var(--eff-bar-w) / 4);
 
                         & label {
                             color: var(--clr-900);
@@ -372,27 +391,41 @@ input#cb_px_horzvert:checked + label {
                                 max-height: 100%;
                             }
                         }
+
                     }
                 }
 
-                & .eff-slider {
+                & .effect-slider {
                     overflow: hidden;
                     max-height: 0;
                 }
 
-                & input:checked + label {
+                /* When the effect has been selected */
+                &:has(>input[name='rbgEffects']:checked) {
+                    border-radius: 15px;
+                    padding: 0px 8px 20px;
+                    gap: 6px;
+                    box-shadow: inset 0px 24px 21px -22px var(--clr-800), inset 0px -20px 18px -15px var(--clr-200);
 
-                    & .on-dot {
-                        background-color: var(--clr-500);
+                    & > label {
+                        box-shadow: none;
+                        transition: none;
+                        pointer-events: none;
                     }
-                }
 
-                & input:checked ~ .effect-btns {
-                     max-height: 40vh;
-                }
+                    & input + label {
+                        & .on-dot {
+                            background-color: var(--clr-500);
+                        }
+                    }
 
-                & input:checked ~ .effect-slider {
-                     max-height: 40vh;
+                    & input ~ .effect-btns {
+                        max-height: 40vh;
+                    }
+
+                    & input ~ .effect-slider {
+                        max-height: 40vh;
+                    }
                 }
             }
         }
@@ -687,7 +720,7 @@ input#cb_px_horzvert:checked + label {
                     }
                 }
 
-                & .eff-slider {
+                & .effect-slider {
                     overflow: hidden;
                     max-height: 0;
                 }

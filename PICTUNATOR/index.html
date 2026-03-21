@@ -113,7 +113,7 @@
                 <div class="effect-btns">
                     <div class="eff-btn">
                         <input type="checkbox" id="cb__" checked>
-                        <label for="cb__" class="btn">
+                        <label for="cb__" class="hover-300">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 18 18">
                                 <path id="path__" fill="none" stroke="#304c7e" stroke-width="1"
                                     d="M 2 3 H 14 V 13 H 2 Z M 7 3 V 13 M 12 3 V 13 M 2 8 H 14 M 2 13 H 14"></path>
@@ -121,7 +121,7 @@
                         </label>
                     </div>
                 </div>
-                <div class="eff-slider" tabindex="0">
+                <div class="effect-slider" tabindex="0">
                     <span class="mobile-label" label-for="container__"></span>
                     <div class="slider" id="container__"></div>
                 </div>
@@ -137,6 +137,12 @@
                 </label>
                 <div class="effect-btns">
                     <div class="eff-btn">
+                        <input type="color" name="" id="ic_px_grid_color">
+                        <label for="ic_px_grid_color" class="btn hover-300">
+                            <span></span>
+                        </label>
+                    </div>
+                    <div class="eff-btn">
                         <input type="checkbox" id="cb_px_grid" checked>
                         <label for="cb_px_grid" class="btn hover-300">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
@@ -148,30 +154,29 @@
                         </label>
                     </div>
                     <div class="eff-btn">
-                        <input type="checkbox" id="cb_px_horzvert" checked>
-                        <label for="cb_px_horzvert" class="btn hover-300">
+                        <input type="checkbox" id="cb_px_is_num_pxls_by_height" checked>
+                        <label for="cb_px_is_num_pxls_by_height" class="btn hover-300">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 12">
                                 <!-- Applies the count of pixesl to the side of the image -->
-                                <path id="path_px_pixels_tall" fill="none" stroke="#304c7e" stroke-width="1"
+                                <path id="path_px_is_num_pxls_by_height_on" fill="none" stroke="#304c7e" stroke-width="1"
                                 d="M 1 1 H 13 V 11 H 1 Z M 6 1 V 11 M 11 1 V 11 M 1 6 H 13 M 1 11 H 13"></path>
                                 
                                 <!-- Applies the count of pixesl along the length of the image -->
-                                <path id="path_px_pixels_wide" fill="none" stroke="#304c7e" stroke-width="1"
+                                <path id="path_px_is_num_pxls_by_height_off" fill="none" stroke="#304c7e" stroke-width="1"
                                     d="M 1 1 H 13 V 11 H 1 Z M 7 1 V 11 M 13 1 V 11 M 1 7 H 13 M 1 11 H 13"></path>
                             </svg>
                         </label>
                     </div>
                     <div class="eff-btn">
-                        <input type="checkbox" id="cb_px_smooth" checked>
-                        <label for="cb_px_smooth" class="btn hover-300">
+                        <input type="checkbox" id="cb_px_blur">
+                        <label for="cb_px_blur" class="btn hover-300">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19 18">
                                 <defs>
                                     <filter id="svgFilterBlur">
                                         <feGaussianBlur in="SourceGraphic" stdDeviation="1" />
                                     </filter>
                                 </defs>
-                                <!-- <g filter="url(#svgFilterBlur)"> -->
-                                <g filter="none">
+                                <g filter="none" id="group_px_blur_off">
                                     <path stroke="none" fill="#000000" d="M 2 4 H 7 V 9 H 2 Z" />
                                     <path stroke="none" fill="#1E1E1E" d="M 2 9 H 7 V 14 H 2 Z" />
                                     <path stroke="none" fill="#3C3C3C" d="M 7 4 H 12 V 9 H 7 Z" />
@@ -180,7 +185,7 @@
                                     <path stroke="none" fill="#969696" d="M 12 9 H 17 V 14 H 12 Z" />
                                 </g>
     
-                                <g filter="url(#svgFilterBlur)" id="group_px_blur_off">
+                                <g filter="url(#svgFilterBlur)" id="group_px_blur_on">
                                     <path stroke="none" fill="#000000" d="M 2 4 H 7 V 9 H 2 Z" />
                                     <path stroke="none" fill="#1E1E1E" d="M 2 9 H 7 V 14 H 2 Z" />
                                     <path stroke="none" fill="#3C3C3C" d="M 7 4 H 12 V 9 H 7 Z" />
@@ -192,9 +197,9 @@
                         </label>
                     </div>
                 </div>
-                <div class="eff-slider" tabindex="0">
-                    <span class="mobile-label" label-for="container__"></span>
-                    <div class="slider" id="container__"></div>
+                <div class="effect-slider" tabindex="0">
+                    <span class="mobile-label" label-for="container_rs_px__num_pxls"></span>
+                    <div class="slider" id="container_rs_px__num_pxls"></div>
                 </div>
             </div>
 
@@ -219,6 +224,44 @@
 
                         </label>
                     </div>
+                </div>
+                <div class="effect-slider">
+                    <span class="mobile-label"></span>
+                    <div class="slider" id="container_rs_grayscale__num_light_values"></div>
+                </div>
+                <div class="effect-slider">
+                    <span class="mobile-label"></span>
+                    <div class="slider" id="container_rs_grayscale__sensitivity"></div>
+                </div>
+            </div>
+
+            <div class="effect">
+                <input type="radio" name="rbgEffects" id="rg_eff_replace_px">
+                <label for="rg_eff_replace_px" class="effect-title">
+                    <span class="on-dot"></span>
+                    Replace Pixel
+                </label>
+                <div class="effect-btns">
+                    <div class="eff-btn">
+                        <input type="checkbox" id="cb_contiguous_px" checked>
+                        <label for="cb_contiguous_px" class="hover-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8">
+                                <path id="path_replx_contiguous_grid" fill="none" stroke="#304c7e" stroke-width="0.05"
+                                    d="M 1 1 H 7 V 7 H 1 Z M 2 1 V 7 M 3 1 V 7 M 4 1 V 7 M 5 1 V 7 M 6 1 V 7 M 1 2 H 7 M 1 3 H 7 M 1 4 H 7 M 1 5 H 7 M 1 6 H 7" />
+                                <path id="path_replx_contiguous_fill" fill="#304c7e" stroke="none"
+                                    d="M 1 7 V 3 H 2 V 4 H 3 V 5 H 4 V 6 H 5 V 7 Z" />
+                                <path id="path_replx_contiguous_on" fill="none" stroke="#304c7e" stroke-width="0.2"
+                                    d="M 3 2 H 4 V 3 H 3 Z M 5 2 H 6 V 3 H 5 Z M 4 3 H 5 V 4 H 4 Z M 5 4 H 6 V 5 H 5 Z M 6 3 H 7 V 4 H 6 Z" />
+                                <path id="path_replx_contiguous_off" fill="#304c7e" stroke="none"
+                                    d="M 3 2 H 4 V 3 H 3 Z M 5 2 H 6 V 3 H 5 Z M 4 3 H 5 V 4 H 4 Z M 5 4 H 6 V 5 H 5 Z M 6 3 H 7 V 4 H 6 Z" />
+                                
+                            </svg>
+                        </label>
+                    </div>
+                </div>
+                <div class="effect-slider" tabindex="0">
+                    <span class="mobile-label" label-for="container__"></span>
+                    <div class="slider" id="container__"></div>
                 </div>
             </div>
 
@@ -464,7 +507,7 @@
     </div>
 
     <script src="/assets/js/dialog.js"></script>
-    <script src="index.js"></script>
+    <script type="module" src="index.js"></script>
 </body>
 
 </html>
