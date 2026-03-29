@@ -1003,15 +1003,55 @@ function initContentEditable(field) {
         r.collapse(true);
         let caretRect = r.getBoundingClientRect();
 
-        // Fallback when rect is zero (empty field, or first position in line)
+        // Fallback when rect is zero (caret after newline, start of empty line, empty field)
         if (!caretRect.height) {
             const fieldRect = field.getBoundingClientRect();
             const style = getComputedStyle(field);
-            caretRect = {
-                top: fieldRect.top + parseFloat(style.paddingTop),
-                left: fieldRect.left + parseFloat(style.paddingLeft),
-                height: parseFloat(style.fontSize) * parseFloat(style.lineHeight) || 20
-            };
+            // lineHeight in px: getComputedStyle returns "normal" when not set, so fall back
+            // to fontSize * 1.2 in that case.
+            const lineH = parseFloat(style.lineHeight) || (parseFloat(style.fontSize) * 1.2) || 20;
+            const padTop  = parseFloat(style.paddingTop);
+            const padLeft = parseFloat(style.paddingLeft);
+
+            // Strategy 1: measure the character immediately before the caret.
+            // Handles cursor-after-\n correctly when the browser gives that char a rect.
+            if (range.startOffset > 0 && range.startContainer.nodeType === Node.TEXT_NODE) {
+                const testRange = document.createRange();
+                testRange.setStart(range.startContainer, range.startOffset - 1);
+                testRange.setEnd(range.startContainer, range.startOffset);
+                const testRect = testRange.getBoundingClientRect();
+                if (testRect.height) {
+                    caretRect = {
+                        top: testRect.bottom,
+                        left: fieldRect.left + padLeft,
+                        height: testRect.height
+                    };
+                }
+            }
+
+            // Strategy 2: count \n characters before the caret to derive the visual line.
+            // This is reliable when the caret is right after a \n (the only zero-rect case
+            // in a single-text-node field), and Strategy 1 failed (e.g. \n rect was zero).
+            if (!caretRect.height && range.startContainer.nodeType === Node.TEXT_NODE) {
+                const pre = document.createRange();
+                pre.selectNodeContents(field);
+                pre.setEnd(range.startContainer, range.startOffset);
+                const linesBefore = (pre.toString().match(/\n/g) || []).length;
+                caretRect = {
+                    top: fieldRect.top + padTop + linesBefore * lineH,
+                    left: fieldRect.left + padLeft,
+                    height: lineH
+                };
+            }
+
+            // Final fallback: top-left of field (empty field or cursor at element level).
+            if (!caretRect.height) {
+                caretRect = {
+                    top: fieldRect.top + padTop,
+                    left: fieldRect.left + padLeft,
+                    height: lineH
+                };
+            }
         }
 
         const containerRect = field.parentElement.getBoundingClientRect();
@@ -1035,11 +1075,45 @@ function initContentEditable(field) {
         document.execCommand("insertText", false, text);
     });
 
-    // Enter: insert a literal \n instead of letting the browser create a new block element
+    // Enter: insert a literal \n by rewriting textContent so the field always stays
+    // as a single text node. range.insertNode splits text nodes, leaving the caret
+    // in an empty sibling at offset 0 where positionCursor's look-back can't help.
     field.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
             e.preventDefault();
-            document.execCommand("insertText", false, "\n");
+            const sel = window.getSelection();
+            if (!sel || !sel.rangeCount) return;
+            const range = sel.getRangeAt(0);
+
+            // Measure offsets in the whole textContent before touching the DOM
+            const preStart = document.createRange();
+            preStart.selectNodeContents(field);
+            preStart.setEnd(range.startContainer, range.startOffset);
+            const startOff = preStart.toString().length;
+
+            let endOff = startOff;
+            if (!range.collapsed) {
+                const preEnd = document.createRange();
+                preEnd.selectNodeContents(field);
+                preEnd.setEnd(range.endContainer, range.endOffset);
+                endOff = preEnd.toString().length;
+            }
+
+            // Replace selection (if any) with a single \n, keeping one text node
+            const old = field.textContent;
+            field.textContent = old.slice(0, startOff) + "\n" + old.slice(endOff);
+
+            // Place caret right after the inserted \n
+            const textNode = field.firstChild;
+            if (textNode) {
+                const r = document.createRange();
+                r.setStart(textNode, startOff + 1);
+                r.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(r);
+            }
+
+            field.dispatchEvent(new InputEvent("input", { bubbles: true }));
         }
     });
 
@@ -1069,7 +1143,7 @@ function initContentEditable(field) {
 
         // Restore caret to the same character offset
         const textNode = field.firstChild;
-        if (textNode && caretOffset) {
+        if (textNode) {
             const r = document.createRange();
             r.setStart(textNode, Math.min(caretOffset, textNode.length));
             r.collapse(true);
