@@ -1007,8 +1007,14 @@ function initContentEditable(field) {
         if (!caretRect.height) {
             const fieldRect = field.getBoundingClientRect();
             const style = getComputedStyle(field);
-            // If caret is after a newline, get the rect of the newline char and place
-            // the cursor on the line below it (handles trailing \n and empty mid-lines).
+            // lineHeight in px: getComputedStyle returns "normal" when not set, so fall back
+            // to fontSize * 1.2 in that case.
+            const lineH = parseFloat(style.lineHeight) || (parseFloat(style.fontSize) * 1.2) || 20;
+            const padTop  = parseFloat(style.paddingTop);
+            const padLeft = parseFloat(style.paddingLeft);
+
+            // Strategy 1: measure the character immediately before the caret.
+            // Handles cursor-after-\n correctly when the browser gives that char a rect.
             if (range.startOffset > 0 && range.startContainer.nodeType === Node.TEXT_NODE) {
                 const testRange = document.createRange();
                 testRange.setStart(range.startContainer, range.startOffset - 1);
@@ -1017,17 +1023,33 @@ function initContentEditable(field) {
                 if (testRect.height) {
                     caretRect = {
                         top: testRect.bottom,
-                        left: fieldRect.left + parseFloat(style.paddingLeft),
+                        left: fieldRect.left + padLeft,
                         height: testRect.height
                     };
                 }
             }
-            // Final fallback: top-left of field (empty field or unresolvable position)
+
+            // Strategy 2: count \n characters before the caret to derive the visual line.
+            // This is reliable when the caret is right after a \n (the only zero-rect case
+            // in a single-text-node field), and Strategy 1 failed (e.g. \n rect was zero).
+            if (!caretRect.height && range.startContainer.nodeType === Node.TEXT_NODE) {
+                const pre = document.createRange();
+                pre.selectNodeContents(field);
+                pre.setEnd(range.startContainer, range.startOffset);
+                const linesBefore = (pre.toString().match(/\n/g) || []).length;
+                caretRect = {
+                    top: fieldRect.top + padTop + linesBefore * lineH,
+                    left: fieldRect.left + padLeft,
+                    height: lineH
+                };
+            }
+
+            // Final fallback: top-left of field (empty field or cursor at element level).
             if (!caretRect.height) {
                 caretRect = {
-                    top: fieldRect.top + parseFloat(style.paddingTop),
-                    left: fieldRect.left + parseFloat(style.paddingLeft),
-                    height: parseFloat(style.fontSize) * parseFloat(style.lineHeight) || 20
+                    top: fieldRect.top + padTop,
+                    left: fieldRect.left + padLeft,
+                    height: lineH
                 };
             }
         }
