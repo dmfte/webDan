@@ -14,7 +14,9 @@
  * - UIController: Connects sliders and controls to the state
  */
 
-import RangeSlider from '../assets/js/RangeSlider.js';
+import { RangeSlider } from '../assets/js/RangeSlider.js';
+import { Downloader } from '../assets/js/Downloader.js'
+import { ImageLoader } from '../assets/js/ImageLoader.js';
 
 // ========================================
 // STATE MANAGEMENT
@@ -40,12 +42,11 @@ const AppState = {
     strokeColor: '#87CEEB'  // Stroke color (light blue default)
   },
 
-  // Node positions (0 = center, 1 = edge)
-  // Y node: 1 = top, -1 = bottom
-  // X node: 1 = right, -1 = left
   nodes: {
-    yPosition: 1,      // Y-axis node position (starts at top = 1)
-    xPosition: 1       // X-axis node position (starts at right = 1)
+    yPosition: 1,  // horizontal arc curvature (-1 to 1)
+    ySlide: 0,     // Y node position along horizontal arc (-1=left, 0=center, 1=right)
+    xPosition: 1,  // vertical arc curvature (-1 to 1)
+    xSlide: 0      // X node position along vertical arc (-1=top, 0=center, 1=bottom)
   },
 
   // Interaction state
@@ -66,53 +67,36 @@ const AppState = {
 };
 
 // ========================================
+// CROP STATE
+// ========================================
+const CropState = {
+  active: false,
+  isDragging: false,
+  startX: 0,
+  startY: 0,
+  endX: 0,
+  endY: 0
+};
+
+// ========================================
 // COLORS
 // ========================================
 const RANGE_SLIDER_FILL = '#210F37';
 const RANGE_SLIDER_EMPTY = '#DCA06D';
 
 // ========================================
-// NODE RADIUS CALIBRATION
+// CALIBRATION
 // ========================================
-// Adjust these values to calibrate node (handle) size
-const NODE_CONFIG = {
-  // Mobile: size based on viewport width (vw units)
-  mobileVw: 5,              // <- CALIBRATE: mobile node size in vw (e.g., 3 = 3vw)
-  mobileBreakpoint: 749,    // <- CALIBRATE: max-width for mobile mode (matches CSS)
+const NODE_RADIUS = 90;  // <- CALIBRATE: node (handle) radius in pixels
+const MOBILE_BREAKPOINT = 749;  // <- CALIBRATE: max-width for mobile mode (matches CSS)
 
-  // Desktop: size based on stroke width
-  desktopMin: 5,            // <- CALIBRATE: minimum node radius on desktop
-  desktopMax: 30,           // <- CALIBRATE: maximum node radius on desktop
-  desktopMultiplier: 6      // <- CALIBRATE: strokeWidth * this = node radius
-};
-
-// ========================================
-// CIRCLE DRAG VELOCITY CALIBRATION
-// ========================================
-// Controls how fast the circle moves relative to pointer/touch drag distance
 const DRAG_CONFIG = {
-  velocity: 1.0             // <- CALIBRATE: 1.0 = 1:1 movement, 2.0 = 2x faster, 0.5 = half speed
+  velocity: 1.0  // <- CALIBRATE: 1.0 = 1:1 movement, 2.0 = 2x faster, 0.5 = half speed
 };
 
-/**
- * Get the node radius based on screen size
- * Mobile: uses viewport-based sizing (vw)
- * Desktop: uses stroke-width-based sizing
- */
 function getNodeRadius() {
-  const isMobile = window.innerWidth <= NODE_CONFIG.mobileBreakpoint;
-
-  if (isMobile) {
-    // Convert vw to pixels: (vw * viewportWidth) / 100
-    return (NODE_CONFIG.mobileVw * window.innerWidth) / 100;
-  } else {
-    // Desktop: based on stroke width
-    const { strokeWidth } = AppState.circle;
-    return Math.max(
-      NODE_CONFIG.desktopMin,
-      Math.min(NODE_CONFIG.desktopMax, strokeWidth * NODE_CONFIG.desktopMultiplier)
-    );
-  }
+  const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
+  return isMobile ? window.innerWidth * 0.4 : NODE_RADIUS;
 }
 
 // ========================================
@@ -156,6 +140,54 @@ function degToRad(degrees) {
   return degrees * Math.PI / 180;
 }
 
+const BEZIER_K = 0.5522847498; // 4*(sqrt(2)-1)/3 — bezier constant for circle approximation
+
+/**
+ * Evaluates a cubic bezier at parameter t
+ */
+function cubicBezier(t, p0, p1, p2, p3) {
+  const mt = 1 - t;
+  return mt*mt*mt*p0 + 3*mt*mt*t*p1 + 3*mt*t*t*p2 + t*t*t*p3;
+}
+
+/**
+ * Returns the canvas-local position of the Y node on the horizontal arc.
+ * slide ∈ [-1, 1]: -1 = left endpoint, 0 = center/peak, 1 = right endpoint
+ */
+function getHorizontalArcPoint(yPos, slide, radius) {
+  if (slide <= 0) {
+    const u = slide + 1; // maps [-1, 0] → [0, 1] for the left cubic
+    return {
+      x: cubicBezier(u, -radius, -radius, -radius * BEZIER_K, 0),
+      y: cubicBezier(u, 0, -radius * BEZIER_K * yPos, -radius * yPos, -radius * yPos)
+    };
+  } else {
+    return {
+      x: cubicBezier(slide, 0, radius * BEZIER_K, radius, radius),
+      y: cubicBezier(slide, -radius * yPos, -radius * yPos, -radius * BEZIER_K * yPos, 0)
+    };
+  }
+}
+
+/**
+ * Returns the canvas-local position of the X node on the vertical arc.
+ * slide ∈ [-1, 1]: -1 = top endpoint, 0 = center/peak, 1 = bottom endpoint
+ */
+function getVerticalArcPoint(xPos, slide, radius) {
+  if (slide <= 0) {
+    const u = slide + 1; // maps [-1, 0] → [0, 1] for the top cubic
+    return {
+      x: cubicBezier(u, 0, radius * BEZIER_K * xPos, radius * xPos, radius * xPos),
+      y: cubicBezier(u, -radius, -radius, -radius * BEZIER_K, 0)
+    };
+  } else {
+    return {
+      x: cubicBezier(slide, radius * xPos, radius * xPos, radius * BEZIER_K * xPos, 0),
+      y: cubicBezier(slide, 0, radius * BEZIER_K, radius, radius)
+    };
+  }
+}
+
 // ========================================
 // IMAGE MANAGER
 // ========================================
@@ -173,42 +205,25 @@ const ImageManager = {
   },
 
   /**
-   * Load an image from a File object
+   * Set an already-loaded Image object as the active image and update state
    */
-  loadImage(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
+  setImage(img) {
+    AppState.image = img;
+    AppState.imageWidth = img.width;
+    AppState.imageHeight = img.height;
 
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          AppState.image = img;
-          AppState.imageWidth = img.width;
-          AppState.imageHeight = img.height;
+    this.canvas.width = img.width;
+    this.canvas.height = img.height;
 
-          // Set canvas size to match image
-          this.canvas.width = img.width;
-          this.canvas.height = img.height;
+    const maxDim = Math.max(img.width, img.height);
+    AppState.circle.x = img.width / 2;
+    AppState.circle.y = img.height / 2;
+    AppState.circle.radius = (maxDim * AppState.circle.sizePercent) / 200;
 
-          // Initialize circle at center with 50% size
-          const maxDim = Math.max(img.width, img.height);
-          AppState.circle.x = img.width / 2;
-          AppState.circle.y = img.height / 2;
-          AppState.circle.radius = (maxDim * AppState.circle.sizePercent) / 200;
-
-          // Reset nodes to extreme positions
-          AppState.nodes.yPosition = 1;
-          AppState.nodes.xPosition = 1;
-
-          resolve(img);
-        };
-        img.onerror = reject;
-        img.src = e.target.result;
-      };
-
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
+    AppState.nodes.yPosition = 0;
+    AppState.nodes.ySlide = 0;
+    AppState.nodes.xPosition = 0;
+    AppState.nodes.xSlide = 0;
   },
 
   /**
@@ -236,12 +251,40 @@ const Renderer = {
 
     if (!AppState.image) return;
 
-    // Clear and draw image
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(AppState.image, 0, 0);
 
-    // Draw the Loomis sphere overlay
-    this.drawLoomis(ctx, includeNodes);
+    if (CropState.active) {
+      this.drawCropOverlay(ctx, canvas);
+    } else {
+      this.drawLoomis(ctx, includeNodes);
+    }
+  },
+
+  drawCropOverlay(ctx, canvas) {
+    ImageManager.updateDisplayScale();
+    const s = AppState.display.scale;
+
+    const x = Math.min(CropState.startX, CropState.endX);
+    const y = Math.min(CropState.startY, CropState.endY);
+    const w = Math.abs(CropState.endX - CropState.startX);
+    const h = Math.abs(CropState.endY - CropState.startY);
+
+    // Dim everything outside the crop area
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    if (w > 0 && h > 0) {
+      // Redraw original image inside crop area to undo the dimming
+      ctx.drawImage(AppState.image, x, y, w, h, x, y, w, h);
+
+      // Dashed border scaled to appear ~2px on screen regardless of image size
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = 2 * s;
+      ctx.setLineDash([12 * s, 6 * s]);
+      ctx.strokeRect(x, y, w, h);
+      ctx.setLineDash([]);
+    }
   },
 
   /**
@@ -249,12 +292,14 @@ const Renderer = {
    */
   drawLoomis(ctx, includeNodes) {
     const { x, y, radius, rotation, strokeWidth, strokeColor } = AppState.circle;
-    const { yPosition, xPosition } = AppState.nodes;
+    const { yPosition, ySlide, xPosition, xSlide } = AppState.nodes;
+    const yNodePx = getHorizontalArcPoint(yPosition, ySlide, radius);
+    const xNodePx = getVerticalArcPoint(xPosition, xSlide, radius);
 
     const rotRad = degToRad(rotation);
 
-    // Calculate axis line width (10% of stroke width, min 1px)
-    const axisWidth = Math.max(1, Math.ceil(strokeWidth * 0.1));
+    // Calculate axis line width (50% of stroke width, min 1px)
+    const axisWidth = Math.max(1, Math.ceil(strokeWidth * 0.5));
 
     ctx.save();
     ctx.translate(x, y);
@@ -287,108 +332,42 @@ const Renderer = {
     // Arc width matches main stroke
     ctx.lineWidth = strokeWidth;
 
-    // Horizontal arc (controlled by Y node)
-    // yPosition: 1 = top (full semicircle up), 0 = flat line, -1 = full semicircle down
     this.drawHorizontalArc(ctx, radius, yPosition, strokeColor);
-
-    // Vertical arc (controlled by X node)
-    // xPosition: 1 = right (full semicircle right), 0 = flat line, -1 = full semicircle left
     this.drawVerticalArc(ctx, radius, xPosition, strokeColor);
 
-    // --- Draw nodes (only in edit mode, not for download) ---
     if (includeNodes) {
       const nodeColor = getComplementaryColor(strokeColor);
       const nodeRadius = getNodeRadius();
-
-      // Y-axis node (moves along Y axis)
-      const yNodeY = -yPosition * radius;
-      this.drawNode(ctx, 0, yNodeY, nodeRadius, nodeColor);
-
-      // X-axis node (moves along X axis)
-      const xNodeX = xPosition * radius;
-      this.drawNode(ctx, xNodeX, 0, nodeRadius, nodeColor);
+      this.drawNode(ctx, yNodePx.x, yNodePx.y, nodeRadius, nodeColor);
+      this.drawNode(ctx, xNodePx.x, xNodePx.y, nodeRadius, nodeColor);
     }
 
     ctx.restore();
   },
 
   /**
-   * Draw horizontal arc (latitude line)
-   * Creates a semicircle from left to right, scaled vertically by yPos.
-   * - yPos = 1: full semicircle curving upward (top half of circle)
-   * - yPos = 0: straight horizontal line
-   * - yPos = -1: full semicircle curving downward (bottom half of circle)
+   * Draw horizontal arc (latitude line) using two cubic beziers (circle approximation).
+   * yPos: 1 = full semicircle up, 0 = flat line, -1 = full semicircle down
    */
   drawHorizontalArc(ctx, radius, yPos, color) {
-    // Bezier constant for circle approximation: k = 4 * (sqrt(2) - 1) / 3
-    const k = 0.5522847498;
-
     ctx.beginPath();
     ctx.strokeStyle = color;
-
-    // Arc goes from left edge (-radius, 0) to right edge (radius, 0)
-    // The vertical scale factor determines how much it curves
-    const scaleY = yPos; // 1 = full up, 0 = flat, -1 = full down
-
-    // For a semicircle approximation, we use two cubic bezier curves
-    // From (-r, 0) to (0, -r*scale) to (r, 0)
-
-    // Start point
     ctx.moveTo(-radius, 0);
-
-    // First bezier: left half of the arc
-    // Control points scaled in Y direction
-    ctx.bezierCurveTo(
-      -radius, -radius * k * scaleY,  // First control point
-      -radius * k, -radius * scaleY,  // Second control point
-      0, -radius * scaleY              // End at top/bottom center
-    );
-
-    // Second bezier: right half of the arc
-    ctx.bezierCurveTo(
-      radius * k, -radius * scaleY,   // First control point
-      radius, -radius * k * scaleY,   // Second control point
-      radius, 0                        // End at right edge
-    );
-
+    ctx.bezierCurveTo(-radius, -radius * BEZIER_K * yPos, -radius * BEZIER_K, -radius * yPos, 0, -radius * yPos);
+    ctx.bezierCurveTo(radius * BEZIER_K, -radius * yPos, radius, -radius * BEZIER_K * yPos, radius, 0);
     ctx.stroke();
   },
 
   /**
-   * Draw vertical arc (longitude line)
-   * Creates a semicircle from top to bottom, scaled horizontally by xPos.
-   * - xPos = 1: full semicircle curving rightward (right half of circle)
-   * - xPos = 0: straight vertical line
-   * - xPos = -1: full semicircle curving leftward (left half of circle)
+   * Draw vertical arc (longitude line) using two cubic beziers (circle approximation).
+   * xPos: 1 = full semicircle right, 0 = flat line, -1 = full semicircle left
    */
   drawVerticalArc(ctx, radius, xPos, color) {
-    // Bezier constant for circle approximation
-    const k = 0.5522847498;
-
     ctx.beginPath();
     ctx.strokeStyle = color;
-
-    // Arc goes from top edge (0, -radius) to bottom edge (0, radius)
-    // The horizontal scale factor determines how much it curves
-    const scaleX = xPos; // 1 = full right, 0 = flat, -1 = full left
-
-    // Start point
     ctx.moveTo(0, -radius);
-
-    // First bezier: top half of the arc
-    ctx.bezierCurveTo(
-      radius * k * scaleX, -radius,   // First control point
-      radius * scaleX, -radius * k,   // Second control point
-      radius * scaleX, 0               // End at middle right/left
-    );
-
-    // Second bezier: bottom half of the arc
-    ctx.bezierCurveTo(
-      radius * scaleX, radius * k,    // First control point
-      radius * k * scaleX, radius,    // Second control point
-      0, radius                        // End at bottom edge
-    );
-
+    ctx.bezierCurveTo(radius * BEZIER_K * xPos, -radius, radius * xPos, -radius * BEZIER_K, radius * xPos, 0);
+    ctx.bezierCurveTo(radius * xPos, radius * BEZIER_K, radius * BEZIER_K * xPos, radius, 0, radius);
     ctx.stroke();
   },
 
@@ -398,10 +377,10 @@ const Renderer = {
   drawNode(ctx, x, y, radius, color) {
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(0,0,0,0.3)';
-    ctx.lineWidth = 2;
+    // ctx.fillStyle = color;
+    // ctx.fill();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 5;
     ctx.stroke();
   }
 };
@@ -467,23 +446,20 @@ const InputHandler = {
    */
   hitTest(imgX, imgY) {
     const { radius, strokeWidth } = AppState.circle;
-    const { yPosition, xPosition } = AppState.nodes;
+    const { yPosition, ySlide, xPosition, xSlide } = AppState.nodes;
     const local = this.imageToCircleLocal(imgX, imgY);
 
     const nodeRadius = getNodeRadius();
     const hitPadding = 10;
 
-    // Y-axis node position
-    const yNodeY = -yPosition * radius;
-    const yNodeDist = Math.hypot(local.x - 0, local.y - yNodeY);
-    if (yNodeDist <= nodeRadius + hitPadding) {
+    const yNodePx = getHorizontalArcPoint(yPosition, ySlide, radius);
+    const xNodePx = getVerticalArcPoint(xPosition, xSlide, radius);
+
+    if (Math.hypot(local.x - yNodePx.x, local.y - yNodePx.y) <= nodeRadius + hitPadding) {
       return 'yNode';
     }
 
-    // X-axis node position
-    const xNodeX = xPosition * radius;
-    const xNodeDist = Math.hypot(local.x - xNodeX, local.y - 0);
-    if (xNodeDist <= nodeRadius + hitPadding) {
+    if (Math.hypot(local.x - xNodePx.x, local.y - xNodePx.y) <= nodeRadius + hitPadding) {
       return 'xNode';
     }
 
@@ -505,6 +481,12 @@ const InputHandler = {
     if (!AppState.image) return;
 
     const pos = this.screenToImage(e.clientX, e.clientY);
+
+    if (CropState.active) {
+      CropController.handlePointerDown(pos);
+      return;
+    }
+
     const target = this.hitTest(pos.x, pos.y);
 
     if (target === 'yNode') {
@@ -532,6 +514,12 @@ const InputHandler = {
 
     const touch = e.touches[0];
     const pos = this.screenToImage(touch.clientX, touch.clientY);
+
+    if (CropState.active) {
+      CropController.handlePointerDown(pos);
+      return;
+    }
+
     const target = this.hitTest(pos.x, pos.y);
 
     if (target === 'yNode') {
@@ -552,6 +540,11 @@ const InputHandler = {
     if (!AppState.image) return;
 
     const pos = this.screenToImage(e.clientX, e.clientY);
+
+    if (CropState.active) {
+      CropController.handlePointerMove(pos);
+      return;
+    }
 
     // Handle circle dragging (delta-based movement)
     if (AppState.interaction.isDraggingCircle) {
@@ -594,6 +587,11 @@ const InputHandler = {
     const touch = e.touches[0];
     const pos = this.screenToImage(touch.clientX, touch.clientY);
 
+    if (CropState.active) {
+      CropController.handlePointerMove(pos);
+      return;
+    }
+
     // Handle circle dragging (delta-based movement)
     if (AppState.interaction.isDraggingCircle) {
       const lastPos = AppState.interaction.lastPointerPos;
@@ -621,41 +619,33 @@ const InputHandler = {
     }
   },
 
-  /**
-   * Update Y node position based on pointer position
-   * Node stays on Y axis within circle bounds
-   */
   updateYNodePosition(imgPos) {
     const local = this.imageToCircleLocal(imgPos.x, imgPos.y);
     const { radius } = AppState.circle;
-
-    // Constrain to Y axis (local.x = 0) and within radius
-    // Map local.y to position (-1 to 1)
-    let newPos = -local.y / radius;
-    newPos = Math.max(-1, Math.min(1, newPos));
-
-    AppState.nodes.yPosition = newPos;
+    // Vertical drag controls arc curvature (same as original behavior)
+    AppState.nodes.yPosition = Math.max(-1, Math.min(1, -local.y / radius));
+    // Horizontal drag slides the node along the arc
+    AppState.nodes.ySlide = Math.max(-1, Math.min(1, local.x / radius));
   },
 
-  /**
-   * Update X node position based on pointer position
-   * Node stays on X axis within circle bounds
-   */
   updateXNodePosition(imgPos) {
     const local = this.imageToCircleLocal(imgPos.x, imgPos.y);
     const { radius } = AppState.circle;
-
-    // Constrain to X axis (local.y = 0) and within radius
-    let newPos = local.x / radius;
-    newPos = Math.max(-1, Math.min(1, newPos));
-
-    AppState.nodes.xPosition = newPos;
+    // Horizontal drag controls arc curvature (same as original behavior)
+    AppState.nodes.xPosition = Math.max(-1, Math.min(1, local.x / radius));
+    // Vertical drag slides the node along the arc
+    AppState.nodes.xSlide = Math.max(-1, Math.min(1, local.y / radius));
   },
 
   /**
    * Handle pointer up
    */
   handlePointerUp() {
+    if (CropState.active) {
+      CropController.handlePointerUp();
+      return;
+    }
+
     AppState.interaction.isDraggingCircle = false;
     AppState.interaction.isDraggingYNode = false;
     AppState.interaction.isDraggingXNode = false;
@@ -690,42 +680,38 @@ const UIController = {
     this.setupColorPickers();
     this.setupDownloadButtons();
     this.setupMobileControls();
+    this.setupCropButton();
   },
 
   /**
    * Setup file input handlers
    */
   setupFileInputs() {
-    const handleFileChange = async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+    const onLoad = (data) => {
+      if (!data) return;
 
-      try {
-        await ImageManager.loadImage(file);
+      ImageManager.setImage(data.image);
 
-        // Show canvas, hide placeholder
-        const canvas = document.getElementById('mainCanvas');
-        const placeholder = document.getElementById('placeholder');
-        canvas.classList.add('visible');
-        placeholder.classList.add('hidden');
+      document.getElementById('mainCanvas').classList.add('visible');
+      document.getElementById('placeholder').classList.add('hidden');
 
-        // Enable download buttons
-        document.getElementById('downloadBtn').disabled = false;
-        const mobileDownload = document.getElementById('mobileDownloadBtn');
-        if (mobileDownload) mobileDownload.disabled = false;
+      // Remove disabled from the container of the desktop download button
+      document.getElementById('downloadBtn').parentElement.removeAttribute('disabled');
 
-        // Update circle size based on slider
-        this.updateCircleSize(AppState.circle.sizePercent);
+      // Remove disabled from mobile buttons
+      const mobileDownload = document.getElementById('mobileDownloadBtn');
+      if (mobileDownload) mobileDownload.removeAttribute('disabled');
+      const mobileCut = document.getElementById('mobileCutBtn');
+      if (mobileCut) mobileCut.removeAttribute('disabled');
 
-        // Initial render
-        Renderer.render();
-      } catch (err) {
-        console.error('Error loading image:', err);
-      }
+      this.updateCircleSize(AppState.circle.sizePercent);
+      Renderer.render();
     };
 
-    document.getElementById('imageInput').addEventListener('change', handleFileChange);
-    document.getElementById('mobileImageInput').addEventListener('change', handleFileChange);
+    ['imageInput', 'mobileImageInput'].forEach(id => {
+      const loader = new ImageLoader(document.getElementById(id));
+      loader.onLoad = onLoad;
+    });
   },
 
   /**
@@ -860,28 +846,39 @@ const UIController = {
    * Setup download button handlers
    */
   setupDownloadButtons() {
-    const handleDownload = () => {
+    const canvas = ImageManager.canvas;
+
+    ['downloadBtn', 'mobileDownloadBtn'].forEach(id => {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+
+      new Downloader(btn, canvas, (canvas) => {
+        Renderer.render(false);
+        const url = canvas.toDataURL('image/png');
+        Renderer.render(true);
+        return url;
+      });
+    });
+  },
+
+  setupCropButton() {
+    const handleCropClick = () => {
       if (!AppState.image) return;
-
-      // Render without nodes
-      Renderer.render(false);
-
-      // Create download link
-      const link = document.createElement('a');
-      link.download = 'pseudo-loomis-output.png';
-      link.href = ImageManager.canvas.toDataURL('image/png');
-      link.click();
-
-      // Re-render with nodes
-      Renderer.render(true);
+      if (CropState.active) {
+        CropController.accept();
+      } else {
+        CropController.enter();
+      }
     };
 
-    document.getElementById('downloadBtn').addEventListener('click', handleDownload);
+    document.getElementById('cutImageBtn').addEventListener('click', handleCropClick);
 
-    const mobileDownload = document.getElementById('mobileDownloadBtn');
-    if (mobileDownload) {
-      mobileDownload.addEventListener('click', handleDownload);
-    }
+    const mobileCut = document.getElementById('mobileCutBtn');
+    if (mobileCut) mobileCut.addEventListener('click', handleCropClick);
+
+    document.getElementById('cropCancelBtn').addEventListener('click', () => {
+      CropController.exit();
+    });
   },
 
   /**
@@ -915,6 +912,81 @@ const UIController = {
         mobileItems.forEach(item => item.classList.remove('active'));
       }
     });
+  }
+};
+
+// ========================================
+// CROP CONTROLLER
+// ========================================
+
+const CropController = {
+  enter() {
+    CropState.active = true;
+    CropState.isDragging = false;
+    CropState.startX = 0;
+    CropState.startY = 0;
+    CropState.endX = AppState.imageWidth;
+    CropState.endY = AppState.imageHeight;
+
+    document.querySelector('label[for="cutImageBtn"]').textContent = 'OK';
+    document.getElementById('cropCancelBtn').classList.remove('hidden');
+    ImageManager.canvas.classList.add('crop-mode');
+
+    Renderer.render();
+  },
+
+  exit() {
+    CropState.active = false;
+    CropState.isDragging = false;
+
+    document.querySelector('label[for="cutImageBtn"]').textContent = '\u2704';
+    document.getElementById('cropCancelBtn').classList.add('hidden');
+    ImageManager.canvas.classList.remove('crop-mode');
+
+    Renderer.render();
+  },
+
+  accept() {
+    const x = Math.round(Math.min(CropState.startX, CropState.endX));
+    const y = Math.round(Math.min(CropState.startY, CropState.endY));
+    const w = Math.round(Math.abs(CropState.endX - CropState.startX));
+    const h = Math.round(Math.abs(CropState.endY - CropState.startY));
+
+    if (w < 1 || h < 1) { this.exit(); return; }
+
+    // Crop from the original image (not the canvas, which has overlays)
+    const tmp = document.createElement('canvas');
+    tmp.width = w;
+    tmp.height = h;
+    tmp.getContext('2d').drawImage(AppState.image, x, y, w, h, 0, 0, w, h);
+
+    const img = new Image();
+    img.onload = () => {
+      ImageManager.setImage(img);
+      UIController.updateCircleSize(AppState.circle.sizePercent);
+      this.exit();
+    };
+    img.src = tmp.toDataURL('image/png');
+  },
+
+  handlePointerDown(pos) {
+    CropState.isDragging = true;
+    CropState.startX = Math.max(0, Math.min(AppState.imageWidth, pos.x));
+    CropState.startY = Math.max(0, Math.min(AppState.imageHeight, pos.y));
+    CropState.endX = CropState.startX;
+    CropState.endY = CropState.startY;
+    Renderer.render();
+  },
+
+  handlePointerMove(pos) {
+    if (!CropState.isDragging) return;
+    CropState.endX = Math.max(0, Math.min(AppState.imageWidth, pos.x));
+    CropState.endY = Math.max(0, Math.min(AppState.imageHeight, pos.y));
+    Renderer.render();
+  },
+
+  handlePointerUp() {
+    CropState.isDragging = false;
   }
 };
 

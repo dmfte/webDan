@@ -28,13 +28,20 @@
   <main class="app-container">
     <!-- Desktop Sidebar Controls -->
     <aside class="controls-sidebar">
-      <h2 class="controls-title">Controls</h2>
 
-      <!-- Image Input -->
-      <div class="control-group">
-        <label class="control-label" for="imageInput">Load Image</label>
-        <input type="file" id="imageInput" accept="image/*" class="file-input">
-        <label for="imageInput" class="file-input-label">Choose File</label>
+      <div class="mini-controls">
+        <div class="mini-ctrl">
+          <input type="file" id="imageInput" accept="image/*" class="file-input">
+          <label for="imageInput" class="file-input-label">⬆</label>
+        </div>
+        <div class="mini-ctrl" disabled>
+          <input type="button" id="downloadBtn">
+          <label for="downloadBtn">⬇</label>
+        </div>
+        <div class="mini-ctrl">
+          <input type="button" id="cutImageBtn">
+          <label for="cutImageBtn">&#9988;</label>
+        </div>
       </div>
 
       <!-- Rotation Slider -->
@@ -60,15 +67,13 @@
         <label class="control-label" for="colorPicker">Stroke Color</label>
         <input type="color" id="colorPicker" value="#87CEEB" class="color-input">
       </div>
-
-      <!-- Download Button -->
-      <button id="downloadBtn" class="download-btn" disabled>Download Image</button>
     </aside>
 
     <!-- Mobile Top Bar -->
     <div class="mobile-top-bar">
       <input type="file" id="mobileImageInput" accept="image/*" class="file-input">
       <label for="mobileImageInput" class="mobile-btn">Load</label>
+      <button id="mobileCutBtn" class="mobile-btn" disabled>✄</button>
       <button id="mobileDownloadBtn" class="mobile-btn" disabled>Download</button>
     </div>
 
@@ -79,6 +84,7 @@
         <div class="placeholder-text" id="placeholder">
           <p>Load an image to begin</p>
         </div>
+        <button id="cropCancelBtn" class="hidden">✕</button>
       </div>
     </section>
 
