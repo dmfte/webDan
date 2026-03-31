@@ -28,7 +28,7 @@ if (!customElements.get('range-slider')) {
     customElements.define('range-slider', class extends HTMLElement {});
 }
 
-class RangeSlider {
+export class RangeSlider {
     // Private static flag for injecting CSS only once
     static #stylesInjected = false;
     // Private instance fields
@@ -323,5 +323,3 @@ class RangeSlider {
         return Number(val.toFixed(dec));
     }
 }
-
-export default RangeSlider;
