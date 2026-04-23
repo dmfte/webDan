@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="./style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pen</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --ink: #161616;
+            --ink-soft: #4d4b45;
+            --paper: #f3f0e7;
+            --paper-soft: #e5dfd1;
+            --panel: #fbfaf6;
+            --panel-strong: #f2ede2;
+            --rule: #7f786d;
+            --rule-strong: #2f2f2f;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: clamp(17px, 1.2vw + 14px, 22px);
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            gap: 0.9rem;
+            align-content: start;
+            padding: clamp(0.9rem, 2.6vw, 2rem);
+            background: #f1ecdf;
+            color: var(--ink);
+            font-family: Iowan Old Style, Palatino Linotype, Book Antiqua, Georgia, serif;
+            line-height: 1.55;
+        }
+
+        .accordion-container {
+            width: min(100%, 58rem);
+            margin: 0 auto;
+            padding: 0.34rem;
+            border: 1.5px solid var(--rule);
+            border-radius: 1.2rem;
+            background: var(--paper-soft);
+            transition: border-color 220ms ease, background 220ms ease;
+        }
+
+        .accordion-title {
+            display: flex;
+        }
+
+        .accordion-title label {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            cursor: pointer;
+            padding: 0.95rem 1.15rem;
+            border: 1px solid #8f887c;
+            border-radius: 0.95rem;
+            background: #ddd6c8;
+            color: #38352f;
+            transition: border-color 220ms ease, background 220ms ease, color 220ms ease;
+        }
+
+        .accordion-title label::after {
+            content: "+";
+            flex: none;
+            width: 1.8rem;
+            height: 1.8rem;
+            display: inline-grid;
+            place-items: center;
+            border: 1px solid currentColor;
+            border-radius: 999px;
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+
+        .accordion-title h3 {
+            margin: 0;
+            font-size: 1em;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+
+        .accordion-title input {
+            display: none;
+        }
+
+        .accordion-collapsible {
+            padding: 0;
+            margin: 0;
+            display: grid;
+            grid-template-rows: 0fr;
+            overflow: hidden;
+            transition: grid-template-rows 320ms ease;
+        }
+
+        .collapsible-content {
+            min-height: 0;
+            margin-top: 0;
+            padding: 0 1rem;
+            border: 1px solid transparent;
+            border-radius: 0.95rem;
+            background: transparent;
+            transition: margin 320ms ease, padding 320ms ease, border-color 320ms ease, background 320ms ease;
+        }
+
+        .accordion-container:has([name='outline_accordion']:checked) {
+            border-color: var(--rule-strong);
+            background: var(--panel-strong);
+        }
+
+        .accordion-container:has([name='outline_accordion']:checked) .accordion-title label {
+            border-color: var(--rule-strong);
+            background: #fcfbf7;
+            color: var(--ink);
+        }
+
+        .accordion-container:has([name='outline_accordion']:checked) .accordion-title label::after {
+            content: "−";
+        }
+
+        .accordion-container:has([name='outline_accordion']:checked) .accordion-collapsible {
+            grid-template-rows: 1fr;
+        }
+
+        .accordion-container:has([name='outline_accordion']:checked) .collapsible-content {
+            margin-top: 0.45rem;
+            padding: 1rem 1.1rem 1.15rem;
+            border-color: #4a4a4a;
+            background: var(--panel);
+        }
+
+        .collapsible-content> :first-child {
+            margin-top: 0;
+        }
+
+        .collapsible-content> :last-child {
+            margin-bottom: 0;
+        }
+
+        ul,
+        ol {
+            margin: 0.15rem 0 0;
+            padding-left: 1.25rem;
+        }
+
+        li+li {
+            margin-top: 0.5rem;
+        }
+
+        p {
+            margin: 0.3rem 0 0;
+        }
+
+        .flecha,
+        .doble-flecha,
+        .parrafo,
+        .corazon {
+            font-weight: 700;
+        }
+
+        @media (max-width: 540px) {
+            body {
+                gap: 0.7rem;
+                padding: 0.7rem;
+            }
+
+            .accordion-title label {
+                padding: 0.85rem 0.95rem;
+            }
+
+            .accordion-container:has([name='outline_accordion']:checked) .collapsible-content {
+                padding: 0.9rem 0.95rem 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="accordion-container">
+        <div class="accordion-title">
+            <label for="accordion_01">
+                <h3>¿Qué hace para saber...</h3>
+            </label>
+            <input type="radio" name="outline_accordion" id="accordion_01">
+        </div>
+        <div class="accordion-collapsible">
+            <div class="collapsible-content">
+                <ul>
+                    <li>
+                        ... sandía buena comer? <span class="flecha">→</span> Estudia sandía
+                    </li>
+                    <li>
+                        ... le piden proyecto? <span class="flecha">→</span> Estudia su tiempo
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="accordion-container">
+        <div class="accordion-title">
+            <label for="accordion_02">
+                <h3>¿Y para algo no tan fácil... estudiar Biblia?</h3>
+            </label>
+            <input type="radio" name="outline_accordion" id="accordion_02">
+        </div>
+        <div class="accordion-collapsible">
+            <div class="collapsible-content">
+                <ul>
+                    <li><strong>¿Cómo?</strong></li>
+                    <li>Recuerda Esdras? <span class="corazon">♡</span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="accordion-container">
+        <div class="accordion-title">
+            <label for="accordion_03">
+                <h3>&#x31;&#xFE0F;&#x20E3; Orar</h3>
+            </label>
+            <input type="radio" name="outline_accordion" id="accordion_03">
+        </div>
+        <div class="accordion-collapsible">
+            <div class="collapsible-content">
+                <ul>
+                    <li>
+                        <p>Lucas 11:13</p>
+                        <p>"<em>Por lo tanto, si ustedes, aunque son malos, saben darles buenos regalos a sus hijos, <strong>¡con mucha más razón el Padre en el cielo les dará espíritu santo a quienes se lo piden!”</strong>.</em>"</p>
+                    </li>
+                    <li>Propósito Divino</li>
+                    <li>Práctica
+                        <ul>
+                            <li>Hermanos</li>
+                            <li>Predicación</li>
+                        </ul>
+                    </li>
+                    <li>Corregir</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="accordion-container">
+        <div class="accordion-title">
+            <label for="accordion_04">
+                <h3>&#x0032;&#xFE0F;&#x20E3; ¿Todo el artículo?</h3>
+            </label>
+            <input type="radio" name="outline_accordion" id="accordion_04">
+        </div>
+        <div class="accordion-collapsible">
+            <div class="collapsible-content">
+                <ul>
+                    <li>
+                        Tema
+                        <ul>
+                            <li>
+                                Subtema
+                                <ul>
+                                    <li>Ilustraciones</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="accordion-container">
+        <div class="accordion-title">
+            <label for="accordion_05">
+                <h3>&#x0033;&#xFE0F;&#x20E3; Ideas principales</h3>
+            </label>
+            <input type="radio" name="outline_accordion" id="accordion_05">
+        </div>
+        <div class="accordion-collapsible">
+            <div class="collapsible-content">
+                <ul>
+                    <li>Subrayar, apuntar</li>
+                    <li>Texto<span class="doble-flecha">↔</span>Tema</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="accordion-container">
+        <div class="accordion-title">
+            <label for="accordion_06">
+                <h3>&#x0034;&#xFE0F;&#x20E3; ¿Nuevo o cuesta?</h3>
+            </label>
+            <input type="radio" name="outline_accordion" id="accordion_06">
+        </div>
+        <div class="accordion-collapsible">
+            <div class="collapsible-content">
+                <ul>
+                    <li>Siguiente <span class="parrafo">§</span></li>
+                    <li>Apúntelo <span class="flecha">→</span> Más tiempo</li>
+                    <li>Y si todavía...
+                        <ul>
+                            <li>
+                                <p>Miqueas 7:7</p>
+                                <p>"<em><strong>Pero yo, yo siempre estaré pendiente de Jehová.<br>Esperaré pacientemente al Dios de mi salvación.<br>Mi Dios me oirá.</strong></em>"</p>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="accordion-container">
+        <div class="accordion-title">
+            <label for="accordion_07">
+                <h3>¿PRACTICAR?</h3>
+            </label>
+            <input type="radio" name="outline_accordion" id="accordion_07">
+        </div>
+        <div class="accordion-collapsible">
+            <div class="collapsible-content">
+                <ul>
+                    <li>LECCIÓN 39</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="accordion-container">
+        <div class="accordion-title">
+            <label for="accordion_08">
+                <h3>Pasos</h3>
+            </label>
+            <input type="radio" name="outline_accordion" id="accordion_08">
+        </div>
+        <div class="accordion-collapsible">
+            <div class="collapsible-content">
+                <ol>
+                    <li>Orar
+                        <ul>
+                            <li>Entender ... glóbulos rojos / eritropoyetina</li>
+                            <li>No curiosidad <span class="flecha">→</span> Convencido</li>
+                        </ul>
+                    </li>
+                    <li>Vistazo
+                        <ul>
+                            <li>Tema <span class="flecha">→</span> No aprobación humanos</li>
+                            <li>Imagen <span class="flecha">→</span> Posibilidad doctor</li>
+                        </ul>
+                    </li>
+                    <li>Ideas principales
+                        <ul>
+                            <li>Subrayar</li>
+                            <li>Texto<span class="doble-flecha">↔</span>Tema</li>
+                            <li>Tito 3:2<span class="doble-flecha">↔</span>¿Sangre?
+                                <ul>
+                                    <li>razonables, apacibles</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>Fracciones
+                        <ul>
+                            <li>Más tiempo</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    <div class="accordion-container">
+        <div class="accordion-title">
+            <label for="accordion_09">
+                <h3>GRACIAS...</h3>
+            </label>
+            <input type="radio" name="outline_accordion" id="accordion_09">
+        </div>
+        <div class="accordion-collapsible">
+            <div class="collapsible-content">
+                <ul>
+                    <li><em>"Sigamos pidiendo sabiduría constantemente a Jehová, y la recibiremos"</em></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="./script.js"></script>
+</body>
+
+</html>
