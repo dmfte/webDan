@@ -98,14 +98,12 @@
         .accordion-collapsible {
             padding: 0;
             margin: 0;
-            display: grid;
-            grid-template-rows: 0fr;
+            max-height: 0;
             overflow: hidden;
-            transition: grid-template-rows 320ms ease;
+            transition: max-height 320ms ease;
         }
 
         .collapsible-content {
-            min-height: 0;
             margin-top: 0;
             padding: 0 1rem;
             border: 1px solid transparent;
@@ -130,7 +128,7 @@
         }
 
         .accordion-container:has([name='outline_accordion']:checked) .accordion-collapsible {
-            grid-template-rows: 1fr;
+            max-height: 30vh;
         }
 
         .accordion-container:has([name='outline_accordion']:checked) .collapsible-content {
