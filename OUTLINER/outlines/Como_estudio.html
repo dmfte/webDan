@@ -54,7 +54,7 @@
             display: flex;
         }
 
-        .accordion-title label {
+        .accordion-trigger {
             width: 100%;
             display: flex;
             align-items: center;
@@ -69,13 +69,13 @@
             transition: border-color 220ms ease, background 220ms ease, color 220ms ease;
         }
 
-        .accordion-title label:focus-visible,
+        .accordion-trigger:focus-visible,
         .accordion-collapsible:focus-visible {
             outline: 2px solid var(--rule-strong);
             outline-offset: 0.15rem;
         }
 
-        .accordion-title label::after {
+        .accordion-trigger::after {
             content: "+";
             flex: none;
             width: 1.8rem;
@@ -97,10 +97,6 @@
             text-align: center;
         }
 
-        .accordion-title input {
-            display: none;
-        }
-
         .accordion-collapsible {
             padding: 0;
             margin: 0;
@@ -119,26 +115,26 @@
             transition: margin 320ms ease, padding 320ms ease, border-color 320ms ease, background 320ms ease;
         }
 
-        .accordion-container:has(.accordion-title label:focus, .accordion-collapsible:focus-within) {
+        .accordion-container:has(.accordion-trigger:focus, .accordion-collapsible:focus-within) {
             border-color: var(--rule-strong);
             background: var(--panel-strong);
         }
 
-        .accordion-container:has(.accordion-title label:focus, .accordion-collapsible:focus-within) .accordion-title label {
+        .accordion-container:has(.accordion-trigger:focus, .accordion-collapsible:focus-within) .accordion-trigger {
             border-color: var(--rule-strong);
             background: #fcfbf7;
             color: var(--ink);
         }
 
-        .accordion-container:has(.accordion-title label:focus, .accordion-collapsible:focus-within) .accordion-title label::after {
+        .accordion-container:has(.accordion-trigger:focus, .accordion-collapsible:focus-within) .accordion-trigger::after {
             content: "−";
         }
 
-        .accordion-container:has(.accordion-title label:focus, .accordion-collapsible:focus-within) .accordion-collapsible {
+        .accordion-container:has(.accordion-trigger:focus, .accordion-collapsible:focus-within) .accordion-collapsible {
             max-height: 30vh;
         }
 
-        .accordion-container:has(.accordion-title label:focus, .accordion-collapsible:focus-within) .collapsible-content {
+        .accordion-container:has(.accordion-trigger:focus, .accordion-collapsible:focus-within) .collapsible-content {
             margin-top: 0.45rem;
             padding: 1rem 1.1rem 1.15rem;
             border-color: #4a4a4a;
@@ -180,11 +176,11 @@
                 padding: 0.7rem;
             }
 
-            .accordion-title label {
+            .accordion-trigger {
                 padding: 0.85rem 0.95rem;
             }
 
-            .accordion-container:has(.accordion-title label:focus, .accordion-collapsible:focus-within) .collapsible-content {
+            .accordion-container:has(.accordion-trigger:focus, .accordion-collapsible:focus-within) .collapsible-content {
                 padding: 0.9rem 0.95rem 1rem;
             }
         }
@@ -194,10 +190,9 @@
 <body>
     <div class="accordion-container">
         <div class="accordion-title">
-            <label for="accordion_01" tabindex="0">
+            <div class="accordion-trigger" tabindex="0">
                 <h3>¿Qué hace para saber...</h3>
-            </label>
-            <input type="radio" name="outline_accordion" id="accordion_01">
+            </div>
         </div>
         <div class="accordion-collapsible" tabindex="0">
             <div class="collapsible-content">
@@ -214,10 +209,9 @@
     </div>
     <div class="accordion-container">
         <div class="accordion-title">
-            <label for="accordion_02" tabindex="0">
+            <div class="accordion-trigger" tabindex="0">
                 <h3>¿Y para algo no tan fácil... estudiar Biblia?</h3>
-            </label>
-            <input type="radio" name="outline_accordion" id="accordion_02">
+            </div>
         </div>
         <div class="accordion-collapsible" tabindex="0">
             <div class="collapsible-content">
@@ -230,10 +224,9 @@
     </div>
     <div class="accordion-container">
         <div class="accordion-title">
-            <label for="accordion_03" tabindex="0">
+            <div class="accordion-trigger" tabindex="0">
                 <h3>&#x31;&#xFE0F;&#x20E3; Orar</h3>
-            </label>
-            <input type="radio" name="outline_accordion" id="accordion_03">
+            </div>
         </div>
         <div class="accordion-collapsible" tabindex="0">
             <div class="collapsible-content">
@@ -256,10 +249,9 @@
     </div>
     <div class="accordion-container">
         <div class="accordion-title">
-            <label for="accordion_04" tabindex="0">
+            <div class="accordion-trigger" tabindex="0">
                 <h3>&#x0032;&#xFE0F;&#x20E3; ¿Todo el artículo?</h3>
-            </label>
-            <input type="radio" name="outline_accordion" id="accordion_04">
+            </div>
         </div>
         <div class="accordion-collapsible" tabindex="0">
             <div class="collapsible-content">
@@ -281,10 +273,9 @@
     </div>
     <div class="accordion-container">
         <div class="accordion-title">
-            <label for="accordion_05" tabindex="0">
+            <div class="accordion-trigger" tabindex="0">
                 <h3>&#x0033;&#xFE0F;&#x20E3; Ideas principales</h3>
-            </label>
-            <input type="radio" name="outline_accordion" id="accordion_05">
+            </div>
         </div>
         <div class="accordion-collapsible" tabindex="0">
             <div class="collapsible-content">
@@ -297,10 +288,9 @@
     </div>
     <div class="accordion-container">
         <div class="accordion-title">
-            <label for="accordion_06" tabindex="0">
+            <div class="accordion-trigger" tabindex="0">
                 <h3>&#x0034;&#xFE0F;&#x20E3; ¿Nuevo o cuesta?</h3>
-            </label>
-            <input type="radio" name="outline_accordion" id="accordion_06">
+            </div>
         </div>
         <div class="accordion-collapsible" tabindex="0">
             <div class="collapsible-content">
@@ -321,10 +311,9 @@
     </div>
     <div class="accordion-container">
         <div class="accordion-title">
-            <label for="accordion_07" tabindex="0">
+            <div class="accordion-trigger" tabindex="0">
                 <h3>¿PRACTICAR?</h3>
-            </label>
-            <input type="radio" name="outline_accordion" id="accordion_07">
+            </div>
         </div>
         <div class="accordion-collapsible" tabindex="0">
             <div class="collapsible-content">
@@ -336,10 +325,9 @@
     </div>
     <div class="accordion-container">
         <div class="accordion-title">
-            <label for="accordion_08" tabindex="0">
+            <div class="accordion-trigger" tabindex="0">
                 <h3>Pasos</h3>
-            </label>
-            <input type="radio" name="outline_accordion" id="accordion_08">
+            </div>
         </div>
         <div class="accordion-collapsible" tabindex="0">
             <div class="collapsible-content">
@@ -378,10 +366,9 @@
     </div>
     <div class="accordion-container">
         <div class="accordion-title">
-            <label for="accordion_09" tabindex="0">
+            <div class="accordion-trigger" tabindex="0">
                 <h3>GRACIAS...</h3>
-            </label>
-            <input type="radio" name="outline_accordion" id="accordion_09">
+            </div>
         </div>
         <div class="accordion-collapsible" tabindex="0">
             <div class="collapsible-content">
