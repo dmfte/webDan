@@ -34,10 +34,50 @@
             gap: 0.9rem;
             align-content: start;
             padding: clamp(0.9rem, 2.6vw, 2rem);
+            padding-top: calc(60px + 0.9rem);
             background: #f1ecdf;
             color: var(--ink);
             font-family: Iowan Old Style, Palatino Linotype, Book Antiqua, Georgia, serif;
             line-height: 1.55;
+        }
+
+        .stopwatch-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0 0.9rem;
+            background: var(--panel-strong);
+            border-bottom: 1.5px solid var(--rule);
+            z-index: 100;
+        }
+
+        .stopwatch-display {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--ink);
+            min-width: 5ch;
+        }
+
+        .stopwatch-buttons {
+            display: flex;
+            gap: 0.4rem;
+        }
+
+        .sw-btn {
+            padding: 0.45rem 0.9rem;
+            border: 1px solid #8f887c;
+            border-radius: 0.6rem;
+            background: #ddd6c8;
+            color: #38352f;
+            font-family: inherit;
+            font-size: 0.95rem;
+            cursor: pointer;
         }
 
         .accordion-container {
@@ -185,6 +225,13 @@
 </head>
 
 <body>
+    <div class="stopwatch-bar">
+        <div class="stopwatch-display" id="sw-display">00:00</div>
+        <div class="stopwatch-buttons">
+            <button type="button" class="sw-btn" id="sw-toggle">Iniciar</button>
+            <button type="button" class="sw-btn" id="sw-reset">Reiniciar</button>
+        </div>
+    </div>
     <div class="accordion-container">
         <div class="accordion-title">
             <div class="accordion-trigger" tabindex="0">
@@ -376,6 +423,60 @@
         </div>
     </div>
     <script>
+        (function () {
+            var display = document.getElementById('sw-display');
+            var toggleBtn = document.getElementById('sw-toggle');
+            var resetBtn = document.getElementById('sw-reset');
+            var elapsed = 0;
+            var startedAt = 0;
+            var timer = null;
+
+            function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+            function format(ms) {
+                var s = Math.floor(ms / 1000);
+                var h = Math.floor(s / 3600);
+                var m = Math.floor((s % 3600) / 60);
+                var sec = s % 60;
+                if (h > 0) return pad(h) + ':' + pad(m) + ':' + pad(sec);
+                return pad(m) + ':' + pad(sec);
+            }
+
+            function render() {
+                var current = elapsed;
+                if (timer !== null) current += (+new Date()) - startedAt;
+                var next = format(current);
+                if (display.innerHTML !== next) display.innerHTML = next;
+            }
+
+            toggleBtn.addEventListener('click', function () {
+                if (timer !== null) {
+                    elapsed += (+new Date()) - startedAt;
+                    clearInterval(timer);
+                    timer = null;
+                    toggleBtn.innerHTML = 'Iniciar';
+                } else {
+                    startedAt = +new Date();
+                    timer = setInterval(render, 1000);
+                    toggleBtn.innerHTML = 'Pausa';
+                }
+                render();
+            });
+
+            resetBtn.addEventListener('click', function () {
+                if (timer !== null) {
+                    clearInterval(timer);
+                    timer = null;
+                }
+                elapsed = 0;
+                startedAt = 0;
+                toggleBtn.innerHTML = 'Iniciar';
+                render();
+            });
+
+            render();
+        })();
+
         (function () {
             var triggers = document.getElementsByClassName('accordion-trigger');
             for (var i = 0; i < triggers.length; i++) {
