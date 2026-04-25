@@ -3,20 +3,41 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="./style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pen</title>
     <style>
         :root {
-            color-scheme: light;
-            --ink: #161616;
-            --ink-soft: #4d4b45;
-            --paper: #f3f0e7;
-            --paper-soft: #e5dfd1;
-            --panel: #fbfaf6;
-            --panel-strong: #f2ede2;
-            --rule: #7f786d;
-            --rule-strong: #2f2f2f;
+            /*color-scheme: light;
+            --color-text-primary: #161616;
+            --color-text-secondary: #38352f;
+            --color-surface-page: #f1ecdf;
+            --color-surface-top-bar: #f2ede2;
+            --color-surface-top-bar-running: #e9e3d4;
+            --color-surface-accordion: #e5dfd1;
+            --color-surface-control: #ddd6c8;
+            --color-surface-content: #fbfaf6;
+            --color-surface-trigger-open: #fcfbf7;
+            --color-border-subtle: #8f887c;
+            --color-border-default: #7f786d;
+            --color-border-strong: #2f2f2f;
+            --color-border-content: #4a4a4a;
+
+            Dark theme reference:*/
+            --color-text-primary: #000;
+            --color-text-secondary: #ffffff;
+            --color-surface-page: #1f1b17;
+            --color-surface-top-bar: #2b241d;
+            --color-surface-top-bar-running: #3a2f24;
+            --color-surface-accordion: #2f271f;
+            --color-surface-control: #4a3d31;
+            --color-surface-content: #fbfaf6;
+            --color-surface-trigger-open: #f6f2ea;
+            --color-border-subtle: #8e7c67;
+            --color-border-default: #a79276;
+            --color-border-strong: #e7d7be;
+            --color-border-content: #5c5144;
+            --top-bar-height: 60px;
+
         }
 
         * {
@@ -26,7 +47,7 @@
         html {
             font-size: 20px;
         }
-        
+
         body {
             margin: 0;
             min-height: 100vh;
@@ -34,61 +55,49 @@
             gap: 0.9rem;
             align-content: start;
             padding: clamp(0.9rem, 2.6vw, 2rem);
-            padding-top: calc(60px + 0.9rem);
-            background: #f1ecdf;
-            color: var(--ink);
+            padding-top: calc(var(--top-bar-height) + 0.9rem);
+            background: var(--color-surface-page);
+            color: var(--color-text-primary);
             font-family: Iowan Old Style, Palatino Linotype, Book Antiqua, Georgia, serif;
             line-height: 1.55;
         }
 
-        .stopwatch-bar {
+        .top-bar {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            height: 60px;
+            height: var(--top-bar-height);
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 0.9rem;
-            background: var(--panel-strong);
-            border-bottom: 1.5px solid var(--rule);
+            align-items: stretch;
+            background: var(--color-surface-top-bar);
+            border-bottom: 1.5px solid var(--color-border-default);
             z-index: 100;
-            cursor: pointer;
             -webkit-user-select: none;
             user-select: none;
             -webkit-touch-callout: none;
             -webkit-tap-highlight-color: transparent;
         }
 
-        .stopwatch-bar.is-running {
-            background: #e9e3d4;
+        .top-bar.is-running {
+            background: var(--color-surface-top-bar-running);
         }
 
-        .stopwatch-display {
-            font-size: 32px;
-            font-weight: 600;
-            color: var(--ink);
-            min-width: 5ch;
-            text-align: center;
-        }
-
-        .stopwatch-controls {
-            position: absolute;
-            left: 0.6rem;
-            top: 50%;
-            transform: translateY(-50%);
+        .font-controls {
+            height: 100%;
+            padding: 0 0.4rem;
             display: flex;
-            gap: 0.4rem;
+            align-items: center;
         }
-
+        
         .font-btn {
-            width: 42px;
-            height: 42px;
-            border: 1px solid #8f887c;
+            height: 80%;
+            width: calc(var(--top-bar-height) * 2);
+            margin-right: 10px;
             border-radius: 0.55rem;
-            background: #ddd6c8;
-            color: #38352f;
+            border: none;
+            background: var(--color-border-subtle);
+            color: var(--color-text-secondary);
             font-family: inherit;
             font-size: 1.2rem;
             font-weight: 600;
@@ -98,13 +107,22 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        .stopwatch-display {
+            font-size: 32px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            flex: 1;
+            text-align: center;
+            cursor: pointer;
+        }
+
         .accordion-container {
             width: 100%;
             margin: 0 auto;
             padding: 0.34rem;
-            border: 1.5px solid var(--rule);
+            border: 1.5px solid var(--color-border-default);
             border-radius: 1.2rem;
-            background: var(--paper-soft);
+            background: var(--color-surface-accordion);
             transition: border-color 220ms ease, background 220ms ease;
         }
 
@@ -120,16 +138,15 @@
             gap: 1rem;
             cursor: pointer;
             padding: 0.95rem 1.15rem;
-            border: 1px solid #8f887c;
+            border: 1px solid var(--color-border-subtle);
             border-radius: 0.95rem;
-            background: #ddd6c8;
-            color: #38352f;
+            background: var(--color-surface-control);
+            color: var(--color-text-secondary);
             transition: border-color 220ms ease, background 220ms ease, color 220ms ease;
         }
 
-        .accordion-trigger:focus-visible,
-        .accordion-collapsible:focus-visible {
-            outline: 2px solid var(--rule-strong);
+        .accordion-trigger:focus-visible {
+            outline: 2px solid var(--color-border-strong);
             outline-offset: 0.15rem;
         }
 
@@ -157,9 +174,6 @@
 
         .accordion-collapsible {
             display: none;
-            padding: 0;
-            margin: 0;
-            outline: none;
         }
 
         .collapsible-content {
@@ -171,14 +185,14 @@
         }
 
         .accordion-container.is-open {
-            border-color: var(--rule-strong);
-            background: var(--panel-strong);
+            border-color: var(--color-border-strong);
+            background: var(--color-surface-top-bar);
         }
 
         .accordion-container.is-open .accordion-trigger {
-            border-color: var(--rule-strong);
-            background: #fcfbf7;
-            color: var(--ink);
+            border-color: var(--color-border-strong);
+            background: var(--color-surface-trigger-open);
+            color: var(--color-text-primary);
         }
 
         .accordion-container.is-open .accordion-trigger::after {
@@ -192,8 +206,8 @@
         .accordion-container.is-open .collapsible-content {
             margin-top: 0.45rem;
             padding: 1rem 1.1rem 1.15rem;
-            border-color: #4a4a4a;
-            background: var(--panel);
+            border-color: var(--color-border-content);
+            background: var(--color-surface-content);
         }
 
         .collapsible-content> :first-child {
@@ -243,8 +257,8 @@
 </head>
 
 <body>
-    <div class="stopwatch-bar" id="sw-bar">
-        <div class="stopwatch-controls">
+    <div class="top-bar" id="sw-bar">
+        <div class="font-controls">
             <button type="button" class="font-btn" id="font-minus">A−</button>
             <button type="button" class="font-btn" id="font-plus">A+</button>
         </div>
@@ -295,7 +309,9 @@
                 <ul>
                     <li>
                         <p>Lucas 11:13</p>
-                        <p>"<em>Por lo tanto, si ustedes, aunque son malos, saben darles buenos regalos a sus hijos, <strong>¡con mucha más razón el Padre en el cielo les dará espíritu santo a quienes se lo piden!”</strong>.</em>"</p>
+                        <p>"<em>Por lo tanto, si ustedes, aunque son malos, saben darles buenos regalos a sus hijos,
+                                <strong>¡con mucha más razón el Padre en el cielo les dará espíritu santo a quienes se
+                                    lo piden!”</strong>.</em>"</p>
                     </li>
                     <li>Propósito Divino</li>
                     <li>Práctica
@@ -363,7 +379,9 @@
                         <ul>
                             <li>
                                 <p>Miqueas 7:7</p>
-                                <p>"<em><strong>Pero yo, yo siempre estaré pendiente de Jehová.<br>Esperaré pacientemente al Dios de mi salvación.<br>Mi Dios me oirá.</strong></em>"</p>
+                                <p>"<em><strong>Pero yo, yo siempre estaré pendiente de Jehová.<br>Esperaré
+                                            pacientemente al Dios de mi salvación.<br>Mi Dios me oirá.</strong></em>"
+                                </p>
                             </li>
                         </ul>
                     </li>
@@ -507,7 +525,7 @@
                 if (px < MIN) px = MIN;
                 if (px > MAX) px = MAX;
                 html.style.fontSize = px + 'px';
-                try { localStorage.setItem(STORAGE_KEY, '' + px); } catch (err) {}
+                try { localStorage.setItem(STORAGE_KEY, '' + px); } catch (err) { }
             }
 
             function stop(e) {
@@ -526,7 +544,7 @@
                 if (!isNaN(saved) && saved >= MIN && saved <= MAX) {
                     html.style.fontSize = saved + 'px';
                 }
-            } catch (err) {}
+            } catch (err) { }
 
             var stopEvents = ['touchstart', 'touchend', 'touchmove', 'touchcancel', 'mousedown', 'mouseup', 'mouseleave', 'click'];
             for (var i = 0; i < stopEvents.length; i++) {
@@ -539,7 +557,7 @@
         })();
 
         (function () {
-            var bar = document.getElementById('sw-bar');
+            var topBar = document.getElementById('sw-bar');
             var display = document.getElementById('sw-display');
             var elapsed = 0;
             var startedAt = 0;
@@ -572,11 +590,11 @@
                     elapsed += (+new Date()) - startedAt;
                     clearInterval(timer);
                     timer = null;
-                    bar.className = bar.className.replace(/\s*is-running/, '');
+                    topBar.className = topBar.className.replace(/\s*is-running/, '');
                 } else {
                     startedAt = +new Date();
                     timer = setInterval(render, 1000);
-                    bar.className += ' is-running';
+                    topBar.className += ' is-running';
                 }
                 render();
             }
@@ -585,7 +603,7 @@
                 if (timer !== null) {
                     clearInterval(timer);
                     timer = null;
-                    bar.className = bar.className.replace(/\s*is-running/, '');
+                    topBar.className = topBar.className.replace(/\s*is-running/, '');
                 }
                 elapsed = 0;
                 startedAt = 0;
@@ -626,27 +644,27 @@
                 return (+new Date()) - lastTouch < 600;
             }
 
-            bar.addEventListener('touchstart', function (e) {
+            display.addEventListener('touchstart', function (e) {
                 lastTouch = +new Date();
                 startPress();
             });
-            bar.addEventListener('touchend', function (e) {
+            display.addEventListener('touchend', function (e) {
                 lastTouch = +new Date();
                 if (longPressed && e.preventDefault) e.preventDefault();
                 endPress();
             });
-            bar.addEventListener('touchmove', cancelPress);
-            bar.addEventListener('touchcancel', cancelPress);
+            display.addEventListener('touchmove', cancelPress);
+            display.addEventListener('touchcancel', cancelPress);
 
-            bar.addEventListener('mousedown', function () {
+            display.addEventListener('mousedown', function () {
                 if (fromTouch()) return;
                 startPress();
             });
-            bar.addEventListener('mouseup', function () {
+            display.addEventListener('mouseup', function () {
                 if (fromTouch()) return;
                 endPress();
             });
-            bar.addEventListener('mouseleave', function () {
+            display.addEventListener('mouseleave', function () {
                 if (fromTouch()) return;
                 cancelPress();
             });
