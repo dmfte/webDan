@@ -98,12 +98,10 @@
         }
 
         .accordion-collapsible {
+            display: none;
             padding: 0;
             margin: 0;
-            max-height: 0;
-            overflow: hidden;
             outline: none;
-            transition: max-height 320ms ease;
         }
 
         .collapsible-content {
@@ -112,29 +110,28 @@
             border: 1px solid transparent;
             border-radius: 0.95rem;
             background: transparent;
-            transition: margin 320ms ease, padding 320ms ease, border-color 320ms ease, background 320ms ease;
         }
 
-        .accordion-container:has(.accordion-trigger:focus, .accordion-collapsible:focus-within) {
+        .accordion-container.is-open {
             border-color: var(--rule-strong);
             background: var(--panel-strong);
         }
 
-        .accordion-container:has(.accordion-trigger:focus, .accordion-collapsible:focus-within) .accordion-trigger {
+        .accordion-container.is-open .accordion-trigger {
             border-color: var(--rule-strong);
             background: #fcfbf7;
             color: var(--ink);
         }
 
-        .accordion-container:has(.accordion-trigger:focus, .accordion-collapsible:focus-within) .accordion-trigger::after {
+        .accordion-container.is-open .accordion-trigger::after {
             content: "−";
         }
 
-        .accordion-container:has(.accordion-trigger:focus, .accordion-collapsible:focus-within) .accordion-collapsible {
-            max-height: 30vh;
+        .accordion-container.is-open .accordion-collapsible {
+            display: block;
         }
 
-        .accordion-container:has(.accordion-trigger:focus, .accordion-collapsible:focus-within) .collapsible-content {
+        .accordion-container.is-open .collapsible-content {
             margin-top: 0.45rem;
             padding: 1rem 1.1rem 1.15rem;
             border-color: #4a4a4a;
@@ -180,7 +177,7 @@
                 padding: 0.85rem 0.95rem;
             }
 
-            .accordion-container:has(.accordion-trigger:focus, .accordion-collapsible:focus-within) .collapsible-content {
+            .accordion-container.is-open .collapsible-content {
                 padding: 0.9rem 0.95rem 1rem;
             }
         }
@@ -194,7 +191,7 @@
                 <h3>¿Qué hace para saber...</h3>
             </div>
         </div>
-        <div class="accordion-collapsible" tabindex="0">
+        <div class="accordion-collapsible">
             <div class="collapsible-content">
                 <ul>
                     <li>
@@ -213,7 +210,7 @@
                 <h3>¿Y para algo no tan fácil... estudiar Biblia?</h3>
             </div>
         </div>
-        <div class="accordion-collapsible" tabindex="0">
+        <div class="accordion-collapsible">
             <div class="collapsible-content">
                 <ul>
                     <li><strong>¿Cómo?</strong></li>
@@ -228,7 +225,7 @@
                 <h3>&#x31;&#xFE0F;&#x20E3; Orar</h3>
             </div>
         </div>
-        <div class="accordion-collapsible" tabindex="0">
+        <div class="accordion-collapsible">
             <div class="collapsible-content">
                 <ul>
                     <li>
@@ -253,7 +250,7 @@
                 <h3>&#x0032;&#xFE0F;&#x20E3; ¿Todo el artículo?</h3>
             </div>
         </div>
-        <div class="accordion-collapsible" tabindex="0">
+        <div class="accordion-collapsible">
             <div class="collapsible-content">
                 <ul>
                     <li>
@@ -277,7 +274,7 @@
                 <h3>&#x0033;&#xFE0F;&#x20E3; Ideas principales</h3>
             </div>
         </div>
-        <div class="accordion-collapsible" tabindex="0">
+        <div class="accordion-collapsible">
             <div class="collapsible-content">
                 <ul>
                     <li>Subrayar, apuntar</li>
@@ -292,7 +289,7 @@
                 <h3>&#x0034;&#xFE0F;&#x20E3; ¿Nuevo o cuesta?</h3>
             </div>
         </div>
-        <div class="accordion-collapsible" tabindex="0">
+        <div class="accordion-collapsible">
             <div class="collapsible-content">
                 <ul>
                     <li>Siguiente <span class="parrafo">§</span></li>
@@ -315,7 +312,7 @@
                 <h3>¿PRACTICAR?</h3>
             </div>
         </div>
-        <div class="accordion-collapsible" tabindex="0">
+        <div class="accordion-collapsible">
             <div class="collapsible-content">
                 <ul>
                     <li>LECCIÓN 39</li>
@@ -329,7 +326,7 @@
                 <h3>Pasos</h3>
             </div>
         </div>
-        <div class="accordion-collapsible" tabindex="0">
+        <div class="accordion-collapsible">
             <div class="collapsible-content">
                 <ol>
                     <li>Orar
@@ -370,7 +367,7 @@
                 <h3>GRACIAS...</h3>
             </div>
         </div>
-        <div class="accordion-collapsible" tabindex="0">
+        <div class="accordion-collapsible">
             <div class="collapsible-content">
                 <ul>
                     <li><em>"Sigamos pidiendo sabiduría constantemente a Jehová, y la recibiremos"</em></li>
@@ -378,6 +375,28 @@
             </div>
         </div>
     </div>
+    <script>
+        (function () {
+            var triggers = document.getElementsByClassName('accordion-trigger');
+            for (var i = 0; i < triggers.length; i++) {
+                triggers[i].addEventListener('click', function () {
+                    var target = this.parentNode;
+                    while (target && (!target.className || target.className.indexOf('accordion-container') === -1)) {
+                        target = target.parentNode;
+                    }
+                    if (!target) return;
+                    var wasOpen = target.className.indexOf('is-open') !== -1;
+                    var containers = document.getElementsByClassName('accordion-container');
+                    for (var j = 0; j < containers.length; j++) {
+                        containers[j].className = containers[j].className.replace(/\s*is-open/, '');
+                    }
+                    if (!wasOpen) {
+                        target.className += ' is-open';
+                    }
+                });
+            }
+        })();
+    </script>
 </body>
 
 </html>
