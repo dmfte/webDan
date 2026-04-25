@@ -49,35 +49,28 @@
             height: 60px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 0.75rem;
+            justify-content: center;
             padding: 0 0.9rem;
             background: var(--panel-strong);
             border-bottom: 1.5px solid var(--rule);
             z-index: 100;
+            cursor: pointer;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .stopwatch-bar.is-running {
+            background: #e9e3d4;
         }
 
         .stopwatch-display {
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             font-weight: 600;
             color: var(--ink);
             min-width: 5ch;
-        }
-
-        .stopwatch-buttons {
-            display: flex;
-            gap: 0.4rem;
-        }
-
-        .sw-btn {
-            padding: 0.45rem 0.9rem;
-            border: 1px solid #8f887c;
-            border-radius: 0.6rem;
-            background: #ddd6c8;
-            color: #38352f;
-            font-family: inherit;
-            font-size: 0.95rem;
-            cursor: pointer;
+            text-align: center;
         }
 
         .accordion-container {
@@ -225,12 +218,8 @@
 </head>
 
 <body>
-    <div class="stopwatch-bar">
+    <div class="stopwatch-bar" id="sw-bar">
         <div class="stopwatch-display" id="sw-display">00:00</div>
-        <div class="stopwatch-buttons">
-            <button type="button" class="sw-btn" id="sw-toggle">Iniciar</button>
-            <button type="button" class="sw-btn" id="sw-reset">Reiniciar</button>
-        </div>
     </div>
     <div class="accordion-container">
         <div class="accordion-title">
@@ -424,12 +413,15 @@
     </div>
     <script>
         (function () {
+            var bar = document.getElementById('sw-bar');
             var display = document.getElementById('sw-display');
-            var toggleBtn = document.getElementById('sw-toggle');
-            var resetBtn = document.getElementById('sw-reset');
             var elapsed = 0;
             var startedAt = 0;
             var timer = null;
+            var pressTimer = null;
+            var longPressed = false;
+            var lastTouch = 0;
+            var LONG_PRESS_MS = 700;
 
             function pad(n) { return n < 10 ? '0' + n : '' + n; }
 
@@ -449,29 +441,88 @@
                 if (display.innerHTML !== next) display.innerHTML = next;
             }
 
-            toggleBtn.addEventListener('click', function () {
+            function toggle() {
                 if (timer !== null) {
                     elapsed += (+new Date()) - startedAt;
                     clearInterval(timer);
                     timer = null;
-                    toggleBtn.innerHTML = 'Iniciar';
+                    bar.className = bar.className.replace(/\s*is-running/, '');
                 } else {
                     startedAt = +new Date();
                     timer = setInterval(render, 1000);
-                    toggleBtn.innerHTML = 'Pausa';
+                    bar.className += ' is-running';
                 }
                 render();
-            });
+            }
 
-            resetBtn.addEventListener('click', function () {
+            function reset() {
                 if (timer !== null) {
                     clearInterval(timer);
                     timer = null;
+                    bar.className = bar.className.replace(/\s*is-running/, '');
                 }
                 elapsed = 0;
                 startedAt = 0;
-                toggleBtn.innerHTML = 'Iniciar';
                 render();
+            }
+
+            function startPress() {
+                longPressed = false;
+                if (pressTimer !== null) clearTimeout(pressTimer);
+                pressTimer = setTimeout(function () {
+                    longPressed = true;
+                    pressTimer = null;
+                    reset();
+                }, LONG_PRESS_MS);
+            }
+
+            function endPress() {
+                if (pressTimer !== null) {
+                    clearTimeout(pressTimer);
+                    pressTimer = null;
+                }
+                if (longPressed) {
+                    longPressed = false;
+                    return;
+                }
+                toggle();
+            }
+
+            function cancelPress() {
+                if (pressTimer !== null) {
+                    clearTimeout(pressTimer);
+                    pressTimer = null;
+                }
+                longPressed = false;
+            }
+
+            function fromTouch() {
+                return (+new Date()) - lastTouch < 600;
+            }
+
+            bar.addEventListener('touchstart', function (e) {
+                lastTouch = +new Date();
+                startPress();
+            });
+            bar.addEventListener('touchend', function (e) {
+                lastTouch = +new Date();
+                if (longPressed && e.preventDefault) e.preventDefault();
+                endPress();
+            });
+            bar.addEventListener('touchmove', cancelPress);
+            bar.addEventListener('touchcancel', cancelPress);
+
+            bar.addEventListener('mousedown', function () {
+                if (fromTouch()) return;
+                startPress();
+            });
+            bar.addEventListener('mouseup', function () {
+                if (fromTouch()) return;
+                endPress();
+            });
+            bar.addEventListener('mouseleave', function () {
+                if (fromTouch()) return;
+                cancelPress();
             });
 
             render();
