@@ -24,9 +24,9 @@
         }
 
         html {
-            font-size: clamp(17px, 1.2vw + 14px, 22px);
+            font-size: 20px;
         }
-
+        
         body {
             margin: 0;
             min-height: 100vh;
@@ -66,11 +66,36 @@
         }
 
         .stopwatch-display {
-            font-size: 1.5rem;
+            font-size: 32px;
             font-weight: 600;
             color: var(--ink);
             min-width: 5ch;
             text-align: center;
+        }
+
+        .stopwatch-controls {
+            position: absolute;
+            left: 0.6rem;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 0.4rem;
+        }
+
+        .font-btn {
+            width: 42px;
+            height: 42px;
+            border: 1px solid #8f887c;
+            border-radius: 0.55rem;
+            background: #ddd6c8;
+            color: #38352f;
+            font-family: inherit;
+            font-size: 1.2rem;
+            font-weight: 600;
+            line-height: 1;
+            padding: 0;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .accordion-container {
@@ -123,7 +148,7 @@
 
         .accordion-title h3 {
             margin: 0;
-            font-size: 1em;
+            font-size: 1.2rem;
             font-weight: 600;
             letter-spacing: 0.01em;
             width: 100%;
@@ -219,6 +244,10 @@
 
 <body>
     <div class="stopwatch-bar" id="sw-bar">
+        <div class="stopwatch-controls">
+            <button type="button" class="font-btn" id="font-minus">A−</button>
+            <button type="button" class="font-btn" id="font-plus">A+</button>
+        </div>
         <div class="stopwatch-display" id="sw-display">00:00</div>
     </div>
     <div class="accordion-container">
@@ -411,7 +440,104 @@
             </div>
         </div>
     </div>
+    <div class="accordion-container">
+        <div class="accordion-title">
+            <div class="accordion-trigger" tabindex="0">
+                <h3>GRACIAS...</h3>
+            </div>
+        </div>
+        <div class="accordion-collapsible">
+            <div class="collapsible-content">
+                <ul>
+                    <li><em>"Sigamos pidiendo sabiduría constantemente a Jehová, y la recibiremos"</em></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="accordion-container">
+        <div class="accordion-title">
+            <div class="accordion-trigger" tabindex="0">
+                <h3>GRACIAS...</h3>
+            </div>
+        </div>
+        <div class="accordion-collapsible">
+            <div class="collapsible-content">
+                <ul>
+                    <li><em>"Sigamos pidiendo sabiduría constantemente a Jehová, y la recibiremos"</em></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="accordion-container">
+        <div class="accordion-title">
+            <div class="accordion-trigger" tabindex="0">
+                <h3>GRACIAS...</h3>
+            </div>
+        </div>
+        <div class="accordion-collapsible">
+            <div class="collapsible-content">
+                <ul>
+                    <li><em>"Sigamos pidiendo sabiduría constantemente a Jehová, y la recibiremos"</em></li>
+                </ul>
+            </div>
+        </div>
+    </div>
     <script>
+        (function () {
+            var html = document.documentElement;
+            var minus = document.getElementById('font-minus');
+            var plus = document.getElementById('font-plus');
+            var STEP = 2;
+            var MIN = 12;
+            var MAX = 36;
+            var STORAGE_KEY = 'comoEstudioFontSize';
+
+            function getSize() {
+                var current = parseInt(html.style.fontSize, 10);
+                if (isNaN(current)) {
+                    var computed = window.getComputedStyle
+                        ? window.getComputedStyle(html).fontSize
+                        : html.currentStyle.fontSize;
+                    current = parseInt(computed, 10) || 20;
+                }
+                return current;
+            }
+
+            function setSize(px) {
+                if (px < MIN) px = MIN;
+                if (px > MAX) px = MAX;
+                html.style.fontSize = px + 'px';
+                try { localStorage.setItem(STORAGE_KEY, '' + px); } catch (err) {}
+            }
+
+            function stop(e) {
+                if (e && e.stopPropagation) e.stopPropagation();
+            }
+
+            function bump(delta) {
+                return function (e) {
+                    stop(e);
+                    setSize(getSize() + delta);
+                };
+            }
+
+            try {
+                var saved = parseInt(localStorage.getItem(STORAGE_KEY), 10);
+                if (!isNaN(saved) && saved >= MIN && saved <= MAX) {
+                    html.style.fontSize = saved + 'px';
+                }
+            } catch (err) {}
+
+            var stopEvents = ['touchstart', 'touchend', 'touchmove', 'touchcancel', 'mousedown', 'mouseup', 'mouseleave', 'click'];
+            for (var i = 0; i < stopEvents.length; i++) {
+                minus.addEventListener(stopEvents[i], stop);
+                plus.addEventListener(stopEvents[i], stop);
+            }
+
+            minus.addEventListener('click', bump(-STEP));
+            plus.addEventListener('click', bump(+STEP));
+        })();
+
         (function () {
             var bar = document.getElementById('sw-bar');
             var display = document.getElementById('sw-display');
