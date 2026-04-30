@@ -7,9 +7,6 @@
 const STORAGE_KEY = "mi-prompt-itud";
 const DEFAULT_CATEGORY = "Sin categoría";
 
-// Cloudflare Worker URL for AI assistant proxy
-const AI_API_URL = "https://mi-prompt-itud-api.dmfte-dev.workers.dev";
-
 // ============================================
 // Default State
 // ============================================
@@ -886,91 +883,6 @@ function saveConfigOnChange() {
 }
 
 // ============================================
-// AI Assistant
-// ============================================
-
-/** Enables/disables the AI send button based on whether any option is checked. */
-function updateAiButtonState() {
-    const checkboxes = document.querySelectorAll(".ai-option");
-    const sendBtn = document.querySelector(".btn-ai-send");
-    sendBtn.disabled = !Array.from(checkboxes).some(cb => cb.checked);
-}
-
-/** Updates the AI status message (normal or error style). */
-function setAiStatus(message, isError = false) {
-    const status = document.getElementById("ai-status");
-    status.textContent = message;
-    status.style.color = isError ? "var(--danger)" : "var(--muted)";
-}
-
-/** Extracts XML-like tags from a plain-text response. */
-function parseXmlTags(text) {
-    const tags = [];
-    const tagRegex = /<(\w+)>([\s\S]*?)<\/\1>/g;
-    let match;
-    while ((match = tagRegex.exec(text)) !== null) {
-        tags.push({ name: match[1].toLowerCase(), content: match[2].trim() });
-    }
-    return tags;
-}
-
-/** Sends the current prompt to the Cloudflare Worker and applies the AI response. */
-async function sendToAI() {
-    const sendBtn = document.querySelector(".btn-ai-send");
-    const currentPrompt = formatPromptPreview(state.editor.tags);
-
-    if (!currentPrompt.trim()) {
-        setAiStatus("El prompt está vacío", true);
-        return;
-    }
-
-    sendBtn.disabled = true;
-    sendBtn.textContent = "Procesando...";
-    setAiStatus("Enviando a Claude...");
-
-    try {
-        const response = await fetch(AI_API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                prompt: currentPrompt,
-                options: {
-                    crea: document.getElementById("ai-crea").checked,
-                    example: document.getElementById("ai-example").checked,
-                    econTokens: document.getElementById("ai-econ-tokens").checked,
-                },
-            }),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            const details = errorData.details ? `: ${errorData.details}` : "";
-            throw new Error((errorData.error || `Error ${response.status}`) + details);
-        }
-
-        const data = await response.json();
-        if (!data.result) throw new Error("Respuesta vacía del servidor");
-
-        const parsedTags = parseXmlTags(data.result);
-        if (parsedTags.length === 0) throw new Error("No se pudieron extraer etiquetas de la respuesta");
-
-        state.editor.tags = parsedTags;
-        state.editor.selectedTagIndex = 0;
-        saveState();
-        renderTags();
-        setAiStatus(`Prompt optimizado con ${parsedTags.length} etiquetas`);
-
-    } catch (error) {
-        console.error("AI Error:", error);
-        setAiStatus(`Error: ${error.message}`, true);
-    } finally {
-        sendBtn.disabled = false;
-        sendBtn.textContent = "Enviar";
-        updateAiButtonState();
-    }
-}
-
-// ============================================
 // Contenteditable: plain-text enforcement & block cursor
 // ============================================
 
@@ -1253,11 +1165,6 @@ function init() {
             ]
         });
     });
-
-    // --- AI event listeners ---
-    document.querySelectorAll(".ai-option").forEach(cb => cb.addEventListener("change", updateAiButtonState));
-    document.querySelector(".btn-ai-send").addEventListener("click", sendToAI);
-    updateAiButtonState();
 }
 
 document.addEventListener("DOMContentLoaded", init);

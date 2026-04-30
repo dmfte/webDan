@@ -402,21 +402,19 @@ h3 {
 
 .editor-workspace {
     display: grid;
-    grid-template-columns: 280px 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     grid-template-areas:
-        "ai tags content"
-        "ai preview preview";
+        "tags content"
+        "preview preview";
     gap: 0.8rem;
 }
 
-.panel-ai,
 .panel-tags,
 .panel-content,
 .panel-preview {
     padding: 0.9rem;
 }
 
-.panel-ai { grid-area: ai; }
 .panel-tags { grid-area: tags; }
 .panel-content { grid-area: content; }
 .panel-preview { grid-area: preview; }
@@ -430,31 +428,11 @@ h3 {
     flex-wrap: wrap;
 }
 
-/* AI Assistant panel */
-.panel-ai p,
 .actions-fixed p {
     margin-top: 0.4rem;
     margin-bottom: 0.8rem;
     color: var(--muted);
     font-size: 0.7rem;
-}
-
-.switch-option {
-    display: flex;
-    gap: 0.6rem;
-    align-items: flex-start;
-    margin-bottom: 0.7rem;
-    font-size: 0.7rem;
-}
-
-.ai-status {
-    margin-top: 0.6rem;
-    font-size: 0.8rem;
-    min-height: 1.2em;
-}
-
-.panel-ai .btn-ai-send {
-    margin-top: 0.5rem;
 }
 
 /* Tag list & move buttons */
@@ -951,7 +929,6 @@ h3 {
     .editor-workspace {
         grid-template-columns: 1fr 1fr;
         grid-template-areas:
-            "ai ai"
             "tags content"
             "preview preview";
     }
@@ -1002,13 +979,11 @@ h3 {
     .editor-workspace {
         grid-template-columns: 1fr;
         grid-template-areas:
-            "ai"
             "tags"
             "content"
             "preview";
     }
 
-    .panel-ai,
     .panel-tags,
     .panel-content,
     .panel-preview {
@@ -1022,11 +997,33 @@ h3 {
 
     .preview-actions {
         width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
     }
 
     .preview-actions .btn {
-        flex: 1;
+        flex: 1 1 calc(50% - 0.2rem);
         text-align: center;
+        min-width: 0;
+    }
+
+    .preview-actions .btn-save-editor {
+        flex-basis: 100%;
+    }
+
+    .accordion-label {
+        flex-wrap: wrap;
+    }
+
+    .accordion-label > span {
+        flex: 1;
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .accordion-label small {
+        white-space: nowrap;
     }
 
     .prompt-editor {
