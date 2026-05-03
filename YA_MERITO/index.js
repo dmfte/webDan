@@ -9,6 +9,7 @@
     ventanaExtra: false,
     autoCerrar: false,
     mostrarSegundos: false,
+    imagenFondoDataURL: null,
     startedAt: null,       // Date.now() when Iniciar was pressed
     intervalId: null,
     watcherId: null,
@@ -26,9 +27,12 @@
   const elAutoCerrar     = document.getElementById('autoCerrarVentanaExtra');
   const elMostrarSegundos= document.getElementById('mostrarSegundos');
   const elIniciar        = document.getElementById('iniciarReloj');
+  const elImagenFondo    = document.getElementById('imagenFondo');
+  const elNombreImagen   = document.getElementById('nombreImagen');
 
   /* ── localStorage persistence ──────────────────────────────────────── */
   const STORAGE_KEY = 'ya-merito-config';
+  const IMAGE_STORAGE_KEY = 'ya-merito-imagen';
   const elsPersistidos = [elHoraDispositivo, elRelojAnalogo, elMostrarSegundos, elVentanaExtra, elAutoCerrar];
 
   function guardarConfig() {
@@ -45,8 +49,52 @@
     } catch {}
   }
 
+  function guardarImagen() {
+    try {
+      if (state.imagenFondoDataURL) {
+        localStorage.setItem(IMAGE_STORAGE_KEY, JSON.stringify({
+          dataURL: state.imagenFondoDataURL,
+          nombre: elNombreImagen.textContent,
+        }));
+      } else {
+        localStorage.removeItem(IMAGE_STORAGE_KEY);
+      }
+    } catch {}
+  }
+
+  function restaurarImagen() {
+    try {
+      const data = JSON.parse(localStorage.getItem(IMAGE_STORAGE_KEY));
+      if (!data) return;
+      state.imagenFondoDataURL = data.dataURL;
+      elNombreImagen.textContent = data.nombre;
+    } catch {}
+  }
+
   document.getElementById('configuracion').addEventListener('change', e => {
     if (e.target.type === 'checkbox') guardarConfig();
+  });
+
+  elImagenFondo.addEventListener('change', () => {
+    const file = elImagenFondo.files[0];
+    if (!file) {
+      state.imagenFondoDataURL = null;
+      elNombreImagen.textContent = 'Sin imagen';
+      guardarImagen();
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      elImagenFondo.value = '';
+      elNombreImagen.textContent = 'Máx. 5 MB';
+      return;
+    }
+    elNombreImagen.textContent = file.name;
+    const reader = new FileReader();
+    reader.onload = e => {
+      state.imagenFondoDataURL = e.target.result;
+      guardarImagen();
+    };
+    reader.readAsDataURL(file);
   });
 
   /* ── Time helpers ───────────────────────────────────────────────────── */
@@ -218,12 +266,19 @@
   }
 
   /* ── Popup window ───────────────────────────────────────────────────── */
-  function abrirPopup() {
+  function abrirPopup(imagenFondo = null) {
     state.canal = new BroadcastChannel('ya-merito');
     state.popupWin = window.open('about:blank', 'reloj-extra',
       'width=600,height=450,menubar=no,toolbar=no,location=no,resizable=yes');
 
     if (!state.popupWin) return; /* blocked by browser */
+
+    const imagenStyle = imagenFondo
+      ? `#img-fondo{position:fixed;inset:0;width:100%;height:100%;object-fit:contain;background:#05070a;z-index:0}`
+      : '';
+    const imagenHtml = imagenFondo
+      ? `<img id="img-fondo" src="${imagenFondo}" alt="">`
+      : '';
 
     const html = `<!DOCTYPE html>
 <html lang="es">
@@ -233,7 +288,8 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100vw;height:100vh;background:#05070a;display:grid;place-items:center;overflow:hidden}
-.contenedor-reloj{width:min(90vw,90vh);height:min(90vw,90vh);display:grid;place-items:center}
+.contenedor-reloj{width:min(90vw,90vh);height:min(90vw,90vh);display:grid;place-items:center;position:relative;z-index:1}
+${imagenStyle}
 /* digital */
 .reloj-digital{display:grid;place-items:center;width:100%;height:100%}
 .reloj-digital .tiempo{color:#c8d6e8;font-family:'IBM Plex Sans',Arial,sans-serif;font-weight:700;font-size:14vw;white-space:nowrap}
@@ -253,6 +309,7 @@ html,body{width:100vw;height:100vh;background:#05070a;display:grid;place-items:c
 </style>
 </head>
 <body>
+${imagenHtml}
 <div class="contenedor-reloj"></div>
 <script>
 (function(){
@@ -296,6 +353,7 @@ html,body{width:100vw;height:100vh;background:#05070a;display:grid;place-items:c
   }
 
   new BroadcastChannel('ya-merito').onmessage=function(e){
+    if(e.data.clearFondo){const img=document.getElementById('img-fondo');if(img){img.style.transition='opacity 0.6s';img.style.opacity='0';setTimeout(()=>{img.style.display='none'},600);}}
     const{h,m,s,ticking,analogico,lapso,horaFinal}=e.data;
     if(analogico!==undefined&&analogico!==mode){mode=analogico;clock=analogico?buildAnalog():buildDigital();}
     if(clock){if(h!==undefined)clock.update(h,m,s,{lapso,horaFinal});if(clock.setTicking)clock.setTicking(ticking);}
@@ -350,7 +408,13 @@ html,body{width:100vw;height:100vh;background:#05070a;display:grid;place-items:c
     state.running = true;
     renderizarReloj();
 
-    if (state.ventanaExtra) abrirPopup();
+    if (state.ventanaExtra) {
+      if (state.popupWin && !state.popupWin.closed) {
+        state.canal?.postMessage({ clearFondo: true });
+      } else {
+        abrirPopup();
+      }
+    }
 
     tick();
     state.intervalId = setInterval(tick, 1000);
@@ -410,6 +474,7 @@ html,body{width:100vw;height:100vh;background:#05070a;display:grid;place-items:c
     if (elHoraDispositivo.checked) {
       aplicarConfig();
       if (!state.horaFinal) return;
+      if (state.ventanaExtra) abrirPopup(state.imagenFondoDataURL);
       state.watcherId = setInterval(watchHora, 1000);
       elIniciar.textContent = 'Esperando…';
       watchHora();
@@ -431,5 +496,6 @@ html,body{width:100vw;height:100vh;background:#05070a;display:grid;place-items:c
   });
 
   restaurarConfig();
+  restaurarImagen();
   aplicarConfig();
 })();
