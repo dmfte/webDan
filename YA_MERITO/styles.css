@@ -1,0 +1,399 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+body {
+    background:
+        radial-gradient(circle at top left, rgba(31, 105, 178, 0.2), transparent 34rem),
+        #07090d;
+    color: #c8d6e8;
+    font-family: 'IBM Plex Sans', Arial, sans-serif;
+    font-weight: 500;
+
+    & input[type='checkbox'] {
+        position: absolute;
+        inline-size: 1px;
+        block-size: 1px;
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+main {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    grid-template-rows: 1fr;
+    height: 100%;
+
+    & section {
+        min-height: 100%;
+
+        &#configuracion {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 18px;
+            padding: 24px 18px;
+            background: linear-gradient(180deg, #121821, #0a0e14);
+            border-right: 1px solid #283549;
+            box-shadow: 12px 0 36px rgba(0, 0, 0, 0.32);
+
+            & .nota-para-empezar-reloj {
+                padding: 14px 16px;
+                color: #e6edf6;
+                background-color: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(145, 171, 207, 0.2);
+                border-radius: 8px;
+                line-height: 1.45;
+            }
+
+            & ul {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                list-style: none;
+
+                & li {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 7px;
+                    padding: 0;
+                }
+
+                & li:has(> ul) {
+                    gap: 8px;
+                    padding: 8px;
+                    background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018));
+                    border: 1px solid rgba(118, 144, 174, 0.34);
+                    border-radius: 28px;
+                    box-shadow:
+                        inset 0 0 0 1px rgba(255, 255, 255, 0.025),
+                        0 12px 24px rgba(0, 0, 0, 0.18);
+                }
+
+                & ul {
+                    gap: 0;
+                    margin-top: 0;
+                    padding: 8px 8px 8px 18px;
+                    background: rgba(3, 6, 10, 0.34);
+                    border: 1px solid rgba(118, 144, 174, 0.18);
+                    border-radius: 20px;
+                }
+
+                & small {
+                    display: block;
+                    padding: 0 12px;
+                    color: #7f91aa;
+                    font-size: 0.8rem;
+                    font-weight: 400;
+                    line-height: 1.35;
+                }
+
+                & label {
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    min-height: 48px;
+                    padding: 10px 16px;
+                    color: #aebed4;
+                    line-height: 1.25;
+                    letter-spacing: 0;
+                    background: linear-gradient(180deg, #1a212a, #121820);
+                    border: 2px solid #6d83a0;
+                    border-radius: 999px;
+                    box-shadow:
+                        inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+                        0 10px 22px rgba(0, 0, 0, 0.2);
+                    cursor: pointer;
+                    transition:
+                        color 180ms ease,
+                        background 180ms ease,
+                        border-color 180ms ease,
+                        box-shadow 180ms ease,
+                        transform 180ms ease;
+                    user-select: none;
+                }
+
+                & ul label {
+                    min-height: 40px;
+                    padding: 8px 12px;
+                    font-size: 0.88rem;
+                    color: #9fafc5;
+                    background: linear-gradient(180deg, #141a21, #0d1218);
+                    border-color: #43556d;
+                    border-radius: 18px;
+                    box-shadow:
+                        inset 0 0 0 1px rgba(255, 255, 255, 0.025),
+                        0 6px 14px rgba(0, 0, 0, 0.18);
+                }
+
+                & label:hover {
+                    color: #e8f2ff;
+                    border-color: #91a9c7;
+                    transform: translateY(-1px);
+                }
+
+                & label:has(input[type='checkbox']:focus-visible),
+                & label:has(input[type='time']:focus-visible) {
+                    outline: 3px solid rgba(46, 155, 255, 0.36);
+                    outline-offset: 3px;
+                }
+
+                & label:has(input[type='checkbox']:checked) {
+                    color: #fff;
+                    background: linear-gradient(180deg, #1598ff, #0076dd);
+                    border-color: #76c2ff;
+                    box-shadow:
+                        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                        inset 0 -10px 24px rgba(0, 88, 170, 0.22),
+                        0 14px 28px rgba(0, 113, 223, 0.28);
+                }
+
+                & li:has(> label #relojAnalogo:not(:checked)) > ul label:has(#mostrarSegundos) {
+                    pointer-events: none;
+                    color: #5f6d7f;
+                    background: linear-gradient(180deg, #10151b, #0a0e13);
+                    border-color: #283545;
+                    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.015);
+                    transform: none;
+                }
+
+                & li:has(> label #relojAnalogo:not(:checked)) > ul label:has(#mostrarSegundos)::after {
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                    border-radius: inherit;
+                    background: repeating-linear-gradient(
+                        -45deg,
+                        rgba(255, 255, 255, 0.035) 0 6px,
+                        transparent 6px 12px
+                    );
+                }
+
+                & li:has(> label #ventanaExtra:not(:checked)) > ul label:has(#autoCerrarVentanaExtra) {
+                    pointer-events: none;
+                    color: #5f6d7f;
+                    background: linear-gradient(180deg, #10151b, #0a0e13);
+                    border-color: #283545;
+                    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.015);
+                    transform: none;
+                }
+
+                & li:has(> label #ventanaExtra:not(:checked)) > ul small {
+                    color: #536174;
+                }
+
+                & li:has(> label #horaDispositivo:not(:checked)) > ul {
+                    display: none;
+                }
+
+                & li:has(> label #horaDispositivo:not(:checked)) {
+                    gap: 7px;
+                    padding: 0;
+                    background: none;
+                    border: none;
+                    box-shadow: none;
+                }
+
+                & li:has(> label #ventanaExtra:not(:checked)) > ul label:has(#autoCerrarVentanaExtra)::after {
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                    border-radius: inherit;
+                    background: repeating-linear-gradient(
+                        -45deg,
+                        rgba(255, 255, 255, 0.035) 0 6px,
+                        transparent 6px 12px
+                    );
+                }
+
+                & li:has(#relojAnalogo) label {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 0;
+                    min-height: 56px;
+                    padding: 4px;
+                    overflow: hidden;
+                    background: #151a20;
+                    border-color: #7890ae;
+                }
+
+                & li:has(#relojAnalogo) label:has(input[type='checkbox']:checked) {
+                    background: #151a20;
+                    box-shadow:
+                        inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+                        0 10px 22px rgba(0, 0, 0, 0.2);
+                }
+
+                & li:has(#relojAnalogo) label span {
+                    display: grid;
+                    place-items: center;
+                    min-height: 46px;
+                    padding: 0 10px;
+                    color: #aebed4;
+                    border-radius: 6px;
+                    transition:
+                        color 180ms ease,
+                        background 180ms ease,
+                        box-shadow 180ms ease;
+                }
+
+                & li:has(#relojAnalogo) label span:first-of-type {
+                    border-radius: 999px 6px 6px 999px;
+                }
+
+                & li:has(#relojAnalogo) label span:last-of-type {
+                    border-radius: 6px 999px 999px 6px;
+                }
+
+                & li:has(#relojAnalogo) label:has(input:checked) span:first-of-type,
+                & li:has(#relojAnalogo) label:has(input:not(:checked)) span:last-of-type {
+                    color: #fff;
+                    background: linear-gradient(180deg, #1598ff, #0076dd);
+                    box-shadow:
+                        inset 0 1px 0 rgba(255, 255, 255, 0.34),
+                        0 8px 18px rgba(0, 113, 223, 0.34);
+                }
+
+                & li:has(input[type='time']) {
+                    display: grid;
+                    gap: 10px;
+                }
+
+                & label:has(input[type='time']) {
+                    justify-content: space-between;
+                    gap: 12px;
+                    padding: 8px 14px;
+                    border-radius: 8px;
+                }
+
+                & input[type='time'] {
+                    min-width: 130px;
+                    padding: 8px 10px;
+                    color: #e8f2ff;
+                    font: inherit;
+                    background-color: #080b10;
+                    border: 1px solid #42566f;
+                    border-radius: 6px;
+                    color-scheme: dark;
+                }
+            }
+
+            & button {
+                min-height: 46px;
+                color: #fff;
+                font: inherit;
+                font-weight: 700;
+                background: linear-gradient(180deg, #2b3645, #19222d);
+                border: 1px solid #607898;
+                border-radius: 8px;
+                box-shadow: 0 12px 24px rgba(0, 0, 0, 0.26);
+                cursor: pointer;
+                transition:
+                    background 180ms ease,
+                    border-color 180ms ease,
+                    transform 180ms ease;
+            }
+
+            & button:hover {
+                background: linear-gradient(180deg, #354459, #202b39);
+                border-color: #8eabd0;
+                transform: translateY(-1px);
+            }
+
+            & #iniciarReloj {
+                margin-top: auto;
+                background: linear-gradient(180deg, #168ff2, #076bc6);
+                border-color: #76c2ff;
+                box-shadow: 0 14px 28px rgba(0, 113, 223, 0.24);
+            }
+
+            & #iniciarReloj:hover {
+                background: linear-gradient(180deg, #2ca2ff, #0876dc);
+                border-color: #b3dcff;
+            }
+        }
+
+        &#reloj {
+            display: grid;
+            place-items: center;
+            background:
+                linear-gradient(135deg, rgba(255, 255, 255, 0.03), transparent 30%),
+                #05070a;
+        }
+
+        & .contenedor-reloj {
+          width: min(90%, 90vh);
+          height: min(90vw, 80vh);
+          display: grid;
+          place-items: center;
+        }
+    }
+}
+
+/* ── Digital clock ──────────────────────────────────────────────────── */
+.reloj-digital {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.reloj-digital .tiempo {
+  color: #c8d6e8;
+  font-weight: 700;
+  white-space: nowrap;
+  /* font-size set dynamically by ResizeObserver in JS */
+}
+
+.reloj-digital.ticking .colon {
+  animation: parpadeo-colon 1s step-start infinite;
+}
+
+@keyframes parpadeo-colon {
+  50% { opacity: 0.2; }
+}
+
+/* ── Analog SVG clock ───────────────────────────────────────────────── */
+.reloj-svg .anillo   { fill: white; }
+.reloj-svg .brecha   { fill: black; }
+.reloj-svg .cara     { fill: #7a9fd4; }
+.reloj-svg .sector   { fill: rgba(180, 210, 255, 0.35); }
+.reloj-svg .marcadores circle { fill: white; }
+.reloj-svg .manecilla {
+  stroke: white;
+  stroke-linecap: round;
+}
+.reloj-svg .manecilla-hora {
+  stroke-width: 6;
+  transform-origin: 100px 100px;
+  transform: rotate(var(--deg-hora, 0deg));
+}
+.reloj-svg .manecilla-minuto {
+  stroke-width: 4;
+  transform-origin: 100px 100px;
+  transform: rotate(var(--deg-minuto, 0deg));
+}
+.reloj-svg .manecilla-segundo {
+  stroke-width: 2;
+  transform-origin: 100px 100px;
+  transform: rotate(var(--deg-segundo, 0deg));
+}
+.reloj-svg .pivote { fill: white; }
+
+/* ── Disabled Iniciar button (device-time mode) ─────────────────────── */
+#iniciarReloj.desactivado {
+  pointer-events: none;
+  opacity: 0.45;
+  cursor: not-allowed;
+}

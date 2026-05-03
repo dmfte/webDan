@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YA MERITO</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main>
+        <section id="configuracion">
+            <ul>
+                <li>
+                    <label>
+                        <input type="checkbox" id="horaDispositivo">
+                        <span>Hora del dispositivo</span>
+                    </label>
+                    <small>Si está activado, la cuenta regresiva e iniciará automáticamente según la hora del dispositivo</small>
+                    <ul>
+                        <li>
+                            <label>
+                                <input type="time" id="horaFinal">
+                                Hora Final
+                            </label>
+                        </li>
+                    </ul>
+                </li>
+                <li style="display: none;">
+                    <label>
+                        <input type="checkbox" id="relojAnalogo">
+                        <span>Reloj análogo</span><span>Reloj digital</span>
+                    </label>
+                    <ul>
+                        <li>
+                            <label>
+                                <input type="checkbox" id="mostrarSegundos">
+                                Manecilla de segundos
+                            </label>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <label>
+                        <input type="time" id="lapso" step="1" value="00:00:00">
+                        Lapso
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <input type="checkbox" name="" id="ventanaExtra">
+                        Ventana extra
+                    </label>
+                    <small>Abrirá una ventana para mostrar el reloj</small>
+                    <ul>
+                        <li>
+                            <label>
+                                <input type="checkbox" id="autoCerrarVentanaExtra">
+                                Auto cerrar
+                            </label>
+                            <small>La ventana extra se cerrará automáticamente al terminar el tiempo</small>
+                        </li>
+                    </ul>
+                </li>   
+            </ul>
+            <button id="iniciarReloj">Iniciar</button>
+        </section>
+        <section id="reloj">
+            <div class="contenedor-reloj"></div>
+        </section>
+    </main>
+<script src="index.js"></script>
+</body>
+</html>
