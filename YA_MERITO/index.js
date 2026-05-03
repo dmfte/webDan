@@ -186,6 +186,20 @@
     for (const node of [anillo, brecha, cara, sector]) {
       svg.appendChild(node);
     }
+
+    if (state.lapso) {
+      const totalSec = state.lapso / 1000;
+      const n = Math.floor(totalSec / 60);
+      for (let i = 1; i <= n; i++) {
+        const a = -Math.PI / 2 + i * (60 / totalSec) * 2 * Math.PI;
+        svg.appendChild(el('line', {
+          class: 'marcador',
+          x1: 100 + 96 * Math.cos(a), y1: 100 + 96 * Math.sin(a),
+          x2: 100 + 80 * Math.cos(a), y2: 100 + 80 * Math.sin(a),
+        }));
+      }
+    }
+
     elContenedor.appendChild(svg);
 
     function sectorPath(cx, cy, r, startRad, endRad) {
@@ -262,6 +276,7 @@ ${imagenStyle}
 .reloj-svg .brecha{fill:black}
 .reloj-svg .cara{fill:#05070a}
 .reloj-svg .sector{fill:#7a9fd4}
+.reloj-svg .marcador{stroke:white;stroke-width:7}
 </style>
 </head>
 <body>
@@ -292,8 +307,18 @@ ${imagenHtml}
     [el('circle',{class:'anillo',cx:100,cy:100,r:96}),el('circle',{class:'brecha',cx:100,cy:100,r:88}),el('circle',{class:'cara',cx:100,cy:100,r:85}),sec].forEach(n=>svg.appendChild(n));
     cont.appendChild(svg);
     function sp(cx,cy,r,s,e){let d=(e-s+2*Math.PI)%(2*Math.PI);if(d===0)d=2*Math.PI;const lg=d>Math.PI?1:0;const x1=cx+r*Math.cos(s),y1=cy+r*Math.sin(s),x2=cx+r*Math.cos(e),y2=cy+r*Math.sin(e);if(Math.abs(d-2*Math.PI)<0.001){const xo=cx+r*Math.cos(s+Math.PI),yo=cy+r*Math.sin(s+Math.PI);return'M '+cx+','+cy+' L '+x1+','+y1+' A '+r+','+r+' 0 1,1 '+xo+','+yo+' A '+r+','+r+' 0 1,1 '+x1+','+y1+' Z';}return'M '+cx+','+cy+' L '+x1+','+y1+' A '+r+','+r+' 0 '+lg+',1 '+x2+','+y2+' Z';}
+    let markersReady=false;
     return{update(h,m,s,meta){
       if(!meta||!meta.lapso){return;}
+      if(!markersReady){
+        const totalSec=meta.lapso/1000;
+        const n=Math.floor(totalSec/60);
+        for(let i=1;i<=n;i++){
+          const a=-Math.PI/2+i*(60/totalSec)*2*Math.PI;
+          svg.appendChild(el('line',{class:'marcador',x1:100+96*Math.cos(a),y1:100+96*Math.sin(a),x2:100+80*Math.cos(a),y2:100+80*Math.sin(a)}));
+        }
+        markersReady=true;
+      }
       const remaining=h*3600+m*60+s;
       const progress=Math.min(1,Math.max(0,1-remaining/(meta.lapso/1000)));
       if(progress<=0){sec.setAttribute('d','');return;}

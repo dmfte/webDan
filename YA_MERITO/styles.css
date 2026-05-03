@@ -402,6 +402,7 @@ main {
 .reloj-svg .brecha  { fill: black; }
 .reloj-svg .cara    { fill: #05070a; }
 .reloj-svg .sector  { fill: #7a9fd4; }
+.reloj-svg .marcador { stroke: white; stroke-width: 7; }
 
 /* ── Disabled Iniciar button (device-time mode) ─────────────────────── */
 #iniciarReloj.desactivado {
