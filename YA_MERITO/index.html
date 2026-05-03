@@ -24,11 +24,14 @@
                             </label>
                         </li>
                         <li>
-                            <label>
-                                <input type="file" id="imagenFondo" accept="image/*">
-                                <span>Imagen de espera</span>
-                                <span id="nombreImagen">Sin imagen</span>
-                            </label>
+                            <div class="imagen-fondo-control">
+                                <label>
+                                    <input type="file" id="imagenFondo" accept="image/*">
+                                    <span>Imagen de espera</span>
+                                    <span id="nombreImagen">Sin imagen</span>
+                                </label>
+                                <button type="button" id="limpiarImagenFondo" aria-label="Quitar imagen de espera" title="Quitar imagen de espera" hidden>×</button>
+                            </div>
                         </li>
                     </ul>
                 </li>

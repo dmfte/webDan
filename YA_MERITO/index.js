@@ -29,6 +29,7 @@
   const elIniciar        = document.getElementById('iniciarReloj');
   const elImagenFondo    = document.getElementById('imagenFondo');
   const elNombreImagen   = document.getElementById('nombreImagen');
+  const elLimpiarImagenFondo = document.getElementById('limpiarImagenFondo');
 
   /* ── localStorage persistence ──────────────────────────────────────── */
   const STORAGE_KEY = 'ya-merito-config';
@@ -62,12 +63,26 @@
     } catch {}
   }
 
+  function actualizarEstadoBotonImagen() {
+    elLimpiarImagenFondo.hidden = !state.imagenFondoDataURL;
+  }
+
+  function limpiarImagenFondo() {
+    state.imagenFondoDataURL = null;
+    elImagenFondo.value = '';
+    elNombreImagen.textContent = 'Sin imagen';
+    guardarImagen();
+    actualizarEstadoBotonImagen();
+    state.canal?.postMessage({ clearFondo: true });
+  }
+
   function restaurarImagen() {
     try {
       const data = JSON.parse(localStorage.getItem(IMAGE_STORAGE_KEY));
       if (!data) return;
       state.imagenFondoDataURL = data.dataURL;
       elNombreImagen.textContent = data.nombre;
+      actualizarEstadoBotonImagen();
     } catch {}
   }
 
@@ -78,9 +93,7 @@
   elImagenFondo.addEventListener('change', () => {
     const file = elImagenFondo.files[0];
     if (!file) {
-      state.imagenFondoDataURL = null;
-      elNombreImagen.textContent = 'Sin imagen';
-      guardarImagen();
+      limpiarImagenFondo();
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
@@ -93,9 +106,12 @@
     reader.onload = e => {
       state.imagenFondoDataURL = e.target.result;
       guardarImagen();
+      actualizarEstadoBotonImagen();
     };
     reader.readAsDataURL(file);
   });
+
+  elLimpiarImagenFondo.addEventListener('click', limpiarImagenFondo);
 
   /* ── Time helpers ───────────────────────────────────────────────────── */
   function timeInputToDate(value) {
