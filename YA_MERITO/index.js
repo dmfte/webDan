@@ -178,41 +178,23 @@
       return e;
     }
 
-    const anillo  = el('circle', { class: 'anillo',  cx: 100, cy: 100, r: 96 });
-    const brecha  = el('circle', { class: 'brecha',  cx: 100, cy: 100, r: 88 });
-    const cara    = el('circle', { class: 'cara',    cx: 100, cy: 100, r: 85 });
-    const sector  = el('path',   { class: 'sector',  d: '' });
-    const marcG   = el('g',      { class: 'marcadores' });
-    const manHora = el('line',   { class: 'manecilla manecilla-hora',    x1: 100, y1: 100, x2: 100, y2: 42 });
-    const manMin  = el('line',   { class: 'manecilla manecilla-minuto',  x1: 100, y1: 100, x2: 100, y2: 30 });
-    const manSeg  = el('line',   { class: 'manecilla manecilla-segundo', x1: 100, y1: 100, x2: 100, y2: 22 });
-    const pivote  = el('circle', { class: 'pivote',  cx: 100, cy: 100, r: 5 });
+    const anillo = el('circle', { class: 'anillo', cx: 100, cy: 100, r: 96 });
+    const brecha = el('circle', { class: 'brecha', cx: 100, cy: 100, r: 88 });
+    const cara   = el('circle', { class: 'cara',   cx: 100, cy: 100, r: 85 });
+    const sector = el('path',   { class: 'sector', d: '' });
 
-    /* 12 hour markers */
-    for (let i = 0; i < 12; i++) {
-      const a = (i / 12) * 2 * Math.PI - Math.PI / 2;
-      const c = el('circle', {
-        cx: 100 + 80 * Math.cos(a),
-        cy: 100 + 80 * Math.sin(a),
-        r: 3,
-      });
-      marcG.appendChild(c);
-    }
-
-    for (const node of [anillo, brecha, cara, sector, marcG, manHora, manMin, manSeg, pivote]) {
+    for (const node of [anillo, brecha, cara, sector]) {
       svg.appendChild(node);
     }
     elContenedor.appendChild(svg);
 
     function sectorPath(cx, cy, r, startRad, endRad) {
-      /* Normalize so arc always goes clockwise from start to end */
       let diff = (endRad - startRad + 2 * Math.PI) % (2 * Math.PI);
-      if (diff === 0) diff = 2 * Math.PI;  /* full circle */
+      if (diff === 0) diff = 2 * Math.PI;
       const large = diff > Math.PI ? 1 : 0;
       const x1 = cx + r * Math.cos(startRad), y1 = cy + r * Math.sin(startRad);
       const x2 = cx + r * Math.cos(endRad),   y2 = cy + r * Math.sin(endRad);
       if (Math.abs(diff - 2 * Math.PI) < 0.001) {
-        /* Full circle — two half-arcs (SVG can't draw a full-circle arc) */
         const xOpp = cx + r * Math.cos(startRad + Math.PI);
         const yOpp = cy + r * Math.sin(startRad + Math.PI);
         return `M ${cx},${cy} L ${x1},${y1} A ${r},${r} 0 1,1 ${xOpp},${yOpp} A ${r},${r} 0 1,1 ${x1},${y1} Z`;
@@ -220,37 +202,17 @@
       return `M ${cx},${cy} L ${x1},${y1} A ${r},${r} 0 ${large},1 ${x2},${y2} Z`;
     }
 
-    function wallAngle(date) {
-      /* Angle in radians for the minute+hour position of a Date, 0=12 o'clock */
-      const h = date.getHours() % 12, m = date.getMinutes(), s = date.getSeconds();
-      const totalMin = h * 60 + m + s / 60;
-      return (totalMin / 720) * 2 * Math.PI - Math.PI / 2;
-    }
-
     return {
       update(h, m, s) {
-        /* h, m, s are the simulated wall-clock time directly */
-        const totalSec = h * 3600 + m * 60 + s;
-        const degH = (totalSec / 43200) * 360;
-        const degM = ((totalSec % 3600) / 3600) * 360;
-        const degS = (s / 60) * 360;
-
-        svg.style.setProperty('--deg-hora',    degH + 'deg');
-        svg.style.setProperty('--deg-minuto',  degM + 'deg');
-        svg.style.setProperty('--deg-segundo', degS + 'deg');
-        manSeg.style.display = state.mostrarSegundos ? '' : 'none';
-
-        /* Sector: fixed arc from (horaFinal - lapso) to horaFinal */
-        if (state.lapso && state.horaFinal) {
-          const startDate = new Date(state.horaFinal.getTime() - state.lapso);
-          const startRad  = wallAngle(startDate);
-          const endRad    = wallAngle(state.horaFinal);
-          sector.setAttribute('d', sectorPath(100, 100, 85, startRad, endRad));
-        }
+        if (!state.lapso) return;
+        const remainingSec = h * 3600 + m * 60 + s;
+        const progress = Math.min(1, Math.max(0, 1 - remainingSec / (state.lapso / 1000)));
+        if (progress <= 0) { sector.setAttribute('d', ''); return; }
+        const startRad = -Math.PI / 2;
+        sector.setAttribute('d', sectorPath(100, 100, 85, startRad, startRad + progress * 2 * Math.PI));
       },
-      destroy() {
-        svg.remove();
-      },
+      setTicking() {},
+      destroy() { svg.remove(); },
     };
   }
 
@@ -298,14 +260,8 @@ ${imagenStyle}
 /* analog */
 .reloj-svg .anillo{fill:white}
 .reloj-svg .brecha{fill:black}
-.reloj-svg .cara{fill:#7a9fd4}
-.reloj-svg .sector{fill:rgba(180,210,255,0.35)}
-.reloj-svg .marcadores circle{fill:white}
-.reloj-svg .manecilla{stroke:white;stroke-linecap:round}
-.reloj-svg .manecilla-hora{stroke-width:6;transform-origin:100px 100px;transform:rotate(var(--deg-hora,0deg))}
-.reloj-svg .manecilla-minuto{stroke-width:4;transform-origin:100px 100px;transform:rotate(var(--deg-minuto,0deg))}
-.reloj-svg .manecilla-segundo{stroke-width:2;transform-origin:100px 100px;transform:rotate(var(--deg-segundo,0deg))}
-.reloj-svg .pivote{fill:white}
+.reloj-svg .cara{fill:#05070a}
+.reloj-svg .sector{fill:#7a9fd4}
 </style>
 </head>
 <body>
@@ -333,22 +289,16 @@ ${imagenHtml}
     const svg=document.createElementNS(svgNS,'svg');
     svg.setAttribute('viewBox','0 0 200 200');svg.setAttribute('width','100%');svg.setAttribute('height','100%');svg.classList.add('reloj-svg');
     const sec=el('path',{class:'sector',d:''});
-    const mG=el('g',{class:'marcadores'});
-    for(let i=0;i<12;i++){const a=(i/12)*2*Math.PI-Math.PI/2;mG.appendChild(el('circle',{cx:100+80*Math.cos(a),cy:100+80*Math.sin(a),r:3}));}
-    [el('circle',{class:'anillo',cx:100,cy:100,r:96}),el('circle',{class:'brecha',cx:100,cy:100,r:88}),el('circle',{class:'cara',cx:100,cy:100,r:85}),sec,mG,
-     el('line',{class:'manecilla manecilla-hora',x1:100,y1:100,x2:100,y2:42}),el('line',{class:'manecilla manecilla-minuto',x1:100,y1:100,x2:100,y2:30}),
-     el('line',{class:'manecilla manecilla-segundo',x1:100,y1:100,x2:100,y2:22}),el('circle',{class:'pivote',cx:100,cy:100,r:5})].forEach(n=>svg.appendChild(n));
+    [el('circle',{class:'anillo',cx:100,cy:100,r:96}),el('circle',{class:'brecha',cx:100,cy:100,r:88}),el('circle',{class:'cara',cx:100,cy:100,r:85}),sec].forEach(n=>svg.appendChild(n));
     cont.appendChild(svg);
     function sp(cx,cy,r,s,e){let d=(e-s+2*Math.PI)%(2*Math.PI);if(d===0)d=2*Math.PI;const lg=d>Math.PI?1:0;const x1=cx+r*Math.cos(s),y1=cy+r*Math.sin(s),x2=cx+r*Math.cos(e),y2=cy+r*Math.sin(e);if(Math.abs(d-2*Math.PI)<0.001){const xo=cx+r*Math.cos(s+Math.PI),yo=cy+r*Math.sin(s+Math.PI);return'M '+cx+','+cy+' L '+x1+','+y1+' A '+r+','+r+' 0 1,1 '+xo+','+yo+' A '+r+','+r+' 0 1,1 '+x1+','+y1+' Z';}return'M '+cx+','+cy+' L '+x1+','+y1+' A '+r+','+r+' 0 '+lg+',1 '+x2+','+y2+' Z';}
     return{update(h,m,s,meta){
-      const ts=h*3600+m*60+s;
-      svg.style.setProperty('--deg-hora',(ts/43200)*360+'deg');
-      svg.style.setProperty('--deg-minuto',((ts%3600)/3600)*360+'deg');
-      svg.style.setProperty('--deg-segundo',(s/60)*360+'deg');
-      if(meta&&meta.lapso&&meta.horaFinal){
-        function wa(d){const t=new Date(d);const hh=t.getHours()%12,mm=t.getMinutes(),ss=t.getSeconds();return((hh*60+mm+ss/60)/720)*2*Math.PI-Math.PI/2;}
-        sec.setAttribute('d',sp(100,100,85,wa(meta.lapso),wa(meta.horaFinal)));
-      }
+      if(!meta||!meta.lapso){return;}
+      const remaining=h*3600+m*60+s;
+      const progress=Math.min(1,Math.max(0,1-remaining/(meta.lapso/1000)));
+      if(progress<=0){sec.setAttribute('d','');return;}
+      const sr=-Math.PI/2;
+      sec.setAttribute('d',sp(100,100,85,sr,sr+progress*2*Math.PI));
     }};
   }
 

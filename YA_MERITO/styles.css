@@ -398,31 +398,10 @@ main {
 }
 
 /* ── Analog SVG clock ───────────────────────────────────────────────── */
-.reloj-svg .anillo   { fill: white; }
-.reloj-svg .brecha   { fill: black; }
-.reloj-svg .cara     { fill: #7a9fd4; }
-.reloj-svg .sector   { fill: rgba(180, 210, 255, 0.35); }
-.reloj-svg .marcadores circle { fill: white; }
-.reloj-svg .manecilla {
-  stroke: white;
-  stroke-linecap: round;
-}
-.reloj-svg .manecilla-hora {
-  stroke-width: 6;
-  transform-origin: 100px 100px;
-  transform: rotate(var(--deg-hora, 0deg));
-}
-.reloj-svg .manecilla-minuto {
-  stroke-width: 4;
-  transform-origin: 100px 100px;
-  transform: rotate(var(--deg-minuto, 0deg));
-}
-.reloj-svg .manecilla-segundo {
-  stroke-width: 2;
-  transform-origin: 100px 100px;
-  transform: rotate(var(--deg-segundo, 0deg));
-}
-.reloj-svg .pivote { fill: white; }
+.reloj-svg .anillo  { fill: white; }
+.reloj-svg .brecha  { fill: black; }
+.reloj-svg .cara    { fill: #05070a; }
+.reloj-svg .sector  { fill: #7a9fd4; }
 
 /* ── Disabled Iniciar button (device-time mode) ─────────────────────── */
 #iniciarReloj.desactivado {
