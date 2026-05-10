@@ -453,7 +453,7 @@ ${imagenHtml}
       if (state.popupWin && !state.popupWin.closed) {
         state.canal?.postMessage({ clearFondo: true });
       } else {
-        abrirPopup(state.imagenFondoDataURL, {
+        abrirPopup(null, {
           analogico: state.analogico,
           lapso: state.lapso,
           horaFinal: state.horaFinal?.getTime(),
