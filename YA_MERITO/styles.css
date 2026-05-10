@@ -84,7 +84,7 @@ main {
                 }
 
                 & ul {
-                    gap: 0;
+                    gap: 6px;
                     margin-top: 0;
                     padding: 8px 8px 8px 18px;
                     background: rgba(3, 6, 10, 0.34);
@@ -293,7 +293,10 @@ main {
 
                 & .imagen-fondo-control button {
                     display: grid;
-                    width: 40px;
+                    height: 100%;
+                    aspect-ratio: 1 / 1;
+                    width: auto;
+                    max-width: 52px;
                     place-items: center;
                     color: #f3f7fc;
                     font: inherit;

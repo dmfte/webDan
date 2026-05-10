@@ -265,7 +265,7 @@
   }
 
   /* ── Popup window ───────────────────────────────────────────────────── */
-  function abrirPopup(imagenFondo = null) {
+  function abrirPopup(imagenFondo = null, initialState = {}) {
     state.canal = new BroadcastChannel('ya-merito');
     state.popupWin = window.open('about:blank', 'reloj-extra',
       'width=600,height=450,menubar=no,toolbar=no,location=no,resizable=yes');
@@ -278,6 +278,8 @@
     const imagenHtml = imagenFondo
       ? `<img id="img-fondo" src="${imagenFondo}" alt="">`
       : '';
+
+    const initJson = JSON.stringify(initialState);
 
     const html = `<!DOCTYPE html>
 <html lang="es">
@@ -307,9 +309,12 @@ ${imagenHtml}
 <div class="contenedor-reloj"></div>
 <script>
 (function(){
+  const INIT=${initJson};
   const svgNS='http://www.w3.org/2000/svg';
   const cont=document.querySelector('.contenedor-reloj');
   let mode=null,clock=null;
+  let meta={lapso:INIT.lapso||null,horaFinal:INIT.horaFinal||null};
+  let selfId=null;
   const pad=n=>String(n).padStart(2,'0');
 
   function buildDigital(){
@@ -331,10 +336,10 @@ ${imagenHtml}
     cont.appendChild(svg);
     function sp(cx,cy,r,s,e){let d=(e-s+2*Math.PI)%(2*Math.PI);if(d===0)d=2*Math.PI;const lg=d>Math.PI?1:0;const x1=cx+r*Math.cos(s),y1=cy+r*Math.sin(s),x2=cx+r*Math.cos(e),y2=cy+r*Math.sin(e);if(Math.abs(d-2*Math.PI)<0.001){const xo=cx+r*Math.cos(s+Math.PI),yo=cy+r*Math.sin(s+Math.PI);return'M '+cx+','+cy+' L '+x1+','+y1+' A '+r+','+r+' 0 1,1 '+xo+','+yo+' A '+r+','+r+' 0 1,1 '+x1+','+y1+' Z';}return'M '+cx+','+cy+' L '+x1+','+y1+' A '+r+','+r+' 0 '+lg+',1 '+x2+','+y2+' Z';}
     let markersReady=false;
-    return{update(h,m,s,meta){
-      if(!meta||!meta.lapso){return;}
+    return{update(h,m,s,m2){
+      if(!m2||!m2.lapso)return;
       if(!markersReady){
-        const totalSec=meta.lapso/1000;
+        const totalSec=m2.lapso/1000;
         const n=Math.floor(totalSec/60);
         for(let i=1;i<=n;i++){
           const a=-Math.PI/2+i*(60/totalSec)*2*Math.PI;
@@ -343,19 +348,57 @@ ${imagenHtml}
         markersReady=true;
       }
       const remaining=h*3600+m*60+s;
-      const progress=Math.min(1,Math.max(0,1-remaining/(meta.lapso/1000)));
+      const progress=Math.min(1,Math.max(0,1-remaining/(m2.lapso/1000)));
       if(progress<=0){sec.setAttribute('d','');return;}
       const sr=-Math.PI/2;
       sec.setAttribute('d',sp(100,100,85,sr,sr+progress*2*Math.PI));
     }};
   }
 
+  /* Self-tick: computes time from wall clock so it's immune to main-window throttling */
+  function selfTick(){
+    if(!meta.horaFinal||!clock)return;
+    const remainingMs=meta.horaFinal-Date.now();
+    const totalSec=Math.max(0,Math.ceil(remainingMs/1000));
+    const h=Math.floor(totalSec/3600);
+    const m=Math.floor((totalSec%3600)/60);
+    const s=totalSec%60;
+    clock.update(h,m,s,meta);
+    if(clock.setTicking)clock.setTicking(remainingMs>0);
+    if(remainingMs<=0&&selfId){clearInterval(selfId);selfId=null;}
+  }
+
+  function startSelf(){
+    if(selfId)clearInterval(selfId);
+    selfTick();
+    selfId=setInterval(selfTick,1000);
+  }
+
+  /* Boot from embedded initial state — no need to wait for first BroadcastChannel message */
+  if(INIT.analogico!==undefined){
+    mode=INIT.analogico;
+    clock=INIT.analogico?buildAnalog():buildDigital();
+    if(meta.horaFinal&&INIT.running)startSelf();
+  }
+
   new BroadcastChannel('ya-merito').onmessage=function(e){
-    if(e.data.clearFondo){const img=document.getElementById('img-fondo');if(img){img.style.transition='opacity 0.6s';img.style.opacity='0';setTimeout(()=>{img.style.display='none'},600);}}
-    const{h,m,s,ticking,analogico,lapso,horaFinal}=e.data;
-    if(analogico!==undefined&&analogico!==mode){mode=analogico;clock=analogico?buildAnalog():buildDigital();}
-    if(clock){if(h!==undefined)clock.update(h,m,s,{lapso,horaFinal});if(clock.setTicking)clock.setTicking(ticking);}
+    const d=e.data;
+    if(d.clearFondo){const img=document.getElementById('img-fondo');if(img){img.style.transition='opacity 0.6s';img.style.opacity='0';setTimeout(()=>{img.style.display='none'},600);}}
+    if(d.lapso!==undefined)meta.lapso=d.lapso;
+    if(d.horaFinal!==undefined)meta.horaFinal=d.horaFinal;
+    if(d.analogico!==undefined&&d.analogico!==mode){mode=d.analogico;clock=d.analogico?buildAnalog():buildDigital();}
+    if(d.ticking===false){
+      if(selfId){clearInterval(selfId);selfId=null;}
+      if(clock&&clock.setTicking)clock.setTicking(false);
+    }else if(d.ticking&&meta.horaFinal){
+      startSelf();
+    }
   };
+
+  /* After the browser throttled us, catch up the moment the window is visible again */
+  document.addEventListener('visibilitychange',function(){
+    if(!document.hidden&&meta.horaFinal&&selfId)selfTick();
+  });
 })();
 <\/script>
 </body>
@@ -410,7 +453,12 @@ ${imagenHtml}
       if (state.popupWin && !state.popupWin.closed) {
         state.canal?.postMessage({ clearFondo: true });
       } else {
-        abrirPopup();
+        abrirPopup(state.imagenFondoDataURL, {
+          analogico: state.analogico,
+          lapso: state.lapso,
+          horaFinal: state.horaFinal?.getTime(),
+          running: true,
+        });
       }
     }
 
@@ -534,7 +582,12 @@ ${imagenHtml}
     } else if (elHoraDispositivo.checked) {
       aplicarConfig();
       if (!state.horaFinal) return;
-      if (state.ventanaExtra) abrirPopup(state.imagenFondoDataURL);
+      if (state.ventanaExtra) abrirPopup(state.imagenFondoDataURL, {
+        analogico: state.analogico,
+        lapso: state.lapso,
+        horaFinal: state.horaFinal?.getTime(),
+        running: false,
+      });
       state.watcherId = setInterval(watchHora, 1000);
       elIniciar.textContent = 'Esperando…';
       watchHora();
