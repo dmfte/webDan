@@ -458,3 +458,184 @@ main {
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+/* ── Lapso custom picker ─────────────────────────────────────────────── */
+.lapso-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 10px 16px;
+  color: #aebed4;
+  background: linear-gradient(180deg, #1a212a, #121820);
+  border: 2px solid #6d83a0;
+  border-radius: 999px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 10px 22px rgba(0, 0, 0, 0.2);
+}
+
+.lapso-input-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lapso-text {
+  width: 68px;
+  padding: 6px 10px;
+  color: #e8f2ff;
+  font: inherit;
+  font-size: 1rem;
+  text-align: center;
+  background: #080b10;
+  border: 1px solid #42566f;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 150ms, box-shadow 150ms;
+}
+
+.lapso-text:focus {
+  border-color: #4d9eff;
+  box-shadow: 0 0 0 2px rgba(77, 158, 255, 0.2);
+}
+
+.lapso-clock-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1/1;
+  width: auto;
+  height: 100%;
+  padding: 0;
+  color: #7a95b5;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #42566f;
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 150ms, border-color 150ms, background 150ms;
+}
+
+.lapso-clock-btn:hover {
+  color: #c8d6e8;
+  border-color: #7a95b5;
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.lapso-clock-btn.active {
+  color: #5bc2ff;
+  border-color: #4d9eff;
+  background: rgba(77, 158, 255, 0.12);
+}
+
+/* Picker popup — position: fixed so it floats above sidebar overflow */
+.lapso-picker {
+  position: fixed;
+  z-index: 9999;
+  width: 220px;
+  background: linear-gradient(180deg, #161d28, #0f151f);
+  border: 1px solid #2a3a52;
+  border-radius: 14px;
+  box-shadow:
+    0 24px 56px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.lapso-picker-cols {
+  display: flex;
+  align-items: stretch;
+  padding: 8px 12px;
+  gap: 0;
+}
+
+.lapso-col-wrap {
+  position: relative;
+  flex: 1;
+  height: 200px;
+  overflow: hidden;
+}
+
+/* Gradient fades at top and bottom of each column */
+.lapso-col-wrap::before,
+.lapso-col-wrap::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 80px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.lapso-col-wrap::before {
+  top: 0;
+  background: linear-gradient(180deg, #161d28 15%, transparent 100%);
+}
+
+.lapso-col-wrap::after {
+  bottom: 0;
+  background: linear-gradient(0deg, #161d28 15%, transparent 100%);
+}
+
+/* Highlight band centered at item 2 offset (2 × 40px = 80px from top) */
+.lapso-col-hl {
+  position: absolute;
+  top: 80px;
+  left: 2px;
+  right: 2px;
+  height: 40px;
+  background: rgba(21, 152, 255, 0.13);
+  border: 1px solid rgba(21, 152, 255, 0.3);
+  border-radius: 7px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.lapso-col {
+  height: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.lapso-col::-webkit-scrollbar {
+  display: none;
+}
+
+.lapso-col-item {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: #3a5272;
+  scroll-snap-align: center;
+  cursor: pointer;
+  user-select: none;
+  transition: color 80ms;
+}
+
+.lapso-col-item.selected {
+  color: #e0ecff;
+  font-weight: 700;
+}
+
+.lapso-col-item:not(.lapso-col-pad):hover {
+  color: #8ab0d8;
+}
+
+.lapso-col-sep {
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
+  color: #3a5272;
+  font-size: 1.6rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+

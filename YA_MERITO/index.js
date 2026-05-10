@@ -30,6 +30,10 @@
   const elImagenFondo    = document.getElementById('imagenFondo');
   const elNombreImagen   = document.getElementById('nombreImagen');
   const elLimpiarImagenFondo = document.getElementById('limpiarImagenFondo');
+  const elLapsoBtn    = document.getElementById('lapsoBtn');
+  const elLapsoPicker = document.getElementById('lapsoPicker');
+  const elHorasCol    = document.getElementById('lapsoHorasCol');
+  const elMinutosCol  = document.getElementById('lapsoMinutosCol');
 
   /* ── localStorage persistence ──────────────────────────────────────── */
   const STORAGE_KEY = 'ya-merito-config';
@@ -134,8 +138,8 @@
     state.mostrarSegundos = elMostrarSegundos.checked;
 
     if (elLapso.value) {
-      const [h, m, s = 0] = elLapso.value.split(':').map(Number);
-      state.lapso = (h * 3600 + m * 60 + s) * 1000;
+      const [m, s = 0] = elLapso.value.split(':').map(Number);
+      state.lapso = (m * 60 + s) * 1000;
     }
 
     if (state.usarDispositivo) {
@@ -485,6 +489,142 @@ ${imagenHtml}
     state.mostrarSegundos = elMostrarSegundos.checked;
     if (state.running) tick();
   });
+
+  /* ── Lapso picker ───────────────────────────────────────────────────── */
+  const LAPSO_ITEM_H = 40;
+  const LAPSO_PAD = 2;
+
+  function buildLapsoCol(col, count) {
+    col.innerHTML = '';
+    for (let i = 0; i < LAPSO_PAD; i++) {
+      const d = document.createElement('div');
+      d.className = 'lapso-col-item lapso-col-pad';
+      col.appendChild(d);
+    }
+    for (let i = 0; i < count; i++) {
+      const d = document.createElement('div');
+      d.className = 'lapso-col-item';
+      d.textContent = pad(i);
+      d.dataset.val = i;
+      col.appendChild(d);
+    }
+    for (let i = 0; i < LAPSO_PAD; i++) {
+      const d = document.createElement('div');
+      d.className = 'lapso-col-item lapso-col-pad';
+      col.appendChild(d);
+    }
+  }
+
+  function lapsoColScrollTo(col, val, smooth = false) {
+    col.scrollTo({ top: val * LAPSO_ITEM_H, behavior: smooth ? 'smooth' : 'instant' });
+  }
+
+  function lapsoColGetValue(col) {
+    return Math.round(col.scrollTop / LAPSO_ITEM_H);
+  }
+
+  function updateLapsoColSelected(col) {
+    const val = lapsoColGetValue(col);
+    col.querySelectorAll('.lapso-col-item').forEach((item, i) => {
+      item.classList.toggle('selected', i - LAPSO_PAD === val);
+    });
+  }
+
+  function parseLapsoText() {
+    const v = elLapso.value.trim();
+    const m = v.match(/^(\d{1,2}):(\d{2})$/);
+    if (m) return { m: Math.min(59, +m[1]), s: Math.min(59, +m[2]) };
+    return { m: 0, s: 0 };
+  }
+
+  function formatLapsoText() {
+    const v = elLapso.value.trim();
+    const m = v.match(/^(\d{1,2}):?(\d{0,2})$/);
+    if (m) {
+      elLapso.value = pad(Math.min(59, parseInt(m[1] || '0', 10))) + ':' +
+                      pad(Math.min(59, parseInt(m[2] || '0', 10)));
+    } else {
+      elLapso.value = '00:00';
+    }
+  }
+
+  function positionLapsoPicker() {
+    const rect = elLapsoBtn.getBoundingClientRect();
+    let left = rect.left;
+    if (left + 220 > window.innerWidth - 8) left = window.innerWidth - 228;
+    elLapsoPicker.style.top  = (rect.bottom + 6) + 'px';
+    elLapsoPicker.style.left = left + 'px';
+  }
+
+  function openLapsoPicker() {
+    buildLapsoCol(elHorasCol, 60);
+    buildLapsoCol(elMinutosCol, 60);
+    elLapsoPicker.removeAttribute('hidden');
+    elLapsoBtn.classList.add('active');
+    positionLapsoPicker();
+    const { m, s } = parseLapsoText();
+    requestAnimationFrame(() => {
+      lapsoColScrollTo(elHorasCol, m);
+      lapsoColScrollTo(elMinutosCol, s);
+      updateLapsoColSelected(elHorasCol);
+      updateLapsoColSelected(elMinutosCol);
+    });
+  }
+
+  function closeLapsoPicker() {
+    elLapsoPicker.setAttribute('hidden', '');
+    elLapsoBtn.classList.remove('active');
+  }
+
+  elLapsoBtn.addEventListener('click', () => {
+    elLapsoPicker.hasAttribute('hidden') ? openLapsoPicker() : closeLapsoPicker();
+  });
+
+  function syncLapsoText() {
+    elLapso.value = pad(lapsoColGetValue(elHorasCol)) + ':' + pad(lapsoColGetValue(elMinutosCol));
+  }
+
+  elHorasCol.addEventListener('scroll',   () => { updateLapsoColSelected(elHorasCol);   syncLapsoText(); }, { passive: true });
+  elMinutosCol.addEventListener('scroll', () => { updateLapsoColSelected(elMinutosCol); syncLapsoText(); }, { passive: true });
+
+  function addColClickHandler(col) {
+    col.addEventListener('click', e => {
+      const item = e.target.closest('[data-val]');
+      if (item) lapsoColScrollTo(col, +item.dataset.val, true);
+    });
+  }
+  addColClickHandler(elHorasCol);
+  addColClickHandler(elMinutosCol);
+
+  document.addEventListener('click', e => {
+    if (!elLapsoPicker.hasAttribute('hidden') &&
+        !elLapsoPicker.contains(e.target) &&
+        !elLapsoBtn.contains(e.target)) {
+      closeLapsoPicker();
+    }
+  }, true);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !elLapsoPicker.hasAttribute('hidden')) closeLapsoPicker();
+  });
+
+  /* ── Lapso text input formatting ────────────────────────────────────── */
+  let lapsoKeyWasDigit = false;
+
+  elLapso.addEventListener('keydown', e => {
+    lapsoKeyWasDigit = /^\d$/.test(e.key);
+    if (['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+    if (/^\d$/.test(e.key) || e.key === ':') return;
+    e.preventDefault();
+  });
+
+  elLapso.addEventListener('input', () => {
+    if (!lapsoKeyWasDigit) return;
+    const v = elLapso.value;
+    if (/^\d{2}$/.test(v)) elLapso.value = v + ':';
+  });
+
+  elLapso.addEventListener('blur', formatLapsoText);
 
   restaurarConfig();
   restaurarImagen();
