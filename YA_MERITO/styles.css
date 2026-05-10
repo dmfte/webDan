@@ -392,8 +392,15 @@ main {
                 transform: translateY(-1px);
             }
 
-            & #iniciarReloj {
+            & .botones-reloj {
                 margin-top: auto;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            & #iniciarReloj {
+                flex: 1;
                 background: linear-gradient(180deg, #168ff2, #076bc6);
                 border-color: #76c2ff;
                 box-shadow: 0 14px 28px rgba(0, 113, 223, 0.24);
@@ -402,6 +409,11 @@ main {
             & #iniciarReloj:hover {
                 background: linear-gradient(180deg, #2ca2ff, #0876dc);
                 border-color: #b3dcff;
+            }
+
+            & #reiniciarReloj:disabled {
+                opacity: 0.3;
+                pointer-events: none;
             }
         }
 

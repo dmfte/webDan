@@ -2,6 +2,8 @@
   /* ── State ─────────────────────────────────────────────────────────── */
   const state = {
     running: false,
+    paused: false,
+    remainingMsAtPause: null,
     usarDispositivo: false,
     analogico: false,
     lapso: null,   // ms (duration)
@@ -27,6 +29,7 @@
   const elAutoCerrar     = document.getElementById('autoCerrarVentanaExtra');
   const elMostrarSegundos= document.getElementById('mostrarSegundos');
   const elIniciar        = document.getElementById('iniciarReloj');
+  const elReiniciar      = document.getElementById('reiniciarReloj');
   const elImagenFondo    = document.getElementById('imagenFondo');
   const elNombreImagen   = document.getElementById('nombreImagen');
   const elLimpiarImagenFondo = document.getElementById('limpiarImagenFondo');
@@ -414,7 +417,8 @@ ${imagenHtml}
     tick();
     state.intervalId = setInterval(tick, 1000);
     clock?.setTicking?.(true);
-    elIniciar.textContent = 'Iniciado';
+    elIniciar.textContent = 'Pausar';
+    elReiniciar.disabled = true;
   }
 
   function terminarReloj() {
@@ -423,8 +427,11 @@ ${imagenHtml}
     state.intervalId = null;
     state.watcherId = null;
     state.running = false;
+    state.paused = false;
+    state.remainingMsAtPause = null;
     clock?.setTicking?.(false);
     elIniciar.textContent = 'Iniciar';
+    elReiniciar.disabled = true;
 
     if (state.canal) {
       state.canal.postMessage({ ticking: false });
@@ -463,10 +470,68 @@ ${imagenHtml}
   });
 
 
-  /* ── Iniciar ────────────────────────────────────────────────────────── */
+  /* ── Pausar / Reanudar / Reiniciar ─────────────────────────────────── */
+  function pausarReloj() {
+    clearInterval(state.intervalId);
+    state.intervalId = null;
+    state.running = false;
+    state.paused = true;
+    state.remainingMsAtPause = Math.max(0, state.horaFinal - Date.now());
+    clock?.setTicking?.(false);
+    elIniciar.textContent = 'Iniciar';
+    elReiniciar.disabled = false;
+    state.canal?.postMessage({ ticking: false });
+  }
+
+  function reanudarReloj() {
+    if (!state.paused) return;
+    if (!elHoraDispositivo.checked) {
+      state.horaFinal = new Date(Date.now() + state.remainingMsAtPause);
+    }
+    if (state.horaFinal && state.horaFinal.getTime() <= Date.now()) {
+      terminarReloj();
+      return;
+    }
+    state.paused = false;
+    state.remainingMsAtPause = null;
+    state.running = true;
+    clock?.setTicking?.(true);
+    elIniciar.textContent = 'Pausar';
+    elReiniciar.disabled = true;
+    tick();
+    state.intervalId = setInterval(tick, 1000);
+  }
+
+  function reiniciarReloj() {
+    clearInterval(state.intervalId);
+    clearInterval(state.watcherId);
+    state.intervalId = null;
+    state.watcherId = null;
+    state.running = false;
+    state.paused = false;
+    state.remainingMsAtPause = null;
+    state.horaFinal = null;
+    elIniciar.textContent = 'Iniciar';
+    elReiniciar.disabled = true;
+    if (clock) { clock.destroy(); clock = null; }
+    elContenedor.innerHTML = '';
+    if (state.canal) {
+      state.canal.postMessage({ ticking: false });
+      state.canal.close();
+      state.canal = null;
+    }
+    if (state.popupWin && !state.popupWin.closed) state.popupWin.close();
+    state.popupWin = null;
+  }
+
   elIniciar.addEventListener('click', () => {
-    if (state.running || state.watcherId) return;
-    if (elHoraDispositivo.checked) {
+    if (state.running) {
+      pausarReloj();
+    } else if (state.paused) {
+      reanudarReloj();
+    } else if (state.watcherId) {
+      return;
+    } else if (elHoraDispositivo.checked) {
       aplicarConfig();
       if (!state.horaFinal) return;
       if (state.ventanaExtra) abrirPopup(state.imagenFondoDataURL);
@@ -477,6 +542,8 @@ ${imagenHtml}
       iniciar();
     }
   });
+
+  elReiniciar.addEventListener('click', reiniciarReloj);
 
   /* ── relojAnalogo live toggle ───────────────────────────────────────── */
   elRelojAnalogo.addEventListener('change', () => {
