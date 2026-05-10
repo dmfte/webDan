@@ -374,11 +374,11 @@ ${imagenHtml}
     selfId=setInterval(selfTick,1000);
   }
 
-  /* Boot from embedded initial state — no need to wait for first BroadcastChannel message */
-  if(INIT.analogico!==undefined){
+  /* Boot from embedded initial state — only build clock if already running */
+  if(INIT.analogico!==undefined&&INIT.running){
     mode=INIT.analogico;
     clock=INIT.analogico?buildAnalog():buildDigital();
-    if(meta.horaFinal&&INIT.running)startSelf();
+    if(meta.horaFinal)startSelf();
   }
 
   new BroadcastChannel('ya-merito').onmessage=function(e){
@@ -578,7 +578,11 @@ ${imagenHtml}
     } else if (state.paused) {
       reanudarReloj();
     } else if (state.watcherId) {
-      return;
+      clearInterval(state.watcherId);
+      state.watcherId = null;
+      elIniciar.textContent = 'Iniciar';
+      if (state.canal) { state.canal.close(); state.canal = null; }
+      if (state.popupWin && !state.popupWin.closed) { state.popupWin.close(); state.popupWin = null; }
     } else if (elHoraDispositivo.checked) {
       aplicarConfig();
       if (!state.horaFinal) return;
@@ -589,7 +593,7 @@ ${imagenHtml}
         running: false,
       });
       state.watcherId = setInterval(watchHora, 1000);
-      elIniciar.textContent = 'Esperando…';
+      elIniciar.textContent = 'Detener espera';
       watchHora();
     } else {
       iniciar();
