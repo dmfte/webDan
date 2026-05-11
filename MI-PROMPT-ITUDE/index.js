@@ -987,45 +987,16 @@ function initContentEditable(field) {
         document.execCommand("insertText", false, text);
     });
 
-    // Enter: insert a literal \n by rewriting textContent so the field always stays
-    // as a single text node. range.insertNode splits text nodes, leaving the caret
-    // in an empty sibling at offset 0 where positionCursor's look-back can't help.
+    // Enter: insert a literal \n via execCommand so the existing text node is
+    // extended in-place — no textContent rewrite, no manual caret placement,
+    // no manual input dispatch. The browser handles all of that correctly.
+    // With contenteditable="plaintext-only" (set in init) this is guaranteed
+    // to stay a plain text node; the sanitizer below is a fallback for browsers
+    // that don't support plaintext-only (Firefox etc.).
     field.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
             e.preventDefault();
-            const sel = window.getSelection();
-            if (!sel || !sel.rangeCount) return;
-            const range = sel.getRangeAt(0);
-
-            // Measure offsets in the whole textContent before touching the DOM
-            const preStart = document.createRange();
-            preStart.selectNodeContents(field);
-            preStart.setEnd(range.startContainer, range.startOffset);
-            const startOff = preStart.toString().length;
-
-            let endOff = startOff;
-            if (!range.collapsed) {
-                const preEnd = document.createRange();
-                preEnd.selectNodeContents(field);
-                preEnd.setEnd(range.endContainer, range.endOffset);
-                endOff = preEnd.toString().length;
-            }
-
-            // Replace selection (if any) with a single \n, keeping one text node
-            const old = field.textContent;
-            field.textContent = old.slice(0, startOff) + "\n" + old.slice(endOff);
-
-            // Place caret right after the inserted \n
-            const textNode = field.firstChild;
-            if (textNode) {
-                const r = document.createRange();
-                r.setStart(textNode, startOff + 1);
-                r.collapse(true);
-                sel.removeAllRanges();
-                sel.addRange(r);
-            }
-
-            field.dispatchEvent(new InputEvent("input", { bubbles: true }));
+            document.execCommand("insertText", false, "\n");
         }
     });
 
@@ -1041,19 +1012,32 @@ function initContentEditable(field) {
         const hasNonText = [...field.childNodes].some(n => n.nodeType !== Node.TEXT_NODE);
         if (!hasNonText) return;
 
-        // Measure caret offset (character count from field start) before touching the DOM
         const sel = window.getSelection();
-        let caretOffset = 0;
-        if (sel && sel.rangeCount && field.contains(sel.getRangeAt(0).startContainer)) {
-            const pre = document.createRange();
-            pre.selectNodeContents(field);
-            pre.setEnd(sel.getRangeAt(0).startContainer, sel.getRangeAt(0).startOffset);
-            caretOffset = pre.toString().length;
+        let caretOffset = -1;
+
+        if (sel && sel.rangeCount) {
+            const range = sel.getRangeAt(0);
+            if (field.contains(range.startContainer)) {
+                // range.toString() ignores the \n that innerText adds between block
+                // elements (e.g. <div> wrappers Chrome creates after a bare \n),
+                // so the old caretOffset landed on the previous visual line.
+                // Insert a sentinel at the caret so its position survives flattening.
+                const marker = document.createTextNode('');
+                const r = range.cloneRange();
+                r.collapse(true);
+                r.insertNode(marker);
+                const flat = field.innerText;
+                caretOffset = flat.indexOf('');
+                marker.remove();
+                field.textContent = flat.replace('', '');
+            }
         }
 
-        field.textContent = field.innerText;
+        if (caretOffset < 0) {
+            field.textContent = field.innerText;
+            return;
+        }
 
-        // Restore caret to the same character offset
         const textNode = field.firstChild;
         if (textNode) {
             const r = document.createRange();
@@ -1093,6 +1077,16 @@ function init() {
 
     // --- Editor event listeners ---
     const contentField = document.getElementById("contenido-etiqueta");
+
+    // Upgrade to plaintext-only if the browser supports it (Chrome 94+, Safari 16.4+).
+    // This prevents the browser from normalizing \n-terminated content into <div> blocks,
+    // which caused the caret to jump back to the previous line after pressing Enter.
+    // Falls back to contenteditable="true" (with the sanitizer) on Firefox etc.
+    contentField.contentEditable = 'plaintext-only';
+    if (contentField.contentEditable !== 'plaintext-only') {
+        contentField.contentEditable = 'true';
+    }
+
     initContentEditable(contentField);
 
     contentField.addEventListener("input", () => {
