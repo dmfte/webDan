@@ -17,14 +17,13 @@ const defaultState = {
         sortOrder: "date-desc",
         viewMode: "todos",
         theme: "oscuro",
-        startWithCrea: true
+        startWithDefaultTags: true
     },
     editor: {
         tags: [
-            { name: "contexto", content: "Estoy creando una app estática para organizar prompts en formato XML." },
-            { name: "rol", content: "Eres un coach de productividad que habla como si estuviera compilando ideas en tiempo real." },
-            { name: "especificidad", content: "Responde con pasos accionables, tono claro, y una lista final de errores comunes." },
-            { name: "acciones", content: "1) Analiza mi objetivo. 2) Sugiere un plan de 7 días. 3) Incluye una rutina de revisión rápida diaria." }
+            { name: "stage", content: "" },
+            { name: "task", content: "" },
+            { name: "rules", content: "" }
         ],
         selectedTagIndex: 0,
         category: "",
@@ -474,14 +473,13 @@ function savePrompt() {
     updateEditorUI();
 }
 
-/** Resets the editor. Uses CREA tags or a single blank tag based on config. */
+/** Resets the editor. Uses default tags or a single blank tag based on config. */
 function clearEditor() {
-    if (state.config.startWithCrea) {
+    if (state.config.startWithDefaultTags) {
         state.editor.tags = [
-            { name: "contexto", content: "" },
-            { name: "rol", content: "" },
-            { name: "especificidad", content: "" },
-            { name: "acciones", content: "" }
+            { name: "stage", content: "" },
+            { name: "task", content: "" },
+            { name: "rules", content: "" }
         ];
     } else {
         state.editor.tags = [{ name: "nueva-etiqueta", content: "" }];
@@ -845,15 +843,17 @@ function handleCategoriesInput() {
 // Config: Save & Restore
 // ============================================
 
-/** Restores UI controls (theme, tab, view mode, sort, CREA toggle) from saved state. */
+/** Restores UI controls (theme, tab, view mode, sort, default-tags toggle) from saved state. */
 function applySavedConfig() {
     document.getElementById(state.config.theme === "claro" ? "tema-claro" : "tema-oscuro").checked = true;
     document.getElementById(state.config.activeTab === "prompts" ? "tab-prompts" : "tab-editor").checked = true;
     document.getElementById(state.config.viewMode === "categorias" ? "vista-categorias" : "vista-todos").checked = true;
 
-    // Migrate old state that may lack startWithCrea
-    if (state.config.startWithCrea === undefined) state.config.startWithCrea = true;
-    document.getElementById("config-crea").checked = state.config.startWithCrea;
+    // Migrate old state that may use the former startWithCrea key
+    if (state.config.startWithDefaultTags === undefined) {
+        state.config.startWithDefaultTags = state.config.startWithCrea ?? true;
+    }
+    document.getElementById("config-etiquetas-default").checked = state.config.startWithDefaultTags;
 
     updateSortButtons();
 }
@@ -1148,8 +1148,8 @@ function init() {
     // Close dropdown when clicking anywhere else
     document.addEventListener("click", () => configDropdown.classList.remove("is-open"));
 
-    document.getElementById("config-crea").addEventListener("change", (e) => {
-        state.config.startWithCrea = e.target.checked;
+    document.getElementById("config-etiquetas-default").addEventListener("change", (e) => {
+        state.config.startWithDefaultTags = e.target.checked;
         saveState();
     });
 
