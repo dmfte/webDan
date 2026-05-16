@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WOL Reader</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Texto del Dia</h1>
+      <div class="date-nav">
+        <button class="nav-btn" id="prevDayBtn" aria-label="Día anterior">«</button>
+        <div class="date" id="date"></div>
+        <button class="nav-btn" id="nextDayBtn" aria-label="Día siguiente">»</button>
+      </div>
+    </header>
+
+    <div class="text-display" id="textDisplay">
+      <span class="theme" id="theme"></span>
+      <span id="body"></span>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="playBtn" disabled>&#9654; Leer en voz alta</button>
+      <button class="btn" id="stopBtn" style="display:none">&#9632; Detener</button>
+    </div>
+
+    <div class="status" id="status"></div>
+  </div>
+
+  <script src="index.js"></script>
+</body>
+</html>
