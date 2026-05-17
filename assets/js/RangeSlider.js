@@ -89,6 +89,24 @@ export class RangeSlider {
         return this.#currentValue;
     }
 
+    set val({value = 0, percent = 0}) {
+        let newPercent, newValue;
+        if (value != 0) {
+            if (this.#currentValue == value) return;
+            newPercent = this.#getPercentFromValue(value);
+            newValue = value;
+        } else if (percent != 0) {
+            if (this.#currentPercent == percent) return;
+            newValue = this.#getValueFromPercent(percent);
+            newPercent = percent
+        } else {
+            return new Error("pass at least one parameter (value or percent).")
+        }
+        this.#currentPercent = newPercent;
+        this.#currentValue = newValue;
+        this.#updateUI();
+    }
+
     onValueChange(callback, ...args) {
         this.#changeCallback = callback;
         this.#changeCallbackArgs = args;
@@ -262,6 +280,10 @@ export class RangeSlider {
 
         this.#thumb.textContent = hoverValue;
         this.#thumb.style.display = 'flex';
+    }
+
+    #getPercentFromValue(value) {
+        return value * 100 / (this.#params.max - this.#params.min);
     }
 
     #getPercentFromEvent(ev) {
