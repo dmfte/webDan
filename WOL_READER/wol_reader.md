@@ -66,7 +66,7 @@ Set with `wrangler secret put <NAME>`.
 ### Text pipeline (`buildDailyText`)
 
 1. **Fetch** the WOL daily page HTML.
-2. **Parse** with regex: find the `<div class="tabContent" data-date="...">` matching today (or the latest available date).
+2. **Parse** with regex: find the `<div class="tabContent" data-date="...">` matching the requested date extracted from the URL (falls back to today, then to the latest available date).
 3. **Extract** heading (`<h2>`), theme (`<p class="themeScrp">`), and body (`<div class="bodyTxt">`).
 4. **Collect verse links** — `<a>` tags with `href="/es/wol/bc/..."` and `class="b"`.
 5. **Resolve verses** — follow each `/bc/` redirect (307) to get the chapter URL + `#v=` hash, fetch unique chapters in parallel, extract verse spans by ID pattern `v{book}-{chapter}-{verse}-1`.
@@ -76,8 +76,8 @@ Set with `wrangler secret put <NAME>`.
 
 ### TTS pipeline (`handleTTS`)
 
-- **Single-voice**: if no `ELEVENLABS_VERSE_VOICE_ID` secret or no `[brackets]` in text, send entire text to ElevenLabs with the primary voice.
-- **Two-voice**: split text on `[...]` segments, call ElevenLabs per segment with the appropriate voice, concatenate MP3 buffers.
+- **Single-voice**: if no `ELEVENLABS_VERSE_VOICE_ID` secret or no `[brackets]` in text, send entire text to ElevenLabs with the primary voice (returns MP3).
+- **Two-voice**: split text on `[...]` segments, call ElevenLabs per segment with the appropriate voice using `pcm_24000` output format, then concatenate the raw PCM buffers and wrap in a WAV header (`buildWav`). Uses `previous_text`/`next_text` parameters for natural prosody at voice transitions.
 - Model: `eleven_multilingual_v2`. Settings: stability 0.5, similarity_boost 0.75.
 
 ### Security
@@ -94,14 +94,14 @@ Set with `wrangler secret put <NAME>`.
 
 ### Flow
 1. On load, `init()` calls `loadDay(currentDate)`.
-2. `loadDay(date)` builds the WOL URL (today uses the bare homepage URL, other dates use `/{year}/{month}/{day}`), fetches via Worker, calls `displayText()`.
+2. `loadDay(date)` updates `currentDate` immediately, aborts any in-flight fetch via `AbortController`, builds the WOL URL (`/{year}/{month}/{day}`), fetches via Worker, calls `displayText()`.
 3. `displayText(text)` splits on `\n\n`: line 0 = date heading, line 1 = theme, rest = body. Verse brackets `[...]` are wrapped in `<span class="verse-inline">`.
-4. Play button calls `speak(fullText)` which POSTs to `/tts`, creates an `Audio` from the blob, and plays it.
+4. Play button calls `toggleAudio()` which POSTs to `/tts`, creates an `Audio` from the blob, and plays it. Single button toggles play/pause.
 5. Prev/Next buttons adjust `currentDate` by one day and reload.
 
 ### UI pattern
-- Play and Stop buttons toggle visibility (not disabled state) for active playback.
-- Status area shows a CSS spinner + message during loading/generation.
+- Single play button toggles between play and pause states; button text reflects current state.
+- Status area (`.status`) shows a CSS spinner + message during loading/generation, and is hidden once audio is playing (the button text already implies status).
 
 ## CSS variables
 
