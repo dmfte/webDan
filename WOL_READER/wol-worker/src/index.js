@@ -58,60 +58,105 @@ async function handleTTS(request, env) {
     return new Response('Missing text', { status: 400, headers: CORS_HEADERS });
   }
 
-  // Single-voice mode: no verse voice configured, or no brackets in text
   if (!verseVoiceId || !/\[[^\]]+\]/.test(text)) {
     return singleVoiceTTS(text, voiceId, apiKey);
   }
 
-  // Two-voice mode: split on [verse] segments
   const segments = text.split(/(\[[^\]]+\])/);
-  const chunks = [];
-
+  const parsed = [];
   for (const seg of segments) {
     const trimmed = seg.trim();
     if (!trimmed) continue;
     const isVerse = trimmed.startsWith('[') && trimmed.endsWith(']');
-    const voice = isVerse ? verseVoiceId : voiceId;
-    const content = isVerse ? trimmed.slice(1, -1) : trimmed;
+    parsed.push({
+      voice: isVerse ? verseVoiceId : voiceId,
+      content: isVerse ? trimmed.slice(1, -1) : trimmed
+    });
+  }
 
-    const buf = await callElevenLabs(content, voice, apiKey);
+  const pcmChunks = [];
+  for (let i = 0; i < parsed.length; i++) {
+    const { voice, content } = parsed[i];
+    const prevText = parsed.slice(0, i).map(s => s.content).join(' ');
+    const nextText = parsed.slice(i + 1).map(s => s.content).join(' ');
+
+    const buf = await callElevenLabsPCM(content, voice, apiKey, prevText, nextText);
     if (!buf) {
       return new Response('ElevenLabs error on segment', { status: 502, headers: CORS_HEADERS });
     }
-    chunks.push(buf);
+    pcmChunks.push(buf);
   }
 
-  const total = chunks.reduce((n, c) => n + c.byteLength, 0);
-  const merged = new Uint8Array(total);
-  let offset = 0;
-  for (const c of chunks) {
-    merged.set(new Uint8Array(c), offset);
-    offset += c.byteLength;
-  }
-
-  return new Response(merged, {
-    headers: { 'Content-Type': 'audio/mpeg', ...CORS_HEADERS }
+  const wav = buildWav(pcmChunks, PCM_SAMPLE_RATE);
+  return new Response(wav, {
+    headers: { 'Content-Type': 'audio/wav', ...CORS_HEADERS }
   });
 }
 
-async function callElevenLabs(text, voiceId, apiKey) {
+const PCM_SAMPLE_RATE = 24000;
+
+async function callElevenLabsPCM(text, voiceId, apiKey, previousText, nextText) {
+  const body = {
+    text,
+    model_id: 'eleven_multilingual_v2',
+    voice_settings: { stability: 0.5, similarity_boost: 0.75 }
+  };
+  if (previousText) body.previous_text = previousText;
+  if (nextText) body.next_text = nextText;
+
   const res = await fetch(
-    `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+    `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=pcm_${PCM_SAMPLE_RATE}`,
     {
       method: 'POST',
       headers: {
         'xi-api-key': apiKey,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        text,
-        model_id: 'eleven_multilingual_v2',
-        voice_settings: { stability: 0.5, similarity_boost: 0.75 }
-      })
+      body: JSON.stringify(body)
     }
   );
   if (!res.ok) return null;
   return res.arrayBuffer();
+}
+
+function buildWav(pcmChunks, sampleRate) {
+  const numChannels = 1;
+  const bitsPerSample = 16;
+  const byteRate = sampleRate * numChannels * (bitsPerSample / 8);
+  const blockAlign = numChannels * (bitsPerSample / 8);
+
+  const dataSize = pcmChunks.reduce((n, c) => n + c.byteLength, 0);
+  const buffer = new ArrayBuffer(44 + dataSize);
+  const view = new DataView(buffer);
+
+  writeString(view, 0, 'RIFF');
+  view.setUint32(4, 36 + dataSize, true);
+  writeString(view, 8, 'WAVE');
+  writeString(view, 12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, numChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, byteRate, true);
+  view.setUint16(32, blockAlign, true);
+  view.setUint16(34, bitsPerSample, true);
+  writeString(view, 36, 'data');
+  view.setUint32(40, dataSize, true);
+
+  const output = new Uint8Array(buffer);
+  let offset = 44;
+  for (const chunk of pcmChunks) {
+    output.set(new Uint8Array(chunk), offset);
+    offset += chunk.byteLength;
+  }
+
+  return buffer;
+}
+
+function writeString(view, offset, str) {
+  for (let i = 0; i < str.length; i++) {
+    view.setUint8(offset + i, str.charCodeAt(i));
+  }
 }
 
 async function singleVoiceTTS(text, voiceId, apiKey) {
@@ -151,8 +196,8 @@ async function buildDailyText(target) {
   if (!res.ok) throw new Error(`Upstream ${res.status}`);
   const html = await res.text();
 
-  const today = getTodayDateString();
-  const { heading, theme, bodyHtml, verseLinks } = parseDailyPage(html, today);
+  const dateStr = extractDateFromUrl(target) || getTodayDateString();
+  const { heading, theme, bodyHtml, verseLinks } = parseDailyPage(html, dateStr);
 
   const resolvedVerses = await resolveAllVerses(verseLinks);
 
@@ -175,6 +220,13 @@ function findTabForDate(html, dateStr) {
     ''
   );
   return html.match(tabRegex);
+}
+
+function extractDateFromUrl(url) {
+  const match = url.match(/\/(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
+  if (!match) return null;
+  const [, y, m, d] = match;
+  return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
 }
 
 function getTodayDateString() {

@@ -46,7 +46,7 @@ body {
   height: 100%;
   max-height: 100%;
   display: grid;
-  grid-template-rows: 150px 1fr 140px 60px;
+  grid-template-rows: 150px 1fr auto auto auto;
 }
 
 header {
@@ -150,12 +150,17 @@ header .date {
   cursor: not-allowed;
 }
 
+.slider-wrap {
+  width: 100%;
+  height: 60px;
+  margin-top: 1rem;
+}
+
 .status {
   text-align: center;
   margin-top: 1rem;
   font-size: 2rem;
   color: var(--muted);
-  min-height: 1.2em;
 }
 
 .loading {

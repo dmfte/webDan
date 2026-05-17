@@ -1,3 +1,5 @@
+import { RangeSlider } from '/assets/js/RangeSlider.js';
+
 const WORKER_URL = 'https://wol-worker.dmfte-dev.workers.dev';
 const WOL_DAILY = 'https://wol.jw.org/es/wol/h/r4/lp-s';
 
@@ -8,10 +10,14 @@ const $playBtn = document.getElementById('playBtn');
 const $status = document.getElementById('status');
 const $prevDay = document.getElementById('prevDayBtn');
 const $nextDay = document.getElementById('nextDayBtn');
+const $sliderWrap = document.getElementById('sliderWrap');
 
 let audio = null;
 let fullText = '';
 let currentDate = new Date();
+let slider = null;
+let isSeeking = false;
+let loadController = null;
 
 init();
 
@@ -20,6 +26,10 @@ function wolUrlForDate(date) {
 }
 
 async function loadDay(date) {
+  if (loadController) loadController.abort();
+  loadController = new AbortController();
+
+  currentDate = date;
   stopAudio();
   $playBtn.disabled = true;
   setStatus('Cargando texto...', true);
@@ -28,14 +38,16 @@ async function loadDay(date) {
 
   try {
     const url = wolUrlForDate(date);
-    const res = await fetch(`${WORKER_URL}/?url=${encodeURIComponent(url)}`);
+    const res = await fetch(`${WORKER_URL}/?url=${encodeURIComponent(url)}`, {
+      signal: loadController.signal
+    });
     if (!res.ok) throw new Error(`Worker: ${res.status}`);
     const text = await res.text();
-    currentDate = date;
     displayText(text);
     $playBtn.disabled = false;
     setStatus('');
   } catch (e) {
+    if (e.name === 'AbortError') return;
     setStatus('Error al cargar: ' + e.message);
   }
 }
@@ -79,14 +91,12 @@ async function toggleAudio() {
   if (audio && !audio.paused) {
     audio.pause();
     $playBtn.innerHTML = '&#9654; Reanudar';
-    setStatus('Pausado');
     return;
   }
 
   if (audio && audio.paused) {
     audio.play();
     $playBtn.innerHTML = '&#9646;&#9646; Pausar';
-    setStatus('Reproduciendo...');
     return;
   }
 
@@ -104,13 +114,26 @@ async function toggleAudio() {
 
     const blob = await res.blob();
     audio = new Audio(URL.createObjectURL(blob));
+
+    audio.addEventListener('loadedmetadata', () => {
+      initSlider(audio.duration);
+    });
+
     audio.play();
     $playBtn.disabled = false;
     $playBtn.innerHTML = '&#9646;&#9646; Pausar';
-    setStatus('Reproduciendo...');
+    $status.hidden = true;
+
+    audio.addEventListener('timeupdate', () => {
+      if (!slider) return;
+      isSeeking = true;
+      slider.val = { value: Math.floor(audio.currentTime) };
+      isSeeking = false;
+    });
 
     audio.addEventListener('ended', () => {
       audio = null;
+      hideSlider();
       $playBtn.innerHTML = '&#9654; Leer';
       setStatus('');
     });
@@ -120,12 +143,33 @@ async function toggleAudio() {
   }
 }
 
+function initSlider(duration) {
+  const max = Math.floor(duration);
+  $sliderWrap.innerHTML = '';
+  $sliderWrap.hidden = false;
+  slider = new RangeSlider($sliderWrap, {
+    min: 0, max, step: 0.5, def: 0,
+    title: '', color: '#4fc3f7'
+  });
+  slider.onValueChange(val => {
+    if (!audio || isSeeking) return;
+    audio.currentTime = val;
+  });
+}
+
+function hideSlider() {
+  $sliderWrap.hidden = true;
+  $sliderWrap.innerHTML = '';
+  slider = null;
+}
+
 function stopAudio() {
   if (audio) {
     audio.pause();
     audio.currentTime = 0;
     audio = null;
   }
+  hideSlider();
   $playBtn.innerHTML = '&#9654; Leer';
   $playBtn.disabled = false;
   setStatus('');
@@ -133,8 +177,10 @@ function stopAudio() {
 
 function setStatus(msg, loading = false) {
   if (msg) {
+    $status.hidden = false;
     $status.innerHTML = (loading ? '<span class="loading"></span><br/>' : '') + msg;
   } else {
+    $status.hidden = true;
     $status.textContent = '';
   }
 }
