@@ -5,7 +5,6 @@ const $date = document.getElementById('date');
 const $theme = document.getElementById('theme');
 const $body = document.getElementById('body');
 const $playBtn = document.getElementById('playBtn');
-const $stopBtn = document.getElementById('stopBtn');
 const $status = document.getElementById('status');
 const $prevDay = document.getElementById('prevDayBtn');
 const $nextDay = document.getElementById('nextDayBtn');
@@ -17,18 +16,13 @@ let currentDate = new Date();
 init();
 
 function wolUrlForDate(date) {
-  const today = new Date();
-  const isToday = date.getFullYear() === today.getFullYear()
-    && date.getMonth() === today.getMonth()
-    && date.getDate() === today.getDate();
-  if (isToday) return WOL_DAILY;
   return `${WOL_DAILY}/${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
 }
 
 async function loadDay(date) {
   stopAudio();
   $playBtn.disabled = true;
-  setStatus('Cargando texto...');
+  setStatus('Cargando texto...', true);
   $theme.textContent = '';
   $body.innerHTML = '';
 
@@ -79,20 +73,31 @@ function displayText(text) {
   fullText = text;
 }
 
-$playBtn.addEventListener('click', () => speak(fullText));
-$stopBtn.addEventListener('click', stopAudio);
+$playBtn.addEventListener('click', toggleAudio);
 
-async function speak(text) {
+async function toggleAudio() {
+  if (audio && !audio.paused) {
+    audio.pause();
+    $playBtn.innerHTML = '&#9654; Reanudar';
+    setStatus('Pausado');
+    return;
+  }
+
+  if (audio && audio.paused) {
+    audio.play();
+    $playBtn.innerHTML = '&#9646;&#9646; Pausar';
+    setStatus('Reproduciendo...');
+    return;
+  }
+
   $playBtn.disabled = true;
-  $playBtn.style.display = 'none';
-  $stopBtn.style.display = '';
-  setStatus('Generando audio...');
+  setStatus('Generando audio...', true);
 
   try {
     const res = await fetch(`${WORKER_URL}/tts`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text })
+      body: JSON.stringify({ text: fullText })
     });
 
     if (!res.ok) throw new Error(`TTS: ${res.status}`);
@@ -100,15 +105,18 @@ async function speak(text) {
     const blob = await res.blob();
     audio = new Audio(URL.createObjectURL(blob));
     audio.play();
+    $playBtn.disabled = false;
+    $playBtn.innerHTML = '&#9646;&#9646; Pausar';
     setStatus('Reproduciendo...');
 
     audio.addEventListener('ended', () => {
-      resetControls();
+      audio = null;
+      $playBtn.innerHTML = '&#9654; Leer';
       setStatus('');
     });
   } catch (e) {
     setStatus('Error TTS: ' + e.message);
-    resetControls();
+    $playBtn.disabled = false;
   }
 }
 
@@ -118,19 +126,14 @@ function stopAudio() {
     audio.currentTime = 0;
     audio = null;
   }
-  resetControls();
+  $playBtn.innerHTML = '&#9654; Leer';
+  $playBtn.disabled = false;
   setStatus('');
 }
 
-function resetControls() {
-  $playBtn.disabled = false;
-  $playBtn.style.display = '';
-  $stopBtn.style.display = 'none';
-}
-
-function setStatus(msg) {
+function setStatus(msg, loading = false) {
   if (msg) {
-    $status.innerHTML = '<span class="loading"></span><br/>' + msg;
+    $status.innerHTML = (loading ? '<span class="loading"></span><br/>' : '') + msg;
   } else {
     $status.textContent = '';
   }
