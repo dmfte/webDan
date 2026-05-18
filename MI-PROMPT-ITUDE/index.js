@@ -21,9 +21,9 @@ const defaultState = {
     },
     editor: {
         tags: [
-            { name: "stage", content: "" },
-            { name: "task", content: "" },
-            { name: "rules", content: "" }
+            { name: "stage", content: "", depth: 0 },
+            { name: "task", content: "", depth: 0 },
+            { name: "rules", content: "", depth: 0 }
         ],
         selectedTagIndex: 0,
         category: "",
@@ -118,9 +118,37 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-/** Formats an array of tags into XML-like preview text. */
+/** Formats an array of tags into XML-like preview text, with indentation for nested tags. */
 function formatPromptPreview(tags) {
-    return tags.map(tag => `<${tag.name}>\n${tag.content}\n</${tag.name}>`).join("\n");
+    if (!tags.length) return "";
+
+    const lines = [];
+    const stack = [];
+    const indent = (d) => "  ".repeat(d);
+
+    for (const tag of tags) {
+        const depth = tag.depth || 0;
+
+        while (stack.length > 0 && stack[stack.length - 1].depth >= depth) {
+            const closed = stack.pop();
+            lines.push(`${indent(closed.depth)}</${closed.name}>`);
+        }
+
+        lines.push(`${indent(depth)}<${tag.name}>`);
+        if (tag.content) {
+            tag.content.split("\n").forEach(line => {
+                lines.push(`${indent(depth)}${line}`);
+            });
+        }
+        stack.push({ name: tag.name, depth });
+    }
+
+    while (stack.length > 0) {
+        const closed = stack.pop();
+        lines.push(`${indent(closed.depth)}</${closed.name}>`);
+    }
+
+    return lines.join("\n");
 }
 
 /** Returns today's date as YYYY-MM-DD. */
@@ -300,6 +328,8 @@ function renderTags() {
     tagList.innerHTML = "";
 
     state.editor.tags.forEach((tag, index) => {
+        const depth = tag.depth || 0;
+
         const input = document.createElement("input");
         input.type = "radio";
         input.name = "tag-activa";
@@ -310,6 +340,9 @@ function renderTags() {
         const label = document.createElement("label");
         label.setAttribute("for", `tag-${index}`);
         label.textContent = `<${tag.name}>`;
+        if (depth > 0) {
+            label.style.marginLeft = `${depth * 1.2}rem`;
+        }
 
         input.addEventListener("change", () => {
             state.editor.selectedTagIndex = index;
@@ -354,8 +387,10 @@ function createTag() {
         counter++;
     }
 
-    state.editor.tags.push({ name: newName, content: "" });
-    state.editor.selectedTagIndex = state.editor.tags.length - 1;
+    const insertAt = state.editor.selectedTagIndex + 1;
+    const siblingDepth = state.editor.tags[state.editor.selectedTagIndex]?.depth || 0;
+    state.editor.tags.splice(insertAt, 0, { name: newName, content: "", depth: siblingDepth });
+    state.editor.selectedTagIndex = insertAt;
     saveState();
     renderTags();
 
@@ -412,6 +447,47 @@ function moveTagDown() {
 
     [state.editor.tags[idx], state.editor.tags[idx + 1]] = [state.editor.tags[idx + 1], state.editor.tags[idx]];
     state.editor.selectedTagIndex = idx + 1;
+    saveState();
+    renderTags();
+}
+
+/** Increases nesting depth of the selected tag (and its children). */
+function nestTagIn() {
+    const idx = state.editor.selectedTagIndex;
+    const tag = state.editor.tags[idx];
+    if (!tag || idx === 0) return;
+
+    const depth = tag.depth || 0;
+    const prevDepth = state.editor.tags[idx - 1].depth || 0;
+    if (depth >= prevDepth + 1) return;
+
+    tag.depth = depth + 1;
+    for (let i = idx + 1; i < state.editor.tags.length; i++) {
+        const childDepth = state.editor.tags[i].depth || 0;
+        if (childDepth <= depth) break;
+        state.editor.tags[i].depth = childDepth + 1;
+    }
+
+    saveState();
+    renderTags();
+}
+
+/** Decreases nesting depth of the selected tag (and its children). */
+function nestTagOut() {
+    const idx = state.editor.selectedTagIndex;
+    const tag = state.editor.tags[idx];
+    if (!tag) return;
+
+    const depth = tag.depth || 0;
+    if (depth <= 0) return;
+
+    tag.depth = depth - 1;
+    for (let i = idx + 1; i < state.editor.tags.length; i++) {
+        const childDepth = state.editor.tags[i].depth || 0;
+        if (childDepth <= depth) break;
+        state.editor.tags[i].depth = childDepth - 1;
+    }
+
     saveState();
     renderTags();
 }
@@ -477,12 +553,12 @@ function savePrompt() {
 function clearEditor() {
     if (state.config.startWithDefaultTags) {
         state.editor.tags = [
-            { name: "stage", content: "" },
-            { name: "task", content: "" },
-            { name: "rules", content: "" }
+            { name: "stage", content: "", depth: 0 },
+            { name: "task", content: "", depth: 0 },
+            { name: "rules", content: "", depth: 0 }
         ];
     } else {
-        state.editor.tags = [{ name: "nueva-etiqueta", content: "" }];
+        state.editor.tags = [{ name: "nueva-etiqueta", content: "", depth: 0 }];
     }
     state.editor.selectedTagIndex = 0;
     state.editor.promptName = "";
@@ -1061,6 +1137,7 @@ function init() {
         state.editor.editingPromptId = null;
         state.editor.promptName = "";
     }
+    state.editor.tags.forEach(t => { if (t.depth === undefined) t.depth = 0; });
 
     // Initial render
     renderTags();
@@ -1108,6 +1185,8 @@ function init() {
     document.querySelector(".btn-delete-tag").addEventListener("click", deleteSelectedTag);
     document.querySelector(".btn-move-up").addEventListener("click", moveTagUp);
     document.querySelector(".btn-move-down").addEventListener("click", moveTagDown);
+    document.querySelector(".btn-nest-out").addEventListener("click", nestTagOut);
+    document.querySelector(".btn-nest-in").addEventListener("click", nestTagIn);
 
     document.querySelector(".btn-save-editor").addEventListener("click", savePrompt);
     document.querySelector(".btn-new-editor").addEventListener("click", clearEditor);

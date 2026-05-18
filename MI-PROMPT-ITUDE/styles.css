@@ -438,12 +438,15 @@ h3 {
 
 /* Tag list & move buttons */
 .tag-list-container {
-    display: flex;
+    display: grid;
+    grid-template-areas: "empty arrows-nest" "arrows-move list";
+    grid-template-columns: 40px 1fr;
     gap: 0.5rem;
     align-items: flex-start;
 }
 
 .tag-move-buttons {
+    grid-area: arrows-move;
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
@@ -453,9 +456,26 @@ h3 {
     padding: 0.4rem 0.6rem;
     font-size: 0.9rem;
     line-height: 1;
+    height: 80px;
+}
+
+.tag-nest-buttons {
+    grid-area: arrows-nest;
+    display: flex;
+    gap: 0.3rem;
+    margin-top: 0.5rem;
+    height: 35px;
+}
+
+.tag-nest-buttons .btn {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.9rem;
+    line-height: 1;
+    width: 85px;
 }
 
 .tag-list {
+    grid-area: list;
     flex: 1;
     display: grid;
     gap: 0.4rem;
@@ -1159,6 +1179,14 @@ h3 {
     }
 
     .tag-move-buttons .btn {
+        flex: 1;
+    }
+
+    .tag-nest-buttons {
+        width: 100%;
+    }
+
+    .tag-nest-buttons .btn {
         flex: 1;
     }
 
