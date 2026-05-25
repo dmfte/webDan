@@ -1,4 +1,4 @@
-import { RangeSlider } from '../assets/js/RangeSlider.js';
+import { RangeSlider } from '/assets/js/RangeSlider.js';
 
 const WORKER_URL = 'https://wol-worker.dmfte-dev.workers.dev';
 const WOL_DAILY = 'https://wol.jw.org/es/wol/h/r4/lp-s';
