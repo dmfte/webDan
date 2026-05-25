@@ -17,7 +17,8 @@ const defaultState = {
         sortOrder: "date-desc",
         viewMode: "todos",
         theme: "oscuro",
-        startWithDefaultTags: true
+        startWithDefaultTags: true,
+        useCorrelativeId: true
     },
     editor: {
         tags: [
@@ -122,6 +123,19 @@ function escapeHtml(text) {
 function formatPromptPreview(tags) {
     if (!tags.length) return "";
 
+    const useIds = state.config.useCorrelativeId;
+
+    // Count occurrences of each tag name to decide which need correlative IDs
+    const nameCounts = {};
+    if (useIds) {
+        for (const tag of tags) {
+            nameCounts[tag.name] = (nameCounts[tag.name] || 0) + 1;
+        }
+    }
+
+    // Track the next ID to assign per tag name
+    const nameNextId = {};
+
     const lines = [];
     const stack = [];
     const indent = (d) => "  ".repeat(d);
@@ -134,7 +148,13 @@ function formatPromptPreview(tags) {
             lines.push(`${indent(closed.depth)}</${closed.name}>`);
         }
 
-        lines.push(`${indent(depth)}<${tag.name}>`);
+        let openTag = tag.name;
+        if (useIds && nameCounts[tag.name] > 1) {
+            nameNextId[tag.name] = (nameNextId[tag.name] || 0) + 1;
+            openTag = `${tag.name} id="${nameNextId[tag.name]}"`;
+        }
+
+        lines.push(`${indent(depth)}<${openTag}>`);
         if (tag.content) {
             tag.content.split("\n").forEach(line => {
                 lines.push(`${indent(depth)}${line}`);
@@ -327,6 +347,15 @@ function renderTags() {
     const tagList = document.getElementById("tag-list");
     tagList.innerHTML = "";
 
+    const useIds = state.config.useCorrelativeId;
+    const nameCounts = {};
+    const nameNextId = {};
+    if (useIds) {
+        for (const t of state.editor.tags) {
+            nameCounts[t.name] = (nameCounts[t.name] || 0) + 1;
+        }
+    }
+
     state.editor.tags.forEach((tag, index) => {
         const depth = tag.depth || 0;
 
@@ -337,9 +366,15 @@ function renderTags() {
         input.className = "tag-choice";
         input.checked = index === state.editor.selectedTagIndex;
 
+        let idAttr = "";
+        if (useIds && nameCounts[tag.name] > 1) {
+            nameNextId[tag.name] = (nameNextId[tag.name] || 0) + 1;
+            idAttr = ` id="${nameNextId[tag.name]}"`;
+        }
+
         const label = document.createElement("label");
         label.setAttribute("for", `tag-${index}`);
-        label.textContent = `<${tag.name}>`;
+        label.textContent = `<${tag.name}${idAttr}>`;
         if (depth > 0) {
             label.style.marginLeft = `${depth * 1.2}rem`;
         }
@@ -931,6 +966,11 @@ function applySavedConfig() {
     }
     document.getElementById("config-etiquetas-default").checked = state.config.startWithDefaultTags;
 
+    if (state.config.useCorrelativeId === undefined) {
+        state.config.useCorrelativeId = true;
+    }
+    document.getElementById("config-id-correlativo").checked = state.config.useCorrelativeId;
+
     updateSortButtons();
 }
 
@@ -1224,6 +1264,12 @@ function init() {
     document.getElementById("config-etiquetas-default").addEventListener("change", (e) => {
         state.config.startWithDefaultTags = e.target.checked;
         saveState();
+    });
+
+    document.getElementById("config-id-correlativo").addEventListener("change", (e) => {
+        state.config.useCorrelativeId = e.target.checked;
+        saveState();
+        updatePreview();
     });
 
     document.querySelector(".btn-reset-storage").addEventListener("click", () => {
