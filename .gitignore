@@ -1,3 +1,9 @@
 CLAUDE.md
 MI-PROMPT-ITUDE/.workers/worker.js
 /.workers
+/WOL_READER/wol-worker
+/WOL_READER/wol-worker
+WOL_READER/wol-worker/package.json
+WOL_READER/wol-worker/src/index.js
+WOL_READER/wol-worker/package.json
+WOL_READER/wol-worker/src/index.js

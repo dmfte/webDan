@@ -1,43 +1,43 @@
 import { RangeSlider } from '../assets/js/RangeSlider.js';
 
 const WORKER_URL = 'https://wol-worker.dmfte-dev.workers.dev';
-const WOL_DAILY = 'https://wol.jw.org/es/wol/h/r4/lp-s';
+// const WORKER_URL = 'http://localhost:8789';
 
-const $date = document.getElementById('date');
+const $heading = document.getElementById('heading');
 const $theme = document.getElementById('theme');
 const $body = document.getElementById('body');
 const $playBtn = document.getElementById('playBtn');
 const $status = document.getElementById('status');
-const $prevDay = document.getElementById('prevDayBtn');
-const $nextDay = document.getElementById('nextDayBtn');
 const $sliderWrap = document.getElementById('sliderWrap');
+const $urlInput = document.getElementById('urlInput');
+const $fetchBtn = document.getElementById('fetchBtn');
 
 let audio = null;
 let fullText = '';
-let currentDate = new Date();
 let slider = null;
 let isSeeking = false;
 let loadController = null;
 
-init();
-
-function wolUrlForDate(date) {
-  return `${WOL_DAILY}/${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+function isWolUrl(url) {
+  try {
+    return new URL(url).hostname === 'wol.jw.org';
+  } catch {
+    return false;
+  }
 }
 
-async function loadDay(date) {
+async function loadUrl(url) {
   if (loadController) loadController.abort();
   loadController = new AbortController();
 
-  currentDate = date;
   stopAudio();
   $playBtn.disabled = true;
   setStatus('Cargando texto...', true);
+  $heading.textContent = '';
   $theme.textContent = '';
   $body.innerHTML = '';
 
   try {
-    const url = wolUrlForDate(date);
     const res = await fetch(`${WORKER_URL}/?url=${encodeURIComponent(url)}`, {
       signal: loadController.signal
     });
@@ -49,32 +49,30 @@ async function loadDay(date) {
   } catch (e) {
     if (e.name === 'AbortError') return;
     setStatus('Error al cargar: ' + e.message);
+    $playBtn.disabled = false;
   }
 }
 
-async function init() {
-  loadDay(currentDate);
-}
-
-$prevDay.addEventListener('click', () => {
-  const prev = new Date(currentDate);
-  prev.setDate(prev.getDate() - 1);
-  loadDay(prev);
+$fetchBtn.addEventListener('click', () => {
+  const url = $urlInput.value.trim();
+  if (!isWolUrl(url)) {
+    setStatus('Solo se admiten URLs de wol.jw.org');
+    return;
+  }
+  loadUrl(url);
 });
 
-$nextDay.addEventListener('click', () => {
-  const next = new Date(currentDate);
-  next.setDate(next.getDate() + 1);
-  loadDay(next);
+$urlInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') $fetchBtn.click();
 });
 
 function displayText(text) {
-  const lines = text.split('\n\n');
-  const heading = lines[0] || '';
-  const theme = lines[1] || '';
-  const body = lines.slice(2).join('\n\n');
+  const parts = text.split('\n\n');
+  const heading = parts[0] || '';
+  const theme = parts[1] || '';
+  const body = parts.slice(2).join('\n\n');
 
-  $date.textContent = heading;
+  $heading.textContent = heading;
   $theme.textContent = theme;
 
   $body.innerHTML = body.replace(

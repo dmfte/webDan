@@ -10,14 +10,14 @@
   <div class="container">
     <header>
       <h1>Texto del Dia</h1>
-      <div class="date-nav">
-        <button class="nav-btn" id="prevDayBtn" aria-label="Día anterior">«</button>
-        <div class="date" id="date"></div>
-        <button class="nav-btn" id="nextDayBtn" aria-label="Día siguiente">»</button>
+      <div class="url-row">
+        <input type="text" id="urlInput" value="https://wol.jw.org/es/wol/h/r4/lp-s" spellcheck="false" autocomplete="off" />
+        <button class="fetch-btn" id="fetchBtn">Cargar</button>
       </div>
     </header>
 
     <div class="text-display" id="textDisplay">
+      <div class="heading" id="heading"></div>
       <span class="theme" id="theme"></span>
       <span id="body"></span>
     </div>
