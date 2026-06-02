@@ -18,7 +18,8 @@ const defaultState = {
         viewMode: "todos",
         theme: "oscuro",
         startWithDefaultTags: true,
-        useCorrelativeId: true
+        useCorrelativeId: true,
+        useAutocompletado: true
     },
     editor: {
         tags: [
@@ -174,6 +175,65 @@ function formatPromptPreview(tags) {
 /** Returns today's date as YYYY-MM-DD. */
 function getCurrentDate() {
     return new Date().toISOString().slice(0, 10);
+}
+
+/**
+ * Returns the caret position { top, left, height } relative to field.parentElement,
+ * or null when the selection is unavailable or outside the field.
+ * Used by both the block-cursor and the suggestion chip.
+ */
+function getCaretCoords(field) {
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount) return null;
+
+    const range = sel.getRangeAt(0);
+    if (!field.contains(range.startContainer)) return null;
+
+    const r = range.cloneRange();
+    r.collapse(true);
+    let caretRect = r.getBoundingClientRect();
+
+    if (!caretRect.height) {
+        const fieldRect = field.getBoundingClientRect();
+        const style     = getComputedStyle(field);
+        // lineHeight in px: getComputedStyle returns "normal" when not set, so fall back
+        // to fontSize * 1.2 in that case.
+        const lineH   = parseFloat(style.lineHeight) || (parseFloat(style.fontSize) * 1.2) || 20;
+        const padTop  = parseFloat(style.paddingTop);
+        const padLeft = parseFloat(style.paddingLeft);
+
+        // Strategy 1: measure the character immediately before the caret.
+        if (range.startOffset > 0 && range.startContainer.nodeType === Node.TEXT_NODE) {
+            const testRange = document.createRange();
+            testRange.setStart(range.startContainer, range.startOffset - 1);
+            testRange.setEnd(range.startContainer, range.startOffset);
+            const testRect = testRange.getBoundingClientRect();
+            if (testRect.height) {
+                caretRect = { top: testRect.bottom, left: fieldRect.left + padLeft, height: testRect.height };
+            }
+        }
+
+        // Strategy 2: count \n characters before the caret to derive the visual line.
+        if (!caretRect.height && range.startContainer.nodeType === Node.TEXT_NODE) {
+            const pre = document.createRange();
+            pre.selectNodeContents(field);
+            pre.setEnd(range.startContainer, range.startOffset);
+            const linesBefore = (pre.toString().match(/\n/g) || []).length;
+            caretRect = { top: fieldRect.top + padTop + linesBefore * lineH, left: fieldRect.left + padLeft, height: lineH };
+        }
+
+        // Final fallback: top-left of field.
+        if (!caretRect.height) {
+            caretRect = { top: fieldRect.top + padTop, left: fieldRect.left + padLeft, height: lineH };
+        }
+    }
+
+    const containerRect = field.parentElement.getBoundingClientRect();
+    return {
+        top:    caretRect.top    - containerRect.top,
+        left:   caretRect.left   - containerRect.left,
+        height: caretRect.height
+    };
 }
 
 // ============================================
@@ -971,6 +1031,11 @@ function applySavedConfig() {
     }
     document.getElementById("config-id-correlativo").checked = state.config.useCorrelativeId;
 
+    if (state.config.useAutocompletado === undefined) {
+        state.config.useAutocompletado = true;
+    }
+    document.getElementById("config-autocompletado").checked = state.config.useAutocompletado;
+
     updateSortButtons();
 }
 
@@ -999,6 +1064,126 @@ function saveConfigOnChange() {
 }
 
 // ============================================
+// Autocomplete (suggestion chip)
+// ============================================
+
+const autocomplete = (() => {
+    let chipEl, hintEl, field;
+    let currentSuggestion = null;
+    let debounceTimer     = null;
+    let controller        = null;
+    let getContext        = null;
+
+    // Set this to your deployed worker URL after `wrangler deploy`.
+    // While null the hardcoded stub is used instead.
+    const WORKER_URL = 'https://mi-prompt-itude-predictive-worker.dmfte-dev.workers.dev';
+
+    const DEBOUNCE_MS = 350;
+    const MIN_LENGTH  = 20;
+    const CURSOR_GAP  = 12;
+
+    function init(fieldEl, chipElement, hintElement, contextFn) {
+        field      = fieldEl;
+        chipEl     = chipElement;
+        hintEl     = hintElement;
+        getContext = contextFn;
+    }
+
+    function onInput() {
+        clearTimeout(debounceTimer);
+        hide();
+
+        const text = field.textContent;
+        if (text.length < MIN_LENGTH) return;
+        if (!/[\w\s.,?!:\n]$/.test(text)) return;
+
+        debounceTimer = setTimeout(dispatch, DEBOUNCE_MS);
+    }
+
+    async function dispatch() {
+        if (controller) controller.abort();
+        controller = new AbortController();
+        try {
+            const suggestion = await fetchSuggestion(controller.signal);
+            if (suggestion) show(suggestion);
+        } catch (e) {
+            if (e.name !== "AbortError") console.error("Autocomplete error:", e);
+        } finally {
+            controller = null;
+        }
+    }
+
+    async function fetchSuggestion(signal) {
+        if (!WORKER_URL) {
+            await new Promise(r => setTimeout(r, 300));
+            if (signal.aborted) return null;
+            return "incluyendo pasos específicos y resultados esperados";
+        }
+
+        const { text, tagName } = getContext();
+        const res = await fetch(WORKER_URL, {
+            method:  'POST',
+            signal,
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ text, tagName })
+        });
+        if (!res.ok) throw new Error(`Worker ${res.status}`);
+        const data = await res.json();
+        return data.suggestion || null;
+    }
+
+    function show(text) {
+        currentSuggestion  = text;
+        chipEl.textContent = text;
+
+        const coords = getCaretCoords(field);
+        if (!coords) { hide(); return; }
+
+        const containerWidth = field.parentElement.offsetWidth;
+        const fieldPadLeft   = parseFloat(getComputedStyle(field).paddingLeft) || 12;
+        const inlineLeft     = coords.left + CURSOR_GAP;
+        const inlineWidth    = containerWidth - inlineLeft - 8;
+
+        // Measure the suggestion's natural (unconstrained) pixel width
+        chipEl.style.maxWidth   = "none";
+        chipEl.style.visibility = "hidden";
+        chipEl.hidden = false;
+        const naturalWidth = chipEl.scrollWidth;
+        chipEl.hidden = true;
+        chipEl.style.visibility = "";
+
+        const fitsInline = naturalWidth <= inlineWidth;
+
+        chipEl.style.top      = fitsInline ? coords.top + "px"
+                                           : (coords.top + coords.height + 2) + "px";
+        chipEl.style.left     = fitsInline ? inlineLeft + "px"
+                                           : fieldPadLeft + "px";
+        chipEl.style.maxWidth = fitsInline ? inlineWidth + "px"
+                                           : (containerWidth - fieldPadLeft - 8) + "px";
+
+        chipEl.hidden = false;
+        hintEl.hidden = false;
+    }
+
+    function hide() {
+        currentSuggestion = null;
+        chipEl.hidden     = true;
+        hintEl.hidden     = true;
+    }
+
+    function accept() {
+        if (!currentSuggestion) return false;
+        document.execCommand("insertText", false, currentSuggestion);
+        hide();
+        return true;
+    }
+
+    function dismiss() { hide(); }
+
+    return { init, onInput, accept, dismiss };
+})();
+
+// ============================================
 // Contenteditable: plain-text enforcement & block cursor
 // ============================================
 
@@ -1017,76 +1202,13 @@ function initContentEditable(field) {
     field.parentElement.appendChild(cursorEl);
 
     function positionCursor() {
-        if (document.activeElement !== field) {
-            cursorEl.hidden = true;
-            return;
-        }
-        const sel = window.getSelection();
-        if (!sel || !sel.rangeCount) { cursorEl.hidden = true; return; }
-
-        const range = sel.getRangeAt(0);
-        if (!field.contains(range.startContainer)) { cursorEl.hidden = true; return; }
-
-        const r = range.cloneRange();
-        r.collapse(true);
-        let caretRect = r.getBoundingClientRect();
-
-        // Fallback when rect is zero (caret after newline, start of empty line, empty field)
-        if (!caretRect.height) {
-            const fieldRect = field.getBoundingClientRect();
-            const style = getComputedStyle(field);
-            // lineHeight in px: getComputedStyle returns "normal" when not set, so fall back
-            // to fontSize * 1.2 in that case.
-            const lineH = parseFloat(style.lineHeight) || (parseFloat(style.fontSize) * 1.2) || 20;
-            const padTop  = parseFloat(style.paddingTop);
-            const padLeft = parseFloat(style.paddingLeft);
-
-            // Strategy 1: measure the character immediately before the caret.
-            // Handles cursor-after-\n correctly when the browser gives that char a rect.
-            if (range.startOffset > 0 && range.startContainer.nodeType === Node.TEXT_NODE) {
-                const testRange = document.createRange();
-                testRange.setStart(range.startContainer, range.startOffset - 1);
-                testRange.setEnd(range.startContainer, range.startOffset);
-                const testRect = testRange.getBoundingClientRect();
-                if (testRect.height) {
-                    caretRect = {
-                        top: testRect.bottom,
-                        left: fieldRect.left + padLeft,
-                        height: testRect.height
-                    };
-                }
-            }
-
-            // Strategy 2: count \n characters before the caret to derive the visual line.
-            // This is reliable when the caret is right after a \n (the only zero-rect case
-            // in a single-text-node field), and Strategy 1 failed (e.g. \n rect was zero).
-            if (!caretRect.height && range.startContainer.nodeType === Node.TEXT_NODE) {
-                const pre = document.createRange();
-                pre.selectNodeContents(field);
-                pre.setEnd(range.startContainer, range.startOffset);
-                const linesBefore = (pre.toString().match(/\n/g) || []).length;
-                caretRect = {
-                    top: fieldRect.top + padTop + linesBefore * lineH,
-                    left: fieldRect.left + padLeft,
-                    height: lineH
-                };
-            }
-
-            // Final fallback: top-left of field (empty field or cursor at element level).
-            if (!caretRect.height) {
-                caretRect = {
-                    top: fieldRect.top + padTop,
-                    left: fieldRect.left + padLeft,
-                    height: lineH
-                };
-            }
-        }
-
-        const containerRect = field.parentElement.getBoundingClientRect();
+        if (document.activeElement !== field) { cursorEl.hidden = true; return; }
+        const coords = getCaretCoords(field);
+        if (!coords) { cursorEl.hidden = true; return; }
         cursorEl.hidden = false;
-        cursorEl.style.top  = (caretRect.top  - containerRect.top)  + "px";
-        cursorEl.style.left = (caretRect.left - containerRect.left) + "px";
-        cursorEl.style.height = caretRect.height + "px";
+        cursorEl.style.top    = coords.top    + "px";
+        cursorEl.style.left   = coords.left   + "px";
+        cursorEl.style.height = coords.height + "px";
     }
 
     document.addEventListener("selectionchange", positionCursor);
@@ -1206,12 +1328,31 @@ function init() {
 
     initContentEditable(contentField);
 
+    autocomplete.init(
+        contentField,
+        document.getElementById("suggestion-chip"),
+        document.getElementById("suggestion-hint"),
+        () => ({
+            text:    contentField.textContent,
+            tagName: state.editor.tags[state.editor.selectedTagIndex]?.name || "tag"
+        })
+    );
+
     contentField.addEventListener("input", () => {
         const selectedTag = state.editor.tags[state.editor.selectedTagIndex];
         if (selectedTag) {
             selectedTag.content = contentField.textContent;
             updatePreview();
             saveState();
+        }
+        if (state.config.useAutocompletado) autocomplete.onInput();
+    });
+
+    contentField.addEventListener("keydown", (e) => {
+        if (e.key === "Tab") {
+            if (autocomplete.accept()) e.preventDefault();
+        } else if (!["Shift", "Control", "Alt", "Meta", "CapsLock"].includes(e.key)) {
+            autocomplete.dismiss();
         }
     });
 
@@ -1270,6 +1411,12 @@ function init() {
         state.config.useCorrelativeId = e.target.checked;
         saveState();
         updatePreview();
+    });
+
+    document.getElementById("config-autocompletado").addEventListener("change", (e) => {
+        state.config.useAutocompletado = e.target.checked;
+        saveState();
+        if (!e.target.checked) autocomplete.dismiss();
     });
 
     document.querySelector(".btn-reset-storage").addEventListener("click", () => {

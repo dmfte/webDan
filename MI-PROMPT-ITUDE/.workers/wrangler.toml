@@ -1,0 +1,7 @@
+name = "mi-prompt-itude-predictive-worker"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+# Set your API key as a secret (never commit it):
+#   wrangler secret put ANTHROPIC_API_KEY
+#   wrangler deploy

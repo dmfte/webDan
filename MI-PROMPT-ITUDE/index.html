@@ -52,6 +52,16 @@
                         </label>
                     </div>
                     <div class="config-item">
+                        <label class="config-switch">
+                            <span class="config-label">
+                                Autocompletado predictivo
+                                <span class="config-tooltip" aria-label="Sugiere continuaciones de texto mientras escribes. Funciona mejor cuando ya hay un borrador; con una etiqueta vacía las sugerencias son menos precisas.">?</span>
+                            </span>
+                            <input type="checkbox" id="config-autocompletado" checked="">
+                            <span class="config-slider"></span>
+                        </label>
+                    </div>
+                    <div class="config-item">
                         <button type="button" class="btn btn-danger btn-reset-storage">Borrar datos</button>
                     </div>
                 </div>
@@ -95,9 +105,13 @@
                         <section class="panel panel-content">
                             <h2>Contenido de etiqueta seleccionada</h2>
                             <div class="editor-block">
-                                <label id="label-contenido">&lt;prompt&gt;</label>
+                                <div class="editor-block-top">
+                                    <label id="label-contenido">&lt;prompt&gt;</label>
+                                    <span id="suggestion-hint" class="suggestion-hint" hidden>Tab · aceptar</span>
+                                </div>
                                 <div class="cursor-field">
                                     <div id="contenido-etiqueta" class="prompt-editor" contenteditable="true" role="textbox" aria-multiline="true" spellcheck="false" data-placeholder="Escribe el contenido de la etiqueta aquí..."></div>
+                                    <div id="suggestion-chip" class="suggestion-chip" hidden></div>
                                 </div>
                             </div>
                         </section>

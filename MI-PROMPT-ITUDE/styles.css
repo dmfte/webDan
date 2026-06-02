@@ -548,12 +548,47 @@ h3 {
     background-color: color-mix(in srgb, var(--accent) 15%, var(--surface-strong));
 }
 
-/* Editor block (tag content textarea) */
-.editor-block label {
-    display: block;
-    margin: 0 0 0.55rem;
+/* Editor block header row */
+.editor-block-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 0.55rem;
+}
+
+.editor-block-top label {
     color: var(--muted);
     font-size: 0.85rem;
+}
+
+.suggestion-hint {
+    font-size: 0.7rem;
+    color: var(--muted);
+    opacity: 0.5;
+    font-family: var(--font-secondary);
+}
+
+/* Ghost-text suggestion chip, positioned near the caret */
+.suggestion-chip {
+    position: absolute;
+    z-index: 5;
+    pointer-events: none;
+    font-family: var(--font-primary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #b7ffc6;
+    opacity: 0.45;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.app-shell:has(#tema-claro:checked) .suggestion-chip {
+    font-family: var(--font-paper);
+    font-size: 1.22rem;
+    line-height: var(--paper-line-height, 1.9rem);
+    color: #24344a;
+    opacity: 0.35;
 }
 
 /* Blinking block cursor for the contenteditable editor */
