@@ -1,6 +1,0 @@
-name = "wol-worker"
-main = "src/index.js"
-compatibility_date = "2025-05-01"
-
-[dev]
-port = 8789
