@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MDEPUB</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    @font-face {
+      font-family: 'VT323';
+      src: url('/assets/fonts/VT323.ttf') format('truetype');
+      font-display: swap;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="pixel-border"></div>
+    <h1>MDEPUB</h1>
+    <p class="tagline">&#9660; MARKDOWN &#187; EPUB CONVERTER &#9660;</p>
+    <div class="pixel-border"></div>
+  </header>
+
+  <main>
+    <section class="card">
+      <label class="field-label" for="md-input">&#9658; PASTE MARKDOWN</label>
+      <div id="drop-zone" class="drop-zone">
+        <label for="file-input"><span id="drop-label">DROP .MD FILE HERE</span></label>
+        <input type="file" id="file-input" accept=".md,.txt" />
+      </div>
+      <textarea id="md-input" placeholder="&#9608; PASTE MARKDOWN CONTENT HERE...&#10;&#10;Or drop a .md file above."></textarea>
+      <div class="input-stats">
+        <span id="word-count">0 WORDS</span>
+        <span id="chapter-count">0 CHAPTERS</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <label class="field-label">&#9658; CHAPTER SPLIT</label>
+      <div class="toggle-group" id="split-toggle">
+        <button class="toggle-btn active" data-val="h1">H1 ONLY</button>
+        <button class="toggle-btn" data-val="h1h2">H1 + H2</button>
+      </div>
+    </section>
+
+    <section class="actions">
+      <button id="download-btn" class="btn-primary">&#9660; DOWNLOAD .EPUB</button>
+    </section>
+  </main>
+
+  <!-- Metadata modal -->
+  <div id="meta-overlay" class="overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <span>&#9608;&#9608; BOOK METADATA &#9608;&#9608;</span>
+      </div>
+      <form id="meta-form">
+        <div class="field">
+          <label for="meta-title">TITLE</label>
+          <input type="text" id="meta-title" placeholder="My Book" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="meta-author">AUTHOR</label>
+          <input type="text" id="meta-author" placeholder="Author Name" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="meta-date">DATE</label>
+          <input type="date" id="meta-date" />
+        </div>
+        <div class="field">
+          <label for="meta-lang">LANGUAGE</label>
+          <select id="meta-lang">
+            <option value="es">ES — SPANISH</option>
+            <option value="en">EN — ENGLISH</option>
+            <option value="fr">FR — FRENCH</option>
+            <option value="de">DE — GERMAN</option>
+            <option value="pt">PT — PORTUGUESE</option>
+            <option value="it">IT — ITALIAN</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn-primary">&#9658; GENERATE</button>
+          <button type="button" id="meta-cancel" class="btn-secondary">&#215; CANCEL</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  <div id="loading-overlay" class="overlay hidden">
+    <div class="loading-box">
+      <div class="pixel-spinner" id="spinner"></div>
+      <p id="loading-msg">BUILDING EPUB...</p>
+    </div>
+  </div>
+
+  <script src="assets/fflate.min.js"></script>
+  <script src="assets/marked.min.js"></script>
+  <script src="index.js"></script>
+</body>
+</html>

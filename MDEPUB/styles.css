@@ -1,0 +1,347 @@
+:root {
+  --bg: #080810;
+  --surface: #10101e;
+  --surface2: #181830;
+  --border: #2a2a50;
+  --border-bright: #4040a0;
+  --green: #00ff41;
+  --cyan: #00ffff;
+  --yellow: #ffdd00;
+  --red: #ff2d55;
+  --blue: #3355ff;
+  --text: #e8e8f0;
+  --muted: #6060a0;
+  --font: 'VT323', 'Courier New', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 18px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  min-height: 100vh;
+  padding-bottom: 2rem;
+}
+
+/* ── Header ─────────────────────────────────── */
+header {
+  background: var(--surface);
+  padding: 1rem;
+  text-align: center;
+  border-bottom: 2px solid var(--border);
+}
+
+.pixel-border {
+  height: 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--green) 0px, var(--green) 8px,
+    transparent 8px, transparent 16px,
+    var(--cyan) 16px, var(--cyan) 24px,
+    transparent 24px, transparent 32px
+  );
+  margin: 4px 0;
+}
+
+header h1 {
+  font-size: 3.2rem;
+  color: var(--green);
+  letter-spacing: 8px;
+  text-shadow: 0 0 12px var(--green), 0 0 24px rgba(0,255,65,0.3);
+  line-height: 1;
+  margin: 0.4rem 0;
+}
+
+.tagline {
+  font-size: 1rem;
+  color: var(--cyan);
+  letter-spacing: 3px;
+  margin-top: 4px;
+}
+
+/* ── Main layout ─────────────────────────────── */
+main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ── Cards ───────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  padding: 0.8rem;
+}
+
+.field-label {
+  display: block;
+  color: var(--yellow);
+  font-size: 1rem;
+  letter-spacing: 2px;
+  margin-bottom: 0.5rem;
+}
+
+/* ── Drop zone ───────────────────────────────── */
+.drop-zone {
+  border: 2px dashed var(--border-bright);
+  padding: 0.7rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+  position: relative;
+  transition: border-color 0.1s, color 0.1s;
+}
+
+.drop-zone:hover, .drop-zone.drag-over {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
+.drop-zone label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.drop-zone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Textarea ────────────────────────────────── */
+#md-input {
+  width: 100%;
+  min-height: 220px;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 1rem;
+  padding: 0.6rem;
+  resize: vertical;
+  outline: none;
+  letter-spacing: 1px;
+  line-height: 1.5;
+}
+
+#md-input:focus { border-color: var(--green); }
+
+#md-input::placeholder { color: var(--muted); }
+
+.input-stats {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+
+/* ── Toggle group ────────────────────────────── */
+.toggle-group {
+  display: flex;
+  gap: 4px;
+}
+
+.toggle-btn {
+  flex: 1;
+  background: var(--surface2);
+  border: 2px solid var(--border);
+  color: var(--muted);
+  font-family: var(--font);
+  font-size: 1rem;
+  letter-spacing: 2px;
+  padding: 0.5rem;
+  cursor: pointer;
+  outline: none;
+}
+
+.toggle-btn.active {
+  background: var(--blue);
+  border-color: var(--cyan);
+  color: var(--text);
+}
+
+.toggle-btn:hover:not(.active) {
+  border-color: var(--border-bright);
+  color: var(--text);
+}
+
+/* ── Buttons ─────────────────────────────────── */
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-primary {
+  flex: 1;
+  background: var(--green);
+  border: 2px solid var(--green);
+  color: var(--bg);
+  font-family: var(--font);
+  font-size: 1.3rem;
+  letter-spacing: 3px;
+  padding: 0.7rem 1rem;
+  cursor: pointer;
+  outline: none;
+  font-weight: bold;
+  text-shadow: none;
+}
+
+.btn-primary:hover {
+  background: var(--bg);
+  color: var(--green);
+  box-shadow: 0 0 12px var(--green);
+}
+
+.btn-primary:active {
+  transform: translateY(2px);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 2px solid var(--red);
+  color: var(--red);
+  font-family: var(--font);
+  font-size: 1.1rem;
+  letter-spacing: 2px;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  outline: none;
+}
+
+.btn-secondary:hover {
+  background: var(--red);
+  color: var(--bg);
+}
+
+/* ── Modal ───────────────────────────────────── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 8, 16, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+
+.overlay.hidden { display: none; }
+
+.modal {
+  background: var(--surface);
+  border: 2px solid var(--border-bright);
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 0 32px rgba(0, 255, 65, 0.15);
+}
+
+.modal-header {
+  background: var(--border-bright);
+  color: var(--text);
+  padding: 0.5rem 0.8rem;
+  font-size: 1.1rem;
+  letter-spacing: 3px;
+  text-align: center;
+}
+
+#meta-form {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.field label {
+  font-size: 0.85rem;
+  color: var(--yellow);
+  letter-spacing: 2px;
+}
+
+.field input,
+.field select {
+  background: var(--bg);
+  border: 2px solid var(--border);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 1rem;
+  padding: 0.4rem 0.5rem;
+  outline: none;
+  letter-spacing: 1px;
+  width: 100%;
+}
+
+.field input:focus,
+.field select:focus { border-color: var(--green); }
+
+.field select option { background: var(--surface); }
+
+.modal-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+}
+
+/* ── Loading ─────────────────────────────────── */
+.loading-box {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pixel-spinner {
+  width: 48px;
+  height: 48px;
+  background: var(--green);
+  animation: pixel-spin 0.4s steps(4) infinite;
+}
+
+@keyframes pixel-spin {
+  0%   { clip-path: polygon(0 0, 50% 0, 50% 50%, 0 50%); }
+  25%  { clip-path: polygon(50% 0, 100% 0, 100% 50%, 50% 50%); }
+  50%  { clip-path: polygon(50% 50%, 100% 50%, 100% 100%, 50% 100%); }
+  75%  { clip-path: polygon(0 50%, 50% 50%, 50% 100%, 0 100%); }
+  100% { clip-path: polygon(0 0, 50% 0, 50% 50%, 0 50%); }
+}
+
+#loading-msg {
+  color: var(--green);
+  font-size: 1.2rem;
+  letter-spacing: 3px;
+}
+
+/* ── Scrollbar ───────────────────────────────── */
+::-webkit-scrollbar { width: 8px; background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border-bright); }
+
+/* ── Mobile fine-tuning ──────────────────────── */
+@media (max-width: 480px) {
+  header h1 { font-size: 2.4rem; letter-spacing: 5px; }
+  main { padding: 0.6rem; }
+  #md-input { min-height: 180px; }
+}
