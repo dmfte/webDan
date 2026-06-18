@@ -3,9 +3,8 @@
 
   // ── State ─────────────────────────────────────────────────────────
   let splitLevel = 'h1';
-  let pendingMeta = null;
-
-  const STORAGE_KEY = 'mdepub_meta';
+  let metaModalOpened = false;    // first-open flag for title auto-fill
+  let modalFromDownload = false;  // true when modal was opened by Download
 
   // ── DOM refs ──────────────────────────────────────────────────────
   const mdInput      = document.getElementById('md-input');
@@ -15,6 +14,8 @@
   const chapterCount = document.getElementById('chapter-count');
   const splitToggle  = document.getElementById('split-toggle');
   const downloadBtn  = document.getElementById('download-btn');
+  const editMetaBtn  = document.getElementById('edit-meta-btn');
+  const metaSubmit   = document.getElementById('meta-submit');
 
   const metaOverlay  = document.getElementById('meta-overlay');
   const metaForm     = document.getElementById('meta-form');
@@ -29,7 +30,6 @@
 
   // ── Init ──────────────────────────────────────────────────────────
   metaDate.value = new Date().toISOString().slice(0, 10);
-  loadSavedMeta();
   updateStats();
 
   // ── Markdown input ────────────────────────────────────────────────
@@ -41,12 +41,6 @@
     const chapters = text ? splitMarkdown(text).length : 0;
     wordCount.textContent    = words.toLocaleString() + ' WORDS';
     chapterCount.textContent = chapters + ' CHAPTER' + (chapters !== 1 ? 'S' : '');
-
-    // Auto-detect title for metadata pre-fill
-    const h1Match = text.match(/^#\s+(.+)$/m);
-    if (h1Match && !metaTitle.value) {
-      metaTitle.value = h1Match[1].trim();
-    }
   }
 
   // ── File drop / input ─────────────────────────────────────────────
@@ -90,21 +84,41 @@
 
     const meta = collectMeta();
     if (!meta.title || !meta.author) {
-      pendingMeta = null;
-      openMetaModal();
+      openMetaModal(true);
     } else {
       startGeneration(md, meta);
     }
   });
 
   // ── Metadata modal ────────────────────────────────────────────────
-  function openMetaModal() {
-    metaOverlay.classList.remove('hidden');
-    if (!metaTitle.value) {
-      const h1Match = mdInput.value.match(/^#\s+(.+)$/m);
-      if (h1Match) metaTitle.value = h1Match[1].trim();
+  editMetaBtn.addEventListener('click', () => openMetaModal(false));
+
+  function openMetaModal(fromDownload) {
+    modalFromDownload = !!fromDownload;
+    metaSubmit.innerHTML = modalFromDownload ? '&#9660; DOWNLOAD' : '&#9658; OK';
+
+    // On the very first open, auto-populate the title from the first
+    // H1 or H2 in the document (only when the field is still empty).
+    if (!metaModalOpened) {
+      metaModalOpened = true;
+      if (!metaTitle.value) {
+        const headingMatch = mdInput.value.match(/^#{1,2}\s+(.+)$/m);
+        if (headingMatch) metaTitle.value = headingMatch[1].trim();
+      }
     }
-    metaTitle.focus();
+
+    metaOverlay.classList.remove('hidden');
+
+    if (modalFromDownload) {
+      // Opened because a field was missing: land on the empty one.
+      const target = !metaTitle.value.trim() ? metaTitle : metaAuthor;
+      target.focus();
+      target.select();
+    } else {
+      // Manual open: focus the title and highlight its content.
+      metaTitle.focus();
+      metaTitle.select();
+    }
   }
 
   function closeMetaModal() {
@@ -113,13 +127,31 @@
 
   metaCancel.addEventListener('click', closeMetaModal);
 
+  // Dismiss on backdrop click (target is the overlay only when the
+  // click lands outside the .modal body) …
+  metaOverlay.addEventListener('click', e => {
+    if (e.target === metaOverlay) closeMetaModal();
+  });
+
+  // … and on Escape, while the modal is open.
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !metaOverlay.classList.contains('hidden')) {
+      closeMetaModal();
+    }
+  });
+
   metaForm.addEventListener('submit', e => {
     e.preventDefault();
-    const meta = collectMeta();
-    if (!meta.title || !meta.author) return;
-    saveMeta(meta);
-    closeMetaModal();
-    startGeneration(mdInput.value.trim(), meta);
+    if (modalFromDownload) {
+      // Download flow: both fields required, then generate.
+      const meta = collectMeta();
+      if (!meta.title || !meta.author) return;
+      closeMetaModal();
+      startGeneration(mdInput.value.trim(), meta);
+    } else {
+      // Plain OK: just keep the entered data in the session.
+      closeMetaModal();
+    }
   });
 
   function collectMeta() {
@@ -129,19 +161,6 @@
       date:   metaDate.value || new Date().toISOString().slice(0, 10),
       lang:   metaLang.value || 'es'
     };
-  }
-
-  function saveMeta(meta) {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(meta)); } catch (_) {}
-  }
-
-  function loadSavedMeta() {
-    try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-      if (saved.title)  metaTitle.value  = saved.title;
-      if (saved.author) metaAuthor.value = saved.author;
-      if (saved.lang)   metaLang.value   = saved.lang;
-    } catch (_) {}
   }
 
   // ── Generation ────────────────────────────────────────────────────
@@ -212,7 +231,6 @@
     setTimeout(() => URL.revokeObjectURL(url), 5000);
 
     hideLoading();
-    saveMeta(meta);
   }
 
   // ── Chapter splitting ─────────────────────────────────────────────
@@ -302,7 +320,7 @@ ${body}
     <item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
     <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
     <item id="cover-image" href="Images/cover.png" media-type="image/png" properties="cover-image"/>
-    <item id="cover" href="cover.xhtml" media-type="application/xhtml+xml"/>
+    <item id="cover" href="cover.xhtml" media-type="application/xhtml+xml" properties="svg"/>
     <item id="css" href="Styles/style.css" media-type="text/css"/>
 ${items}
   </manifest>
@@ -360,10 +378,13 @@ ${points}
 <html xmlns="http://www.w3.org/1999/xhtml" lang="${lang}" xml:lang="${lang}">
 <head>
   <title>Cover</title>
-  <style type="text/css">body{margin:0;padding:0;}img{max-width:100%;height:auto;display:block;}</style>
 </head>
 <body>
-  <img src="../Images/cover.png" alt="Cover" />
+  <div style="height: 100vh; text-align: center; padding: 0pt; margin: 0pt;">
+    <svg xmlns="http://www.w3.org/2000/svg" height="100%" preserveAspectRatio="xMidYMid meet" version="1.1" viewBox="0 0 600 900" width="100%" xmlns:xlink="http://www.w3.org/1999/xlink">
+      <image width="600" height="900" xlink:href="Images/cover.png"/>
+    </svg>
+  </div>
 </body>
 </html>`;
   }

@@ -1,18 +1,94 @@
+/* ════════════════════════════════════════════
+   THEME VARIABLES — swap the active :root block
+   to change the entire app's look.
+   ════════════════════════════════════════════ */
+
+/* ── ACTIVE: Matrix / Neon Green ─────────────── 
 :root {
-  --bg: #080810;
-  --surface: #10101e;
-  --surface2: #181830;
-  --border: #2a2a50;
-  --border-bright: #4040a0;
-  --green: #00ff41;
-  --cyan: #00ffff;
-  --yellow: #ffdd00;
-  --red: #ff2d55;
-  --blue: #3355ff;
-  --text: #e8e8f0;
-  --muted: #6060a0;
-  --font: 'VT323', 'Courier New', monospace;
+  --bg:           #080810;
+  --surface:      #10101e;
+  --surface2:     #181830;
+  --border:       #2a2a50;
+  --border-bright:#4040a0;
+  --green:        #00ff41;   
+  --cyan:         #00ffff;   
+  --yellow:       #ffdd00;   
+  --red:          #ff2d55;   
+  --blue:         #3355ff;   
+  --text:         #e8e8f0;
+  --muted:        #6060a0;
+  --font:         'VT323', 'Courier New', monospace;
 }
+ ── Amber Terminal ───────────────────────────
+:root {
+  --bg:           #0d0800;
+  --surface:      #1a1000;
+  --surface2:     #251800;
+  --border:       #4a2e00;
+  --border-bright:#8c5a00;
+  --green:        #ffb300;
+  --cyan:         #ffd54f;
+  --yellow:       #fff176;
+  --red:          #ff6d00;
+  --blue:         #bf360c;
+  --text:         #ffe082;
+  --muted:        #795548;
+  --font:         'VT323', 'Courier New', monospace;
+}
+
+ ── DOS Blue ─────────────────────────────────
+:root {
+  --bg:           #0000aa;
+  --surface:      #0000cc;
+  --surface2:     #0000ff;
+  --border:       #5555ff;
+  --border-bright:#aaaaff;
+  --green:        #55ff55;
+  --cyan:         #55ffff;
+  --yellow:       #ffff55;
+  --red:          #ff5555;
+  --blue:         #ffffff;
+  --text:         #ffffff;
+  --muted:        #aaaaaa;
+  --font:         'VT323', 'Courier New', monospace;
+}
+
+
+ ── Game Boy LCD ─────────────────────────────
+:root {
+  --bg:           #0f380f;
+  --surface:      #306230;
+  --surface2:     #4a7c3f;
+  --border:       #306230;
+  --border-bright:#8bac0f;
+  --green:        #9bbc0f;
+  --cyan:         #8bac0f;
+  --yellow:       #9bbc0f;
+  --red:          #0f380f;
+  --blue:         #306230;
+  --text:         #9bbc0f;
+  --muted:        #4a7c3f;
+  --font:         'VT323', 'Courier New', monospace;
+}
+
+
+/* ── Synthwave / Purple ───────────────────────*/
+:root {
+  --bg:           #0d0015;
+  --surface:      #1a0030;
+  --surface2:     #260045;
+  --border:       #4a006a;
+  --border-bright:#8000c0;
+  --green:        #7700ff;
+  --cyan:         #00e5ff;
+  --yellow:       #ffe600;
+  --red:          #ff2979;
+  --blue:         #7c00ff;
+  --text:         #f0e0ff;
+  --muted:        #00aabc;
+  --font:         'VT323', 'Courier New', monospace;
+}
+
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -22,20 +98,28 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
-  min-height: 100vh;
-  padding-bottom: 2rem;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* ── Header ─────────────────────────────────── */
 header {
+  flex: 0 0 150px;
   background: var(--surface);
   padding: 1rem;
   text-align: center;
   border-bottom: 2px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .pixel-border {
   height: 4px;
+  flex-shrink: 0;
   background: repeating-linear-gradient(
     90deg,
     var(--green) 0px, var(--green) 8px,
@@ -64,12 +148,25 @@ header h1 {
 
 /* ── Main layout ─────────────────────────────── */
 main {
-  max-width: 640px;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  max-width: 750px;
   margin: 0 auto;
   padding: 1rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  overflow: hidden;
+}
+
+/* The markdown card absorbs leftover vertical space so the
+   page fits the viewport with no scrollbar. */
+main > .card:first-child {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ── Cards ───────────────────────────────────── */
@@ -89,6 +186,7 @@ main {
 
 /* ── Drop zone ───────────────────────────────── */
 .drop-zone {
+  height: 4rem;
   border: 2px dashed var(--border-bright);
   padding: 0.7rem;
   text-align: center;
@@ -127,14 +225,15 @@ main {
 /* ── Textarea ────────────────────────────────── */
 #md-input {
   width: 100%;
-  min-height: 220px;
+  flex: 1 1 auto;
+  min-height: 0;
   background: var(--bg);
   border: 2px solid var(--border);
   color: var(--text);
   font-family: var(--font);
   font-size: 1rem;
   padding: 0.6rem;
-  resize: vertical;
+  resize: none;
   outline: none;
   letter-spacing: 1px;
   line-height: 1.5;
@@ -146,11 +245,30 @@ main {
 
 .input-stats {
   display: flex;
+  align-items: center;
   gap: 1rem;
   margin-top: 0.4rem;
   font-size: 0.85rem;
   color: var(--muted);
   letter-spacing: 1px;
+}
+
+.meta-btn {
+  margin-left: auto;
+  background: transparent;
+  border: 2px solid var(--border);
+  color: var(--cyan);
+  font-family: var(--font);
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  padding: 0.2rem 0.6rem;
+  cursor: pointer;
+  outline: none;
+}
+
+.meta-btn:hover {
+  border-color: var(--cyan);
+  color: var(--text);
 }
 
 /* ── Toggle group ────────────────────────────── */
@@ -340,8 +458,11 @@ main {
 ::-webkit-scrollbar-thumb { background: var(--border-bright); }
 
 /* ── Mobile fine-tuning ──────────────────────── */
+@media (max-width: 750px) {
+  header { flex-basis: 130px; }
+}
+
 @media (max-width: 480px) {
   header h1 { font-size: 2.4rem; letter-spacing: 5px; }
   main { padding: 0.6rem; }
-  #md-input { min-height: 180px; }
 }
