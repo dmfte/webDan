@@ -7,3 +7,4 @@ WOL_READER/wol-worker/package.json
 WOL_READER/wol-worker/src/index.js
 WOL_READER/wol-worker/package.json
 WOL_READER/wol-worker/src/index.js
+assets/.DS_Store

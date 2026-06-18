@@ -204,6 +204,32 @@ main > .card:first-child {
   color: var(--cyan);
 }
 
+/* Keep the font chip and its remove button grouped as one unit. */
+.font-controls {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.font-controls .meta-btn {
+  margin-left: 0;
+}
+
+/* Font picker chip in the stats row: truncate long filenames, highlight
+   when a font is loaded. */
+#font-pick {
+  max-width: 12rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#font-pick.has-font {
+  border-color: var(--cyan);
+  color: var(--text);
+}
+
 .drop-zone label {
   position: absolute;
   inset: 0;
@@ -211,6 +237,16 @@ main > .card:first-child {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+}
+
+/* Keep long filenames (shown after picking) from overflowing their half. */
+.drop-zone label span {
+  display: block;
+  max-width: 100%;
+  padding: 0 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .drop-zone input[type="file"] {
@@ -251,6 +287,12 @@ main > .card:first-child {
   font-size: 0.85rem;
   color: var(--muted);
   letter-spacing: 1px;
+}
+
+.input-counts {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .meta-btn {
@@ -361,7 +403,7 @@ main > .card:first-child {
   padding: 1rem;
 }
 
-.overlay.hidden { display: none; }
+.hidden { display: none; }
 
 .modal {
   background: var(--surface);
@@ -465,4 +507,17 @@ main > .card:first-child {
 @media (max-width: 480px) {
   header h1 { font-size: 2.4rem; letter-spacing: 5px; }
   main { padding: 0.6rem; }
+
+  /* Stack the stats controls vertically as centered pairs so the
+     buttons get full width and stop wrapping mid-label. */
+  .input-stats {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .font-controls,
+  #edit-meta-btn {
+    margin-left: 0;
+  }
 }

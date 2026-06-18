@@ -30,8 +30,15 @@
       </div>
       <textarea id="md-input" placeholder="&#9608; PASTE MARKDOWN CONTENT HERE...&#10;&#10;Or drop a .md file above."></textarea>
       <div class="input-stats">
-        <span id="word-count">0 WORDS</span>
-        <span id="chapter-count">0 CHAPTERS</span>
+        <span class="input-counts">
+          <span id="word-count">0 WORDS</span>
+          <span id="chapter-count">0 CHAPTERS</span>
+        </span>
+        <span class="font-controls">
+          <label for="font-input" id="font-pick" class="meta-btn">+ CUSTOM FONT</label>
+          <input type="file" id="font-input" accept=".ttf,.otf,.woff,.woff2" hidden />
+          <button type="button" id="font-clear" class="meta-btn hidden" title="Remove font">&#215;</button>
+        </span>
         <button type="button" id="edit-meta-btn" class="meta-btn">&#9998; TITLE &amp; AUTHOR</button>
       </div>
     </section>

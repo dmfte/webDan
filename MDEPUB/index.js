@@ -5,6 +5,15 @@
   let splitLevel = 'h1';
   let metaModalOpened = false;    // first-open flag for title auto-fill
   let modalFromDownload = false;  // true when modal was opened by Download
+  let fontInfo = null;            // embedded font: {family, filename, mime, format, file}
+
+  // Supported font formats → manifest media-type + CSS format() hint.
+  const FONT_TYPES = {
+    ttf:   { mime: 'font/ttf',   format: 'truetype' },
+    otf:   { mime: 'font/otf',   format: 'opentype' },
+    woff:  { mime: 'font/woff',  format: 'woff' },
+    woff2: { mime: 'font/woff2', format: 'woff2' }
+  };
 
   // ── DOM refs ──────────────────────────────────────────────────────
   const mdInput      = document.getElementById('md-input');
@@ -25,6 +34,10 @@
   const metaDate     = document.getElementById('meta-date');
   const metaLang     = document.getElementById('meta-lang');
 
+  const fontInput    = document.getElementById('font-input');
+  const fontPick     = document.getElementById('font-pick');
+  const fontClear    = document.getElementById('font-clear');
+
   const loadingOverlay = document.getElementById('loading-overlay');
   const loadingMsg     = document.getElementById('loading-msg');
 
@@ -44,18 +57,31 @@
   }
 
   // ── File drop / input ─────────────────────────────────────────────
+  // One drop zone for both inputs: route the dropped file by extension
+  // (text → Markdown, font extension → embedded font, else reject).
   dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
   dropZone.addEventListener('drop', e => {
     e.preventDefault();
     dropZone.classList.remove('drag-over');
     const file = e.dataTransfer.files[0];
-    if (file) readFile(file);
+    if (file) routeDroppedFile(file);
   });
 
   fileInput.addEventListener('change', e => {
     if (e.target.files[0]) readFile(e.target.files[0]);
   });
+
+  function routeDroppedFile(file) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (ext === 'md' || ext === 'txt') {
+      readFile(file);
+    } else if (FONT_TYPES[ext]) {
+      setFont(file);
+    } else {
+      alert('UNSUPPORTED FILE — DROP .MD / .TXT OR A FONT (.TTF/.OTF/.WOFF/.WOFF2)');
+    }
+  }
 
   function readFile(file) {
     const reader = new FileReader();
@@ -65,6 +91,65 @@
       updateStats();
     };
     reader.readAsText(file);
+  }
+
+  // ── Font input ────────────────────────────────────────────────────
+  const MAX_FONT_BYTES = 5 * 1024 * 1024; // 5 MB ceiling
+
+  fontInput.addEventListener('change', e => {
+    if (e.target.files[0]) setFont(e.target.files[0]);
+  });
+
+  fontClear.addEventListener('click', clearFont);
+
+  // Validate cheaply at pick time, but keep only the File handle — the
+  // (potentially large) bytes are read lazily at download in startGeneration.
+  async function setFont(file) {
+    const ext  = file.name.split('.').pop().toLowerCase();
+    const type = FONT_TYPES[ext];
+    if (!type) {
+      alert('UNSUPPORTED FONT — USE .TTF, .OTF, .WOFF OR .WOFF2');
+      return;
+    }
+    if (file.size > MAX_FONT_BYTES) {
+      alert('FONT TOO LARGE — MAX 5 MB');
+      return;
+    }
+    // Sniff the first 4 bytes to confirm it really is a font of this kind.
+    const sig = new Uint8Array(await file.slice(0, 4).arrayBuffer());
+    if (!signatureMatches(ext, sig)) {
+      alert('THIS DOES NOT LOOK LIKE A VALID ' + ext.toUpperCase() + ' FONT');
+      return;
+    }
+    const base = file.name.replace(/\.[^.]+$/, '');
+    fontInfo = {
+      family:   base,                                      // CSS font-family name
+      filename: base.replace(/[^A-Za-z0-9._-]/g, '_') + '.' + ext, // safe zip path
+      mime:     type.mime,
+      format:   type.format,
+      file                                                 // bytes read at download
+    };
+    fontPick.textContent = file.name;
+    fontPick.classList.add('has-font');
+    fontClear.classList.remove('hidden');
+  }
+
+  // SFNT/WOFF magic numbers. woff/woff2 are strict; ttf/otf are both SFNT
+  // containers so we accept any of the valid sfnt version tags.
+  function signatureMatches(ext, b) {
+    const tag = String.fromCharCode(b[0], b[1], b[2], b[3]);
+    const u32 = ((b[0] << 24) | (b[1] << 16) | (b[2] << 8) | b[3]) >>> 0;
+    if (ext === 'woff')  return tag === 'wOFF';
+    if (ext === 'woff2') return tag === 'wOF2';
+    return u32 === 0x00010000 || tag === 'OTTO' || tag === 'true' || tag === 'ttcf';
+  }
+
+  function clearFont() {
+    fontInfo = null;
+    fontInput.value = '';
+    fontPick.textContent = '+ CUSTOM FONT';
+    fontPick.classList.remove('has-font');
+    fontClear.classList.add('hidden');
   }
 
   // ── Split toggle ──────────────────────────────────────────────────
@@ -187,6 +272,19 @@
     showLoading('ASSEMBLING EPUB...');
     await tick();
 
+    // Read the embedded font now (lazy): only the File handle was kept at
+    // pick time. Bail out cleanly if it can no longer be read.
+    let fontBytes = null;
+    if (fontInfo) {
+      try {
+        fontBytes = new Uint8Array(await fontInfo.file.arrayBuffer());
+      } catch (err) {
+        hideLoading();
+        alert('COULD NOT READ THE FONT FILE — IT MAY HAVE MOVED. PLEASE RE-ADD IT.');
+        return;
+      }
+    }
+
     const uuid = generateUUID();
     const enc  = new TextEncoder();
 
@@ -197,7 +295,7 @@
 
     files['META-INF/container.xml'] = enc.encode(buildContainerXml());
 
-    files['OEBPS/content.opf'] = enc.encode(buildOpf(meta, uuid, chapterFiles));
+    files['OEBPS/content.opf'] = enc.encode(buildOpf(meta, uuid, chapterFiles, fontInfo));
 
     files['OEBPS/nav.xhtml'] = enc.encode(buildNav(meta, chapterFiles));
 
@@ -207,10 +305,11 @@
 
     files['OEBPS/Images/cover.png'] = coverPng;
 
-    files['OEBPS/Styles/style.css'] = enc.encode(buildEpubCss());
+    files['OEBPS/Styles/style.css'] = enc.encode(buildEpubCss(fontInfo));
 
-    // Fonts folder placeholder
-    files['OEBPS/Fonts/.keep'] = enc.encode('');
+    if (fontInfo) {
+      files['OEBPS/Fonts/' + fontInfo.filename] = fontBytes;
+    }
 
     chapterFiles.forEach(ch => {
       files[`OEBPS/Text/${ch.id}.xhtml`] = enc.encode(ch.xhtml);
@@ -296,8 +395,11 @@ ${body}
 </container>`;
   }
 
-  function buildOpf(meta, uuid, chapters) {
+  function buildOpf(meta, uuid, chapters, fontInfo) {
     const modified = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
+    const fontItem = fontInfo
+      ? `\n    <item id="font-main" href="Fonts/${fontInfo.filename}" media-type="${fontInfo.mime}"/>`
+      : '';
     const items = chapters.map(ch =>
       `    <item id="${ch.id}" href="Text/${ch.id}.xhtml" media-type="application/xhtml+xml"/>`
     ).join('\n');
@@ -321,7 +423,7 @@ ${body}
     <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
     <item id="cover-image" href="Images/cover.png" media-type="image/png" properties="cover-image"/>
     <item id="cover" href="cover.xhtml" media-type="application/xhtml+xml" properties="svg"/>
-    <item id="css" href="Styles/style.css" media-type="text/css"/>
+    <item id="css" href="Styles/style.css" media-type="text/css"/>${fontItem}
 ${items}
   </manifest>
   <spine toc="ncx">
@@ -389,9 +491,18 @@ ${points}
 </html>`;
   }
 
-  function buildEpubCss() {
-    return `body{margin:5%;font-family:serif;font-size:1em;line-height:1.6;}
-h1,h2,h3,h4,h5,h6{font-family:sans-serif;line-height:1.3;margin-top:2em;margin-bottom:0.4em;}
+  function buildEpubCss(fontInfo) {
+    // A single uploaded file is declared as one normal-weight, normal-style
+    // face. Leaving the weight/style descriptors at their defaults lets the
+    // reader synthesise (faux) bold/italic for <strong>/<em>, rather than
+    // claiming the file already covers those weights.
+    const fontFace = fontInfo
+      ? `@font-face{font-family:'${fontInfo.family}';src:url('../Fonts/${fontInfo.filename}') format('${fontInfo.format}');}\n`
+      : '';
+    const bodyFamily = fontInfo ? `'${fontInfo.family}',serif`      : 'serif';
+    const headFamily = fontInfo ? `'${fontInfo.family}',sans-serif` : 'sans-serif';
+    return `${fontFace}body{margin:5%;font-family:${bodyFamily};font-size:1em;line-height:1.6;}
+h1,h2,h3,h4,h5,h6{font-family:${headFamily};line-height:1.3;margin-top:2em;margin-bottom:0.4em;}
 h1{font-size:2em;}h2{font-size:1.5em;}h3{font-size:1.2em;}
 p{margin:0.5em 0;}
 pre,code{font-family:monospace;font-size:0.9em;}
