@@ -192,17 +192,21 @@ h3 {
     transform: translate(-3px, -2px) rotate(45deg);
 }
 
-.config-dropdown {
-    position: absolute;
-    top: calc(100% + 0.5rem);
-    right: 0;
+/* Shared panel look for the config menu and any config sub-menus */
+.config-dropdown-panel {
     min-width: 220px;
     background-color: var(--surface);
     border: 1px solid var(--line);
     border-radius: 12px;
     padding: 0.7rem;
-    display: none;
     z-index: 100;
+}
+
+.config-dropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    display: none;
 }
 
 .config-dropdown.is-open {
@@ -323,6 +327,79 @@ h3 {
 
 .config-tooltip:hover::after {
     opacity: 1;
+}
+
+/* Plantillas sub-menu (flyout opens to the left) */
+.config-item-submenu {
+    position: relative;
+}
+
+.config-submenu {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.config-submenu-current {
+    color: var(--text);
+    font-size: 0.82rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0.25rem 0.5rem;
+}
+
+.config-submenu-flyout {
+    position: absolute;
+    top: 50%;
+    right: calc(100% + 0.6rem);
+    transform: translateY(-50%);
+    min-width: 160px;
+    display: none;
+    flex-direction: column;
+    z-index: 110;
+}
+
+/* Invisible bridge over the gap so hover survives the move into the flyout */
+.config-submenu-flyout::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 100%;
+    width: 0.6rem;
+}
+
+.config-item-submenu:hover .config-submenu-flyout,
+.config-item-submenu:focus-within .config-submenu-flyout {
+    display: flex;
+}
+
+.config-submenu-option {
+    width: 100%;
+    text-align: left;
+    white-space: nowrap;
+    background-color: var(--panel-bg);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 0.45rem 0.72rem;
+    font-family: inherit;
+    font-size: 0.82rem;
+    line-height: 1.2;
+    cursor: pointer;
+}
+
+.config-submenu-option + .config-submenu-option {
+    margin-top: 0.3rem;
+}
+
+.config-submenu-option:hover {
+    border-color: var(--accent);
+}
+
+.config-submenu-option.is-active {
+    border-color: var(--accent);
+    background-color: color-mix(in srgb, var(--accent) 15%, var(--surface-strong));
 }
 
 /* ============================================

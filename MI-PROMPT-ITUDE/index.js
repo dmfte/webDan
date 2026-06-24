@@ -7,6 +7,48 @@
 const STORAGE_KEY = "mi-prompt-itud";
 const DEFAULT_CATEGORY = "Sin categoría";
 
+// Tags used when starting a new prompt with default tags enabled.
+const DEFAULT_TAGS = [
+    {
+        name: "prompt",
+        depth: 0,
+        content:
+            "- Read all tags and understand how they relate to each other before starting to write.\n" +
+            "- Follow the tags inside the 'task' tags in the order their IDs indicate. Don't start the next task before finishing up the current one.\n" +
+            "- Ask me any questions you consider necessary."
+    },
+    { name: "stage", content: "", depth: 1 },
+    { name: "context", content: "", depth: 2 },
+    { name: "objective", content: "", depth: 2 },
+    { name: "rol", content: "", depth: 2 },
+    { name: "task", content: "", depth: 1 },
+    { name: "build", content: "", depth: 2 },
+    { name: "analyze", content: "", depth: 2 },
+    { name: "write", content: "", depth: 2 },
+    { name: "rules", content: "", depth: 1 },
+    { name: "example", content: "", depth: 2 },
+    { name: "style", content: "", depth: 2 },
+    { name: "tone", content: "", depth: 2 }
+];
+
+// Tags used by the CREA template.
+const CREA_TAGS = [
+    { name: "contexto", content: "", depth: 0 },
+    { name: "rol", content: "", depth: 0 },
+    { name: "especificidad", content: "", depth: 0 },
+    { name: "accion", content: "", depth: 0 }
+];
+
+// Valid template ids and their labels (shown in the Plantillas sub-menu).
+const TEMPLATE_LABELS = { vacio: "Vacío", str: "STR", crea: "CREA" };
+
+/** Returns a fresh tag list for the given template id. */
+function getTemplateTags(template) {
+    if (template === "crea") return JSON.parse(JSON.stringify(CREA_TAGS));
+    if (template === "vacio") return [{ name: "nueva-etiqueta", content: "", depth: 0 }];
+    return JSON.parse(JSON.stringify(DEFAULT_TAGS)); // "str"
+}
+
 // ============================================
 // Default State
 // ============================================
@@ -17,16 +59,12 @@ const defaultState = {
         sortOrder: "date-desc",
         viewMode: "todos",
         theme: "oscuro",
-        startWithDefaultTags: true,
+        template: "str",
         useCorrelativeId: true,
         useAutocompletado: true
     },
     editor: {
-        tags: [
-            { name: "stage", content: "", depth: 0 },
-            { name: "task", content: "", depth: 0 },
-            { name: "rules", content: "", depth: 0 }
-        ],
+        tags: JSON.parse(JSON.stringify(DEFAULT_TAGS)),
         selectedTagIndex: 0,
         category: "",
         promptName: "",
@@ -646,15 +684,7 @@ function savePrompt() {
 
 /** Resets the editor. Uses default tags or a single blank tag based on config. */
 function clearEditor() {
-    if (state.config.startWithDefaultTags) {
-        state.editor.tags = [
-            { name: "stage", content: "", depth: 0 },
-            { name: "task", content: "", depth: 0 },
-            { name: "rules", content: "", depth: 0 }
-        ];
-    } else {
-        state.editor.tags = [{ name: "nueva-etiqueta", content: "", depth: 0 }];
-    }
+    state.editor.tags = getTemplateTags(state.config.template);
     state.editor.selectedTagIndex = 0;
     state.editor.promptName = "";
     state.editor.editingPromptId = null;
@@ -1014,17 +1044,27 @@ function handleCategoriesInput() {
 // Config: Save & Restore
 // ============================================
 
-/** Restores UI controls (theme, tab, view mode, sort, default-tags toggle) from saved state. */
+/** Syncs the Plantillas sub-menu (label + active option) with the saved template. */
+function updatePlantillaUI() {
+    const current = document.getElementById("config-plantilla-current");
+    if (current) current.textContent = TEMPLATE_LABELS[state.config.template] || TEMPLATE_LABELS.str;
+    document.querySelectorAll(".config-plantilla-option").forEach((btn) => {
+        btn.classList.toggle("is-active", btn.dataset.template === state.config.template);
+    });
+}
+
+/** Restores UI controls (theme, tab, view mode, sort, template) from saved state. */
 function applySavedConfig() {
     document.getElementById(state.config.theme === "claro" ? "tema-claro" : "tema-oscuro").checked = true;
     document.getElementById(state.config.activeTab === "prompts" ? "tab-prompts" : "tab-editor").checked = true;
     document.getElementById(state.config.viewMode === "categorias" ? "vista-categorias" : "vista-todos").checked = true;
 
-    // Migrate old state that may use the former startWithCrea key
-    if (state.config.startWithDefaultTags === undefined) {
-        state.config.startWithDefaultTags = state.config.startWithCrea ?? true;
+    // Migrate old state that used the former startWithDefaultTags/startWithCrea booleans
+    if (state.config.template === undefined) {
+        const legacy = state.config.startWithDefaultTags ?? state.config.startWithCrea ?? true;
+        state.config.template = legacy ? "str" : "vacio";
     }
-    document.getElementById("config-etiquetas-default").checked = state.config.startWithDefaultTags;
+    updatePlantillaUI();
 
     if (state.config.useCorrelativeId === undefined) {
         state.config.useCorrelativeId = true;
@@ -1402,9 +1442,12 @@ function init() {
     // Close dropdown when clicking anywhere else
     document.addEventListener("click", () => configDropdown.classList.remove("is-open"));
 
-    document.getElementById("config-etiquetas-default").addEventListener("change", (e) => {
-        state.config.startWithDefaultTags = e.target.checked;
-        saveState();
+    document.querySelectorAll(".config-plantilla-option").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            state.config.template = btn.dataset.template;
+            updatePlantillaUI();
+            saveState();
+        });
     });
 
     document.getElementById("config-id-correlativo").addEventListener("change", (e) => {

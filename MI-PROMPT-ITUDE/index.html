@@ -24,7 +24,7 @@
                     <span class="meat"></span>
                     <span class="bottom-bun"></span>
                 </button>
-                <div class="config-dropdown">
+                <div class="config-dropdown config-dropdown-panel">
                     <div class="config-item">
                         <span class="config-label">Modo:</span>
                         <div class="theme-toggle">
@@ -34,12 +34,16 @@
                             <label for="tema-claro" class="toggle-chip">Light</label>
                         </div>
                     </div>
-                    <div class="config-item">
-                        <label class="config-switch">
-                            <span class="config-label">Etiquetas por default</span>
-                            <input type="checkbox" id="config-etiquetas-default" checked="">
-                            <span class="config-slider"></span>
-                        </label>
+                    <div class="config-item config-item-submenu">
+                        <span class="config-label">Plantillas</span>
+                        <div class="config-submenu">
+                            <span class="config-submenu-current" id="config-plantilla-current">STR</span>
+                            <div class="config-submenu-flyout config-dropdown-panel">
+                                <button type="button" class="config-submenu-option config-plantilla-option" data-template="vacio">Vacío</button>
+                                <button type="button" class="config-submenu-option config-plantilla-option" data-template="str">STR</button>
+                                <button type="button" class="config-submenu-option config-plantilla-option" data-template="crea">CREA</button>
+                            </div>
+                        </div>
                     </div>
                     <div class="config-item">
                         <label class="config-switch">
