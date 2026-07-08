@@ -515,6 +515,28 @@ input:focus {
     stroke-dasharray: 6 4;
 }
 
+.rotate-overlay {
+    opacity: 0.7;
+    cursor: pointer;
+}
+
+.rotate-overlay:hover {
+    opacity: 1;
+}
+
+.rotate-overlay ellipse {
+    fill: var(--surface);
+    stroke: var(--primary);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+}
+
+.rotate-overlay text {
+    fill: var(--primary);
+    font-weight: 700;
+    user-select: none;
+}
+
 .strip-empty {
     align-self: center;
     justify-self: center;

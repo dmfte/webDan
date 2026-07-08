@@ -13,6 +13,10 @@
     const SCALE_MIN = 0.25;
     const SCALE_MAX = 1;
     const SCALE_STEP = 0.05;
+    // Tamaño en pantalla del botón de giro (px CSS), igual en escritorio y móvil.
+    // Variables separadas para calibrarlo a mano fácilmente.
+    const ROTATE_BTN_WIDTH = 50;
+    const ROTATE_BTN_HEIGHT = 50;
     const SVG_NS = "http://www.w3.org/2000/svg";
 
     // ------------------------------------------------------------------
@@ -54,8 +58,6 @@
         pageStrip: $(".page-strip"),
         exportPdf: $("#exportPdf"),
         toolbar: $("#pictureToolbar"),
-        rotateLeft: $("#rotateLeft"),
-        rotateRight: $("#rotateRight"),
         scaleDown: $("#scaleDown"),
         scaleUp: $("#scaleUp"),
         scaleLabel: $("#scaleLabel"),
@@ -459,8 +461,55 @@
         rect.setAttribute("height", cell.h);
         rect.setAttribute("pointer-events", "none");
         image.ownerSVGElement.appendChild(rect);
+        image.ownerSVGElement.appendChild(buildRotateOverlay(cell, image.ownerSVGElement));
         el.toolbar.hidden = false;
         updateToolbar();
+    }
+
+    // Botón único de giro horario, centrado sobre la foto seleccionada.
+    // Mide ROTATE_BTN_WIDTH × ROTATE_BTN_HEIGHT px en pantalla: se convierte
+    // de px CSS a unidades del viewBox según el tamaño renderizado del SVG.
+    function buildRotateOverlay(cell, svg) {
+        const cx = cell.x + cell.w / 2;
+        const cy = cell.y + cell.h / 2;
+        const rendered = svg.getBoundingClientRect();
+        const unitsPerPx = rendered.width > 0
+            ? svg.viewBox.baseVal.width / rendered.width
+            : 1;
+        const rx = (ROTATE_BTN_WIDTH / 2) * unitsPerPx;
+        const ry = (ROTATE_BTN_HEIGHT / 2) * unitsPerPx;
+        const g = document.createElementNS(SVG_NS, "g");
+        g.setAttribute("class", "rotate-overlay");
+        g.setAttribute("role", "button");
+        g.setAttribute("aria-label", "Girar a la derecha");
+
+        const ellipse = document.createElementNS(SVG_NS, "ellipse");
+        ellipse.setAttribute("cx", cx);
+        ellipse.setAttribute("cy", cy);
+        ellipse.setAttribute("rx", rx);
+        ellipse.setAttribute("ry", ry);
+
+        const glyph = document.createElementNS(SVG_NS, "text");
+        glyph.setAttribute("x", cx);
+        glyph.setAttribute("y", cy);
+        glyph.setAttribute("text-anchor", "middle");
+        glyph.setAttribute("dominant-baseline", "central");
+        glyph.setAttribute("font-size", Math.min(rx, ry) * 1.2);
+        glyph.textContent = "⟳";
+
+        g.appendChild(ellipse);
+        g.appendChild(glyph);
+        g.addEventListener("click", (e) => {
+            e.stopPropagation();
+            rotateSelected();
+        });
+        return g;
+    }
+
+    function rotateSelected() {
+        if (!state.selectedId) return;
+        const ov = getOverride(state.selectedId);
+        setOverride(state.selectedId, { ...ov, rotation: (ov.rotation + 90) % 360 });
     }
 
     function deselect() {
@@ -470,7 +519,7 @@
     }
 
     function clearSelectionRect() {
-        el.pageStrip.querySelectorAll(".selection-rect").forEach((r) => r.remove());
+        el.pageStrip.querySelectorAll(".selection-rect, .rotate-overlay").forEach((r) => r.remove());
     }
 
     function getOverride(id) {
@@ -495,18 +544,6 @@
         el.scaleUp.disabled = ov.scale >= SCALE_MAX - 0.001;
         el.scaleDown.disabled = ov.scale <= SCALE_MIN + 0.001;
     }
-
-    el.rotateLeft.addEventListener("click", () => {
-        if (!state.selectedId) return;
-        const ov = getOverride(state.selectedId);
-        setOverride(state.selectedId, { ...ov, rotation: (ov.rotation + 270) % 360 });
-    });
-
-    el.rotateRight.addEventListener("click", () => {
-        if (!state.selectedId) return;
-        const ov = getOverride(state.selectedId);
-        setOverride(state.selectedId, { ...ov, rotation: (ov.rotation + 90) % 360 });
-    });
 
     el.scaleDown.addEventListener("click", () => {
         if (!state.selectedId) return;
@@ -573,6 +610,9 @@
             });
         }
         updateNavButtons(total);
+        // Reconstruir el resaltado y el botón de giro con el nuevo tamaño
+        // renderizado, para que el botón conserve su tamaño fijo en px.
+        if (state.selectedId) select(state.selectedId);
     }
 
     function updateNavButtons(total) {
