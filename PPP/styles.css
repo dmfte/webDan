@@ -447,7 +447,9 @@ input:focus {
     flex: 1;
     min-height: 0;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
+    align-content: center;
     justify-content: center;
     gap: var(--strip-gap);
     overflow: hidden;

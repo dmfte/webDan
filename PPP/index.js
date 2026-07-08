@@ -42,6 +42,7 @@
     // ------------------------------------------------------------------
     const $ = (sel) => document.querySelector(sel);
     const el = {
+        settingsToggle: $("#settingsToggle"),
         fileInput: $("#pictureFiles"),
         dropZone: $(".drop-zone"),
         tray: $(".picture-tray"),
@@ -571,7 +572,22 @@
     });
 
     document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") deselect();
+        if (e.key !== "Escape") return;
+        if (el.settingsToggle.checked) {
+            el.settingsToggle.checked = false;
+            return;
+        }
+        deselect();
+    });
+
+    // Cierra el panel de configuración (móvil) al hacer clic fuera de él.
+    // El panel sigue siendo CSS-only; aquí solo se desmarca el checkbox.
+    document.addEventListener("click", (e) => {
+        if (!el.settingsToggle.checked) return;
+        if (e.target.closest(".controls-panel") ||
+            e.target.closest(".panel-open") ||
+            e.target === el.settingsToggle) return;
+        el.settingsToggle.checked = false;
     });
 
     // ------------------------------------------------------------------
@@ -593,15 +609,21 @@
         state.viewStart = Math.max(0, Math.min(state.viewStart, total - k));
 
         if (total) {
+            // En móvil, los grupos de 3 y 4 páginas se acomodan en una
+            // cuadrícula de 2 x 2 en lugar de una sola fila.
+            const isMobile = window.matchMedia("(max-width: 820px)").matches;
+            const cols = isMobile && k >= 3 ? 2 : k;
+            const rows = Math.ceil(k / cols);
+
             const styles = getComputedStyle(el.pageStrip);
             const gap = parseFloat(styles.columnGap) || 0;
             const padX = parseFloat(styles.paddingLeft) + parseFloat(styles.paddingRight);
             const padY = parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom);
-            const availW = (el.pageStrip.clientWidth - padX - (k - 1) * gap) / k;
-            // 18px extra para la etiqueta "Página N" que sobresale por arriba
-            const availH = el.pageStrip.clientHeight - padY - 18;
+            const availW = (el.pageStrip.clientWidth - padX - (cols - 1) * gap) / cols;
+            // 18px extra por fila para la etiqueta "Página N" que sobresale
+            const availH = (el.pageStrip.clientHeight - padY - (rows - 1) * gap - rows * 18) / rows;
             const page = PAGE_SIZES[state.settings.pageSize];
-            const width = Math.max(100, Math.min(availW, availH * (page.w / page.h)));
+            const width = Math.max(100, Math.floor(Math.min(availW, availH * (page.w / page.h))));
 
             sheets.forEach((sheet, i) => {
                 const visible = i >= state.viewStart && i < state.viewStart + k;
