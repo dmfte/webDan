@@ -23,12 +23,13 @@
         overrides: new Map(),   // id -> { rotation: 0|90|180|270, scale: 0.25..1 }
         settings: {
             pageSize: "letter",
-            margins: { top: 0.5, right: 0.5, bottom: 0.5, left: 0.5 },
-            picturesPerPage: 6,
+            margins: { top: 0.2, right: 0.2, bottom: 0.2, left: 0.2 },
+            picturesPerPage: 4,
             gap: 0.15,
             pagesPerScroll: 2
         },
         selectedId: null,
+        viewStart: 0,           // índice de la primera página del grupo visible
         placements: new Map()   // id -> { cell, entry } (reconstruido en cada render)
     };
 
@@ -47,7 +48,6 @@
         marginLeft: $("#marginLeft"),
         picturesPerPage: $("#picturesPerPage"),
         pictureGap: $("#pictureGap"),
-        pagesPerScroll: $("#pagesPerScroll"),
         previewPagesPerScroll: $("#previewPagesPerScroll"),
         prevPages: $("#prevPages"),
         nextPages: $("#nextPages"),
@@ -346,7 +346,7 @@
             empty.innerHTML = "<strong>Sin páginas todavía</strong><span>Agrega fotos para ver la vista previa de tus páginas.</span>";
             el.pageStrip.appendChild(empty);
             deselect();
-            updateNavButtons();
+            updateView();
             return;
         }
 
@@ -357,7 +357,7 @@
             bad.innerHTML = "<strong>No hay espacio para las fotos</strong><span>Los márgenes o la separación no dejan área imprimible. Reduce sus valores.</span>";
             el.pageStrip.appendChild(bad);
             deselect();
-            updateNavButtons();
+            updateView();
             return;
         }
 
@@ -416,7 +416,7 @@
                 deselect();
             }
         }
-        updateNavButtons();
+        updateView();
     }
 
     function applyPlacement(image, cell, entry) {
@@ -543,32 +543,53 @@
     function setPagesPerScroll(value) {
         const k = Math.min(4, Math.max(1, parseInt(value, 10) || 2));
         state.settings.pagesPerScroll = k;
-        el.pagesPerScroll.value = String(k);
         el.previewPagesPerScroll.value = String(k);
-        el.pageStrip.style.setProperty("--visible-pages", k);
-        updateNavButtons();
+        updateView();
     }
 
-    function scrollByPages(direction) {
-        const sheet = el.pageStrip.querySelector(".paper-sheet");
-        if (!sheet) return;
-        const gap = parseFloat(getComputedStyle(el.pageStrip).columnGap) || 24;
-        const step = (sheet.getBoundingClientRect().width + gap) * state.settings.pagesPerScroll;
-        el.pageStrip.scrollBy({ left: direction * step, behavior: "smooth" });
+    // Muestra solo el grupo de páginas actual y dimensiona cada hoja para
+    // que el grupo completo quepa en el área visible, sin desplazamiento.
+    function updateView() {
+        const sheets = el.pageStrip.querySelectorAll(".paper-sheet");
+        const total = sheets.length;
+        const k = state.settings.pagesPerScroll;
+        state.viewStart = Math.max(0, Math.min(state.viewStart, total - k));
+
+        if (total) {
+            const styles = getComputedStyle(el.pageStrip);
+            const gap = parseFloat(styles.columnGap) || 0;
+            const padX = parseFloat(styles.paddingLeft) + parseFloat(styles.paddingRight);
+            const padY = parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom);
+            const availW = (el.pageStrip.clientWidth - padX - (k - 1) * gap) / k;
+            // 18px extra para la etiqueta "Página N" que sobresale por arriba
+            const availH = el.pageStrip.clientHeight - padY - 18;
+            const page = PAGE_SIZES[state.settings.pageSize];
+            const width = Math.max(100, Math.min(availW, availH * (page.w / page.h)));
+
+            sheets.forEach((sheet, i) => {
+                const visible = i >= state.viewStart && i < state.viewStart + k;
+                sheet.classList.toggle("is-offscreen", !visible);
+                sheet.style.width = `${width}px`;
+            });
+        }
+        updateNavButtons(total);
     }
 
-    function updateNavButtons() {
-        const maxScroll = el.pageStrip.scrollWidth - el.pageStrip.clientWidth;
-        el.prevPages.disabled = el.pageStrip.scrollLeft <= 2;
-        el.nextPages.disabled = el.pageStrip.scrollLeft >= maxScroll - 2;
+    function updateNavButtons(total) {
+        el.prevPages.disabled = state.viewStart <= 0;
+        el.nextPages.disabled = state.viewStart + state.settings.pagesPerScroll >= total;
     }
 
-    el.prevPages.addEventListener("click", () => scrollByPages(-1));
-    el.nextPages.addEventListener("click", () => scrollByPages(1));
-    el.pageStrip.addEventListener("scroll", updateNavButtons, { passive: true });
-    window.addEventListener("resize", updateNavButtons);
+    el.prevPages.addEventListener("click", () => {
+        state.viewStart -= state.settings.pagesPerScroll;
+        updateView();
+    });
+    el.nextPages.addEventListener("click", () => {
+        state.viewStart += state.settings.pagesPerScroll;
+        updateView();
+    });
+    window.addEventListener("resize", updateView);
 
-    el.pagesPerScroll.addEventListener("change", () => setPagesPerScroll(el.pagesPerScroll.value));
     el.previewPagesPerScroll.addEventListener("change", () => setPagesPerScroll(el.previewPagesPerScroll.value));
 
     // ------------------------------------------------------------------
@@ -752,6 +773,20 @@
     // ------------------------------------------------------------------
     // Arranque
     // ------------------------------------------------------------------
+    // Los valores por defecto viven solo en state.settings; el marcado
+    // no define value/selected y aquí se vuelca el estado a los controles.
+    function applySettingsToInputs() {
+        const s = state.settings;
+        el.pageSize.value = s.pageSize;
+        el.marginTop.value = String(s.margins.top);
+        el.marginRight.value = String(s.margins.right);
+        el.marginBottom.value = String(s.margins.bottom);
+        el.marginLeft.value = String(s.margins.left);
+        el.picturesPerPage.value = String(s.picturesPerPage);
+        el.pictureGap.value = String(s.gap);
+    }
+
+    applySettingsToInputs();
     setPagesPerScroll(state.settings.pagesPerScroll);
     renderTray();
     renderPages();

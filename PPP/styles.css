@@ -444,18 +444,14 @@ input:focus {
 
 .page-strip {
     --strip-gap: 24px;
-    --visible-pages: 2;
     flex: 1;
     min-height: 0;
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: max(240px, calc((100% - (var(--visible-pages) - 1) * var(--strip-gap)) / var(--visible-pages)));
-    align-items: start;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     gap: var(--strip-gap);
-    overflow: auto;
+    overflow: hidden;
     padding: 28px;
-    scroll-snap-type: x mandatory;
-    scroll-padding: 28px;
 }
 
 .page-strip:focus-visible {
@@ -465,13 +461,17 @@ input:focus {
 
 .paper-sheet {
     position: relative;
+    flex: 0 0 auto;
     aspect-ratio: 8.5 / 11;
     display: flex;
     border: 1px solid #ddd7cd;
     border-radius: 3px;
     background: #ffffff;
     box-shadow: var(--shadow);
-    scroll-snap-align: start;
+}
+
+.paper-sheet.is-offscreen {
+    display: none;
 }
 
 .paper-sheet svg {
@@ -770,7 +770,6 @@ input:focus {
         --strip-gap: 18px;
         min-height: calc(100vh - 190px);
         padding: 24px 16px;
-        scroll-padding: 16px;
     }
 }
 

@@ -55,16 +55,33 @@
                     </div>
                 </section>
 
-                <section class="control-card" aria-labelledby="pageSetupTitle">
+                <section class="control-card" aria-labelledby="pictureLayoutTitle">
                     <div class="section-title">
                         <span class="step-number">2</span>
+                        <h3 id="pictureLayoutTitle">Distribución de fotos</h3>
+                    </div>
+
+                    <label class="field" for="picturesPerPage">
+                        <span>Fotos por página</span>
+                        <input id="picturesPerPage" name="picturesPerPage" type="number" min="1" step="1">
+                    </label>
+
+                    <label class="field" for="pictureGap">
+                        <span>Separación entre fotos</span>
+                        <input id="pictureGap" name="pictureGap" type="number" min="0" step="0.05">
+                    </label>
+                </section>
+
+                <section class="control-card" aria-labelledby="pageSetupTitle">
+                    <div class="section-title">
+                        <span class="step-number">3</span>
                         <h3 id="pageSetupTitle">Configuración de página</h3>
                     </div>
 
                     <label class="field" for="pageSize">
                         <span>Tamaño de página</span>
                         <select id="pageSize" name="pageSize">
-                            <option value="letter" selected>Carta - 8.5 x 11 pulg</option>
+                            <option value="letter">Carta - 8.5 x 11 pulg</option>
                             <option value="officio">Oficio - 8.5 x 13 pulg</option>
                         </select>
                     </label>
@@ -74,57 +91,24 @@
                         <div class="margin-grid">
                             <label class="field compact" for="marginTop">
                                 <span>Arriba</span>
-                                <input id="marginTop" name="marginTop" type="number" min="0" step="0.1" value="0.5">
+                                <input id="marginTop" name="marginTop" type="number" min="0" step="0.1">
                             </label>
                             <label class="field compact" for="marginRight">
                                 <span>Derecha</span>
-                                <input id="marginRight" name="marginRight" type="number" min="0" step="0.1" value="0.5">
+                                <input id="marginRight" name="marginRight" type="number" min="0" step="0.1">
                             </label>
                             <label class="field compact" for="marginBottom">
                                 <span>Abajo</span>
-                                <input id="marginBottom" name="marginBottom" type="number" min="0" step="0.1" value="0.5">
+                                <input id="marginBottom" name="marginBottom" type="number" min="0" step="0.1">
                             </label>
                             <label class="field compact" for="marginLeft">
                                 <span>Izquierda</span>
-                                <input id="marginLeft" name="marginLeft" type="number" min="0" step="0.1" value="0.5">
+                                <input id="marginLeft" name="marginLeft" type="number" min="0" step="0.1">
                             </label>
                         </div>
                     </fieldset>
                 </section>
 
-                <section class="control-card" aria-labelledby="pictureLayoutTitle">
-                    <div class="section-title">
-                        <span class="step-number">3</span>
-                        <h3 id="pictureLayoutTitle">Distribución de fotos</h3>
-                    </div>
-
-                    <label class="field" for="picturesPerPage">
-                        <span>Fotos por página</span>
-                        <input id="picturesPerPage" name="picturesPerPage" type="number" min="1" step="1" value="6">
-                    </label>
-
-                    <label class="field" for="pictureGap">
-                        <span>Separación entre fotos</span>
-                        <input id="pictureGap" name="pictureGap" type="number" min="0" step="0.05" value="0.15">
-                    </label>
-                </section>
-
-                <section class="control-card" aria-labelledby="workspaceTitle">
-                    <div class="section-title">
-                        <span class="step-number">4</span>
-                        <h3 id="workspaceTitle">Área de trabajo</h3>
-                    </div>
-
-                    <label class="field" for="pagesPerScroll">
-                        <span>Máximo de páginas por desplazamiento</span>
-                        <select id="pagesPerScroll" name="pagesPerScroll">
-                            <option value="1">1 página</option>
-                            <option value="2" selected>2 páginas</option>
-                            <option value="3">3 páginas</option>
-                            <option value="4">4 páginas</option>
-                        </select>
-                    </label>
-                </section>
             </aside>
 
             <section class="preview-workspace" aria-label="Área de vista previa de páginas">
@@ -138,7 +122,7 @@
                         <button class="icon-button" type="button" id="prevPages" aria-label="Páginas anteriores">Anterior</button>
                         <select id="previewPagesPerScroll" aria-label="Máximo de páginas visibles por desplazamiento">
                             <option value="1">Mostrar 1 página</option>
-                            <option value="2" selected>Mostrar 2 páginas</option>
+                            <option value="2">Mostrar 2 páginas</option>
                             <option value="3">Mostrar 3 páginas</option>
                             <option value="4">Mostrar 4 páginas</option>
                         </select>
