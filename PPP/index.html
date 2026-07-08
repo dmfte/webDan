@@ -3,158 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PPP — Fotos por Página</title>
+    <title>Pictures Per Page</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="../assets/js/pdf-lib.min.js"></script>
 </head>
 <body>
+    <div class="app-shell">
+        <input class="panel-toggle" type="checkbox" id="settingsToggle" aria-hidden="true">
 
-    <div class="panel-overlay" id="panelOverlay"></div>
-
-    <!-- Header -->
-    <header class="topbar">
-        <div class="topbar-left">
-            <button class="hamburger" id="hamburgerBtn" aria-label="Abrir parámetros">
-                <span></span><span></span><span></span>
-            </button>
+        <header class="topbar">
             <div class="brand">
-                <span class="brand-name">PPP</span>
-                <span class="brand-sub">Fotos por Página</span>
-            </div>
-        </div>
-        <a href="../index.html" class="btn-back">← Portfolio</a>
-    </header>
-
-    <div class="app-body">
-
-        <!-- Zone A: Upload + Thumbnails -->
-        <section class="zone-upload" aria-label="Subir fotos">
-            <div class="drop-zone" id="dropZone">
-                <input type="file" id="fileInput" multiple accept="image/*">
-                <label for="fileInput">
-                    <div class="drop-icon">🖼️</div>
-                    <p class="drop-title">Arrastra tus fotos aquí</p>
-                    <p class="drop-sub">o haz clic para seleccionar</p>
-                    <span class="drop-hint">JPG · PNG · WebP · y más</span>
-                </label>
-            </div>
-            <div class="thumb-grid" id="thumbGrid"></div>
-        </section>
-
-        <!-- Zone C: Preview (center) -->
-        <section class="zone-preview" aria-label="Vista previa">
-
-            <div class="preview-card">
-                <div class="preview-area" id="previewArea">
-
-                    <canvas id="previewCanvas"></canvas>
-
-                    <div class="preview-placeholder" id="previewPlaceholder">
-                        <div class="placeholder-icon">🖨️</div>
-                        <p>Sube fotos y configura los parámetros,<br>luego haz clic en <strong>Generar distribución</strong>.</p>
-                    </div>
-
-                    <div class="preview-loading" id="previewLoading">
-                        <div class="spinner"></div>
-                        <p>Calculando distribución...</p>
-                    </div>
-
-                    <div class="preview-error" id="previewError">
-                        <div class="error-box" id="errorText">Error al calcular la distribución.</div>
-                        <button class="btn btn-danger" id="retryBtn">Reintentar</button>
-                    </div>
-
-                </div>
-
-                <div class="preview-footer">
-                    <div class="page-nav" id="pageNav">
-                        <button class="nav-btn" id="prevPageBtn" disabled aria-label="Página anterior">←</button>
-                        <span class="page-indicator" id="pageIndicator">Página 1 / 1</span>
-                        <button class="nav-btn" id="nextPageBtn" disabled aria-label="Página siguiente">→</button>
-                    </div>
-                    <button class="btn btn-primary" id="downloadBtn" disabled>Descargar PDF</button>
+                <span class="brand-mark" aria-hidden="true">PPP</span>
+                <div>
+                    <h1>Pictures Per Page</h1>
+                    <p>Organiza archivos de imagen en páginas listas para imprimir.</p>
                 </div>
             </div>
 
-        </section>
+            <div class="topbar-actions">
+                <label class="button button-secondary panel-open" for="settingsToggle">Configuración</label>
+                <button class="button button-primary" type="button" id="exportPdf">Exportar PDF</button>
+            </div>
+        </header>
 
-        <!-- Zone B: Parameters (right panel) -->
-        <aside class="zone-params" id="zoneParams" aria-label="Parámetros">
-            <div class="params-scroll">
-
-                <div class="params-head">
-                    <h2>Configuración</h2>
-                    <p>Ajusta cómo se organizarán tus fotos.</p>
+        <main class="app-layout">
+            <aside class="controls-panel" aria-label="Configuración de Pictures Per Page">
+                <div class="panel-heading">
+                    <div>
+                        <p class="eyebrow">Ajustes</p>
+                        <h2>Diseño de impresión</h2>
+                    </div>
+                    <label class="panel-close" for="settingsToggle" aria-label="Cerrar configuración">Cerrar</label>
                 </div>
 
-                <div class="param-card">
-                    <h3>Papel</h3>
+                <section class="control-card upload-card" aria-labelledby="addPicturesTitle">
+                    <div class="section-title">
+                        <span class="step-number">1</span>
+                        <h3 id="addPicturesTitle">Agregar fotos</h3>
+                    </div>
 
-                    <div class="field">
-                        <label class="field-label" for="pageSizeSelect">Tamaño de página</label>
-                        <select id="pageSizeSelect">
-                            <option value="letter">Carta (Letter 8.5×11")</option>
-                            <option value="a4">A4 (210×297 mm)</option>
-                            <option value="legal">Oficio (Legal 8.5×14")</option>
-                            <option value="a3">A3 (297×420 mm)</option>
-                            <option value="tabloid">Tabloide (11×17")</option>
+                    <div class="drop-zone">
+                        <input type="file" id="pictureFiles" name="pictureFiles" accept="image/*" multiple>
+                        <label class="drop-label" for="pictureFiles">
+                            <span class="upload-mark" aria-hidden="true"></span>
+                            <strong>Suelta tus fotos aquí</strong>
+                            <span>o elige fotos</span>
+                        </label>
+                    </div>
+
+                    <div class="picture-tray" aria-label="Fotos seleccionadas">
+                        <p>Aún no has seleccionado fotos.</p>
+                    </div>
+                </section>
+
+                <section class="control-card" aria-labelledby="pageSetupTitle">
+                    <div class="section-title">
+                        <span class="step-number">2</span>
+                        <h3 id="pageSetupTitle">Configuración de página</h3>
+                    </div>
+
+                    <label class="field" for="pageSize">
+                        <span>Tamaño de página</span>
+                        <select id="pageSize" name="pageSize">
+                            <option value="letter" selected>Carta - 8.5 x 11 pulg</option>
+                            <option value="officio">Oficio - 8.5 x 13 pulg</option>
                         </select>
-                    </div>
-
-                    <div class="field">
-                        <span class="field-label">Orientación</span>
-                        <div class="segmented">
-                            <button class="seg-btn active" id="btnPortrait" data-orient="portrait">▯ Vertical</button>
-                            <button class="seg-btn" id="btnLandscape" data-orient="landscape">▭ Horizontal</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="param-card">
-                    <h3>Distribución</h3>
-
-                    <div class="field">
-                        <label class="field-label" for="picsPerPageInput">Fotos por página</label>
-                        <input type="number" id="picsPerPageInput" min="1" max="12" step="1">
-                    </div>
-                </div>
-
-                <div class="param-card">
-                    <h3>Espaciado</h3>
-
-                    <div class="field">
-                        <label class="field-label" for="gapInput">Separación entre fotos (mm)</label>
-                        <input type="number" id="gapInput" min="0" max="50" step="1">
-                    </div>
-
-                    <div class="field">
-                        <label class="field-label" for="marginInput">Margen de página (mm)</label>
-                        <input type="number" id="marginInput" min="0" max="50" step="1">
-                    </div>
-                </div>
-
-                <div class="param-card">
-                    <h3>Opciones</h3>
-
-                    <label class="check-row" for="allowRotationCb">
-                        <div class="check-info">
-                            <strong>Permitir rotación de fotos</strong>
-                            <p>Gira fotos 90° para mejor ajuste en la página.</p>
-                        </div>
-                        <input type="checkbox" id="allowRotationCb">
                     </label>
+
+                    <fieldset class="field-group">
+                        <legend>Márgenes</legend>
+                        <div class="margin-grid">
+                            <label class="field compact" for="marginTop">
+                                <span>Arriba</span>
+                                <input id="marginTop" name="marginTop" type="number" min="0" step="0.1" value="0.5">
+                            </label>
+                            <label class="field compact" for="marginRight">
+                                <span>Derecha</span>
+                                <input id="marginRight" name="marginRight" type="number" min="0" step="0.1" value="0.5">
+                            </label>
+                            <label class="field compact" for="marginBottom">
+                                <span>Abajo</span>
+                                <input id="marginBottom" name="marginBottom" type="number" min="0" step="0.1" value="0.5">
+                            </label>
+                            <label class="field compact" for="marginLeft">
+                                <span>Izquierda</span>
+                                <input id="marginLeft" name="marginLeft" type="number" min="0" step="0.1" value="0.5">
+                            </label>
+                        </div>
+                    </fieldset>
+                </section>
+
+                <section class="control-card" aria-labelledby="pictureLayoutTitle">
+                    <div class="section-title">
+                        <span class="step-number">3</span>
+                        <h3 id="pictureLayoutTitle">Distribución de fotos</h3>
+                    </div>
+
+                    <label class="field" for="picturesPerPage">
+                        <span>Fotos por página</span>
+                        <input id="picturesPerPage" name="picturesPerPage" type="number" min="1" step="1" value="6">
+                    </label>
+
+                    <label class="field" for="pictureGap">
+                        <span>Separación entre fotos</span>
+                        <input id="pictureGap" name="pictureGap" type="number" min="0" step="0.05" value="0.15">
+                    </label>
+                </section>
+
+                <section class="control-card" aria-labelledby="workspaceTitle">
+                    <div class="section-title">
+                        <span class="step-number">4</span>
+                        <h3 id="workspaceTitle">Área de trabajo</h3>
+                    </div>
+
+                    <label class="field" for="pagesPerScroll">
+                        <span>Máximo de páginas por desplazamiento</span>
+                        <select id="pagesPerScroll" name="pagesPerScroll">
+                            <option value="1">1 página</option>
+                            <option value="2" selected>2 páginas</option>
+                            <option value="3">3 páginas</option>
+                            <option value="4">4 páginas</option>
+                        </select>
+                    </label>
+                </section>
+            </aside>
+
+            <section class="preview-workspace" aria-label="Área de vista previa de páginas">
+                <div class="preview-toolbar">
+                    <div>
+                        <p class="eyebrow">Vista previa</p>
+                        <h2>Páginas</h2>
+                    </div>
+
+                    <div class="page-controls" aria-label="Navegación de páginas">
+                        <button class="icon-button" type="button" id="prevPages" aria-label="Páginas anteriores">Anterior</button>
+                        <select id="previewPagesPerScroll" aria-label="Máximo de páginas visibles por desplazamiento">
+                            <option value="1">Mostrar 1 página</option>
+                            <option value="2" selected>Mostrar 2 páginas</option>
+                            <option value="3">Mostrar 3 páginas</option>
+                            <option value="4">Mostrar 4 páginas</option>
+                        </select>
+                        <button class="icon-button" type="button" id="nextPages" aria-label="Páginas siguientes">Siguiente</button>
+                    </div>
                 </div>
 
-                <button class="btn btn-accent btn-full" id="generateBtn" disabled>
-                    Generar distribución
-                </button>
+                <div class="page-strip" tabindex="0" aria-label="Vistas previas de páginas desplazables"></div>
 
-
-            </div>
-        </aside>
-
+                <div class="picture-toolbar" id="pictureToolbar" hidden>
+                    <button class="tool-button" type="button" id="rotateLeft" aria-label="Girar a la izquierda">⟲</button>
+                    <button class="tool-button" type="button" id="rotateRight" aria-label="Girar a la derecha">⟳</button>
+                    <span class="tool-divider" aria-hidden="true"></span>
+                    <button class="tool-button" type="button" id="scaleDown" aria-label="Reducir tamaño">−</button>
+                    <span class="tool-scale" id="scaleLabel" aria-live="polite">100%</span>
+                    <button class="tool-button" type="button" id="scaleUp" aria-label="Aumentar tamaño">+</button>
+                    <span class="tool-divider" aria-hidden="true"></span>
+                    <button class="tool-button tool-text" type="button" id="resetPicture">Restablecer</button>
+                    <button class="tool-button" type="button" id="deselectPicture" aria-label="Cerrar edición de foto">✕</button>
+                </div>
+            </section>
+        </main>
     </div>
 
+    <script src="pdf-lib.min.js"></script>
     <script src="index.js"></script>
 </body>
 </html>
