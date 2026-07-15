@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pictures Per Page</title>
+    <title>Photos Per Page</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -14,7 +14,7 @@
             <div class="brand">
                 <span class="brand-mark" aria-hidden="true">PPP</span>
                 <div>
-                    <h1>Pictures Per Page</h1>
+                    <h1>Photos Per Page</h1>
                     <p>Organiza archivos de imagen en páginas listas para imprimir.</p>
                 </div>
             </div>
@@ -26,7 +26,7 @@
         </header>
 
         <main class="app-layout">
-            <aside class="controls-panel" aria-label="Configuración de Pictures Per Page">
+            <aside class="controls-panel" aria-label="Configuración de Photos Per Page">
                 <div class="panel-heading">
                     <div>
                         <p class="eyebrow">Ajustes</p>
@@ -35,41 +35,50 @@
                     <label class="panel-close" for="settingsToggle" aria-label="Cerrar configuración">Cerrar</label>
                 </div>
 
-                <section class="control-card upload-card" aria-labelledby="addPicturesTitle">
+                <section class="control-card upload-card" aria-labelledby="addPhotosTitle">
                     <div class="section-title">
                         <span class="step-number">1</span>
-                        <h3 id="addPicturesTitle">Agregar fotos</h3>
+                        <h3 id="addPhotosTitle">Agregar fotos</h3>
                     </div>
 
                     <div class="drop-zone">
-                        <input type="file" id="pictureFiles" name="pictureFiles" accept="image/*" multiple>
-                        <label class="drop-label" for="pictureFiles">
+                        <input type="file" id="photoFiles" name="photoFiles" accept="image/*" multiple>
+                        <label class="drop-label" for="photoFiles">
                             <span class="upload-mark" aria-hidden="true"></span>
                             <strong>Suelta tus fotos aquí</strong>
                             <span>o elige fotos</span>
                         </label>
                     </div>
 
-                    <div class="picture-tray" aria-label="Fotos seleccionadas">
+                    <div class="photo-tray" aria-label="Fotos seleccionadas">
                         <p>Aún no has seleccionado fotos.</p>
                     </div>
                 </section>
 
-                <section class="control-card" aria-labelledby="pictureLayoutTitle">
+                <section class="control-card" aria-labelledby="photoLayoutTitle">
                     <div class="section-title">
                         <span class="step-number">2</span>
-                        <h3 id="pictureLayoutTitle">Distribución de fotos</h3>
+                        <h3 id="photoLayoutTitle">Distribución de fotos</h3>
                     </div>
 
-                    <label class="field" for="picturesPerPage">
+                    <label class="field" for="photosPerPage">
                         <span>Fotos por página</span>
-                        <input id="picturesPerPage" name="picturesPerPage" type="number" min="1" step="1">
+                        <input id="photosPerPage" name="photosPerPage" type="number" min="1" step="1">
                     </label>
 
-                    <label class="field" for="pictureGap">
+                    <label class="field" for="photoGap">
                         <span>Separación entre fotos</span>
-                        <input id="pictureGap" name="pictureGap" type="number" min="0" step="0.05">
+                        <input id="photoGap" name="photoGap" type="number" min="0" step="0.05">
                     </label>
+
+                    <fieldset class="field-group">
+                        <legend>Rotar todas las fotos</legend>
+                        <div class="rotate-all-group" role="group" aria-label="Rotar todas las fotos">
+                            <button class="button button-secondary" type="button" id="rotateAllHorizontal">Horizontal</button>
+                            <button class="button button-secondary" type="button" id="rotateAllVertical">Vertical</button>
+                            <button class="button button-secondary" type="button" id="rotateAllReset">Original</button>
+                        </div>
+                    </fieldset>
                 </section>
 
                 <section class="control-card" aria-labelledby="pageSetupTitle">
@@ -88,24 +97,31 @@
 
                     <fieldset class="field-group">
                         <legend>Márgenes</legend>
-                        <div class="margin-grid">
-                            <label class="field compact" for="marginTop">
-                                <span>Arriba</span>
-                                <input id="marginTop" name="marginTop" type="number" min="0" step="0.1">
-                            </label>
-                            <label class="field compact" for="marginRight">
-                                <span>Derecha</span>
-                                <input id="marginRight" name="marginRight" type="number" min="0" step="0.1">
-                            </label>
-                            <label class="field compact" for="marginBottom">
-                                <span>Abajo</span>
-                                <input id="marginBottom" name="marginBottom" type="number" min="0" step="0.1">
-                            </label>
-                            <label class="field compact" for="marginLeft">
-                                <span>Izquierda</span>
-                                <input id="marginLeft" name="marginLeft" type="number" min="0" step="0.1">
-                            </label>
-                        </div>
+                        <label class="field" for="marginAll">
+                            <span>Margen (los 4 lados)</span>
+                            <input id="marginAll" name="marginAll" type="number" min="0" step="0.1" placeholder="Varios valores">
+                        </label>
+                        <details class="margin-details">
+                            <summary>Ajustar cada lado por separado</summary>
+                            <div class="margin-grid">
+                                <label class="field compact" for="marginTop">
+                                    <span>Arriba</span>
+                                    <input id="marginTop" name="marginTop" type="number" min="0" step="0.1">
+                                </label>
+                                <label class="field compact" for="marginRight">
+                                    <span>Derecha</span>
+                                    <input id="marginRight" name="marginRight" type="number" min="0" step="0.1">
+                                </label>
+                                <label class="field compact" for="marginBottom">
+                                    <span>Abajo</span>
+                                    <input id="marginBottom" name="marginBottom" type="number" min="0" step="0.1">
+                                </label>
+                                <label class="field compact" for="marginLeft">
+                                    <span>Izquierda</span>
+                                    <input id="marginLeft" name="marginLeft" type="number" min="0" step="0.1">
+                                </label>
+                            </div>
+                        </details>
                     </fieldset>
                 </section>
 
@@ -132,13 +148,13 @@
 
                 <div class="page-strip" tabindex="0" aria-label="Vistas previas de páginas desplazables"></div>
 
-                <div class="picture-toolbar" id="pictureToolbar" hidden>
+                <div class="photo-toolbar" id="photoToolbar" hidden>
                     <button class="tool-button" type="button" id="scaleDown" aria-label="Reducir tamaño">−</button>
                     <span class="tool-scale" id="scaleLabel" aria-live="polite">100%</span>
                     <button class="tool-button" type="button" id="scaleUp" aria-label="Aumentar tamaño">+</button>
                     <span class="tool-divider" aria-hidden="true"></span>
-                    <button class="tool-button tool-text" type="button" id="resetPicture">Restablecer</button>
-                    <button class="tool-button" type="button" id="deselectPicture" aria-label="Cerrar edición de foto">✕</button>
+                    <button class="tool-button tool-text" type="button" id="resetPhoto">Restablecer</button>
+                    <button class="tool-button" type="button" id="deselectPhoto" aria-label="Cerrar edición de foto">✕</button>
                 </div>
             </section>
         </main>

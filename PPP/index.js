@@ -28,7 +28,7 @@
         settings: {
             pageSize: "letter",
             margins: { top: 0.2, right: 0.2, bottom: 0.2, left: 0.2 },
-            picturesPerPage: 4,
+            photosPerPage: 4,
             gap: 0.15,
             pagesPerScroll: 2
         },
@@ -43,27 +43,31 @@
     const $ = (sel) => document.querySelector(sel);
     const el = {
         settingsToggle: $("#settingsToggle"),
-        fileInput: $("#pictureFiles"),
+        fileInput: $("#photoFiles"),
         dropZone: $(".drop-zone"),
-        tray: $(".picture-tray"),
+        tray: $(".photo-tray"),
         pageSize: $("#pageSize"),
+        marginAll: $("#marginAll"),
         marginTop: $("#marginTop"),
         marginRight: $("#marginRight"),
         marginBottom: $("#marginBottom"),
         marginLeft: $("#marginLeft"),
-        picturesPerPage: $("#picturesPerPage"),
-        pictureGap: $("#pictureGap"),
+        photosPerPage: $("#photosPerPage"),
+        photoGap: $("#photoGap"),
         previewPagesPerScroll: $("#previewPagesPerScroll"),
         prevPages: $("#prevPages"),
         nextPages: $("#nextPages"),
         pageStrip: $(".page-strip"),
         exportPdf: $("#exportPdf"),
-        toolbar: $("#pictureToolbar"),
+        toolbar: $("#photoToolbar"),
         scaleDown: $("#scaleDown"),
         scaleUp: $("#scaleUp"),
         scaleLabel: $("#scaleLabel"),
-        resetPicture: $("#resetPicture"),
-        deselectPicture: $("#deselectPicture")
+        resetPhoto: $("#resetPhoto"),
+        deselectPhoto: $("#deselectPhoto"),
+        rotateAllHorizontal: $("#rotateAllHorizontal"),
+        rotateAllVertical: $("#rotateAllVertical"),
+        rotateAllReset: $("#rotateAllReset")
     };
 
     // ------------------------------------------------------------------
@@ -109,7 +113,7 @@
         });
         idCounter += 1;
         return {
-            id: `pic-${Date.now().toString(36)}-${idCounter}`,
+            id: `photo-${Date.now().toString(36)}-${idCounter}`,
             file,
             name: file.name,
             width,
@@ -189,7 +193,7 @@
             const item = document.createElement("div");
             item.className = "tray-item";
             item.draggable = true;
-            item.dataset.picId = entry.id;
+            item.dataset.photoId = entry.id;
             item.title = entry.name;
 
             const img = document.createElement("img");
@@ -221,7 +225,7 @@
     el.tray.addEventListener("dragstart", (e) => {
         const item = e.target.closest(".tray-item");
         if (!item) return;
-        dragId = item.dataset.picId;
+        dragId = item.dataset.photoId;
         item.classList.add("is-dragging");
         e.dataTransfer.effectAllowed = "move";
         e.dataTransfer.setData("text/plain", dragId);
@@ -236,7 +240,7 @@
     el.tray.addEventListener("dragover", (e) => {
         if (!dragId) return;
         const target = e.target.closest(".tray-item");
-        if (!target || target.dataset.picId === dragId) return;
+        if (!target || target.dataset.photoId === dragId) return;
         e.preventDefault();
         e.dataTransfer.dropEffect = "move";
         target.classList.add("is-drop-target");
@@ -250,10 +254,10 @@
     el.tray.addEventListener("drop", (e) => {
         if (!dragId) return;
         const target = e.target.closest(".tray-item");
-        if (!target || target.dataset.picId === dragId) return;
+        if (!target || target.dataset.photoId === dragId) return;
         e.preventDefault();
         const from = state.files.findIndex((f) => f.id === dragId);
-        const to = state.files.findIndex((f) => f.id === target.dataset.picId);
+        const to = state.files.findIndex((f) => f.id === target.dataset.photoId);
         if (from === -1 || to === -1) return;
         const [moved] = state.files.splice(from, 1);
         state.files.splice(to, 0, moved);
@@ -276,7 +280,7 @@
         const usableW = page.w - m.left - m.right;
         const usableH = page.h - m.top - m.bottom;
         const gap = s.gap * PT;
-        const n = s.picturesPerPage;
+        const n = s.photosPerPage;
 
         let grid = null;
         if (usableW > 0 && usableH > 0) {
@@ -310,7 +314,7 @@
 
     // LA única función de encaje: ajuste "contain" dentro de la celda con
     // rotación (intercambia el aspecto en 90/270) y escala, siempre centrada.
-    function placePicture(cell, imgW, imgH, ov = {}) {
+    function placePhoto(cell, imgW, imgH, ov = {}) {
         const rot = ov.rotation ?? 0;
         const scale = ov.scale ?? 1;
         const odd = rot % 180 !== 0;
@@ -328,7 +332,7 @@
     }
 
     function chunkPages() {
-        const n = state.settings.picturesPerPage;
+        const n = state.settings.photosPerPage;
         const pages = [];
         for (let i = 0; i < state.files.length; i += n) {
             pages.push(state.files.slice(i, i + n));
@@ -368,7 +372,7 @@
         const pages = chunkPages();
         const { page, m } = metrics;
 
-        pages.forEach((pics, pageIndex) => {
+        pages.forEach((photos, pageIndex) => {
             const sheet = document.createElement("article");
             sheet.className = "paper-sheet";
             sheet.style.aspectRatio = `${page.w} / ${page.h}`;
@@ -391,14 +395,14 @@
             printable.setAttribute("height", Math.max(0, metrics.usableH));
             svg.appendChild(printable);
 
-            pics.forEach((entry, slot) => {
+            photos.forEach((entry, slot) => {
                 const cell = cells[slot];
                 state.placements.set(entry.id, { cell, entry });
                 const image = document.createElementNS(SVG_NS, "image");
                 image.setAttribute("href", entry.thumbUrl);
                 image.setAttribute("preserveAspectRatio", "none");
-                image.setAttribute("data-pic-id", entry.id);
-                image.setAttribute("class", "page-picture");
+                image.setAttribute("data-photo-id", entry.id);
+                image.setAttribute("class", "page-photo");
                 applyPlacement(image, cell, entry);
                 image.addEventListener("click", (e) => {
                     e.stopPropagation();
@@ -424,7 +428,7 @@
 
     function applyPlacement(image, cell, entry) {
         const ov = state.overrides.get(entry.id);
-        const p = placePicture(cell, entry.width, entry.height, ov);
+        const p = placePhoto(cell, entry.width, entry.height, ov);
         image.setAttribute("x", p.cx - p.w / 2);
         image.setAttribute("y", p.cy - p.h / 2);
         image.setAttribute("width", p.w);
@@ -436,9 +440,9 @@
         }
     }
 
-    function updatePictureEl(id) {
+    function updatePhotoEl(id) {
         const placement = state.placements.get(id);
-        const image = el.pageStrip.querySelector(`[data-pic-id="${id}"]`);
+        const image = el.pageStrip.querySelector(`[data-photo-id="${id}"]`);
         if (!placement || !image) return;
         applyPlacement(image, placement.cell, placement.entry);
     }
@@ -451,7 +455,7 @@
         clearSelectionRect();
         const placement = state.placements.get(id);
         if (!placement) { deselect(); return; }
-        const image = el.pageStrip.querySelector(`[data-pic-id="${id}"]`);
+        const image = el.pageStrip.querySelector(`[data-photo-id="${id}"]`);
         if (!image) { deselect(); return; }
         const { cell } = placement;
         const rect = document.createElementNS(SVG_NS, "rect");
@@ -513,6 +517,31 @@
         setOverride(state.selectedId, { ...ov, rotation: (ov.rotation + 90) % 360 });
     }
 
+    // entry.width/height ya vienen orientadas correctamente (el bitmap se
+    // crea con imageOrientation "from-image"), así que comparar ambos lados
+    // basta para saber si la foto es apaisada o vertical antes de aplicar
+    // el override de rotación del usuario.
+    function orientationRotation(entry, mode) {
+        if (mode === "reset") return 0;
+        const isLandscape = entry.width >= entry.height;
+        if (mode === "horizontal") return isLandscape ? 0 : 90;
+        return isLandscape ? 90 : 0;
+    }
+
+    // Rota todas las fotos a la misma orientación (o las devuelve a su
+    // posición original) conservando la escala que cada una ya tenía.
+    function rotateAll(mode) {
+        if (!state.files.length) return;
+        for (const entry of state.files) {
+            const ov = getOverride(entry.id);
+            setOverride(entry.id, { ...ov, rotation: orientationRotation(entry, mode) });
+        }
+    }
+
+    el.rotateAllHorizontal.addEventListener("click", () => rotateAll("horizontal"));
+    el.rotateAllVertical.addEventListener("click", () => rotateAll("vertical"));
+    el.rotateAllReset.addEventListener("click", () => rotateAll("reset"));
+
     function deselect() {
         state.selectedId = null;
         clearSelectionRect();
@@ -534,7 +563,7 @@
         } else {
             state.overrides.set(id, ov);
         }
-        updatePictureEl(id);
+        updatePhotoEl(id);
         updateToolbar();
     }
 
@@ -560,12 +589,12 @@
         setOverride(state.selectedId, { ...ov, scale });
     });
 
-    el.resetPicture.addEventListener("click", () => {
+    el.resetPhoto.addEventListener("click", () => {
         if (!state.selectedId) return;
         setOverride(state.selectedId, { rotation: 0, scale: 1 });
     });
 
-    el.deselectPicture.addEventListener("click", deselect);
+    el.deselectPhoto.addEventListener("click", deselect);
 
     el.pageStrip.addEventListener("click", (e) => {
         if (!e.target.closest("image")) deselect();
@@ -665,6 +694,29 @@
         return value;
     }
 
+    // Lectura tolerante para vista previa en vivo (evento "input"): nunca
+    // reescribe el campo que el usuario está escribiendo, para no pisar
+    // un "0." a medio teclear. Si el valor aún no es válido, conserva el
+    // último margen válido hasta que el campo pierda el foco ("change").
+    function readNumberLive(input, fallback) {
+        const value = parseFloat(input.value);
+        return Number.isFinite(value) && value >= 0 ? value : fallback;
+    }
+
+    // Reconstruir todas las páginas en cada pulsación de tecla es barato
+    // con pocas fotos, pero con lotes grandes (cientos de fotos → muchas
+    // páginas) puede notarse. Este debounce corto (imperceptible al ojo)
+    // agrupa ráfagas de teclas o clics mantenidos en las flechas del campo
+    // numérico en un solo renderizado.
+    function debounce(fn, delay) {
+        let handle = null;
+        return (...args) => {
+            clearTimeout(handle);
+            handle = setTimeout(() => fn(...args), delay);
+        };
+    }
+    const renderPagesLive = debounce(renderPages, 60);
+
     function onSettingsChange() {
         const s = state.settings;
         s.pageSize = PAGE_SIZES[el.pageSize.value] ? el.pageSize.value : "letter";
@@ -672,13 +724,56 @@
         s.margins.right = readNumber(el.marginRight, { fallback: s.margins.right });
         s.margins.bottom = readNumber(el.marginBottom, { fallback: s.margins.bottom });
         s.margins.left = readNumber(el.marginLeft, { fallback: s.margins.left });
-        s.picturesPerPage = readNumber(el.picturesPerPage, { min: 1, integer: true, fallback: s.picturesPerPage });
-        s.gap = readNumber(el.pictureGap, { fallback: s.gap });
+        s.photosPerPage = readNumber(el.photosPerPage, { min: 1, integer: true, fallback: s.photosPerPage });
+        s.gap = readNumber(el.photoGap, { fallback: s.gap });
+        syncMarginAllInput();
         renderPages();
     }
 
+    // El campo "los 4 lados" es solo un atajo: no se guarda en el estado,
+    // sino que escribe el mismo valor en los cuatro campos individuales
+    // (única fuente de verdad) y deja que onSettingsChange los relea.
+    function syncMarginAllInput() {
+        const { top, right, bottom, left } = state.settings.margins;
+        if (top === right && right === bottom && bottom === left) {
+            el.marginAll.value = String(top);
+        } else {
+            el.marginAll.value = "";
+        }
+    }
+
+    el.marginAll.addEventListener("change", () => {
+        const value = readNumber(el.marginAll, { fallback: state.settings.margins.top });
+        el.marginTop.value = String(value);
+        el.marginRight.value = String(value);
+        el.marginBottom.value = String(value);
+        el.marginLeft.value = String(value);
+        onSettingsChange();
+    });
+
+    // Vista previa en vivo: igual que el listener "change" de arriba, pero
+    // sin tocar el valor de marginAll (el usuario sigue escribiendo ahí).
+    el.marginAll.addEventListener("input", () => {
+        const value = readNumberLive(el.marginAll, state.settings.margins.top);
+        el.marginTop.value = String(value);
+        el.marginRight.value = String(value);
+        el.marginBottom.value = String(value);
+        el.marginLeft.value = String(value);
+        state.settings.margins = { top: value, right: value, bottom: value, left: value };
+        renderPagesLive();
+    });
+
+    [["top", el.marginTop], ["right", el.marginRight], ["bottom", el.marginBottom], ["left", el.marginLeft]]
+        .forEach(([side, input]) => {
+            input.addEventListener("input", () => {
+                state.settings.margins[side] = readNumberLive(input, state.settings.margins[side]);
+                syncMarginAllInput();
+                renderPagesLive();
+            });
+        });
+
     [el.pageSize, el.marginTop, el.marginRight, el.marginBottom, el.marginLeft,
-     el.picturesPerPage, el.pictureGap].forEach((input) => {
+     el.photosPerPage, el.photoGap].forEach((input) => {
         input.addEventListener("change", onSettingsChange);
     });
 
@@ -714,6 +809,10 @@
     function updateExportState() {
         el.exportPdf.disabled = !state.files.length;
         el.exportPdf.title = state.files.length ? "" : "Agrega fotos para exportar";
+        const noPhotos = !state.files.length;
+        el.rotateAllHorizontal.disabled = noPhotos;
+        el.rotateAllVertical.disabled = noPhotos;
+        el.rotateAllReset.disabled = noPhotos;
     }
 
     async function embedEntry(pdfDoc, entry, cache) {
@@ -749,9 +848,9 @@
         return result;
     }
 
-    function drawPicture(page, embedded, orientationBaked, metrics, cell, entry) {
+    function drawPhoto(page, embedded, orientationBaked, metrics, cell, entry) {
         const ov = state.overrides.get(entry.id);
-        const p = placePicture(cell, entry.width, entry.height, ov);
+        const p = placePhoto(cell, entry.width, entry.height, ov);
 
         // pdf-lib ignora la orientación EXIF de los JPEG, así que la rotación
         // EXIF se suma aquí. Los tamaños calculados (p.w × p.h) corresponden a
@@ -794,19 +893,19 @@
             const pdfDoc = await PDFLib.PDFDocument.create();
             const cells = computeCells(metrics);
             const cache = new Map();
-            for (const pics of chunkPages()) {
+            for (const photos of chunkPages()) {
                 const page = pdfDoc.addPage([metrics.page.w, metrics.page.h]);
-                for (let slot = 0; slot < pics.length; slot++) {
-                    const entry = pics[slot];
+                for (let slot = 0; slot < photos.length; slot++) {
+                    const entry = photos[slot];
                     const { embedded, orientationBaked } = await embedEntry(pdfDoc, entry, cache);
-                    drawPicture(page, embedded, orientationBaked, metrics, cells[slot], entry);
+                    drawPhoto(page, embedded, orientationBaked, metrics, cells[slot], entry);
                 }
             }
             const bytes = await pdfDoc.save();
             const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
             const a = document.createElement("a");
             a.href = url;
-            a.download = "pictures-per-page.pdf";
+            a.download = "photos-per-page.pdf";
             a.click();
             setTimeout(() => URL.revokeObjectURL(url), 10000);
             el.exportPdf.textContent = originalText;
@@ -844,8 +943,9 @@
         el.marginRight.value = String(s.margins.right);
         el.marginBottom.value = String(s.margins.bottom);
         el.marginLeft.value = String(s.margins.left);
-        el.picturesPerPage.value = String(s.picturesPerPage);
-        el.pictureGap.value = String(s.gap);
+        el.photosPerPage.value = String(s.photosPerPage);
+        el.photoGap.value = String(s.gap);
+        syncMarginAllInput();
     }
 
     applySettingsToInputs();

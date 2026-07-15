@@ -338,7 +338,7 @@ p {
     font-size: 13px;
 }
 
-.picture-tray {
+.photo-tray {
     min-height: 56px;
     margin-top: 12px;
     display: grid;
@@ -396,6 +396,49 @@ select:focus,
 input:focus {
     border-color: var(--primary);
     box-shadow: 0 0 0 4px rgba(47, 111, 115, 0.14);
+}
+
+.rotate-all-group {
+    display: flex;
+    gap: 8px;
+}
+
+.rotate-all-group .button {
+    flex: 1 1 0;
+    padding: 0 8px;
+    font-size: 13px;
+}
+
+.margin-details {
+    margin-top: 14px;
+}
+
+.margin-details summary {
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    list-style: none;
+}
+
+.margin-details summary::-webkit-details-marker {
+    display: none;
+}
+
+.margin-details summary::before {
+    content: "+ ";
+}
+
+.margin-details[open] summary::before {
+    content: "− ";
+}
+
+.margin-details summary:hover {
+    color: var(--primary-hover);
+}
+
+.margin-details .margin-grid {
+    margin-top: 12px;
 }
 
 .margin-grid {
@@ -461,6 +504,19 @@ input:focus {
     outline-offset: -4px;
 }
 
+@media (min-width: 821px) {
+    .app-layout {
+        height: calc(100vh - var(--topbar-height));
+        overflow: hidden;
+    }
+
+    .preview-workspace {
+        height: 100%;
+        min-height: 0;
+        overflow: hidden;
+    }
+}
+
 .paper-sheet {
     position: relative;
     flex: 0 0 auto;
@@ -506,7 +562,7 @@ input:focus {
     stroke-dasharray: 4 4;
 }
 
-.page-picture {
+.page-photo {
     cursor: pointer;
 }
 
@@ -629,11 +685,11 @@ input:focus {
     background: #b23b3b;
 }
 
-.picture-toolbar[hidden] {
+.photo-toolbar[hidden] {
     display: none;
 }
 
-.picture-toolbar {
+.photo-toolbar {
     position: absolute;
     left: 50%;
     bottom: 18px;
