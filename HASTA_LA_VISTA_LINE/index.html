@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Hasta la Vista, Line</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div class="app">
+
+    <header class="topline">
+      <h1>Hasta la Vista, Line</h1>
+      <p>Traza dos pares de líneas sobre una foto y encuentra sus puntos de fuga y la línea de horizonte.</p>
+    </header>
+
+    <div class="toolbar" role="toolbar" aria-label="Herramientas">
+      <input type="file" id="ifLoadImg" accept="image/*">
+      <label for="ifLoadImg" class="btn btn-file">
+        <svg viewBox="0 0 18 18" aria-hidden="true">
+          <path d="M 1 1 H 17 V 17 H 1 Z"></path>
+          <path d="M 11 5 A 2 2 0 1 0 15 5 A 1 1 0 1 0 11 5"></path>
+          <path d="M 3 15 C 5 8 8 4 11 11 C 12 9 13 8 15 11"></path>
+        </svg>
+        <span>Cargar<span class="btn-long"> imagen</span></span>
+      </label>
+
+      <button id="btnAddLine" class="btn btn-primary" type="button">
+        <span>Añadir<span class="btn-long"> línea</span></span>
+        <span class="pair-badge" id="pairBadge" data-pair="A" aria-label="Par de destino">A</span>
+      </button>
+      <button id="btnDelLine" class="btn" type="button" disabled>Borrar línea</button>
+      <button id="btnClear" class="btn" type="button">Limpiar<span class="btn-long"> todo</span></button>
+
+      <label class="cursor-select" for="selCursorMode">
+        <span class="btn-long">Cursor</span>
+        <select id="selCursorMode">
+          <option value="crosshair">Cruceta</option>
+          <option value="magnify">Lupa</option>
+        </select>
+      </label>
+
+      <span class="sep" aria-hidden="true"></span>
+
+      <button id="btnZoomOut" class="btn btn-icon" type="button" aria-label="Alejar">−</button>
+      <span id="zoomLabel" class="zoom-label">100%</span>
+      <button id="btnZoomIn" class="btn btn-icon" type="button" aria-label="Acercar">+</button>
+      <button id="btnFit" class="btn" type="button">Ajustar<span class="btn-long"> imagen</span></button>
+      <button id="btnFitAll" class="btn" type="button">Ver todo</button>
+    </div>
+
+    <main class="stage">
+      <div class="canvas-wrap">
+        <svg id="board" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"
+          preserveAspectRatio="xMidYMid meet" aria-label="Área de trabajo con la imagen y las líneas de fuga">
+          <defs>
+            <pattern id="gridPattern" width="50" height="50" patternUnits="userSpaceOnUse">
+              <path id="gridPath" d="M 50 0 L 0 0 L 0 50" fill="none" class="grid-stroke"
+                vector-effect="non-scaling-stroke"></path>
+            </pattern>
+          </defs>
+
+          <rect id="worldBg" x="-600" y="-400" width="2400" height="1600" fill="url(#gridPattern)"></rect>
+          <image id="photo" x="0" y="0" width="1200" height="800" preserveAspectRatio="none"
+            style="display:none"></image>
+          <rect id="photoFrame" x="0" y="0" width="1200" height="800" class="photo-frame"
+            vector-effect="non-scaling-stroke"></rect>
+
+          <g id="overlay">
+            <g id="raysLayer"></g>
+            <line id="horizonHalo" class="horizon-halo" vector-effect="non-scaling-stroke" style="display:none"></line>
+            <line id="horizonLine" class="horizon" vector-effect="non-scaling-stroke" style="display:none"></line>
+            <g id="linesLayer"></g>
+            <g id="edgeLayer"></g>
+            <g id="vpLayer"></g>
+            <line id="previewLine" class="preview" vector-effect="non-scaling-stroke" style="display:none"></line>
+          </g>
+        </svg>
+
+        <p id="emptyHint" class="empty-hint">Carga una imagen para empezar (también puedes trazar sobre la
+          cuadrícula vacía).</p>
+        <p id="hint" class="hint" role="status" aria-live="polite"></p>
+
+        <div id="loupe" class="loupe" aria-hidden="true">
+          <svg id="loupeSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+            <use href="#worldBg"></use>
+            <use href="#photo"></use>
+            <use href="#photoFrame"></use>
+            <use href="#raysLayer"></use>
+            <use href="#horizonHalo"></use>
+            <use href="#horizonLine"></use>
+            <use href="#linesLayer"></use>
+            <use href="#edgeLayer"></use>
+            <use href="#vpLayer"></use>
+            <use href="#previewLine"></use>
+          </svg>
+          <span class="loupe-ring"></span>
+          <span class="loupe-reticle"></span>
+        </div>
+      </div>
+
+      <aside class="panel" aria-label="Resultados">
+        <section class="card">
+          <h2>Puntos de fuga</h2>
+
+          <div class="vp-row" id="rowA">
+            <span class="dot dot-a" aria-hidden="true"></span>
+            <div class="vp-info">
+              <p class="vp-name">Fuga A <span class="vp-count" id="countA">0/2</span></p>
+              <p class="vp-coords" id="coordsA">Faltan 2 líneas</p>
+            </div>
+            <div class="vp-actions">
+              <button class="btn btn-mini" type="button" data-act="center" data-pair="A" disabled>Centrar</button>
+              <button class="btn btn-mini" type="button" data-act="clear" data-pair="A" disabled>Borrar par</button>
+            </div>
+          </div>
+
+          <div class="vp-row" id="rowB">
+            <span class="dot dot-b" aria-hidden="true"></span>
+            <div class="vp-info">
+              <p class="vp-name">Fuga B <span class="vp-count" id="countB">0/2</span></p>
+              <p class="vp-coords" id="coordsB">Faltan 2 líneas</p>
+            </div>
+            <div class="vp-actions">
+              <button class="btn btn-mini" type="button" data-act="center" data-pair="B" disabled>Centrar</button>
+              <button class="btn btn-mini" type="button" data-act="clear" data-pair="B" disabled>Borrar par</button>
+            </div>
+          </div>
+
+          <div class="vp-row horizon-row">
+            <span class="dot dot-h" aria-hidden="true"></span>
+            <div class="vp-info">
+              <p class="vp-name">Horizonte</p>
+              <p class="vp-coords" id="horizonInfo">Aparece cuando existen las dos fugas.</p>
+            </div>
+          </div>
+
+          <p class="note">Las coordenadas están en píxeles de la imagen original: pueden ser negativas o superar su
+            tamaño.</p>
+        </section>
+
+        <section class="card help">
+          <h2>Cómo usar</h2>
+          <ol>
+            <li>Carga una foto con perspectiva.</li>
+            <li>Pulsa <strong>Añadir línea</strong> y toca dos veces sobre el área de trabajo para colocarla.</li>
+            <li>Repite hasta tener dos líneas por par (4 en total).</li>
+            <li>Arrastra un nodo para girar la línea sobre el otro extremo; arrastra el cuerpo para moverla entera.</li>
+            <li>Arrastra el fondo para desplazar la vista; rueda del ratón o pellizco para acercar y alejar.</li>
+          </ol>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <script src="index.js"></script>
+</body>
+
+</html>

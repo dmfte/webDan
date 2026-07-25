@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="hlvlTitle hlvlDesc">
+  <title id="hlvlTitle">Vista previa de Hasta la Vista, Line</title>
+  <desc id="hlvlDesc">Área de trabajo oscura con una foto, dos pares de líneas que convergen en sus puntos de fuga y la línea de horizonte.</desc>
+
+  <defs>
+    <pattern id="hlvlGrid" width="50" height="50" patternUnits="userSpaceOnUse">
+      <path d="M 50 0 L 0 0 L 0 50" fill="none" stroke="rgba(231,236,243,0.08)" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="hlvlPhoto" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0" stop-color="#33404f"/>
+      <stop offset="1" stop-color="#1a212b"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="675" fill="#0e1116"/>
+  <rect width="1200" height="675" fill="url(#hlvlGrid)"/>
+
+  <rect x="80" y="90" width="700" height="480" fill="url(#hlvlPhoto)"/>
+  <rect x="80" y="90" width="700" height="480" fill="none" stroke="rgba(231,236,243,0.34)" stroke-width="2" stroke-dasharray="10 8"/>
+
+  <!-- Línea de horizonte -->
+  <line x1="0" y1="330" x2="1200" y2="330" stroke="#000" stroke-opacity="0.6" stroke-width="8" stroke-dasharray="24 7 5 7"/>
+  <line x1="0" y1="330" x2="1200" y2="330" stroke="#b6ff3f" stroke-width="4" stroke-dasharray="24 7 5 7"/>
+
+  <!-- Par A: converge en VP-A -->
+  <g stroke="#ff6b35" fill="none">
+    <path d="M 520 190 L 100 400" stroke-width="2.5" stroke-dasharray="14 10" opacity="0.9"/>
+    <path d="M 520 480 L 100 255" stroke-width="2.5" stroke-dasharray="14 10" opacity="0.9"/>
+    <path d="M 520 190 L 380 260" stroke-width="6" stroke-linecap="round"/>
+    <path d="M 520 480 L 380 405" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <!-- Par B: converge en VP-B, fuera de la foto -->
+  <g stroke="#35c2ff" fill="none">
+    <path d="M 520 190 L 1160 369" stroke-width="2.5" stroke-dasharray="14 10" opacity="0.9"/>
+    <path d="M 520 480 L 1160 288" stroke-width="2.5" stroke-dasharray="14 10" opacity="0.9"/>
+    <path d="M 520 190 L 770 260" stroke-width="6" stroke-linecap="round"/>
+    <path d="M 520 480 L 770 405" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <!-- Arista vertical de la caja -->
+  <line x1="520" y1="190" x2="520" y2="480" stroke="rgba(231,236,243,0.55)" stroke-width="3"/>
+
+  <!-- Nodos -->
+  <g fill="#14171d" stroke-width="4">
+    <circle cx="520" cy="190" r="9" stroke="#ff6b35"/>
+    <circle cx="520" cy="480" r="9" stroke="#ff6b35"/>
+    <circle cx="380" cy="260" r="9" stroke="#ff6b35"/>
+    <circle cx="380" cy="405" r="9" stroke="#ff6b35"/>
+    <circle cx="770" cy="260" r="9" stroke="#35c2ff"/>
+    <circle cx="770" cy="405" r="9" stroke="#35c2ff"/>
+  </g>
+
+  <!-- Puntos de fuga -->
+  <g fill="none" stroke-width="4">
+    <circle cx="240" cy="330" r="20" stroke="#ff6b35"/>
+    <line x1="204" y1="330" x2="276" y2="330" stroke="#ff6b35"/>
+    <line x1="240" y1="294" x2="240" y2="366" stroke="#ff6b35"/>
+    <circle cx="1020" cy="330" r="20" stroke="#35c2ff"/>
+    <line x1="984" y1="330" x2="1056" y2="330" stroke="#35c2ff"/>
+    <line x1="1020" y1="294" x2="1020" y2="366" stroke="#35c2ff"/>
+  </g>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="30" fill="#e7ecf3" stroke="#0e1116" stroke-width="6" paint-order="stroke">
+    <text x="266" y="296">VP-A</text>
+    <text x="1046" y="296">VP-B</text>
+  </g>
+</svg>
