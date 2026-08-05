@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tiny JPG</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <input class="panel-toggle" type="checkbox" id="settingsToggle" aria-hidden="true">
+
+    <header class="topbar">
+      <div class="brand">
+        <a class="brand-back" href="../index.html" aria-label="Volver al portafolio">←</a>
+        <span class="brand-mark" aria-hidden="true">JPG</span>
+        <div>
+          <h1>Tiny JPG</h1>
+          <p>Comprime fotos con la mínima pérdida visible de calidad.</p>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <label class="button button-secondary panel-open" for="settingsToggle">Ajustes</label>
+        <button class="button button-secondary" type="button" id="downloadAll" disabled>Descargar todas</button>
+        <button class="button button-secondary" type="button" id="cancelAll" disabled>Cancelar todo</button>
+      </div>
+    </header>
+
+    <main class="app-layout">
+      <aside class="controls-panel" aria-label="Ajustes de Tiny JPG">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Ajustes</p>
+            <h2>Compresión</h2>
+          </div>
+          <label class="panel-close" for="settingsToggle" aria-label="Cerrar ajustes">Cerrar</label>
+        </div>
+
+        <section class="control-card upload-card" aria-labelledby="addPhotosTitle">
+          <div class="section-title">
+            <span class="step-number">1</span>
+            <h3 id="addPhotosTitle">Agregar fotos</h3>
+          </div>
+
+          <div class="drop-zone" id="dropZone">
+            <input type="file" id="fileInput" name="fileInput" accept="image/jpeg,image/png,image/webp" multiple>
+            <label class="drop-label" for="fileInput">
+              <span class="upload-mark" aria-hidden="true"></span>
+              <strong>Suelta tus fotos aquí</strong>
+              <span>o elige archivos</span>
+            </label>
+          </div>
+
+          <p class="hint">Acepta JPG, PNG y WebP · siempre entrega JPG.</p>
+        </section>
+
+        <section class="control-card" aria-labelledby="resizeTitle">
+          <div class="section-title">
+            <span class="step-number">2</span>
+            <h3 id="resizeTitle">Redimensionar</h3>
+          </div>
+
+          <label class="field-check" for="resizeToggle">
+            <input type="checkbox" id="resizeToggle">
+            <span>Reducir dimensiones antes de comprimir</span>
+          </label>
+
+          <div class="rs-mount" id="resizeSlider" hidden></div>
+          <p class="hint" id="resizePreview" hidden></p>
+        </section>
+
+        <section class="control-card notice-card">
+          <p class="hint">
+            Todo ocurre en tu navegador — nada se sube a ningún servidor. Si cierras o recargas
+            la pestaña, se pierde todo lo que no hayas descargado todavía, esté comprimiéndose
+            o ya listo.
+          </p>
+        </section>
+      </aside>
+
+      <section class="workspace" aria-label="Lote de compresión">
+        <div class="large-file-banner" id="largeFileBanner" role="status" hidden>
+          <p>Hay archivos de más de 20 MB en el lote — la compresión puede tardar unos segundos más de lo habitual.</p>
+        </div>
+
+        <div class="batch-summary" id="batchSummary" hidden>
+          <div class="batch-counts" id="batchCounts" aria-live="polite"></div>
+          <div class="batch-progress">
+            <div class="batch-progress-fill" id="batchProgressFill"></div>
+          </div>
+        </div>
+
+        <ul class="file-list" id="fileList"></ul>
+
+        <p class="empty-hint" id="emptyHint">Todavía no has agregado fotos.</p>
+      </section>
+    </main>
+  </div>
+
+  <template id="fileRowTemplate">
+    <li class="file-row" data-status="queued">
+      <div class="file-row-main">
+        <p class="file-name"></p>
+        <p class="file-meta">
+          <span class="file-size-original"></span>
+          <span class="file-dims"></span>
+        </p>
+      </div>
+      <div class="file-row-status">
+        <span class="status-chip"></span>
+        <p class="file-result" hidden></p>
+      </div>
+      <div class="file-row-actions">
+        <button class="button button-secondary button-action" type="button">Cancelar</button>
+      </div>
+    </li>
+  </template>
+
+  <script src="index.js" type="module"></script>
+</body>
+</html>

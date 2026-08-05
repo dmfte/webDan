@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="tjTitle tjDesc">
+  <title id="tjTitle">Vista previa de Tiny JPG</title>
+  <desc id="tjDesc">Una foto grande se reduce a una versión más pequeña, con una barra de progreso y una etiqueta de porcentaje ahorrado.</desc>
+
+  <defs>
+    <pattern id="tjGrid" width="50" height="50" patternUnits="userSpaceOnUse">
+      <path d="M 50 0 L 0 0 L 0 50" fill="none" stroke="rgba(231,236,243,0.08)" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="tjPhotoBig" x1="0" y1="0" x2="0.7" y2="1">
+      <stop offset="0" stop-color="#33404f"/>
+      <stop offset="1" stop-color="#1a212b"/>
+    </linearGradient>
+    <linearGradient id="tjPhotoSmall" x1="0" y1="0" x2="0.7" y2="1">
+      <stop offset="0" stop-color="#3a5a5f"/>
+      <stop offset="1" stop-color="#1f2f31"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="675" fill="#0e1116"/>
+  <rect width="1200" height="675" fill="url(#tjGrid)"/>
+
+  <!-- Foto grande original -->
+  <rect x="90" y="95" width="520" height="480" fill="url(#tjPhotoBig)"/>
+  <rect x="90" y="95" width="520" height="480" fill="none" stroke="rgba(231,236,243,0.34)" stroke-width="2" stroke-dasharray="10 8"/>
+  <circle cx="230" cy="240" r="46" fill="rgba(231,236,243,0.14)"/>
+  <path d="M 90 460 L 260 320 L 380 410 L 480 340 L 610 470 L 610 575 L 90 575 Z" fill="rgba(231,236,243,0.1)"/>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="26" fill="#98a3b6">
+    <text x="90" y="605">83 MB</text>
+  </g>
+
+  <!-- Flecha -->
+  <g stroke="#6ecedb" stroke-width="6" fill="none" stroke-linecap="round">
+    <path d="M 650 335 L 760 335"/>
+    <path d="M 730 305 L 762 335 L 730 365"/>
+  </g>
+
+  <!-- Foto pequena comprimida -->
+  <rect x="800" y="180" width="310" height="290" fill="url(#tjPhotoSmall)"/>
+  <rect x="800" y="180" width="310" height="290" fill="none" stroke="#6ecedb" stroke-width="3"/>
+  <circle cx="880" cy="260" r="26" fill="rgba(110,206,219,0.28)"/>
+  <path d="M 800 415 L 900 350 L 960 390 L 1020 355 L 1110 420 L 1110 470 L 800 470 Z" fill="rgba(110,206,219,0.22)"/>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="26" fill="#e7ecf3">
+    <text x="800" y="500">11 MB</text>
+  </g>
+
+  <!-- Insignia de ahorro -->
+  <g>
+    <rect x="940" y="500" width="170" height="52" rx="26" fill="#6ecedb"/>
+    <text x="1025" y="533" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="24" font-weight="bold" fill="#0e1116" text-anchor="middle">−87%</text>
+  </g>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="30" fill="#e7ecf3" stroke="#0e1116" stroke-width="6" paint-order="stroke">
+    <text x="90" y="70">JPG · PNG · WebP → JPG</text>
+  </g>
+</svg>
