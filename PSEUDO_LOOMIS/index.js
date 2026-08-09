@@ -56,6 +56,8 @@ const AppState = {
     isDraggingXNode: false,
     isRotating: false,
     rotateAngleOffset: 0,  // Difference between pointer angle and circle rotation at grab time
+    yNodeOffset: { position: 0, slide: 0 },  // Difference between raw pointer value and node value at grab time
+    xNodeOffset: { position: 0, slide: 0 },
     hoverTarget: null,  // 'circle', 'yNode', 'xNode', 'rotate', or null
     lastPointerPos: { x: 0, y: 0 }  // For delta-based circle dragging
   },
@@ -550,9 +552,11 @@ const InputHandler = {
 
     if (target === 'yNode') {
       AppState.interaction.isDraggingYNode = true;
+      AppState.interaction.yNodeOffset = this.getNodeGrabOffset(this.getRawYNodeValue(pos), AppState.nodes.yPosition, AppState.nodes.ySlide);
       this.canvas.classList.add('dragging-node');
     } else if (target === 'xNode') {
       AppState.interaction.isDraggingXNode = true;
+      AppState.interaction.xNodeOffset = this.getNodeGrabOffset(this.getRawXNodeValue(pos), AppState.nodes.xPosition, AppState.nodes.xSlide);
       this.canvas.classList.add('dragging-node');
     } else if (target === 'rotate') {
       AppState.interaction.isRotating = true;
@@ -588,8 +592,10 @@ const InputHandler = {
 
     if (target === 'yNode') {
       AppState.interaction.isDraggingYNode = true;
+      AppState.interaction.yNodeOffset = this.getNodeGrabOffset(this.getRawYNodeValue(pos), AppState.nodes.yPosition, AppState.nodes.ySlide);
     } else if (target === 'xNode') {
       AppState.interaction.isDraggingXNode = true;
+      AppState.interaction.xNodeOffset = this.getNodeGrabOffset(this.getRawXNodeValue(pos), AppState.nodes.xPosition, AppState.nodes.xSlide);
     } else if (target === 'rotate') {
       AppState.interaction.isRotating = true;
       AppState.interaction.rotateAngleOffset = this.getPointerAngleDeg(pos.x, pos.y) - AppState.circle.rotation;
@@ -703,22 +709,49 @@ const InputHandler = {
     AppState.circle.rotation = Math.max(-ROTATION_LIMIT_DEG, Math.min(ROTATION_LIMIT_DEG, angle));
   },
 
-  updateYNodePosition(imgPos) {
+  /**
+   * Raw (un-offset) node value implied by a pointer position alone. Clicking a node is
+   * rarely a pixel-perfect match for its current value, so this is combined with a
+   * grab-time offset (see getNodeGrabOffset) rather than used directly - otherwise the
+   * node would jump to match the pointer instead of moving smoothly from where it was.
+   */
+  getRawYNodeValue(imgPos) {
     const local = this.imageToCircleLocal(imgPos.x, imgPos.y);
     const { radius } = AppState.circle;
+    return { position: -local.y / radius, slide: local.x / radius };
+  },
+
+  getRawXNodeValue(imgPos) {
+    const local = this.imageToCircleLocal(imgPos.x, imgPos.y);
+    const { radius } = AppState.circle;
+    return { position: local.x / radius, slide: local.y / radius };
+  },
+
+  /**
+   * Difference between a node's actual current value and the raw value implied by the
+   * pointer at grab time, so dragging can continue smoothly from the current position
+   * (same idea as the circle's delta-based drag and the lever rotation's angle offset).
+   */
+  getNodeGrabOffset(raw, currentPosition, currentSlide) {
+    return { position: currentPosition - raw.position, slide: currentSlide - raw.slide };
+  },
+
+  updateYNodePosition(imgPos) {
+    const raw = this.getRawYNodeValue(imgPos);
+    const offset = AppState.interaction.yNodeOffset;
     // Vertical drag controls arc curvature (same as original behavior)
-    AppState.nodes.yPosition = Math.max(-1, Math.min(1, -local.y / radius));
+    AppState.nodes.yPosition = Math.max(-1, Math.min(1, raw.position + offset.position));
     // Horizontal drag slides the node along the arc
-    AppState.nodes.ySlide = Math.max(-1, Math.min(1, local.x / radius));
+    AppState.nodes.ySlide = Math.max(-1, Math.min(1, raw.slide + offset.slide));
   },
 
   updateXNodePosition(imgPos) {
-    const local = this.imageToCircleLocal(imgPos.x, imgPos.y);
-    const { radius } = AppState.circle;
+    const raw = this.getRawXNodeValue(imgPos);
+    const offset = AppState.interaction.xNodeOffset;
     // Horizontal drag controls arc curvature (same as original behavior)
-    AppState.nodes.xPosition = Math.max(-1, Math.min(1, local.x / radius));
+    AppState.nodes.xPosition = Math.max(-1, Math.min(1, raw.position + offset.position));
     // Vertical drag slides the node along the arc
-    AppState.nodes.xSlide = Math.max(-1, Math.min(1, local.y / radius));
+    AppState.nodes.xSlide = Math.max(-1, Math.min(1, raw.slide + offset.slide));
   },
 
   /**
