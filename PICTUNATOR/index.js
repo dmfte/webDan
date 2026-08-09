@@ -1,3 +1,5 @@
+import { RangeSlider } from "../assets/js/RangeSlider.js";
+
 // VARIABLES
 var canvIn = document.getElementById("canvIn");
 // var ctxIn = canvIn.getContext("2d", {willReadFrequently: true});
@@ -285,17 +287,17 @@ var rsGridSquares = new RangeSlider(containerGridSquares, {
     max: 20,
     def: paramsGrid.amnt,
     step: 1,
-    color1: "#576b9e",
+    color: "#576b9e",
     color2: "rgb(142, 167, 231)"
 });
 labelForContainerGridSquares.innerText = rsGridSquares.val;
-rsGridSquares.onslide = async function () {
+rsGridSquares.onValueChange(async function () {
     labelForContainerGridSquares.innerText = rsGridSquares.val;
     if (imageIn == undefined) return;
     paramsGrid.amnt = rsGridSquares.val;
     paramsGrid.atdg = await getArrayToDrawGrid(imageInData, paramsGrid);
     drawGrid(canvOut, paramsGrid);
-};
+});
 
 //-- Slider for the width of the grid line.
 const containerGridLinew = document.getElementById("containerGridLinew");
@@ -306,15 +308,15 @@ var rsGridLinew = new RangeSlider(containerGridLinew, {
     step: 1,
     max: 30,
     def: paramsGrid.linew,
-    color1: "#576b9e",
+    color: "#576b9e",
     color2: "rgb(142, 167, 231)"
 });
 labelForContainerGridLinew.innerText = rsGridLinew.val;
-rsGridLinew.onslide = function () {
+rsGridLinew.onValueChange(function () {
     labelForContainerGridLinew.innerText = rsGridLinew.val;
     paramsGrid.linew = rsGridLinew.val;
     drawGrid(canvOut, paramsGrid);
-}
+});
 
 //-- Functions
 function getArrayToDrawGrid(data, params) {
@@ -360,7 +362,7 @@ function drawGrid(canvas, params) {
         canvas.width = imageIn.width;
         canvas.height = imageIn.height;
     }
-    ctx = canvas.getContext("2d", {
+    let ctx = canvas.getContext("2d", {
         willReadFrequently: true
     });
     ctx.drawImage(imageIn, 0, 0);
@@ -383,11 +385,26 @@ var paramsPx = {
     dimension: 10,
     horizontal: false,
     grid: true,
-    palete: true
+    palette: false,
+    paletteIdx: 0,
+    dither: false,
+    adaptive: false
 }
 var canv0 = document.createElement("canvas");
 var c0 = canv0.getContext("2d", { willReadFrequently: true });
-var pxPalette = {};
+
+//-- Color palettes (loaded from JSON). Keys are the palette sizes ("8", "16", ...).
+var pxPalettes = null;
+var pxPaletteKeys = [];
+var pxColorCache = new Map(); //  packed rgb -> [r, g, b] of the closest palette color.
+var rsPxPalette;
+
+const PX_MAX_DIM = 500; //  Safety cap for the largest dimension of the working canvas.
+
+const debouncedPxRender = debounceFn(() => {
+    canv0 = getPixelatedCanvas(paramsPx);
+    applyPixelation(canvOut, canv0, paramsPx);
+}, 80);
 
 //-- Radio Button from the Effects group.
 const rgEffPixelate = document.getElementById("rgEffPixelate");
@@ -424,28 +441,198 @@ cbPxGrid.addEventListener("click", () => {
 });
 
 const cbPxPalette = document.getElementById("cbPxPalette");
-cbPxPalette.addEventListener("click", () => {
-    if (!cbPxPalette.checked) return;
+cbPxPalette.addEventListener("input", () => {
+    paramsPx.palette = cbPxPalette.checked;
     if (imageIn == undefined) return;
-    let imagedata = c0.getImageData(0, 0, canv0.width, canv0.height).data;
-    for (let i = 0; i < imagedata.length; i += 4) {
-        let r = imagedata[i + 0];
-        let g = imagedata[i + 1];
-        let b = imagedata[i + 2];
-        // let a = imagedata[i + 3];
-        let rgb = `${r}, ${g}, ${b}`;
-        if (!pxPalette.hasOwnProperty(rgb))  pxPalette[rgb] = [];
-        pxPalette[rgb].push(i);
-    }
-    console.log(pxPalette);
-    for (const key in pxPalette) {
-        if (Object.prototype.hasOwnProperty.call(pxPalette, key)) {
-            const rgb = pxPalette[key];
-            
+    canv0 = getPixelatedCanvas(paramsPx);
+    applyPixelation(canvOut, canv0, paramsPx);
+});
+
+//-- Dithering: diffuses each pixel's quantization error into its neighbors so the eye
+//   blends two palette colors into an in-between tone the palette doesn't literally contain.
+const cbPxDither = document.getElementById("cbPxDither");
+cbPxDither.addEventListener("input", () => {
+    paramsPx.dither = cbPxDither.checked;
+    if (imageIn == undefined || !paramsPx.palette) return;
+    canv0 = getPixelatedCanvas(paramsPx);
+    applyPixelation(canvOut, canv0, paramsPx);
+});
+
+//-- Adaptive palette: instead of a fixed retro palette, builds one from the image's own
+//   colors (median-cut) at the same color count the Palette slider currently selects.
+const cbPxAdaptive = document.getElementById("cbPxAdaptive");
+cbPxAdaptive.addEventListener("input", () => {
+    paramsPx.adaptive = cbPxAdaptive.checked;
+    pxColorCache.clear(); //  Cached matches belong to the previous color source (fixed vs. adaptive).
+    if (imageIn == undefined || !paramsPx.palette) return;
+    canv0 = getPixelatedCanvas(paramsPx);
+    applyPixelation(canvOut, canv0, paramsPx);
+});
+
+//-- Slider to pick which palette (its position in the JSON) is used.
+const containerPxPalette = document.getElementById("containerPxPalette");
+const labelForContainerPxPalette = document.querySelector("[label-for=containerPxPalette]");
+fetch("color-palettes.json")
+    .then(response => response.json())
+    .then(json => {
+        pxPalettes = json;
+        pxPaletteKeys = Object.keys(json).sort((a, b) => a - b);
+        rsPxPalette = new RangeSlider(containerPxPalette, {
+            title: "Palette",
+            min: 1,
+            max: pxPaletteKeys.length,
+            step: 1,
+            def: paramsPx.paletteIdx + 1,
+            color: "#576b9e",
+            color2: "rgb(142, 167, 231)"
+        });
+        labelForContainerPxPalette.innerText = pxPaletteKeys[paramsPx.paletteIdx];
+        rsPxPalette.onValueChange(function () {
+            paramsPx.paletteIdx = rsPxPalette.val - 1;
+            labelForContainerPxPalette.innerText = pxPaletteKeys[paramsPx.paletteIdx];
+            pxColorCache.clear(); //  Cached matches belong to the previous palette.
+            if (imageIn == undefined || !paramsPx.palette) return;
+            debouncedPxRender();
+        });
+    });
+
+//-- Weighted Euclidean color distance: fixed arbitrary per-channel weights (tune to taste).
+//   No sqrt needed since only relative ordering matters for nearest-match comparisons.
+const PX_WEIGHT_R = 0.30;
+const PX_WEIGHT_G = 0.59;
+const PX_WEIGHT_B = 0.11;
+function weightedDistance(r1, g1, b1, r2, g2, b2) {
+    const dr = r1 - r2;
+    const dg = g1 - g2;
+    const db = b1 - b2;
+    return PX_WEIGHT_R * dr * dr + PX_WEIGHT_G * dg * dg + PX_WEIGHT_B * db * db;
+}
+
+function getClosestPaletteColor(r, g, b, colors) {
+    const packed = (r << 16) | (g << 8) | b;
+    let match = pxColorCache.get(packed);
+    if (match !== undefined) return match;
+    let bestIdx = 0;
+    let bestDist = Infinity;
+    for (let i = 0; i < colors.length; i++) {
+        const c = colors[i];
+        const dist = weightedDistance(r, g, b, c[0], c[1], c[2]);
+        if (dist < bestDist) {
+            bestDist = dist;
+            bestIdx = i;
         }
     }
-    
-});
+    match = colors[bestIdx];
+    pxColorCache.set(packed, match);
+    return match;
+}
+
+//-- Median-cut: builds a palette of `numColors` from the pixels actually present in the
+//   image, instead of a fixed retro set. Recursively splits the largest-range color bucket
+//   along its widest channel until there are enough buckets, then averages each bucket.
+function buildAdaptivePalette(data, numColors) {
+    const pixels = [];
+    for (let i = 0; i < data.length; i += 4) {
+        pixels.push([data[i], data[i + 1], data[i + 2]]);
+    }
+    let buckets = [pixels];
+    while (buckets.length < numColors) {
+        let splitIdx = -1;
+        let splitChannel = 0;
+        let widestRange = -1;
+        for (let bi = 0; bi < buckets.length; bi++) {
+            const bucket = buckets[bi];
+            if (bucket.length < 2) continue;
+            for (let c = 0; c < 3; c++) {
+                let min = 255, max = 0;
+                for (const p of bucket) {
+                    if (p[c] < min) min = p[c];
+                    if (p[c] > max) max = p[c];
+                }
+                if (max - min > widestRange) {
+                    widestRange = max - min;
+                    splitIdx = bi;
+                    splitChannel = c;
+                }
+            }
+        }
+        if (splitIdx === -1 || widestRange <= 0) break; //  Nothing left worth splitting.
+        const bucket = buckets[splitIdx];
+        bucket.sort((a, b) => a[splitChannel] - b[splitChannel]);
+        const mid = Math.floor(bucket.length / 2);
+        buckets.splice(splitIdx, 1, bucket.slice(0, mid), bucket.slice(mid));
+    }
+    return buckets.map(bucket => {
+        let sr = 0, sg = 0, sb = 0;
+        for (const p of bucket) { sr += p[0]; sg += p[1]; sb += p[2]; }
+        const n = bucket.length;
+        return [Math.round(sr / n), Math.round(sg / n), Math.round(sb / n)];
+    });
+}
+
+//-- Floyd-Steinberg error diffusion: quantizes each pixel to the closest palette color, then
+//   pushes the rounding error into not-yet-visited neighbors so the average of a neighborhood
+//   approximates the original color even though only palette colors were used.
+function applyDitheredPalette(data, w, h, colors) {
+    const buf = new Float32Array(w * h * 3);
+    for (let i = 0, p = 0; i < data.length; i += 4, p += 3) {
+        buf[p] = data[i];
+        buf[p + 1] = data[i + 1];
+        buf[p + 2] = data[i + 2];
+    }
+    const diffuse = (x, y, er, eg, eb, factor) => {
+        if (x < 0 || x >= w || y < 0 || y >= h) return;
+        const p = (y * w + x) * 3;
+        buf[p] += er * factor;
+        buf[p + 1] += eg * factor;
+        buf[p + 2] += eb * factor;
+    };
+    for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+            const p = (y * w + x) * 3;
+            const r = Math.min(255, Math.max(0, buf[p]));
+            const g = Math.min(255, Math.max(0, buf[p + 1]));
+            const b = Math.min(255, Math.max(0, buf[p + 2]));
+            const match = getClosestPaletteColor(Math.round(r), Math.round(g), Math.round(b), colors);
+            const er = r - match[0], eg = g - match[1], eb = b - match[2];
+            const i = (y * w + x) * 4;
+            data[i] = match[0];
+            data[i + 1] = match[1];
+            data[i + 2] = match[2];
+            diffuse(x + 1, y, er, eg, eb, 7 / 16);
+            diffuse(x - 1, y + 1, er, eg, eb, 3 / 16);
+            diffuse(x, y + 1, er, eg, eb, 5 / 16);
+            diffuse(x + 1, y + 1, er, eg, eb, 1 / 16);
+        }
+    }
+}
+
+//-- Substitutes every pixel of canv0 with the closest color of the current palette
+//   (fixed or adaptive), optionally dithering the result.
+function applyPaletteToCanv0(params) {
+    const key = pxPaletteKeys[params.paletteIdx];
+    if (key == undefined) return;
+    const imagedata = c0.getImageData(0, 0, canv0.width, canv0.height);
+    const data = imagedata.data;
+    let colors;
+    if (params.adaptive) {
+        colors = buildAdaptivePalette(data, parseInt(key));
+        pxColorCache.clear(); //  Adaptive colors are rebuilt every call; stale cache entries would misquantize.
+    } else {
+        colors = pxPalettes[key].colors;
+    }
+    if (params.dither) {
+        applyDitheredPalette(data, canv0.width, canv0.height, colors);
+    } else {
+        for (let i = 0; i < data.length; i += 4) {
+            const match = getClosestPaletteColor(data[i], data[i + 1], data[i + 2], colors);
+            data[i + 0] = match[0];
+            data[i + 1] = match[1];
+            data[i + 2] = match[2];
+        }
+    }
+    c0.putImageData(imagedata, 0, 0);
+}
 
 //-- Range slider controlling level of pixelation
 var paramsPxLevel = {
@@ -454,32 +641,43 @@ var paramsPxLevel = {
     step: 1,
     max: 128,
     def: 32,
-    color1: "#576b9e",
+    color: "#576b9e",
     color2: "rgb(142, 167, 231)"
 };
 
 const containerPxLevel = document.getElementById("containerPxLevel");
 const labelForContainerPxLevel = document.querySelector("[label-for=containerPxLevel]");
 var rsPxLevel = new RangeSlider(containerPxLevel, paramsPxLevel);
-rsPxLevel.onslide = function () {
+function onPxLevelChange() {
     labelForContainerPxLevel.innerText = rsPxLevel.val;
     paramsPx.dimension = rsPxLevel.val;
-    canv0 = getPixelatedCanvas(paramsPx);
-
-    applyPixelation(canvOut, canv0, paramsPx);
+    debouncedPxRender();
 }
+rsPxLevel.onValueChange(onPxLevelChange);
 labelForContainerPxLevel.innerText = rsPxLevel.val;
 
 function getPixelatedCanvas(params) {
     if (imageIn == undefined) return undefined;
-    
-    canv0.width = (params.horizontal) ? params.dimension : parseInt(params.dimension / RATIO);
-    canv0.height = (params.horizontal) ? parseInt(params.dimension * RATIO) : params.dimension;
+
+    let w = (params.horizontal) ? params.dimension : parseInt(params.dimension / RATIO);
+    let h = (params.horizontal) ? parseInt(params.dimension * RATIO) : params.dimension;
+    w = Math.max(1, w);
+    h = Math.max(1, h);
+    //  Extreme aspect ratios could blow up the free dimension; cap it to keep calculations cheap.
+    const largest = Math.max(w, h);
+    if (largest > PX_MAX_DIM) {
+        const factor = PX_MAX_DIM / largest;
+        w = Math.max(1, Math.round(w * factor));
+        h = Math.max(1, Math.round(h * factor));
+    }
+    canv0.width = w;
+    canv0.height = h;
     c0 = canv0.getContext("2d", {
         willReadFrequently: true
     });
     c0.imageSmoothingEnabled = params.smooth;
     c0.drawImage(imageIn, 0, 0, canv0.width, canv0.height);
+    if (params.palette && pxPalettes) applyPaletteToCanv0(params);
     return canv0;
 }
 
@@ -546,16 +744,16 @@ const rsGraysLevels = new RangeSlider(containerGraysLevels, {
     max: 20,
     step: 1,
     def: paramsGrays.levels,
-    color1: "#576b9e",
+    color: "#576b9e",
     color2: "rgb(142, 167, 231)"
 });
 //  More than 20 grayscale tones are barely distinguishable.
 labelForContainerGraysLevels.innerText = rsGraysLevels.val;
-rsGraysLevels.onslide = function () {
+rsGraysLevels.onValueChange(function () {
     labelForContainerGraysLevels.innerText = rsGraysLevels.val;
     paramsGrays.levels = rsGraysLevels.val;
     applyGrayscaling(paramsGrays);
-}
+});
 
 //-- Slider for gray sensitivity.
 const containerGraysSensitivity = document.getElementById("containerGraysSensitivity");
@@ -566,15 +764,15 @@ const rsGraysSensitivity = new RangeSlider(containerGraysSensitivity, {
     step: 1,
     max: 254,
     def: paramsGrays.levels,
-    color1: "#576b9e",
+    color: "#576b9e",
     color2: "rgb(142, 167, 231)"
 });
 labelForContainerGraysSensitivity.innerText = rsGraysSensitivity.val;
-rsGraysSensitivity.onslide = function () {
+rsGraysSensitivity.onValueChange(function () {
     labelForContainerGraysSensitivity.innerText = rsGraysSensitivity.val;
     paramsGrays.sens = rsGraysSensitivity.val;
     applyGrayscaling(paramsGrays);
-}
+});
 
 
 function getGrayscaledImgData(imagedata, levels = 2, sens = 2, black = true) {
@@ -609,7 +807,7 @@ async function applyGrayscaling(params) {
         canvOut.width = imageIn.width;
         canvOut.height = imageIn.height;
     }
-    ctx = canvOut.getContext("2d", {
+    let ctx = canvOut.getContext("2d", {
         willReadFrequently: true
     });
     ctx.imageSmoothingEnabled = false;
@@ -682,18 +880,18 @@ var rsHatchHowmanyw = new RangeSlider(containerHatchHowmany, {
     max: 10,
     def: paramsHatch.buckets.length,
     step: 1,
-    color1: "#576b9e",
+    color: "#576b9e",
     color2: "rgb(142, 167, 231)"
 });
 labelForContainerHatchHowmany.innerText = rsHatchHowmanyw.val;
-rsHatchHowmanyw.onslide = async function () {
+rsHatchHowmanyw.onValueChange(async function () {
     labelForContainerHatchHowmany.innerText = rsHatchHowmanyw.val;
     if (imageIn == undefined) return;
     paramsHatch.buckets = await get255Buckets(rsHatchHowmanyw.val + 1, paramsHatch.sensitivity);
     paramsHatch.buckets.pop(); //  One more bucket is added for absolute white values, but then removed so it is not hatched.
     paramsHatch.atdh = await getArrToDrawHatch(paramsHatch);
     applyHatching(paramsHatch);
-};
+});
 
 // Hatch separation slider.
 const containerHatchSeparation = document.getElementById("containerHatchSeparation");
@@ -704,17 +902,17 @@ var rsHatchSeparation = new RangeSlider(containerHatchSeparation, {
     max: 3,
     step: 1,
     def: paramsHatch.separation,
-    color1: "#576b9e",
+    color: "#576b9e",
     color2: "rgb(142, 167, 231)"
 }); //  Will be reinitialized when image is loaded.
 labelForContainerHatchSeparation.innerText = rsHatchSeparation.val;
-rsHatchSeparation.onslide = async function () {
+rsHatchSeparation.onValueChange(async function () {
     labelForContainerHatchSeparation.innerText = rsHatchSeparation.val;
     if (imageIn == undefined) return;
     paramsHatch.separation = rsHatchSeparation.val;
     paramsHatch.atdh = await getArrToDrawHatch(paramsHatch);
     applyHatching(paramsHatch);
-};
+});
 
 // Width factor slider.
 const containerHatchLinew = document.getElementById("containerHatchLinew");
@@ -725,15 +923,15 @@ var rsHatchLinewidth = new RangeSlider(containerHatchLinew, {
     max: 15,
     def: paramsHatch.linew,
     step: 1,
-    color1: "#576b9e",
+    color: "#576b9e",
     color2: "rgb(142, 167, 231)"
 });
 labelForContainerHatchLinew.innerText = rsHatchLinewidth.val;
-rsHatchLinewidth.onslide = function () {
+rsHatchLinewidth.onValueChange(function () {
     labelForContainerHatchLinew.innerText = rsHatchLinewidth.val;
     paramsHatch.linew = rsHatchLinewidth.val;
     applyHatching(paramsHatch);
-};
+});
 
 // Sensitivity slider.
 const containerHatchSensitivity = document.getElementById("containerHatchSensitivity");
@@ -744,11 +942,11 @@ var rsHatchSensitivity = new RangeSlider(containerHatchSensitivity, {
     max: 250,
     step: 1,
     def: paramsHatch.sensitivity,
-    color1: "#576b9e",
+    color: "#576b9e",
     color2: "rgb(142, 167, 231)"
 });
 labelForContainerHatchSensitivity.innerText = rsHatchSensitivity.val;
-rsHatchSensitivity.onslide = async function () {
+rsHatchSensitivity.onValueChange(async function () {
     labelForContainerHatchSensitivity.innerText = rsHatchSensitivity.val;
     if (imageIn == undefined) return;
     paramsHatch.sensitivity = rsHatchSensitivity.val;
@@ -757,7 +955,7 @@ rsHatchSensitivity.onslide = async function () {
     paramsHatch.buckets.pop(); //  One more bucket is added for absolute white values but then removed so it is not hatched.
     paramsHatch.atdh = await getArrToDrawHatch(paramsHatch);
     applyHatching(paramsHatch);
-};
+});
 
 
 async function applyHatching(params) {
@@ -1010,15 +1208,15 @@ var rsCrosshSeparation = new RangeSlider(containerCrosshSeparation, {
     max: 4,
     def: 3,
     step: 1,
-    color1: "#576b9e",
+    color: "#576b9e",
     color2: "rgb(142, 167, 231)"
 });
 labelForContainerCrosshSeparation.innerText = rsCrosshSeparation.val;
-rsCrosshSeparation.onslide = async function () {
+rsCrosshSeparation.onValueChange(async function () {
     labelForContainerCrosshSeparation.innerText = rsCrosshSeparation.val;
     paramsCrossh.separation = rsCrosshSeparation.val;
     applyCrossh(paramsCrossh);
-}
+});
 
 const containerCrosshWidth = document.getElementById("containerCrosshWidth");
 const labelForContainerCrosshWidth = document.querySelector("[label-for=containerCrosshWidth]");
@@ -1028,15 +1226,15 @@ var rsCrosshWidth = new RangeSlider(containerCrosshWidth, {
     max: 10,
     def: 2,
     step: 1,
-    color1: "#576b9e",
+    color: "#576b9e",
     color2: "rgb(142, 167, 231)"
 });
 labelForContainerCrosshWidth.innerText = rsCrosshWidth.val;
-rsCrosshWidth.onslide = function () {
+rsCrosshWidth.onValueChange(function () {
     labelForContainerCrosshWidth.innerText = rsCrosshWidth.val;
     paramsCrossh.linew = rsCrosshWidth.val;
     applyCrossh(paramsCrossh);
-}
+});
 
 const containerCrosshSensitivity = document.getElementById("containerCrosshSensitivity");
 const labelForContainerCrosshSensitivity = document.querySelector("[label-for=containerCrosshSensitivity]");
@@ -1046,18 +1244,18 @@ var rsCrosshSensitivity = new RangeSlider(containerCrosshSensitivity, {
     max: 254,
     def: 0,
     step: 1,
-    color1: "#576b9e",
+    color: "#576b9e",
     color2: "rgb(142, 167, 231)"
 });
 labelForContainerCrosshSensitivity.innerText = rsCrosshSensitivity.val;
-rsCrosshSensitivity.onslide = async function () {
+rsCrosshSensitivity.onValueChange(async function () {
     labelForContainerCrosshSensitivity.innerText = rsCrosshSensitivity.val;
     if (imageIn == undefined) return;
     paramsCrossh.sensitivity = rsCrosshSensitivity.val;
     paramsCrossh.buckets = await get255Buckets(5, paramsCrossh.sensitivity);
     paramsCrossh.atch = await getArrToCrossh(paramsCrossh);
     applyCrossh(paramsCrossh);
-}
+});
 
 function getArrToCrossh(params) {
     return new Promise(async (res, rej) => {
@@ -1142,7 +1340,7 @@ var rsGlyphDetail = new RangeSlider(containerGlyphDetail, {
     max: 20,
     step: 1,
     def: paramsGlyph.detail,
-    color1: "#576b9e",
+    color: "#576b9e",
     color2: "rgb(142, 167, 231)"
 });
 labelForContainerGlyphDetail.innerText = rsGlyphDetail.val;
@@ -1153,9 +1351,9 @@ var rsGlyphFontsize = new RangeSlider(containerGlyphFontsize, {
     title: "Font Size",
     min: 1.0,
     max: 20.0,
-    ste: 0.1,
+    step: 0.1,
     def: paramsGlyph.fontsize,
-    color1: "#576b9e",
+    color: "#576b9e",
     color2: "rgb(142, 167, 231)"
 });
 labelForContainerGlyphFontsize.innerText = rsGlyphFontsize.val;
@@ -1246,7 +1444,7 @@ async function onceImageLoads(inputFileEvent) {
     // }
     canvIn.width = imageIn.width;
     canvIn.height = imageIn.height;
-    ctxIn = canvIn.getContext("2d", {
+    let ctxIn = canvIn.getContext("2d", {
         willReadFrequently: true
     });
     ctxIn.drawImage(imageIn, 0, 0, canvIn.width, canvIn.height);
@@ -1276,7 +1474,7 @@ async function onceImageLoads(inputFileEvent) {
     //     applyPixelation(canvOut, canv0, paramsPx);
     // }
     if (rgEffPixelate.checked) {
-        rsPxLevel.onslide();
+        onPxLevelChange();
     }
 
     // Grayscaling Effect
@@ -1289,45 +1487,47 @@ async function onceImageLoads(inputFileEvent) {
     let newDef = parseInt(newMax / 4);
 
     //  Hatching Effect.
+    containerHatchSeparation.innerHTML = ""; //  Avoid stacking another slider on top of the previous one.
     rsHatchSeparation = new RangeSlider(containerHatchSeparation, {
         title: "Separation",
         min: 2,
         max: newMax,
         step: 1,
         def: newDef,
-        color1: "#576b9e",
+        color: "#576b9e",
         color2: "rgb(142, 167, 231)"
     });
     paramsHatch.separation = rsHatchSeparation.val;
     labelForContainerHatchSeparation.innerText = rsHatchSeparation.val;
-    rsHatchSeparation.onslide = async function () {
+    rsHatchSeparation.onValueChange(async function () {
         labelForContainerHatchSeparation.innerText = rsHatchSeparation.val;
         paramsHatch.separation = rsHatchSeparation.val;
         paramsHatch.atdh = await getArrToDrawHatch(paramsHatch);
         applyHatching(paramsHatch);
-    };
+    });
     if (rgEffHatching.checked) {
         paramsHatch.atdh = await getArrToDrawHatch(paramsHatch);
         applyHatching(paramsHatch);
     }
 
     //  Cross-hatching Effect.
+    containerCrosshSeparation.innerHTML = ""; //  Avoid stacking another slider on top of the previous one.
     rsCrosshSeparation = new RangeSlider(containerCrosshSeparation, {
         title: "Separation",
         min: 3,
         max: newMax,
         step: 1,
         def: newDef,
-        color1: "#576b9e",
+        color: "#576b9e",
         color2: "rgb(142, 167, 231)"
     });
     labelForContainerCrosshSeparation.innerText = rsCrosshSeparation.val;
-    rsCrosshSeparation.onslide = async function () {
+    rsCrosshSeparation.onValueChange(async function () {
         labelForContainerCrosshSeparation.innerText = rsCrosshSeparation.val;
         paramsCrossh.separation = rsCrosshSeparation.val;
         paramsCrossh.atch = await getArrToCrossh(paramsCrossh);
         applyCrossh(paramsCrossh);
-    }
+    });
     paramsCrossh.separation = rsCrosshSeparation.val;
     if (rgEffCrossh.checked) {
         paramsCrossh.atch = await getArrToCrossh(paramsCrossh);
@@ -1373,6 +1573,15 @@ function getLoadedImage(evt) {
 //  Returns the passed value, but if it is lower than the minimum, returns the minimum; if it is higher than the maximum, returns the maximum.
 function getMinMax(val = 0, [min = 0, max = 0]) {
     return Math.min(max, Math.max(min, val));
+}
+
+//  Returns a debounced version of fn: it only runs after ms without new calls (keeps sliders responsive).
+function debounceFn(fn, ms) {
+    let timeout;
+    return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => fn(...args), ms);
+    };
 }
 
 
