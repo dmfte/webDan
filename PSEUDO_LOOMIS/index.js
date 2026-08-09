@@ -54,8 +54,16 @@ const AppState = {
     isDraggingCircle: false,
     isDraggingYNode: false,
     isDraggingXNode: false,
-    hoverTarget: null,  // 'circle', 'yNode', 'xNode', or null
+    isRotating: false,
+    rotateAngleOffset: 0,  // Difference between pointer angle and circle rotation at grab time
+    hoverTarget: null,  // 'circle', 'yNode', 'xNode', 'rotate', or null
     lastPointerPos: { x: 0, y: 0 }  // For delta-based circle dragging
+  },
+
+  // Overlay visibility toggles
+  overlays: {
+    showAxes: true,
+    showGuideLines: true
   },
 
   // Canvas display state (for coordinate transformations)
@@ -87,16 +95,18 @@ const RANGE_SLIDER_EMPTY = '#DCA06D';
 // ========================================
 // CALIBRATION
 // ========================================
-const NODE_RADIUS = 90;  // <- CALIBRATE: node (handle) radius in pixels
+const NODE_RADIUS = 50;  // <- CALIBRATE: node (handle) radius in pixels
 const MOBILE_BREAKPOINT = 749;  // <- CALIBRATE: max-width for mobile mode (matches CSS)
 
 const DRAG_CONFIG = {
   velocity: 1.0  // <- CALIBRATE: 1.0 = 1:1 movement, 2.0 = 2x faster, 0.5 = half speed
 };
 
+const ROTATION_LIMIT_DEG = 90;  // <- CALIBRATE: max |rotation| in either direction
+
 function getNodeRadius() {
   const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
-  return isMobile ? window.innerWidth * 0.4 : NODE_RADIUS;
+  return isMobile ? window.innerWidth * 0.15 : NODE_RADIUS;
 }
 
 // ========================================
@@ -147,7 +157,7 @@ const BEZIER_K = 0.5522847498; // 4*(sqrt(2)-1)/3 — bezier constant for circle
  */
 function cubicBezier(t, p0, p1, p2, p3) {
   const mt = 1 - t;
-  return mt*mt*mt*p0 + 3*mt*mt*t*p1 + 3*mt*t*t*p2 + t*t*t*p3;
+  return mt * mt * mt * p0 + 3 * mt * mt * t * p1 + 3 * mt * t * t * p2 + t * t * t * p3;
 }
 
 /**
@@ -299,7 +309,8 @@ const Renderer = {
     const rotRad = degToRad(rotation);
 
     // Calculate axis line width (50% of stroke width, min 1px)
-    const axisWidth = Math.max(1, Math.ceil(strokeWidth * 0.5));
+    const axisWidth = Math.max(1, Math.ceil(strokeWidth * 0.3));
+    const dashPattern = [axisWidth * 3, axisWidth * 2];
 
     ctx.save();
     ctx.translate(x, y);
@@ -312,28 +323,65 @@ const Renderer = {
     ctx.lineWidth = strokeWidth;
     ctx.stroke();
 
-    // --- Draw axes (thinner lines) ---
-    ctx.strokeStyle = strokeColor;
-    ctx.lineWidth = axisWidth;
+    // --- Draw axes (thinner, dotted lines) ---
+    if (AppState.overlays.showAxes) {
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = axisWidth;
+      ctx.setLineDash(dashPattern);
 
-    // Y-axis (vertical line)
-    ctx.beginPath();
-    ctx.moveTo(0, -radius);
-    ctx.lineTo(0, radius);
-    ctx.stroke();
+      // Y-axis (vertical line)
+      ctx.beginPath();
+      ctx.moveTo(0, -radius);
+      ctx.lineTo(0, radius);
+      ctx.stroke();
 
-    // X-axis (horizontal line)
-    ctx.beginPath();
-    ctx.moveTo(-radius, 0);
-    ctx.lineTo(radius, 0);
-    ctx.stroke();
+      // X-axis (horizontal line)
+      ctx.beginPath();
+      ctx.moveTo(-radius, 0);
+      ctx.lineTo(radius, 0);
+      ctx.stroke();
+
+      ctx.setLineDash([]);
+    }
+
+    // --- Draw guide lines: tangent to the circle, perpendicular to each axis ---
+    if (AppState.overlays.showGuideLines) {
+      const farLength = Math.hypot(ctx.canvas.width, ctx.canvas.height);
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = axisWidth;
+      ctx.setLineDash(dashPattern);
+
+      // Tangent to top/bottom, perpendicular to the vertical axis
+      [-radius, radius].forEach(offsetY => {
+        ctx.beginPath();
+        ctx.moveTo(-farLength, offsetY);
+        ctx.lineTo(farLength, offsetY);
+        ctx.stroke();
+      });
+
+      // Tangent to left/right, perpendicular to the horizontal axis
+      [-radius, radius].forEach(offsetX => {
+        ctx.beginPath();
+        ctx.moveTo(offsetX, -farLength);
+        ctx.lineTo(offsetX, farLength);
+        ctx.stroke();
+      });
+
+      ctx.setLineDash([]);
+    }
 
     // --- Draw arcs based on node positions ---
-    // Arc width matches main stroke
+    // Arc width matches main stroke. Skipped when curvature is ~0: at that
+    // point the arc is a straight line exactly coincident with the axis, and
+    // being solid it would paint over (and hide) the dotted axis above.
     ctx.lineWidth = strokeWidth;
 
-    this.drawHorizontalArc(ctx, radius, yPosition, strokeColor);
-    this.drawVerticalArc(ctx, radius, xPosition, strokeColor);
+    if (Math.abs(yPosition) > 0.001) {
+      this.drawHorizontalArc(ctx, radius, yPosition, strokeColor);
+    }
+    if (Math.abs(xPosition) > 0.001) {
+      this.drawVerticalArc(ctx, radius, xPosition, strokeColor);
+    }
 
     if (includeNodes) {
       const nodeColor = getComplementaryColor(strokeColor);
@@ -469,13 +517,24 @@ const InputHandler = {
       return 'circle';
     }
 
-    return null;
+    // Anywhere outside the circle acts as an invisible lever pivoting at its center
+    return 'rotate';
+  },
+
+  /**
+   * Angle (degrees) from the circle's center to an image-space point.
+   * Positive = clockwise, matching ctx.rotate()'s convention on a y-down canvas.
+   */
+  getPointerAngleDeg(imgX, imgY) {
+    const { x, y } = AppState.circle;
+    return Math.atan2(imgY - y, imgX - x) * 180 / Math.PI;
   },
 
   /**
    * Handle pointer down (mouse or touch)
    * - Clicking on nodes: drag that specific node
-   * - Clicking anywhere else: drag circle using delta movement
+   * - Clicking inside the circle: drag circle using delta movement
+   * - Clicking outside the circle: rotate, as if pivoting an invisible lever at its center
    */
   handlePointerDown(e) {
     if (!AppState.image) return;
@@ -495,8 +554,12 @@ const InputHandler = {
     } else if (target === 'xNode') {
       AppState.interaction.isDraggingXNode = true;
       this.canvas.classList.add('dragging-node');
+    } else if (target === 'rotate') {
+      AppState.interaction.isRotating = true;
+      AppState.interaction.rotateAngleOffset = this.getPointerAngleDeg(pos.x, pos.y) - AppState.circle.rotation;
+      this.canvas.classList.add('rotating');
     } else {
-      // Drag circle from anywhere (delta-based movement)
+      // Drag circle from anywhere inside it (delta-based movement)
       AppState.interaction.isDraggingCircle = true;
       AppState.interaction.lastPointerPos = { x: pos.x, y: pos.y };
       this.canvas.classList.add('dragging-circle');
@@ -506,7 +569,8 @@ const InputHandler = {
   /**
    * Handle touch start
    * - Touching nodes: drag that specific node
-   * - Touching anywhere else: drag circle using delta movement
+   * - Touching inside the circle: drag circle using delta movement
+   * - Touching outside the circle: rotate, as if pivoting an invisible lever at its center
    */
   handleTouchStart(e) {
     if (!AppState.image || e.touches.length !== 1) return;
@@ -526,8 +590,11 @@ const InputHandler = {
       AppState.interaction.isDraggingYNode = true;
     } else if (target === 'xNode') {
       AppState.interaction.isDraggingXNode = true;
+    } else if (target === 'rotate') {
+      AppState.interaction.isRotating = true;
+      AppState.interaction.rotateAngleOffset = this.getPointerAngleDeg(pos.x, pos.y) - AppState.circle.rotation;
     } else {
-      // Drag circle from anywhere (delta-based movement)
+      // Drag circle from anywhere inside it (delta-based movement)
       AppState.interaction.isDraggingCircle = true;
       AppState.interaction.lastPointerPos = { x: pos.x, y: pos.y };
     }
@@ -556,6 +623,12 @@ const InputHandler = {
       AppState.circle.y += deltaY;
       AppState.interaction.lastPointerPos = { x: pos.x, y: pos.y };
 
+      Renderer.render();
+      return;
+    }
+
+    if (AppState.interaction.isRotating) {
+      this.updateRotation(pos);
       Renderer.render();
       return;
     }
@@ -606,6 +679,12 @@ const InputHandler = {
       return;
     }
 
+    if (AppState.interaction.isRotating) {
+      this.updateRotation(pos);
+      Renderer.render();
+      return;
+    }
+
     if (AppState.interaction.isDraggingYNode) {
       this.updateYNodePosition(pos);
       Renderer.render();
@@ -617,6 +696,11 @@ const InputHandler = {
       Renderer.render();
       return;
     }
+  },
+
+  updateRotation(imgPos) {
+    const angle = this.getPointerAngleDeg(imgPos.x, imgPos.y) - AppState.interaction.rotateAngleOffset;
+    AppState.circle.rotation = Math.max(-ROTATION_LIMIT_DEG, Math.min(ROTATION_LIMIT_DEG, angle));
   },
 
   updateYNodePosition(imgPos) {
@@ -649,20 +733,23 @@ const InputHandler = {
     AppState.interaction.isDraggingCircle = false;
     AppState.interaction.isDraggingYNode = false;
     AppState.interaction.isDraggingXNode = false;
+    AppState.interaction.isRotating = false;
 
-    this.canvas.classList.remove('dragging-circle', 'dragging-node');
+    this.canvas.classList.remove('dragging-circle', 'dragging-node', 'rotating');
   },
 
   /**
    * Update cursor based on hover target
    */
   updateCursor(target) {
-    this.canvas.classList.remove('hover-circle', 'hover-node');
+    this.canvas.classList.remove('hover-circle', 'hover-node', 'hover-rotate');
 
     if (target === 'circle') {
       this.canvas.classList.add('hover-circle');
     } else if (target === 'yNode' || target === 'xNode') {
       this.canvas.classList.add('hover-node');
+    } else if (target === 'rotate') {
+      this.canvas.classList.add('hover-rotate');
     }
   }
 };
@@ -678,6 +765,7 @@ const UIController = {
     this.setupFileInputs();
     this.setupSliders();
     this.setupColorPickers();
+    this.setupOverlayToggles();
     this.setupDownloadButtons();
     this.setupMobileControls();
     this.setupCropButton();
@@ -730,32 +818,8 @@ const UIController = {
    */
   createSliders(mode) {
     const prefix = mode === 'mobile' ? 'mobile' : '';
-    const rotationContainer = document.getElementById(`${prefix}${prefix ? 'R' : 'r'}otationSlider`);
     const sizeContainer = document.getElementById(`${prefix}${prefix ? 'S' : 's'}izeSlider`);
     const strokeContainer = document.getElementById(`${prefix}${prefix ? 'S' : 's'}trokeSlider`);
-
-    // Rotation slider (-90 to 90, step 0.5)
-    if (rotationContainer) {
-      const rotationSlider = new RangeSlider(rotationContainer, {
-        min: -90,
-        max: 90,
-        step: 0.5,
-        def: 0,
-        title: 'Deg',
-        color: RANGE_SLIDER_FILL,
-        color2: RANGE_SLIDER_EMPTY
-      });
-
-      rotationSlider.onValueChange((value) => {
-        AppState.circle.rotation = value;
-        if (AppState.image) Renderer.render();
-
-        // Sync with other slider if exists
-        this.syncSliderValue('rotation', value, mode);
-      });
-
-      this.sliders[`${mode}Rotation`] = rotationSlider;
-    }
 
     // Size slider (5% to 100%, step 1)
     if (sizeContainer) {
@@ -840,6 +904,29 @@ const UIController = {
     if (mobilePicker) {
       mobilePicker.addEventListener('input', handleColorChange);
     }
+  },
+
+  /**
+   * Setup axes / guide-lines visibility toggles (desktop + mobile, kept in sync)
+   */
+  setupOverlayToggles() {
+    const toggles = [
+      { key: 'showAxes', ids: ['toggleAxes', 'mobileToggleAxes'] },
+      { key: 'showGuideLines', ids: ['toggleGuideLines', 'mobileToggleGuideLines'] }
+    ];
+
+    toggles.forEach(({ key, ids }) => {
+      const elements = ids.map(id => document.getElementById(id)).filter(Boolean);
+
+      elements.forEach(el => {
+        el.checked = AppState.overlays[key];
+        el.addEventListener('change', () => {
+          AppState.overlays[key] = el.checked;
+          elements.forEach(other => { other.checked = el.checked; });
+          if (AppState.image) Renderer.render();
+        });
+      });
+    });
   },
 
   /**

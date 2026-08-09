@@ -153,6 +153,23 @@ body {
   border-radius: 4px;
 }
 
+/* === Overlay Toggles === */
+.toggle-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-text);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.toggle-control input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
 /* === Mobile Top Bar (hidden on desktop) === */
 .mobile-top-bar {
   display: none;
@@ -356,6 +373,29 @@ body {
   .mobile-control-item[data-control="color"].active .mobile-control-slider {
     width: 80px;
   }
+
+  /* Mobile Overlay Toggles */
+  .mobile-toggle-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    cursor: pointer;
+  }
+
+  .mobile-toggle-label input[type="checkbox"] {
+    width: 24px;
+    height: 24px;
+    accent-color: var(--color-accent);
+    cursor: pointer;
+  }
+
+  .mobile-control-item[data-control="axes"]:focus-within .mobile-control-slider,
+  .mobile-control-item[data-control="axes"].active .mobile-control-slider,
+  .mobile-control-item[data-control="guides"]:focus-within .mobile-control-slider,
+  .mobile-control-item[data-control="guides"].active .mobile-control-slider {
+    width: 60px;
+  }
 }
 
 /* ========================================
@@ -405,10 +445,18 @@ body {
   cursor: grab;
 }
 
+#mainCanvas.rotating {
+  cursor: crosshair;
+}
+
 #mainCanvas.hover-circle {
   cursor: move;
 }
 
 #mainCanvas.hover-node {
   cursor: pointer;
+}
+
+#mainCanvas.hover-rotate {
+  cursor: crosshair;
 }

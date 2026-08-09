@@ -44,12 +44,6 @@
         </div>
       </div>
 
-      <!-- Rotation Slider -->
-      <div class="control-group">
-        <label class="control-label">Rotation</label>
-        <div id="rotationSlider" class="slider-container"></div>
-      </div>
-
       <!-- Size Slider -->
       <div class="control-group">
         <label class="control-label">Circle Size</label>
@@ -66,6 +60,18 @@
       <div class="control-group">
         <label class="control-label" for="colorPicker">Stroke Color</label>
         <input type="color" id="colorPicker" value="#87CEEB" class="color-input">
+      </div>
+
+      <!-- Overlay Toggles -->
+      <div class="control-group">
+        <label class="toggle-control">
+          <input type="checkbox" id="toggleAxes" checked>
+          <span>Show Axes</span>
+        </label>
+        <label class="toggle-control">
+          <input type="checkbox" id="toggleGuideLines" checked>
+          <span>Show Guide Lines</span>
+        </label>
       </div>
     </aside>
 
@@ -90,14 +96,6 @@
 
     <!-- Mobile Sidebar Controls -->
     <aside class="mobile-controls">
-      <!-- Rotation -->
-      <div class="mobile-control-item" data-control="rotation">
-        <div class="mobile-control-icon">&#x1F504;</div>
-        <div class="mobile-control-slider">
-          <div id="mobileRotationSlider" class="slider-container"></div>
-        </div>
-      </div>
-
       <!-- Size -->
       <div class="mobile-control-item" data-control="size">
         <div class="mobile-control-icon">&#x1F4D0;</div>
@@ -119,6 +117,26 @@
         <div class="mobile-control-icon">&#x1F3A8;</div>
         <div class="mobile-control-slider">
           <input type="color" id="mobileColorPicker" value="#87CEEB" class="color-input mobile-color">
+        </div>
+      </div>
+
+      <!-- Axes Toggle -->
+      <div class="mobile-control-item" data-control="axes">
+        <div class="mobile-control-icon">&#x271B;</div>
+        <div class="mobile-control-slider">
+          <label class="mobile-toggle-label">
+            <input type="checkbox" id="mobileToggleAxes" checked>
+          </label>
+        </div>
+      </div>
+
+      <!-- Guide Lines Toggle -->
+      <div class="mobile-control-item" data-control="guides">
+        <div class="mobile-control-icon">&#x1F4CF;</div>
+        <div class="mobile-control-slider">
+          <label class="mobile-toggle-label">
+            <input type="checkbox" id="mobileToggleGuideLines" checked>
+          </label>
         </div>
       </div>
     </aside>
