@@ -386,7 +386,7 @@ var paramsPx = {
     horizontal: false,
     grid: true,
     palette: false,
-    paletteIdx: 0,
+    numColors: 16,
     dither: false,
     adaptive: false
 }
@@ -399,7 +399,7 @@ var pxPaletteKeys = [];
 var pxColorCache = new Map(); //  packed rgb -> [r, g, b] of the closest palette color.
 var rsPxPalette;
 
-const PX_MAX_DIM = 500; //  Safety cap for the largest dimension of the working canvas.
+const PX_MAX_DIM = 250; //  Safety cap for the largest dimension of the working canvas.
 
 const debouncedPxRender = debounceFn(() => {
     canv0 = getPixelatedCanvas(paramsPx);
@@ -459,7 +459,7 @@ cbPxDither.addEventListener("input", () => {
 });
 
 //-- Adaptive palette: instead of a fixed retro palette, builds one from the image's own
-//   colors (median-cut) at the same color count the Palette slider currently selects.
+//   colors (popularity algorithm) at the same color count the Palette slider currently selects.
 const cbPxAdaptive = document.getElementById("cbPxAdaptive");
 cbPxAdaptive.addEventListener("input", () => {
     paramsPx.adaptive = cbPxAdaptive.checked;
@@ -469,7 +469,7 @@ cbPxAdaptive.addEventListener("input", () => {
     applyPixelation(canvOut, canv0, paramsPx);
 });
 
-//-- Slider to pick which palette (its position in the JSON) is used.
+//-- Slider to pick the number of colors: exact count in Adaptive mode, nearest fixed preset otherwise.
 const containerPxPalette = document.getElementById("containerPxPalette");
 const labelForContainerPxPalette = document.querySelector("[label-for=containerPxPalette]");
 fetch("color-palettes.json")
@@ -479,17 +479,17 @@ fetch("color-palettes.json")
         pxPaletteKeys = Object.keys(json).sort((a, b) => a - b);
         rsPxPalette = new RangeSlider(containerPxPalette, {
             title: "Palette",
-            min: 1,
-            max: pxPaletteKeys.length,
-            step: 1,
-            def: paramsPx.paletteIdx + 1,
+            min: 8,
+            max: 256,
+            step: 8,
+            def: paramsPx.numColors,
             color: "#576b9e",
             color2: "rgb(142, 167, 231)"
         });
-        labelForContainerPxPalette.innerText = pxPaletteKeys[paramsPx.paletteIdx];
+        labelForContainerPxPalette.innerText = paramsPx.numColors;
         rsPxPalette.onValueChange(function () {
-            paramsPx.paletteIdx = rsPxPalette.val - 1;
-            labelForContainerPxPalette.innerText = pxPaletteKeys[paramsPx.paletteIdx];
+            paramsPx.numColors = rsPxPalette.val;
+            labelForContainerPxPalette.innerText = paramsPx.numColors;
             pxColorCache.clear(); //  Cached matches belong to the previous palette.
             if (imageIn == undefined || !paramsPx.palette) return;
             debouncedPxRender();
@@ -527,47 +527,21 @@ function getClosestPaletteColor(r, g, b, colors) {
     return match;
 }
 
-//-- Median-cut: builds a palette of `numColors` from the pixels actually present in the
-//   image, instead of a fixed retro set. Recursively splits the largest-range color bucket
-//   along its widest channel until there are enough buckets, then averages each bucket.
-function buildAdaptivePalette(data, numColors) {
-    const pixels = [];
+//-- Popularity algorithm: counts how many times each exact RGB color occurs in the image,
+//   then keeps the `numColors` most frequent ones as the palette. Unlike median-cut, every
+//   palette entry is a real color lifted straight from the picture, not an average.
+function buildPopularityPalette(data, numColors) {
+    const counts = new Map(); //  packed rgb -> occurrence count.
     for (let i = 0; i < data.length; i += 4) {
-        pixels.push([data[i], data[i + 1], data[i + 2]]);
+        const packed = (data[i] << 16) | (data[i + 1] << 8) | data[i + 2];
+        counts.set(packed, (counts.get(packed) || 0) + 1);
     }
-    let buckets = [pixels];
-    while (buckets.length < numColors) {
-        let splitIdx = -1;
-        let splitChannel = 0;
-        let widestRange = -1;
-        for (let bi = 0; bi < buckets.length; bi++) {
-            const bucket = buckets[bi];
-            if (bucket.length < 2) continue;
-            for (let c = 0; c < 3; c++) {
-                let min = 255, max = 0;
-                for (const p of bucket) {
-                    if (p[c] < min) min = p[c];
-                    if (p[c] > max) max = p[c];
-                }
-                if (max - min > widestRange) {
-                    widestRange = max - min;
-                    splitIdx = bi;
-                    splitChannel = c;
-                }
-            }
-        }
-        if (splitIdx === -1 || widestRange <= 0) break; //  Nothing left worth splitting.
-        const bucket = buckets[splitIdx];
-        bucket.sort((a, b) => a[splitChannel] - b[splitChannel]);
-        const mid = Math.floor(bucket.length / 2);
-        buckets.splice(splitIdx, 1, bucket.slice(0, mid), bucket.slice(mid));
-    }
-    return buckets.map(bucket => {
-        let sr = 0, sg = 0, sb = 0;
-        for (const p of bucket) { sr += p[0]; sg += p[1]; sb += p[2]; }
-        const n = bucket.length;
-        return [Math.round(sr / n), Math.round(sg / n), Math.round(sb / n)];
-    });
+    const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+    return sorted.slice(0, numColors).map(([packed]) => [
+        (packed >> 16) & 0xff,
+        (packed >> 8) & 0xff,
+        packed & 0xff
+    ]);
 }
 
 //-- Floyd-Steinberg error diffusion: quantizes each pixel to the closest palette color, then
@@ -607,18 +581,33 @@ function applyDitheredPalette(data, w, h, colors) {
     }
 }
 
+//-- Finds the JSON preset whose color count is numerically closest to `numColors`, since
+//   fixed presets only exist at a handful of sizes but the slider now moves in steps of 8.
+function getNearestPaletteKey(numColors) {
+    let best = pxPaletteKeys[0];
+    let bestDiff = Infinity;
+    for (const key of pxPaletteKeys) {
+        const diff = Math.abs(parseInt(key) - numColors);
+        if (diff < bestDiff) {
+            bestDiff = diff;
+            best = key;
+        }
+    }
+    return best;
+}
+
 //-- Substitutes every pixel of canv0 with the closest color of the current palette
 //   (fixed or adaptive), optionally dithering the result.
 function applyPaletteToCanv0(params) {
-    const key = pxPaletteKeys[params.paletteIdx];
-    if (key == undefined) return;
     const imagedata = c0.getImageData(0, 0, canv0.width, canv0.height);
     const data = imagedata.data;
     let colors;
     if (params.adaptive) {
-        colors = buildAdaptivePalette(data, parseInt(key));
+        colors = buildPopularityPalette(data, params.numColors);
         pxColorCache.clear(); //  Adaptive colors are rebuilt every call; stale cache entries would misquantize.
     } else {
+        const key = getNearestPaletteKey(params.numColors);
+        if (key == undefined) return;
         colors = pxPalettes[key].colors;
     }
     if (params.dither) {
@@ -692,8 +681,15 @@ function applyPixelation(canvasTarget, canvasPixelated, params) {
     let ctx = canvasTarget.getContext("2d", {
         willReadFrequently: true
     });
-    ctx.imageSmoothingEnabled = params.smooth;
-    ctx.drawImage(canvasPixelated, 0, 0, canvOut.width, canvOut.height);
+    if (params.smooth) {
+        ctx.imageSmoothingEnabled = true;
+        ctx.drawImage(canvasPixelated, 0, 0, canvOut.width, canvOut.height);
+    } else {
+        //  drawImage's magnification can still blend in stray colors at block edges even with
+        //  smoothing disabled; replicate each source pixel by hand for a genuinely crisp result.
+        ctx.imageSmoothingEnabled = false;
+        drawNearestNeighborUpscale(ctx, canvasPixelated, block);
+    }
 
     if (params.grid) {
         for (let i = 1; i < canvasPixelated.height; i++) {
@@ -713,6 +709,34 @@ function applyPixelation(canvasTarget, canvasPixelated, params) {
             ctx.stroke();
         }
     }
+}
+
+//-- Replicates every pixel of `source` into a `block`x`block` square on `ctx`, bypassing
+//   drawImage's built-in scaling so the result is exactly nearest-neighbor with no blending.
+function drawNearestNeighborUpscale(ctx, source, block) {
+    const sctx = source.getContext("2d", { willReadFrequently: true });
+    const srcData = sctx.getImageData(0, 0, source.width, source.height).data;
+    const dw = source.width * block;
+    const dh = source.height * block;
+    const out = ctx.createImageData(dw, dh);
+    const outData = out.data;
+    for (let sy = 0; sy < source.height; sy++) {
+        for (let sx = 0; sx < source.width; sx++) {
+            const si = (sy * source.width + sx) * 4;
+            const r = srcData[si], g = srcData[si + 1], b = srcData[si + 2], a = srcData[si + 3];
+            for (let by = 0; by < block; by++) {
+                let di = ((sy * block + by) * dw + sx * block) * 4;
+                for (let bx = 0; bx < block; bx++) {
+                    outData[di] = r;
+                    outData[di + 1] = g;
+                    outData[di + 2] = b;
+                    outData[di + 3] = a;
+                    di += 4;
+                }
+            }
+        }
+    }
+    ctx.putImageData(out, 0, 0);
 }
 
 //  GRAYSCALE
