@@ -570,7 +570,7 @@ var paramsPxLevel = {
     min: 8,
     step: 1,
     max: 128,
-    def: 32,
+    def: paramsPx.dimension,
     color: "#576b9e",
     color2: "rgb(142, 167, 231)"
 };
@@ -728,7 +728,7 @@ const rsGraysSensitivity = new RangeSlider(containerGraysSensitivity, {
     min: -254,
     step: 1,
     max: 254,
-    def: paramsGrays.levels,
+    def: paramsGrays.sens,
     color: "#576b9e",
     color2: "rgb(142, 167, 231)"
 });
@@ -1171,7 +1171,7 @@ var rsCrosshSeparation = new RangeSlider(containerCrosshSeparation, {
     title: "Separation",
     min: 3,
     max: 4,
-    def: 3,
+    def: paramsCrossh.separation,
     step: 1,
     color: "#576b9e",
     color2: "rgb(142, 167, 231)"
@@ -1189,7 +1189,7 @@ var rsCrosshWidth = new RangeSlider(containerCrosshWidth, {
     title: "Width",
     min: 1,
     max: 10,
-    def: 2,
+    def: paramsCrossh.linew,
     step: 1,
     color: "#576b9e",
     color2: "rgb(142, 167, 231)"
@@ -1207,7 +1207,7 @@ var rsCrosshSensitivity = new RangeSlider(containerCrosshSensitivity, {
     title: "Sensitivity",
     min: -254,
     max: 254,
-    def: 0,
+    def: paramsCrossh.sensitivity,
     step: 1,
     color: "#576b9e",
     color2: "rgb(142, 167, 231)"
