@@ -396,9 +396,15 @@ var pxColorCache = new Map(); //  packed rgb -> [r, g, b] of the closest palette
 
 const PX_MAX_DIM = 250; //  Safety cap for the largest dimension of the working canvas.
 
+//-- Floating panel listing every distinct color actually present in the pixelated output.
+const paletteContainerPx = document.getElementById("paletteContainerPx");
+const paletteResolutionPx = document.getElementById("paletteResolutionPx");
+const paletteColorListPx = document.getElementById("paletteColorListPx");
+
 const debouncedPxRender = debounceFn(() => {
     canv0 = getPixelatedCanvas(paramsPx);
     applyPixelation(canvOut, canv0, paramsPx);
+    renderPxPalette();
 }, 80);
 
 //-- Radio Button from the Effects group.
@@ -426,6 +432,7 @@ cbPxHorizontal.addEventListener("click", () => {
 
     canv0 = getPixelatedCanvas(paramsPx);
     applyPixelation(canvOut, canv0, paramsPx);
+    renderPxPalette();
 });
 
 const cbPxGrid = document.getElementById("cbPxGrid");
@@ -447,6 +454,7 @@ cbPxTrueColors.addEventListener("input", () => {
     if (imageIn == undefined) return;
     canv0 = getPixelatedCanvas(paramsPx);
     applyPixelation(canvOut, canv0, paramsPx);
+    renderPxPalette();
 });
 
 //-- Slider to pick how many representative colors to keep.
@@ -651,6 +659,48 @@ function applyPixelation(canvasTarget, canvasPixelated, params) {
         }
     }
 }
+
+//-- Rebuilds the floating swatch table from every distinct color present in canv0 (the
+//   pixelated result before it gets upscaled/gridded onto canvOut), most-used first.
+//   Hides itself whenever there's no image, Pixelate isn't the active effect, or True
+//   Colors is on (that mode skips quantization, so the color count can run into the
+//   thousands and isn't a meaningful "palette" to list).
+function renderPxPalette() {
+    if (imageIn == undefined || !rgEffPixelate.checked || paramsPx.trueColors) {
+        paletteContainerPx.style.display = "none";
+        return;
+    }
+    const imagedata = c0.getImageData(0, 0, canv0.width, canv0.height);
+    const data = imagedata.data;
+    const counts = new Map(); //  packed rgb -> occurrence count.
+    for (let i = 0; i < data.length; i += 4) {
+        const packed = (data[i] << 16) | (data[i + 1] << 8) | data[i + 2];
+        counts.set(packed, (counts.get(packed) || 0) + 1);
+    }
+    const sorted = [...counts.keys()].sort((a, b) => counts.get(b) - counts.get(a));
+
+    paletteResolutionPx.innerText = `${canv0.width}px x ${canv0.height}px`;
+    paletteColorListPx.innerHTML = "";
+    sorted.forEach(packed => {
+        const hex = "#" + packed.toString(16).padStart(6, "0");
+        const row = document.createElement("div");
+        row.className = "color";
+        const swatch = document.createElement("span");
+        swatch.className = "swatch";
+        swatch.style.backgroundColor = hex;
+        const hexLabel = document.createElement("span");
+        hexLabel.className = "hex";
+        hexLabel.innerText = hex;
+        row.append(swatch, hexLabel);
+        paletteColorListPx.appendChild(row);
+    });
+    paletteContainerPx.style.display = "flex";
+}
+
+//-- Any effect switch can hide (or reveal) the palette panel, not just Pixelate's own controls.
+document.querySelectorAll("[name=rbgEffects]").forEach(rb => {
+    rb.addEventListener("input", renderPxPalette);
+});
 
 //-- Replicates every pixel of `source` into a `block`x`block` square on `ctx`, bypassing
 //   drawImage's built-in scaling so the result is exactly nearest-neighbor with no blending.
@@ -1501,12 +1551,36 @@ async function onceImageLoads(inputFileEvent) {
 }
 
 //  DOWNLOAD BUTTON
-const dlDownload = document.getElementById("dlDownload");
-dlDownload.addEventListener("click", () => {
+function downloadCanvas(canvas) {
     let link = document.createElement("a");
     link.download = getName("png");
-    link.href = canvOut.toDataURL();
+    link.href = canvas.toDataURL();
     link.click();
+}
+
+//-- When Pixelate is active, canvOut is canv0 upscaled (plus an optional grid overlay) to
+//   roughly match the original image's size; canv0 itself is the literal, un-upscaled result.
+//   Ask which one the user actually wants instead of silently picking the upscaled one.
+const bodyDiagDownloadSize = document.getElementById("diagDownloadSize");
+const diagDownloadSize = new AutoDialog({
+    dialog: bodyDiagDownloadSize,
+    title: "Descargar imagen",
+    ok: true,
+    cancel: true
+});
+diagDownloadSize.onOk(() => downloadCanvas(canv0));
+diagDownloadSize.onCancel(() => downloadCanvas(canvOut));
+
+const dlDownload = document.getElementById("dlDownload");
+dlDownload.addEventListener("click", () => {
+    const canPickPixelatedSize = rgEffPixelate.checked && imageIn != undefined && canv0 != undefined && canv0.width > 0 && canv0.height > 0;
+    if (canPickPixelatedSize) {
+        diagDownloadSize.btnOk.innerText = `Tamaño literal (${canv0.width}×${canv0.height}px)`;
+        diagDownloadSize.btnCancel.innerText = `Tamaño original (≈${canvOut.width}×${canvOut.height}px)`;
+        diagDownloadSize.show();
+        return;
+    }
+    downloadCanvas(canvOut);
 });
 
 
