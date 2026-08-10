@@ -18,6 +18,7 @@
     --panel-bg: #24345c;
     --panel-bg-strong: #2b3d6b;
     --panel-border: #0a1224;
+    --panel-border-highlight: #264772;
     --panel-header-bg: #4d7a94;
 
     --lcd-bg: #cfe8de;
@@ -274,12 +275,8 @@ button {
     align-items: start;
 }
 
-.panel {
-    min-width: 0;
-    background: var(--panel-bg);
-    border: 3px solid var(--panel-border);
-    border-radius: var(--radius);
-    clip-path: polygon(0 var(--notch),
+.panel-frame {
+    --panel-clip: polygon(0 var(--notch),
             var(--notch) var(--notch),
             var(--notch) 0,
             calc(100% - var(--notch)) 0,
@@ -291,6 +288,18 @@ button {
             var(--notch) 100%,
             var(--notch) calc(100% - var(--notch)),
             0 calc(100% - var(--notch)));
+
+    min-width: 0;
+    background: var(--panel-border-highlight);
+    clip-path: var(--panel-clip);
+    padding: 2px;
+}
+
+.panel {
+    background: var(--panel-bg);
+    border: 3px solid var(--panel-border);
+    border-radius: var(--radius);
+    clip-path: var(--panel-clip);
     padding: 1rem;
 }
 
@@ -443,7 +452,7 @@ button {
 }
 
 .lcd-progress {
-    height: 0.9rem;
+    height: 2rem;
     background: rgba(22, 36, 29, 0.18);
     border: 2px solid var(--lcd-text);
     border-radius: 3px;
@@ -621,5 +630,51 @@ dialog.confirm-dialog .modFootBtn {
 
     .playlist-panel {
         min-height: 16rem;
+    }
+}
+
+@media (min-width: 901px) {
+    .side-panel {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+
+    .volume-block {
+        order: 2;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    .volume-slider {
+        writing-mode: vertical-lr;
+        direction: rtl;
+        width: 0.9rem;
+        height: 9rem;
+    }
+
+    .settings-block {
+        order: 1;
+        flex: 1;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.8rem 1rem;
+        align-content: start;
+    }
+
+    .settings-block>h2 {
+        grid-column: 1 / -1;
+    }
+
+    .settings-icons {
+        display: contents;
+    }
+
+    .display-mode-block {
+        display: contents;
+    }
+
+    .display-mode-btn {
+        grid-column: 1 / -1;
     }
 }
