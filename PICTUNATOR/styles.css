@@ -11,6 +11,7 @@
     font-family: NovaMono;
     font-weight: 100;
 }
+
 :root {
     --controlsbar-w: 45px;
     --all-grid-columns: 1fr var(--controlsbar-w);
@@ -239,25 +240,25 @@ body {
     @media only screen and (max-width: 600px) {
         /* grid-template-columns: 1fr var(--all-grid-columns); */
         grid-template-rows: var(--globalbarh-cel) var(--globalbarh-cel) 1fr;
-        grid-template-areas: "global global""effects effects""pictures controls";
+        grid-template-areas: "global global" "effects effects" "pictures controls";
     }
 
     @media only screen and (min-width: 601px) and (max-width: 1024px) {
         /* grid-template-columns: 1fr var(--all-grid-columns); */
         grid-template-rows: var(--globalbarh-tab) var(--globalbarh-tab) 1fr;
-        grid-template-areas: "global global""effects effects""pictures controls";
+        grid-template-areas: "global global" "effects effects" "pictures controls";
     }
 
     @media only screen and (min-width: 1025px) and (max-width: 1440px) {
         /* grid-template-columns: var(--all-grid-columns) 1fr; */
         grid-template-rows: var(--globalbarh-md) var(--globalbarh-md) 1fr;
-        grid-template-areas: "global global""effects effects""controls pictures";
+        grid-template-areas: "global global" "effects effects" "controls pictures";
     }
 
     @media only screen and (min-width: 1441px) {
         /* grid-template-columns: var(--all-grid-columns) 1fr; */
         grid-template-rows: var(--globalbarh-lg) var(--globalbarh-lg) 1fr;
-        grid-template-areas: "global global""effects effects""controls pictures";
+        grid-template-areas: "global global" "effects effects" "controls pictures";
     }
 
     & #globalControls {
@@ -590,12 +591,28 @@ body {
                 }
 
                 & input:checked+label {
-                    background-color: var(--color-controls-btn-checked);
+                    /* background-color: var(--color-controls-btn-checked); */
                     /* scale: 0.85; */
                 }
 
                 & input~label:active {
                     background-color: var(--color-controls-btn-active);
+                }
+
+                & input~label svg .off {
+                    display: block;
+                }
+
+                & input+label svg .on {
+                    display: none;
+                }
+
+                & input:checked+label svg .off {
+                    display: none;
+                }
+
+                & input:checked+label svg .on {
+                    display: block;
                 }
 
                 & .btn {
@@ -945,7 +962,7 @@ body {
             left: 0;
             z-index: 2;
 
-            & .palette-container{
+            & .palette-container {
                 border: 1px solid red;
                 position: absolute;
                 top: 2em;
@@ -957,18 +974,18 @@ body {
                 max-height: 80%;
                 font-size: 0.7em;
 
-                & .resolution{
+                & .resolution {
                     border: 1px solid blue;
 
                 }
 
-                & .color-list{
+                & .color-list {
                     border: 1px solid orange;
                     display: flex;
                     flex-direction: column;
                     justify-content: stretch;
 
-                    & .color{
+                    & .color {
                         border: 1px solid green;
                     }
                 }
