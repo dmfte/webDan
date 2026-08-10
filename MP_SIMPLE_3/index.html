@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MP SIMPLE 3</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <div class="player">
+
+        <div class="topbar">
+            <div class="menu-wrap">
+                <button class="icon-btn hamburger-btn" id="btnMenu" type="button" aria-haspopup="true"
+                    aria-expanded="false" title="Menu">
+                    <svg viewBox="0 0 16 16" shape-rendering="crispEdges">
+                        <rect x="2" y="3" width="12" height="2" />
+                        <rect x="2" y="7" width="12" height="2" />
+                        <rect x="2" y="11" width="12" height="2" />
+                    </svg>
+                </button>
+                <div class="dropdown" id="menuDropdown" hidden>
+                    <button class="dropdown-item" id="btnClearPlaylist" type="button">Vaciar lista</button>
+                </div>
+            </div>
+
+            <div class="avatar" aria-hidden="true">
+                <svg viewBox="0 0 16 16" shape-rendering="crispEdges">
+                    <rect x="4" y="2" width="8" height="8" rx="1" />
+                    <rect x="3" y="10" width="10" height="4" />
+                    <rect x="6" y="1" width="4" height="2" class="avatar-hair" />
+                </svg>
+            </div>
+        </div>
+
+        <div class="layout">
+
+            <section class="panel nowplaying-panel">
+                <div class="lcd">
+                    <h2 class="lcd-title">Now Playing</h2>
+                    <hr>
+                    <p class="lcd-line" id="npArtist">ARTISTA: —</p>
+                    <p class="lcd-line" id="npSong">CANCION: —</p>
+                    <div class="lcd-progress" id="lcdProgress" role="slider" tabindex="0"
+                        aria-label="Progreso de la cancion" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0">
+                        <div class="lcd-progress-fill" id="lcdProgressFill"></div>
+                    </div>
+                    <div class="lcd-times">
+                        <span id="npElapsed">0:00</span>
+                        <span id="npTotal">0:00</span>
+                    </div>
+                </div>
+
+                <div class="transport-row">
+                    <button class="icon-btn square-btn" id="btnPrev" type="button" title="Anterior">
+                        <svg viewBox="0 0 16 16" shape-rendering="crispEdges">
+                            <rect x="3" y="3" width="2" height="10" />
+                            <polygon points="6,8 14,3 14,13" />
+                        </svg>
+                    </button>
+
+                    <button class="icon-btn square-btn play-btn" id="btnPlay" type="button"
+                        title="Reproducir/Pausar">
+                        <svg class="icon-play" viewBox="0 0 16 16" shape-rendering="crispEdges">
+                            <polygon points="4,3 13,8 4,13" />
+                        </svg>
+                        <svg class="icon-pause" viewBox="0 0 16 16" shape-rendering="crispEdges">
+                            <rect x="4" y="3" width="3" height="10" />
+                            <rect x="9" y="3" width="3" height="10" />
+                        </svg>
+                    </button>
+
+                    <button class="icon-btn square-btn" id="btnNext" type="button" title="Siguiente">
+                        <svg viewBox="0 0 16 16" shape-rendering="crispEdges">
+                            <rect x="11" y="3" width="2" height="10" />
+                            <polygon points="10,8 2,3 2,13" />
+                        </svg>
+                    </button>
+                </div>
+            </section>
+
+            <section class="panel playlist-panel" id="playlistPanel">
+                <div class="panel-header">
+                    <h2>Playlist</h2>
+                    <button class="icon-btn add-btn" id="btnAdd" type="button" title="Anadir MP3">
+                        <svg viewBox="0 0 16 16" shape-rendering="crispEdges">
+                            <rect x="7" y="2" width="2" height="12" />
+                            <rect x="2" y="7" width="12" height="2" />
+                        </svg>
+                    </button>
+                </div>
+
+                <ul class="track-list" id="trackList"></ul>
+
+                <p class="empty-hint" id="emptyHint">Sin canciones. Arrastra archivos MP3 aqui o usa el boton +.</p>
+
+                <div class="panel-footer">
+                    <input type="search" id="searchInput" class="search-input" placeholder="Buscar">
+                </div>
+            </section>
+
+            <aside class="panel side-panel">
+                <div class="volume-block">
+                    <h2>Volume</h2>
+                    <input type="range" id="volumeSlider" class="volume-slider pixel-range" min="0" max="1"
+                        step="0.01" value="0.8" aria-label="Volumen">
+                </div>
+
+                <div class="settings-block">
+                    <h2>Settings</h2>
+
+                    <div class="settings-icons">
+                        <button class="icon-btn square-btn" id="btnRepeat" type="button" title="Repetir">
+                            <svg viewBox="0 0 16 16" shape-rendering="crispEdges">
+                                <rect x="3" y="3" width="8" height="2" />
+                                <rect x="3" y="11" width="8" height="2" />
+                                <rect x="3" y="3" width="2" height="5" />
+                                <rect x="11" y="8" width="2" height="5" />
+                                <polygon points="9,1 9,5 13,3" />
+                                <polygon points="7,11 7,15 3,13" />
+                            </svg>
+                            <span class="badge" id="repeatBadge">1</span>
+                        </button>
+                        <button class="icon-btn square-btn" id="btnShuffle" type="button" title="Aleatorio">
+                            <svg viewBox="0 0 16 16" shape-rendering="crispEdges">
+                                <rect x="2" y="3" width="3" height="2" />
+                                <rect x="2" y="11" width="3" height="2" />
+                                <rect x="4" y="4" width="2" height="2" />
+                                <rect x="4" y="10" width="2" height="2" />
+                                <rect x="6" y="6" width="2" height="2" />
+                                <rect x="6" y="8" width="2" height="2" />
+                                <rect x="8" y="4" width="2" height="2" />
+                                <rect x="8" y="10" width="2" height="2" />
+                                <rect x="10" y="3" width="4" height="2" />
+                                <rect x="10" y="11" width="4" height="2" />
+                                <polygon points="14,1 14,5 11,3" />
+                                <polygon points="14,9 14,13 11,11" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="display-mode-block">
+                        <button class="icon-btn square-btn display-mode-btn" id="displayModeBtn" type="button"
+                            title="Formato de lista (clic para cambiar)">
+                            <span id="displayModeLabel">Cancion</span>
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+        </div>
+
+        <input type="file" id="fileInput" accept=".mp3,audio/mpeg" multiple hidden>
+        <audio id="audioEl" preload="metadata"></audio>
+
+        <p class="status-bar" id="statusBar" role="status" aria-live="polite" hidden></p>
+
+        <dialog class="confirm-dialog" id="confirmDialog">
+            <div class="body">
+                <p>Esto eliminara todas las canciones guardadas. Esta accion no se puede deshacer.</p>
+            </div>
+        </dialog>
+
+    </div>
+
+    <script src="AutoDialog.js"></script>
+    <script src="index.js"></script>
+</body>
+
+</html>
