@@ -8,8 +8,13 @@ const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 // passes in worker.js's quality search take noticeably longer.
 const LARGE_FILE_THRESHOLD = 20 * 1024 * 1024;
 
-const settingsToggle = document.getElementById('settingsToggle');
-const controlsPanel = document.querySelector('.controls-panel');
+const appShell = document.querySelector('.app-shell');
+const topbarEl = document.querySelector('.topbar');
+const workspaceEl = document.querySelector('.workspace');
+const controlsPanel = document.getElementById('controlsPanel');
+const panelOpenBtn = document.getElementById('panelOpenBtn');
+const panelCloseBtn = document.getElementById('panelCloseBtn');
+const fileAnnouncer = document.getElementById('fileAnnouncer');
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
 const folderInput = document.getElementById('folderInput');
@@ -36,6 +41,15 @@ let idCounter = 0;
 let resizeEnabled = false;
 let resizePercent = 80;
 let resizeSliderInstance = null;
+let announceTimer = null;
+
+function announce(message) {
+  fileAnnouncer.textContent = '';
+  clearTimeout(announceTimer);
+  announceTimer = setTimeout(() => {
+    fileAnnouncer.textContent = message;
+  }, 50);
+}
 
 // === Settings ===
 
@@ -51,6 +65,9 @@ resizeToggle.addEventListener('change', () => {
       step: 1,
       def: 80,
       title: '%',
+      ariaLabel: 'Porcentaje de redimensionado',
+      minusLabel: 'Disminuir',
+      plusLabel: 'Aumentar',
       color: '#6ecedb'
     });
     resizePercent = resizeSliderInstance.val;
@@ -63,14 +80,78 @@ resizeToggle.addEventListener('change', () => {
   refreshResizePreviews();
 });
 
+const mobileQuery = window.matchMedia('(max-width: 900px)');
+let panelOpen = false;
+
+function getFocusableChildren(container) {
+  return Array.from(
+    container.querySelectorAll(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )
+  ).filter((el) => el.offsetParent !== null);
+}
+
+function trapFocus(e) {
+  const focusable = getFocusableChildren(controlsPanel);
+  if (!focusable.length) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (e.shiftKey && document.activeElement === first) {
+    e.preventDefault();
+    last.focus();
+  } else if (!e.shiftKey && document.activeElement === last) {
+    e.preventDefault();
+    first.focus();
+  }
+}
+
+function onPanelKeydown(e) {
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    closePanel();
+  } else if (e.key === 'Tab') {
+    trapFocus(e);
+  }
+}
+
+function openPanel() {
+  if (!mobileQuery.matches || panelOpen) return;
+  panelOpen = true;
+  appShell.classList.add('is-panel-open');
+  panelOpenBtn.setAttribute('aria-expanded', 'true');
+  controlsPanel.setAttribute('role', 'dialog');
+  controlsPanel.setAttribute('aria-modal', 'true');
+  topbarEl.inert = true;
+  workspaceEl.inert = true;
+  document.addEventListener('keydown', onPanelKeydown);
+  const firstFocusable = getFocusableChildren(controlsPanel)[0];
+  (firstFocusable || controlsPanel).focus();
+}
+
+function closePanel({ returnFocus = true } = {}) {
+  if (!panelOpen) return;
+  panelOpen = false;
+  appShell.classList.remove('is-panel-open');
+  panelOpenBtn.setAttribute('aria-expanded', 'false');
+  controlsPanel.removeAttribute('role');
+  controlsPanel.removeAttribute('aria-modal');
+  topbarEl.inert = false;
+  workspaceEl.inert = false;
+  document.removeEventListener('keydown', onPanelKeydown);
+  if (returnFocus) panelOpenBtn.focus();
+}
+
+panelOpenBtn.addEventListener('click', openPanel);
+panelCloseBtn.addEventListener('click', () => closePanel());
+
 document.addEventListener('click', (e) => {
-  if (!settingsToggle.checked) return;
-  if (
-    e.target === settingsToggle ||
-    controlsPanel.contains(e.target) ||
-    e.target.closest('.panel-open')
-  ) return;
-  settingsToggle.checked = false;
+  if (!panelOpen) return;
+  if (controlsPanel.contains(e.target) || e.target.closest('.panel-open')) return;
+  closePanel({ returnFocus: false });
+});
+
+mobileQuery.addEventListener('change', (e) => {
+  if (!e.matches) closePanel({ returnFocus: false });
 });
 
 // === File intake ===
@@ -281,6 +362,7 @@ function failEntry(entry, message) {
   activeCount--;
   processQueue();
   updateBatchSummary();
+  announce(`${entry.els.name.textContent}: ${message}`);
 }
 
 function cancelEntry(id) {

@@ -8,8 +8,6 @@
 </head>
 <body>
   <div class="app-shell">
-    <input class="panel-toggle" type="checkbox" id="settingsToggle" aria-hidden="true">
-
     <header class="topbar">
       <div class="brand">
         <a class="brand-back" href="../index.html" aria-label="Volver al portafolio">←</a>
@@ -21,20 +19,20 @@
       </div>
 
       <div class="topbar-actions">
-        <label class="button button-secondary panel-open" for="settingsToggle">Ajustes</label>
+        <button type="button" class="button button-secondary panel-open" id="panelOpenBtn" aria-expanded="false" aria-controls="controlsPanel">Ajustes</button>
         <button class="button button-secondary" type="button" id="downloadAll" disabled>Descargar todas</button>
         <button class="button button-secondary" type="button" id="cancelAll" disabled>Cancelar todo</button>
       </div>
     </header>
 
     <main class="app-layout">
-      <aside class="controls-panel" aria-label="Ajustes de Tiny JPG">
+      <aside class="controls-panel" id="controlsPanel" aria-label="Ajustes de Tiny JPG">
         <div class="panel-heading">
           <div>
             <p class="eyebrow">Ajustes</p>
             <h2>Compresión</h2>
           </div>
-          <label class="panel-close" for="settingsToggle" aria-label="Cerrar ajustes">Cerrar</label>
+          <button type="button" class="panel-close" id="panelCloseBtn" aria-label="Cerrar ajustes">Cerrar</button>
         </div>
 
         <section class="control-card upload-card" aria-labelledby="addPhotosTitle">
@@ -87,6 +85,8 @@
         <div class="large-file-banner" id="largeFileBanner" role="status" hidden>
           <p>Hay archivos de más de 20 MB en el lote — la compresión puede tardar unos segundos más de lo habitual.</p>
         </div>
+
+        <div id="fileAnnouncer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
         <div class="batch-summary" id="batchSummary" hidden>
           <div class="batch-counts" id="batchCounts" aria-live="polite"></div>
