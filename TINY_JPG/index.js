@@ -8,8 +8,13 @@ const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 // passes in worker.js's quality search take noticeably longer.
 const LARGE_FILE_THRESHOLD = 20 * 1024 * 1024;
 
+const settingsToggle = document.getElementById('settingsToggle');
+const controlsPanel = document.querySelector('.controls-panel');
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
+const folderInput = document.getElementById('folderInput');
+const lastFolderHint = document.getElementById('lastFolderHint');
+const LAST_FOLDER_KEY = 'tinyjpg-last-folder';
 const resizeToggle = document.getElementById('resizeToggle');
 const resizeSliderMount = document.getElementById('resizeSlider');
 const resizePreviewEl = document.getElementById('resizePreview');
@@ -58,12 +63,39 @@ resizeToggle.addEventListener('change', () => {
   refreshResizePreviews();
 });
 
+document.addEventListener('click', (e) => {
+  if (!settingsToggle.checked) return;
+  if (
+    e.target === settingsToggle ||
+    controlsPanel.contains(e.target) ||
+    e.target.closest('.panel-open')
+  ) return;
+  settingsToggle.checked = false;
+});
+
 // === File intake ===
 
 fileInput.addEventListener('change', () => {
   handleFiles(fileInput.files);
   fileInput.value = '';
 });
+
+folderInput.addEventListener('change', () => {
+  const [firstFile] = folderInput.files;
+  if (firstFile && firstFile.webkitRelativePath) {
+    localStorage.setItem(LAST_FOLDER_KEY, firstFile.webkitRelativePath.split('/')[0]);
+    renderLastFolderHint();
+  }
+  handleFiles(folderInput.files);
+  folderInput.value = '';
+});
+
+function renderLastFolderHint() {
+  const name = localStorage.getItem(LAST_FOLDER_KEY);
+  lastFolderHint.hidden = !name;
+  lastFolderHint.textContent = name ? `Última carpeta: ${name}` : '';
+}
+renderLastFolderHint();
 
 ['dragenter', 'dragover'].forEach((evtName) => {
   dropZone.addEventListener(evtName, (e) => {
@@ -107,7 +139,7 @@ function addFile(file) {
     actionBtn: row.querySelector('.button-action')
   };
 
-  els.name.textContent = file.name;
+  els.name.textContent = file.webkitRelativePath || file.name;
   els.sizeOriginal.textContent = formatBytes(file.size);
   els.dims.textContent = 'Leyendo dimensiones…';
 
@@ -298,7 +330,7 @@ function downloadEntry(entry) {
   if (!entry.outputUrl) return;
   const a = document.createElement('a');
   a.href = entry.outputUrl;
-  a.download = outputFileName(entry.file.name);
+  a.download = outputFileName(entry.file.webkitRelativePath || entry.file.name);
   a.click();
 }
 
@@ -323,7 +355,7 @@ downloadAllBtn.addEventListener('click', async () => {
   downloadAllBtn.textContent = 'Generando ZIP…';
   try {
     const zipBlob = await createZipBlob(
-      doneEntries.map((e) => ({ name: zipEntryFileName(e.file.name), blob: e.outputBlob }))
+      doneEntries.map((e) => ({ name: zipEntryFileName(e.file.webkitRelativePath || e.file.name), blob: e.outputBlob }))
     );
     const a = document.createElement('a');
     a.href = URL.createObjectURL(zipBlob);

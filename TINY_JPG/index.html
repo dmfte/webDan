@@ -14,7 +14,7 @@
       <div class="brand">
         <a class="brand-back" href="../index.html" aria-label="Volver al portafolio">←</a>
         <span class="brand-mark" aria-hidden="true">JPG</span>
-        <div>
+        <div class="brand-title">
           <h1>Tiny JPG</h1>
           <p>Comprime fotos con la mínima pérdida visible de calidad.</p>
         </div>
@@ -51,6 +51,10 @@
               <span>o elige archivos</span>
             </label>
           </div>
+
+          <input type="file" id="folderInput" name="folderInput" webkitdirectory multiple>
+          <label class="button button-secondary" for="folderInput">Seleccionar carpeta</label>
+          <p class="hint" id="lastFolderHint" hidden></p>
 
           <p class="hint">Acepta JPG, PNG y WebP · siempre entrega JPG.</p>
         </section>
