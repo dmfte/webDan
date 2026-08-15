@@ -25,7 +25,11 @@
   --void: #0e1116;
   --grid: rgba(231, 236, 243, 0.09);
 
-  /* Tonos propios de la herramienta */
+  /* Tonos propios de la herramienta: --pair-a / --pair-b / --horizon son
+     los valores por defecto reales: CAMBIA LOS COLORES DE PARTIDA AQUI. JS
+     los lee al arrancar (o usa el color guardado, si el usuario ya eligio
+     uno con el selector junto a cada fuga/horizonte) y los reescribe en
+     linea via setProperty. */
   --pair-a: #ff6b35;
   --pair-b: #35c2ff;
   --horizon: #b6ff3f;
@@ -108,6 +112,35 @@ select {
   margin: 0 0.25rem;
 }
 
+/* Agrupa los controles de zoom (−, %, +, Ajustar imagen, Ver todo) en un
+   solo bloque con borde compartido, a modo de control segmentado, para que
+   se lean como una sola familia de acciones. */
+.btn-group {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+}
+
+.btn-group>.btn {
+  border: none;
+  border-radius: 0;
+}
+
+.btn-group>.btn:first-child {
+  border-top-left-radius: var(--radius);
+  border-bottom-left-radius: var(--radius);
+}
+
+.btn-group>.btn:last-child {
+  border-top-right-radius: var(--radius);
+  border-bottom-right-radius: var(--radius);
+}
+
+.btn-group> :not(:last-child) {
+  border-right: 1px solid var(--line);
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -181,6 +214,23 @@ select {
 .btn-mini {
   padding: 0.2rem 0.45rem;
   font-size: 0.68rem;
+}
+
+.btn-icon-square {
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  justify-content: center;
+}
+
+.btn-icon-square svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 #ifLoadImg {
@@ -311,7 +361,7 @@ select {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 19rem;
+  grid-template-columns: minmax(0, 1fr) 14rem;
   gap: 0.7rem;
 }
 
@@ -577,6 +627,13 @@ select {
   color: var(--muted);
 }
 
+.btn-clear-all {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  margin-bottom: 0.6rem;
+}
+
 .vp-row {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -592,22 +649,44 @@ select {
 }
 
 .dot {
-  width: 0.7rem;
-  height: 0.7rem;
+  width: 2rem;
+  height: 2rem;
   border-radius: 50%;
-  margin-top: 0.28rem;
+  align-self: center;
 }
 
-.dot-a {
-  background: var(--pair-a);
+/* dot-a / dot-b son <input type="color">: se quita el cromado nativo del
+   control para que sigan leyendose como un simple circulo de color, ahora
+   clicable para elegir otro tono para las lineas de ese par. El color que
+   se ve lo pone el atributo/valor del input, no el "background" de aqui. */
+input[type="color"].dot {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  padding: 0;
+  background: none;
+  cursor: pointer;
 }
 
-.dot-b {
-  background: var(--pair-b);
+input[type="color"].dot::-webkit-color-swatch-wrapper {
+  padding: 0;
+  border-radius: 50%;
+  overflow: hidden;
 }
 
-.dot-h {
-  background: var(--horizon);
+input[type="color"].dot::-webkit-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+input[type="color"].dot::-moz-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+input[type="color"].dot:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
 .vp-info p {
@@ -647,15 +726,11 @@ select {
   flex-wrap: wrap;
 }
 
-.note {
-  margin: 0.6rem 0 0;
-  font-size: 0.68rem;
-  color: var(--muted);
-  opacity: 0.85;
-  line-height: 1.35;
+.help-dialog {
+  width: min(24rem, 90vw);
 }
 
-.help ol {
+.help-dialog ol {
   margin: 0;
   padding-left: 1.05rem;
   font-size: 0.72rem;
@@ -663,8 +738,42 @@ select {
   line-height: 1.5;
 }
 
-.help li + li {
+.help-dialog li+li {
   margin-top: 0.25rem;
+}
+
+/* Circulo "i" fijo en la esquina inferior izquierda: fuera del flujo del
+   documento a proposito, para no restar espacio al lienzo de trabajo. */
+.help-trigger {
+  position: fixed;
+  left: 0.8rem;
+  bottom: 0.8rem;
+  z-index: 550;
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--muted);
+  font-family: "Chivo Mono", monospace;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-style: italic;
+  cursor: pointer;
+}
+
+.help-trigger:hover {
+  background: var(--surface-soft);
+  color: var(--text);
+  border-color: var(--text);
+}
+
+.help-trigger:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
 /* ---------- Móvil ---------- */
@@ -690,10 +799,6 @@ select {
 
   .panel {
     max-height: 36svh;
-  }
-
-  .help {
-    display: none;
   }
 
   .btn {

@@ -13,7 +13,7 @@
 
     <header class="topline">
       <h1>Hasta la Vista, Line</h1>
-      <p>Traza dos pares de líneas sobre una foto y encuentra sus puntos de fuga y la línea de horizonte.</p>
+      <p>Encuentra sus puntos de fuga y la línea de horizonte.</p>
     </header>
 
     <div class="toolbar" role="toolbar" aria-label="Herramientas">
@@ -31,8 +31,6 @@
         <span>Añadir<span class="btn-long"> línea</span></span>
         <span class="pair-badge" id="pairBadge" data-pair="A" aria-label="Par de destino">A</span>
       </button>
-      <button id="btnDelLine" class="btn" type="button" disabled>Borrar línea</button>
-      <button id="btnClear" class="btn" type="button">Limpiar<span class="btn-long"> todo</span></button>
 
       <label class="cursor-select" for="selCursorMode">
         <span class="btn-long">Cursor</span>
@@ -44,11 +42,13 @@
 
       <span class="sep" aria-hidden="true"></span>
 
-      <button id="btnZoomOut" class="btn btn-icon" type="button" aria-label="Alejar">−</button>
-      <span id="zoomLabel" class="zoom-label">100%</span>
-      <button id="btnZoomIn" class="btn btn-icon" type="button" aria-label="Acercar">+</button>
-      <button id="btnFit" class="btn" type="button">Ajustar<span class="btn-long"> imagen</span></button>
-      <button id="btnFitAll" class="btn" type="button">Ver todo</button>
+      <div class="btn-group" role="group" aria-label="Zoom">
+        <button id="btnZoomOut" class="btn btn-icon" type="button" aria-label="Alejar">−</button>
+        <span id="zoomLabel" class="zoom-label">100%</span>
+        <button id="btnZoomIn" class="btn btn-icon" type="button" aria-label="Acercar">+</button>
+        <button id="btnFit" class="btn" type="button">Ajustar<span class="btn-long"> imagen</span></button>
+        <button id="btnFitAll" class="btn" type="button">Ver todo</button>
+      </div>
 
       <span class="sep" aria-hidden="true"></span>
 
@@ -108,55 +108,80 @@
       <aside class="panel" aria-label="Resultados">
         <section class="card">
           <h2>Puntos de fuga</h2>
+          <button id="btnClear" class="btn btn-clear-all" type="button">Limpiar todo</button>
 
           <div class="vp-row" id="rowA">
-            <span class="dot dot-a" aria-hidden="true"></span>
+            <!-- Color de partida del par A: JS lo sobrescribe al cargar con
+                 --pair-a de styles.css (o con el color guardado); cambia el
+                 valor por defecto ahi, no aqui. -->
+            <input type="color" id="colorA" class="dot dot-a" value="#ff6b35" aria-label="Color del par A">
             <div class="vp-info">
               <p class="vp-name">Fuga A <span class="vp-count" id="countA">0/2</span></p>
               <p class="vp-coords" id="coordsA">Faltan 2 líneas</p>
             </div>
             <div class="vp-actions">
-              <button class="btn btn-mini" type="button" data-act="center" data-pair="A" disabled>Centrar</button>
-              <button class="btn btn-mini" type="button" data-act="clear" data-pair="A" disabled>Borrar par</button>
+              <button class="btn btn-mini btn-icon-square" type="button" data-act="clear" data-pair="A" disabled
+                aria-label="Borrar par A">
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                  <path d="M3 4.5 H13"></path>
+                  <path d="M6 4.5 V2.5 H10 V4.5"></path>
+                  <path d="M4.5 4.5 L5.2 13 A1 1 0 0 0 6.2 14 H9.8 A1 1 0 0 0 10.8 13 L11.5 4.5"></path>
+                  <path d="M6.7 7 V11.5 M9.3 7 V11.5"></path>
+                </svg>
+              </button>
             </div>
           </div>
 
           <div class="vp-row" id="rowB">
-            <span class="dot dot-b" aria-hidden="true"></span>
+            <!-- Idem para el par B: valor por defecto real en --pair-b. -->
+            <input type="color" id="colorB" class="dot dot-b" value="#35c2ff" aria-label="Color del par B">
             <div class="vp-info">
               <p class="vp-name">Fuga B <span class="vp-count" id="countB">0/2</span></p>
               <p class="vp-coords" id="coordsB">Faltan 2 líneas</p>
             </div>
             <div class="vp-actions">
-              <button class="btn btn-mini" type="button" data-act="center" data-pair="B" disabled>Centrar</button>
-              <button class="btn btn-mini" type="button" data-act="clear" data-pair="B" disabled>Borrar par</button>
+              <button class="btn btn-mini btn-icon-square" type="button" data-act="clear" data-pair="B" disabled
+                aria-label="Borrar par B">
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                  <path d="M3 4.5 H13"></path>
+                  <path d="M6 4.5 V2.5 H10 V4.5"></path>
+                  <path d="M4.5 4.5 L5.2 13 A1 1 0 0 0 6.2 14 H9.8 A1 1 0 0 0 10.8 13 L11.5 4.5"></path>
+                  <path d="M6.7 7 V11.5 M9.3 7 V11.5"></path>
+                </svg>
+              </button>
             </div>
           </div>
 
           <div class="vp-row horizon-row">
-            <span class="dot dot-h" aria-hidden="true"></span>
+            <!-- Idem: valor por defecto real en --horizon (styles.css). -->
+            <input type="color" id="colorH" class="dot dot-h" value="#b6ff3f" aria-label="Color del horizonte">
             <div class="vp-info">
               <p class="vp-name">Horizonte</p>
               <p class="vp-coords" id="horizonInfo">Aparece cuando existen las dos fugas.</p>
             </div>
           </div>
 
-          <p class="note">Las coordenadas están en píxeles de la imagen original: pueden ser negativas o superar su
-            tamaño.</p>
-        </section>
-
-        <section class="card help">
-          <h2>Cómo usar</h2>
-          <ol>
-            <li>Carga una foto con perspectiva.</li>
-            <li>Pulsa <strong>Añadir línea</strong> y toca dos veces sobre el área de trabajo para colocarla.</li>
-            <li>Repite hasta tener dos líneas por par (4 en total).</li>
-            <li>Arrastra un nodo para girar la línea sobre el otro extremo; arrastra el cuerpo para moverla entera.</li>
-            <li>Arrastra el fondo para desplazar la vista; rueda del ratón o pellizco para acercar y alejar.</li>
-          </ol>
         </section>
       </aside>
     </main>
+
+    <button id="btnHelp" class="help-trigger" type="button" aria-label="Cómo usar">i</button>
+
+    <dialog id="helpDialog" class="export-dialog help-dialog" aria-label="Cómo usar">
+      <header class="export-dialog-head">
+        <h2>Cómo usar</h2>
+        <button type="button" id="btnHelpClose" class="btn-icon-close" aria-label="Cerrar">×</button>
+      </header>
+      <div class="export-dialog-body">
+        <ol>
+          <li>Carga una foto con perspectiva.</li>
+          <li>Pulsa <strong>Añadir línea</strong> y toca dos veces sobre el área de trabajo para colocarla.</li>
+          <li>Repite hasta tener dos líneas por par (4 en total).</li>
+          <li>Arrastra un nodo para girar la línea sobre el otro extremo; arrastra el cuerpo para moverla entera.</li>
+          <li>Arrastra el fondo para desplazar la vista; rueda del ratón o pellizco para acercar y alejar.</li>
+        </ol>
+      </div>
+    </dialog>
 
     <dialog id="exportDialog" class="export-dialog" aria-label="Exportar a PDF">
       <header class="export-dialog-head">
