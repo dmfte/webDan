@@ -702,6 +702,149 @@ select {
   }
 }
 
+/* ---------- Exportar a PDF ---------- */
+
+.export-dialog {
+  width: min(30rem, 92vw);
+  max-height: 88svh;
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* El <dialog> nativo ya se oculta con display:none cuando no tiene el
+   atributo "open" (showModal()/close() lo alternan); si dieramos
+   display:flex de forma incondicional aqui, esa regla del user agent
+   quedaria pisada y el dialogo se veria permanentemente abierto. */
+.export-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.export-dialog::backdrop {
+  background: rgba(6, 8, 11, 0.72);
+}
+
+.export-dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.6rem 0.5rem 0.6rem 0.9rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.export-dialog-head h2 {
+  margin: 0;
+  font-family: "VT323", monospace;
+  font-size: 1.3rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+}
+
+.btn-icon-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.btn-icon-close:hover {
+  background: var(--surface-soft);
+  color: var(--text);
+}
+
+.btn-icon-close:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.export-dialog-body {
+  padding: 0.8rem 0.9rem;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.export-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.export-field select {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface-soft);
+  color: var(--text);
+  padding: 0.3rem 0.5rem;
+  font-family: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.export-field select:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.export-preview-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem;
+  border-radius: var(--radius);
+  background: var(--void);
+}
+
+.export-preview {
+  width: 100%;
+  max-height: 46svh;
+  background: #fff;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+}
+
+.export-slider-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+.export-slider-mount {
+  height: 4.5rem;
+}
+
+.export-hint {
+  margin: 0;
+  min-height: 1.4em;
+  font-size: 0.72rem;
+  color: var(--focus);
+}
+
+.export-dialog-foot {
+  padding: 0.6rem 0.9rem;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: flex-end;
+}
+
 /* Etiquetas cortas en pantallas estrechas: la barra cabe en menos filas
    y el lienzo gana altura. */
 @media (max-width: 560px) {

@@ -49,6 +49,10 @@
       <button id="btnZoomIn" class="btn btn-icon" type="button" aria-label="Acercar">+</button>
       <button id="btnFit" class="btn" type="button">Ajustar<span class="btn-long"> imagen</span></button>
       <button id="btnFitAll" class="btn" type="button">Ver todo</button>
+
+      <span class="sep" aria-hidden="true"></span>
+
+      <button id="btnExport" class="btn" type="button" disabled>Exportar<span class="btn-long"> PDF</span></button>
     </div>
 
     <main class="stage">
@@ -153,9 +157,46 @@
         </section>
       </aside>
     </main>
+
+    <dialog id="exportDialog" class="export-dialog" aria-label="Exportar a PDF">
+      <header class="export-dialog-head">
+        <h2>Exportar a PDF</h2>
+        <button type="button" id="btnExportClose" class="btn-icon-close" aria-label="Cerrar">×</button>
+      </header>
+
+      <div class="export-dialog-body">
+        <label class="export-field" for="selPageSize">
+          <span>Tamaño de página</span>
+          <select id="selPageSize">
+            <option value="A4-portrait">A4 · vertical</option>
+            <option value="A4-landscape">A4 · horizontal</option>
+            <option value="Letter-portrait">Carta · vertical</option>
+            <option value="Letter-landscape">Carta · horizontal</option>
+          </select>
+        </label>
+
+        <div class="export-preview-wrap">
+          <svg id="exportPreview" class="export-preview" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 595 842"
+            aria-label="Vista previa de la página"></svg>
+        </div>
+
+        <div class="export-slider-labels">
+          <span>Fugas visibles</span>
+          <span>Foto a página completa</span>
+        </div>
+        <div id="exportSliderMount" class="export-slider-mount"></div>
+
+        <p id="exportHint" class="export-hint"></p>
+      </div>
+
+      <footer class="export-dialog-foot">
+        <button type="button" id="btnExportDownload" class="btn btn-primary">Descargar PDF</button>
+      </footer>
+    </dialog>
   </div>
 
-  <script src="index.js"></script>
+  <script src="/assets/js/pdf-lib.min.js"></script>
+  <script src="index.js" type="module"></script>
 </body>
 
 </html>

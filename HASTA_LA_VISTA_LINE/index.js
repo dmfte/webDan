@@ -53,6 +53,15 @@
   var loupeEl = document.getElementById('loupe');
   var loupeSvg = document.getElementById('loupeSvg');
 
+  var btnExport = document.getElementById('btnExport');
+  var exportDialog = document.getElementById('exportDialog');
+  var btnExportClose = document.getElementById('btnExportClose');
+  var selPageSize = document.getElementById('selPageSize');
+  var exportPreview = document.getElementById('exportPreview');
+  var exportSliderMount = document.getElementById('exportSliderMount');
+  var exportHint = document.getElementById('exportHint');
+  var btnExportDownload = document.getElementById('btnExportDownload');
+
   var readout = {
     A: {
       count: document.getElementById('countA'),
@@ -68,7 +77,7 @@
   /* -------------------------------------------------------------- Estado */
 
   var state = {
-    img: { url: null, w: 1200, h: 800, loaded: false },
+    img: { url: null, file: null, w: 1200, h: 800, loaded: false },
     view: { x: 0, y: 0, w: 1200, h: 800 },
     lines: [],          // { id, pair: 'A'|'B', a: {x,y}, b: {x,y} }
     selectedId: null,
@@ -83,7 +92,36 @@
   var drag = null;          // arrastre activo
   var pendingDrag = null;   // lo prepara el hijo, lo confirma el handler del svg
   var pinch = null;         // gesto de dos dedos
+  var middlePan = null;     // paneo con boton central, independiente de "drag"
   var rafId = null;
+
+  /* ----------------------------------------------------------- Ajustes
+   * Preferencias que sobreviven a un recargo de pagina (localStorage), no
+   * el trabajo en curso: la imagen, las lineas y la vista se quedan fuera
+   * a proposito, solo persisten los controles de configuracion.
+   */
+
+  var SETTINGS_KEY = 'hlvl:settings';
+  var CURSOR_MODES = ['crosshair', 'magnify'];
+  var PAGE_SIZE_VALUES = ['A4-portrait', 'A4-landscape', 'Letter-portrait', 'Letter-landscape'];
+
+  function loadSettings() {
+    try {
+      var raw = localStorage.getItem(SETTINGS_KEY);
+      var parsed = raw ? JSON.parse(raw) : null;
+      return (parsed && typeof parsed === 'object') ? parsed : {};
+    } catch (e) {
+      return {}; // localStorage no disponible (privado, cuota, etc.)
+    }
+  }
+
+  function saveSetting(key, value) {
+    try {
+      var current = loadSettings();
+      current[key] = value;
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(current));
+    } catch (e) { /* se ignora: no hay forma de persistir, no es fatal */ }
+  }
 
   /* ------------------------------------------------------ Utilidades geom */
 
@@ -188,16 +226,30 @@
 
   /**
    * Punto donde la recta INFINITA (p1,p2) cruza el borde vertical x = edgeX,
-   * o null si la recta es (casi) vertical o el cruce cae fuera de [yMin, yMax]
-   * (es decir, la recta sale por arriba/abajo antes de llegar a ese borde).
+   * o null si la recta es (casi) horizontal o el cruce cae fuera de
+   * [yMin, yMax] (es decir, la recta sale por arriba/abajo antes de llegar
+   * a ese borde).
    */
-  function edgeCrossing(p1, p2, edgeX, yMin, yMax) {
+  function edgeCrossingV(p1, p2, edgeX, yMin, yMax) {
     var dx = p2.x - p1.x;
     if (Math.abs(dx) < 1e-9) return null;
     var t = (edgeX - p1.x) / dx;
     var y = p1.y + t * (p2.y - p1.y);
     if (y < yMin - 1e-6 || y > yMax + 1e-6) return null;
     return { x: edgeX, y: y };
+  }
+
+  /**
+   * Analogo a edgeCrossingV pero para el borde horizontal y = edgeY: null si
+   * la recta es (casi) vertical o el cruce cae fuera de [xMin, xMax].
+   */
+  function edgeCrossingH(p1, p2, edgeY, xMin, xMax) {
+    var dy = p2.y - p1.y;
+    if (Math.abs(dy) < 1e-9) return null;
+    var t = (edgeY - p1.y) / dy;
+    var x = p1.x + t * (p2.x - p1.x);
+    if (x < xMin - 1e-6 || x > xMax + 1e-6) return null;
+    return { x: x, y: edgeY };
   }
 
   function isOutsideImage(pt) {
@@ -531,22 +583,31 @@
       }
     });
 
-    // Marcadores donde las lineas de cada par (y el horizonte) cruzan los
-    // bordes izquierdo/derecho de la imagen: solo cuando la fuga de ese par
-    // queda fuera del encuadre, para poder apuntar hacia ella sin verla.
-    var edgeXs = [0, state.img.w];
+    // Marcadores donde las lineas de cada par (y el horizonte) cruzan
+    // cualquiera de los cuatro bordes de la imagen: solo cuando la fuga de
+    // ese par queda fuera del encuadre, para poder apuntar hacia ella sin
+    // verla.
+    var edgeXs = [0, state.img.w]; // bordes izquierdo/derecho
+    var edgeYs = [0, state.img.h]; // bordes superior/inferior
     var edgeFrag = document.createDocumentFragment();
+
+    function addEdgeMarker(pt, cls) {
+      var s = 8 * k;
+      edgeFrag.appendChild(el('rect', {
+        x: pt.x - s, y: pt.y - s, width: s * 2, height: s * 2,
+        transform: 'rotate(45 ' + pt.x + ' ' + pt.y + ')',
+        'vector-effect': 'non-scaling-stroke'
+      }, 'edge-marker ' + cls));
+    }
 
     function markEdgeCrossings(p1, p2, cls) {
       edgeXs.forEach(function (edgeX) {
-        var pt = edgeCrossing(p1, p2, edgeX, 0, state.img.h);
-        if (!pt) return;
-        var s = 8 * k;
-        edgeFrag.appendChild(el('rect', {
-          x: pt.x - s, y: pt.y - s, width: s * 2, height: s * 2,
-          transform: 'rotate(45 ' + pt.x + ' ' + pt.y + ')',
-          'vector-effect': 'non-scaling-stroke'
-        }, 'edge-marker ' + cls));
+        var pt = edgeCrossingV(p1, p2, edgeX, 0, state.img.h);
+        if (pt) addEdgeMarker(pt, cls);
+      });
+      edgeYs.forEach(function (edgeY) {
+        var pt = edgeCrossingH(p1, p2, edgeY, 0, state.img.w);
+        if (pt) addEdgeMarker(pt, cls);
       });
     }
 
@@ -631,6 +692,7 @@
 
     btnDelLine.disabled = state.selectedId === null;
     btnAddLine.disabled = state.lines.length >= MAX_LINES;
+    btnExport.disabled = !state.img.loaded;
     var np = nextPair();
     pairBadge.textContent = np || '—';
     pairBadge.setAttribute('data-pair', np || '');
@@ -653,15 +715,17 @@
   }
 
   /**
-   * Vista previa ampliada del punto bajo el cursor, mientras se coloca una
-   * linea. Se desplaza por encima del cursor (no sobre el) para que el punto
-   * que realmente se va a tocar quede libre. La ventana del mundo que
-   * muestra se calcula a partir de worldPerPx(), no de state.view.w/h
-   * directamente, porque la lupa es cuadrada y el lienzo principal no
-   * siempre lo es: usar sus proporciones distorsionaria la imagen ampliada.
+   * Vista previa ampliada del punto bajo el cursor, mientras se coloca o se
+   * reposiciona una linea (nodo o cuerpo). Se desplaza por encima del cursor
+   * (no sobre el) para que el punto que realmente se va a tocar quede libre.
+   * La ventana del mundo que muestra se calcula a partir de worldPerPx(), no
+   * de state.view.w/h directamente, porque la lupa es cuadrada y el lienzo
+   * principal no siempre lo es: usar sus proporciones distorsionaria la
+   * imagen ampliada.
    */
   function updateLoupe(clientX, clientY, worldPt) {
-    if (state.cursorMode !== 'magnify' || state.mode !== 'add') {
+    var repositioning = drag && (drag.type === 'node' || drag.type === 'body');
+    if (state.cursorMode !== 'magnify' || !(state.mode === 'add' || repositioning)) {
       hideLoupe();
       return;
     }
@@ -763,7 +827,25 @@
     cancelAddMode();
   }
 
+  function updatePanningCursor() {
+    svg.classList.toggle('is-panning', !!middlePan || (!!drag && drag.type === 'pan'));
+  }
+
   function onPointerDown(ev) {
+    if (ev.button === 1) {
+      // Boton central: solo mueve la camara. No toca selectedId, drag ni
+      // pendingDrag, para poder pasear la imagen por debajo de un nodo que
+      // se esta arrastrando (o de una linea a medio colocar) sin soltarlo.
+      ev.preventDefault();
+      pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+      middlePan = {
+        startClient: { x: ev.clientX, y: ev.clientY },
+        startView: { x: state.view.x, y: state.view.y, w: state.view.w, h: state.view.h }
+      };
+      updatePanningCursor();
+      try { svg.setPointerCapture(ev.pointerId); } catch (e) { /* ignorar */ }
+      return;
+    }
     if (typeof ev.button === 'number' && ev.button > 0) {
       pendingDrag = null;
       return;
@@ -773,7 +855,9 @@
     if (pointers.size >= 2) {
       pendingDrag = null;
       drag = null;
-      svg.classList.remove('is-panning');
+      middlePan = null;
+      updatePanningCursor();
+      hideLoupe();
       startPinch();
       return;
     }
@@ -794,7 +878,7 @@
         startClient: { x: ev.clientX, y: ev.clientY },
         startView: { x: state.view.x, y: state.view.y, w: state.view.w, h: state.view.h }
       };
-      svg.classList.add('is-panning');
+      updatePanningCursor();
     }
 
     try { svg.setPointerCapture(ev.pointerId); } catch (e) { /* ignorar */ }
@@ -808,6 +892,21 @@
     if (pinch) {
       updatePinch();
       return;
+    }
+
+    // El paneo con boton central es independiente de cualquier otro gesto:
+    // se aplica siempre que este activo, y lo que siga (nodo, cuerpo o
+    // vista previa de "add") lee la camara ya actualizada.
+    if (middlePan) {
+      var mr = svg.getBoundingClientRect();
+      if (mr.width) {
+        var mkx = middlePan.startView.w / mr.width;
+        var mky = middlePan.startView.h / mr.height;
+        state.view.x = middlePan.startView.x - (ev.clientX - middlePan.startClient.x) * mkx;
+        state.view.y = middlePan.startView.y - (ev.clientY - middlePan.startClient.y) * mky;
+        applyViewBox();
+        scheduleRender();
+      }
     }
 
     if (state.mode === 'add') {
@@ -837,6 +936,7 @@
     var line = lineById(drag.lineId);
     if (!line) { drag = null; return; }
     var w = toWorldXY(ev.clientX, ev.clientY);
+    updateLoupe(ev.clientX, ev.clientY, w);
 
     if (drag.type === 'node') {
       // El otro nodo queda fijo: la linea gira sobre el.
@@ -855,18 +955,34 @@
   }
 
   function endPointer(ev) {
-    pointers.delete(ev.pointerId);
-    if (pinch && pointers.size < 2) pinch = null;
-    if (drag) {
-      drag = null;
-      svg.classList.remove('is-panning');
+    // Cada boton del raton dispara su propio pointerup (mismo pointerId,
+    // "button" indica cual se solto): soltar el central no debe terminar un
+    // arrastre de nodo/cuerpo que siga vivo con el izquierdo, ni viceversa.
+    // pointercancel no trae un "button" fiable, asi que ahi soltamos todo.
+    var cancelled = ev.type === 'pointercancel';
+    var isOtherButton = typeof ev.button === 'number' && ev.button > 0 && ev.button !== 1;
+
+    if (cancelled || ev.button === 1) {
+      middlePan = null;
     }
-    pendingDrag = null;
-    try {
-      if (svg.hasPointerCapture && svg.hasPointerCapture(ev.pointerId)) {
-        svg.releasePointerCapture(ev.pointerId);
+    if (!isOtherButton && (cancelled || ev.button !== 1)) {
+      if (drag) {
+        hideLoupe();
+        drag = null;
       }
-    } catch (e) { /* ignorar */ }
+      pendingDrag = null;
+    }
+    updatePanningCursor();
+
+    if (cancelled || !ev.buttons) {
+      pointers.delete(ev.pointerId);
+      if (pinch && pointers.size < 2) pinch = null;
+      try {
+        if (svg.hasPointerCapture && svg.hasPointerCapture(ev.pointerId)) {
+          svg.releasePointerCapture(ev.pointerId);
+        }
+      } catch (e) { /* ignorar */ }
+    }
   }
 
   function startPinch() {
@@ -929,6 +1045,7 @@
     probe.onload = function () {
       if (state.img.url) URL.revokeObjectURL(state.img.url);
       state.img.url = url;
+      state.img.file = file; // bytes originales, para poder incrustarla al exportar a PDF
       state.img.w = probe.naturalWidth || probe.width || 1200;
       state.img.h = probe.naturalHeight || probe.height || 800;
       state.img.loaded = true;
@@ -948,6 +1065,424 @@
       setTimeout(function () { setHint(''); }, 2500);
     };
     probe.src = url;
+  }
+
+  /* ----------------------------------------------------------- Exportar PDF
+   *
+   * Todo el trabajo ocurre en "espacio de pagina": igual que el mundo del
+   * SVG principal, pero en puntos PDF (1pt = 1/72"), origen arriba-izquierda
+   * (como el SVG; solo se invierte el eje Y al dibujar con pdf-lib, que usa
+   * origen abajo-izquierda). Esto permite reutilizar clipInfiniteLine /
+   * edgeCrossingV / edgeCrossingH / pairVP tal cual, pasandoles el
+   * rectangulo de la pagina en vez del rectangulo de la imagen o de la
+   * vista.
+   *
+   * El mando deslizante (0..1) interpola entre dos encuadres fijos:
+   *  - t=0: el rectangulo que envuelve la imagen Y las fugas finitas queda
+   *    centrado en la pagina (contain-fit) -> las fugas se ven.
+   *  - t=1: la imagen sola cubre la pagina (cover-fit) centrada -> la
+   *    dimension mas pequena de la foto toca su borde, con 0.5cm de margen.
+   * Tanto la escala como la posicion se interpolan linealmente entre esos
+   * dos extremos, asi que el encuadre se desplaza (no solo cambia de
+   * tamano) segun donde caigan las fugas.
+   */
+
+  var CM_TO_PT = 72 / 2.54;
+  var EXPORT_MARGIN_PT = 0.5 * CM_TO_PT;
+  var PAGE_SIZES = { A4: [595.28, 841.89], Letter: [612, 792] };
+
+  var exportState = { t: 0, slider: null, pageSizeRestored: false };
+
+  function currentPageDims() {
+    var parts = selPageSize.value.split('-');
+    var base = PAGE_SIZES[parts[0]] || PAGE_SIZES.A4;
+    var w = base[0], h = base[1];
+    if (parts[1] === 'landscape') { var tmp = w; w = h; h = tmp; }
+    return { w: w, h: h };
+  }
+
+  function withinRect(p, w, h) {
+    return p.x >= -1e-6 && p.x <= w + 1e-6 && p.y >= -1e-6 && p.y <= h + 1e-6;
+  }
+
+  /**
+   * Bbox-min (imagen + fugas finitas) y bbox-max (solo imagen), y las
+   * escalas de contain/cover correspondientes para la pagina dada.
+   */
+  function computePageGeom(pageW, pageH) {
+    var x0 = 0, y0 = 0, x1 = state.img.w, y1 = state.img.h;
+    var vps = { A: pairVP('A'), B: pairVP('B') };
+
+    ['A', 'B'].forEach(function (pair) {
+      var vp = vps[pair];
+      if (vp.status !== 'ok') return;
+      if (Math.abs(vp.point.x) > COORD_LIMIT || Math.abs(vp.point.y) > COORD_LIMIT) return;
+      x0 = Math.min(x0, vp.point.x);
+      x1 = Math.max(x1, vp.point.x);
+      y0 = Math.min(y0, vp.point.y);
+      y1 = Math.max(y1, vp.point.y);
+    });
+
+    var printW = Math.max(pageW - 2 * EXPORT_MARGIN_PT, 1);
+    var printH = Math.max(pageH - 2 * EXPORT_MARGIN_PT, 1);
+    var bw = Math.max(x1 - x0, 1);
+    var bh = Math.max(y1 - y0, 1);
+
+    var scaleMin = Math.min(printW / bw, printH / bh);
+    var scaleMax = Math.max(printW / state.img.w, printH / state.img.h);
+    if (scaleMax < scaleMin) scaleMax = scaleMin;
+
+    return {
+      printW: printW, printH: printH, x0: x0, y0: y0, bw: bw, bh: bh,
+      scaleMin: scaleMin, scaleMax: scaleMax, vps: vps
+    };
+  }
+
+  /** Escala + origen (mundo -> pagina) para la posicion t (0..1) del mando. */
+  function pageTransformAt(t, geom, pageW, pageH) {
+    var scale = geom.scaleMin + t * (geom.scaleMax - geom.scaleMin);
+
+    var px0 = EXPORT_MARGIN_PT + (geom.printW - geom.bw * geom.scaleMin) / 2;
+    var py0 = EXPORT_MARGIN_PT + (geom.printH - geom.bh * geom.scaleMin) / 2;
+    var originX0 = px0 - geom.x0 * geom.scaleMin;
+    var originY0 = py0 - geom.y0 * geom.scaleMin;
+
+    var originX1 = EXPORT_MARGIN_PT + (geom.printW - state.img.w * geom.scaleMax) / 2;
+    var originY1 = EXPORT_MARGIN_PT + (geom.printH - state.img.h * geom.scaleMax) / 2;
+
+    return {
+      scale: scale,
+      originX: originX0 + t * (originX1 - originX0),
+      originY: originY0 + t * (originY1 - originY0)
+    };
+  }
+
+  function worldToPage(pt, xf) {
+    return { x: xf.originX + pt.x * xf.scale, y: xf.originY + pt.y * xf.scale };
+  }
+
+  /**
+   * Resuelve toda la escena en espacio de pagina (top-down) para la posicion
+   * t del mando: foto, segmentos, rayos hasta la fuga (recortados contra la
+   * pagina), linea de horizonte, marcadores de fuga (si caen dentro) y
+   * marcadores de borde (si la fuga queda fuera, igual que en el lienzo
+   * principal pero contra el rectangulo de la pagina).
+   */
+  function buildExportScene(t, pageW, pageH) {
+    var geom = computePageGeom(pageW, pageH);
+    var xf = pageTransformAt(t, geom, pageW, pageH);
+
+    var imgTL = worldToPage({ x: 0, y: 0 }, xf);
+    var imgBR = worldToPage({ x: state.img.w, y: state.img.h }, xf);
+    var photo = { x: imgTL.x, y: imgTL.y, w: imgBR.x - imgTL.x, h: imgBR.y - imgTL.y };
+
+    var segments = state.lines.map(function (line) {
+      return { pair: line.pair, a: worldToPage(line.a, xf), b: worldToPage(line.b, xf) };
+    });
+
+    var rays = [];
+    state.lines.forEach(function (line) {
+      var a = worldToPage(line.a, xf), b = worldToPage(line.b, xf);
+      var seg = clipInfiniteLine(a, b, 0, 0, pageW, pageH);
+      if (seg) rays.push({ pair: line.pair, a: seg.a, b: seg.b });
+    });
+
+    var vpMarkers = [];
+    var edgeMarkers = [];
+    var vpPagePoints = {};
+
+    function markPairEdges(pair) {
+      pairLines(pair).forEach(function (line) {
+        var a = worldToPage(line.a, xf), b = worldToPage(line.b, xf);
+        [0, pageW].forEach(function (edgeX) {
+          var pt = edgeCrossingV(a, b, edgeX, 0, pageH);
+          if (pt) edgeMarkers.push({ pair: pair, point: pt });
+        });
+        [0, pageH].forEach(function (edgeY) {
+          var pt = edgeCrossingH(a, b, edgeY, 0, pageW);
+          if (pt) edgeMarkers.push({ pair: pair, point: pt });
+        });
+      });
+    }
+
+    ['A', 'B'].forEach(function (pair) {
+      var vp = geom.vps[pair];
+      var p = null;
+      if (vp.status === 'ok' && Math.abs(vp.point.x) <= COORD_LIMIT && Math.abs(vp.point.y) <= COORD_LIMIT) {
+        p = worldToPage(vp.point, xf);
+        vpPagePoints[pair] = p;
+      }
+      if (p && withinRect(p, pageW, pageH)) {
+        vpMarkers.push({ pair: pair, point: p });
+        return;
+      }
+      if (vp.status === 'incomplete') return;
+      markPairEdges(pair);
+    });
+
+    var horizon = null;
+    if (vpPagePoints.A && vpPagePoints.B) {
+      var hseg = clipInfiniteLine(vpPagePoints.A, vpPagePoints.B, 0, 0, pageW, pageH);
+      if (hseg) horizon = hseg;
+      var aIn = withinRect(vpPagePoints.A, pageW, pageH);
+      var bIn = withinRect(vpPagePoints.B, pageW, pageH);
+      if (!aIn || !bIn) {
+        [0, pageW].forEach(function (edgeX) {
+          var pt = edgeCrossingV(vpPagePoints.A, vpPagePoints.B, edgeX, 0, pageH);
+          if (pt) edgeMarkers.push({ pair: 'horizon', point: pt });
+        });
+        [0, pageH].forEach(function (edgeY) {
+          var pt = edgeCrossingH(vpPagePoints.A, vpPagePoints.B, edgeY, 0, pageW);
+          if (pt) edgeMarkers.push({ pair: 'horizon', point: pt });
+        });
+      }
+    }
+
+    return {
+      geom: geom, photo: photo, segments: segments, rays: rays,
+      horizon: horizon, vpMarkers: vpMarkers, edgeMarkers: edgeMarkers,
+      pageW: pageW, pageH: pageH
+    };
+  }
+
+  /* ------------------------------------------------- Vista previa (SVG) */
+
+  var EXPORT_COLORS = { A: '#ff6b35', B: '#35c2ff', horizon: '#b6ff3f' };
+
+  function svgEl(name, attrs) {
+    var node = document.createElementNS('http://www.w3.org/2000/svg', name);
+    for (var k in attrs) {
+      if (Object.prototype.hasOwnProperty.call(attrs, k)) node.setAttribute(k, attrs[k]);
+    }
+    return node;
+  }
+
+  function renderExportPreview() {
+    if (!state.img.loaded) return;
+    var dims = currentPageDims();
+    var scene = buildExportScene(exportState.t, dims.w, dims.h);
+
+    exportPreview.setAttribute('viewBox', '0 0 ' + dims.w + ' ' + dims.h);
+    exportPreview.textContent = '';
+
+    var m = EXPORT_MARGIN_PT;
+    exportPreview.appendChild(svgEl('rect', {
+      x: m, y: m, width: dims.w - 2 * m, height: dims.h - 2 * m,
+      fill: 'none', stroke: '#c7c7c7', 'stroke-width': 1, 'stroke-dasharray': '4 3'
+    }));
+
+    exportPreview.appendChild(svgEl('image', {
+      x: scene.photo.x, y: scene.photo.y, width: scene.photo.w, height: scene.photo.h,
+      href: state.img.url, preserveAspectRatio: 'none'
+    }));
+
+    scene.rays.forEach(function (r) {
+      exportPreview.appendChild(svgEl('line', {
+        x1: r.a.x, y1: r.a.y, x2: r.b.x, y2: r.b.y,
+        stroke: EXPORT_COLORS[r.pair], 'stroke-width': 1.2, 'stroke-dasharray': '6 4', opacity: 0.85
+      }));
+    });
+
+    if (scene.horizon) {
+      exportPreview.appendChild(svgEl('line', {
+        x1: scene.horizon.a.x, y1: scene.horizon.a.y, x2: scene.horizon.b.x, y2: scene.horizon.b.y,
+        stroke: EXPORT_COLORS.horizon, 'stroke-width': 1.4, 'stroke-dasharray': '9 3 2 3'
+      }));
+    }
+
+    scene.segments.forEach(function (s) {
+      exportPreview.appendChild(svgEl('line', {
+        x1: s.a.x, y1: s.a.y, x2: s.b.x, y2: s.b.y,
+        stroke: EXPORT_COLORS[s.pair], 'stroke-width': 2.2, 'stroke-linecap': 'round'
+      }));
+    });
+
+    scene.edgeMarkers.forEach(function (mk) {
+      var s = 4.5;
+      exportPreview.appendChild(svgEl('rect', {
+        x: mk.point.x - s, y: mk.point.y - s, width: s * 2, height: s * 2,
+        transform: 'rotate(45 ' + mk.point.x + ' ' + mk.point.y + ')',
+        fill: '#fff', stroke: EXPORT_COLORS[mk.pair], 'stroke-width': 1.4
+      }));
+    });
+
+    scene.vpMarkers.forEach(function (mk) {
+      var color = EXPORT_COLORS[mk.pair];
+      var p = mk.point, rad = 6, arm = 11;
+      exportPreview.appendChild(svgEl('circle', {
+        cx: p.x, cy: p.y, r: rad, fill: 'none', stroke: color, 'stroke-width': 1.4
+      }));
+      exportPreview.appendChild(svgEl('line', {
+        x1: p.x - arm, y1: p.y, x2: p.x + arm, y2: p.y, stroke: color, 'stroke-width': 1
+      }));
+      exportPreview.appendChild(svgEl('line', {
+        x1: p.x, y1: p.y - arm, x2: p.x, y2: p.y + arm, stroke: color, 'stroke-width': 1
+      }));
+      var label = svgEl('text', { x: p.x + arm * 0.7, y: p.y - arm * 0.7, 'font-size': 10, fill: '#222' });
+      label.textContent = 'VP-' + mk.pair;
+      exportPreview.appendChild(label);
+    });
+
+    updateExportHint(scene);
+  }
+
+  function updateExportHint(scene) {
+    var offPage = [];
+    ['A', 'B'].forEach(function (pair) {
+      var vp = scene.geom.vps[pair];
+      if (vp.status === 'incomplete') return;
+      var shown = scene.vpMarkers.some(function (mk) { return mk.pair === pair; });
+      if (!shown) offPage.push('Fuga ' + pair);
+    });
+    if (!offPage.length) { exportHint.textContent = ''; return; }
+    var verb = offPage.length > 1 ? 'quedarán' : 'quedará';
+    exportHint.textContent = offPage.join(' y ') + ' ' + verb + ' fuera de la página con este tamaño.';
+  }
+
+  /* -------------------------------------------------- Mando deslizante */
+
+  function ensureExportSlider() {
+    if (exportState.slider) return Promise.resolve(exportState.slider);
+    return import('/assets/js/RangeSlider.js').then(function (mod) {
+      var slider = new mod.RangeSlider(exportSliderMount, {
+        min: 0, max: 100, step: 1, def: 0, title: 'Encuadre', color: '#f6c94b'
+      });
+      slider.onValueChange(function (val) {
+        exportState.t = val / 100;
+        renderExportPreview();
+      });
+      exportState.slider = slider;
+      return slider;
+    });
+  }
+
+  function openExportDialog() {
+    if (!state.img.loaded) return;
+    var firstOpen = !exportState.slider;
+    ensureExportSlider().then(function () {
+      if (firstOpen && !exportState.pageSizeRestored) {
+        // Sugerencia inicial de orientacion segun la foto (solo si no hay
+        // una preferencia guardada); el desplegable sigue siendo libre
+        // para cambiarla.
+        var landscape = state.img.w >= state.img.h;
+        selPageSize.value = 'A4-' + (landscape ? 'landscape' : 'portrait');
+      }
+      renderExportPreview();
+      exportDialog.showModal();
+    });
+  }
+
+  function closeExportDialog() {
+    exportDialog.close();
+  }
+
+  /* ------------------------------------------------------- Generar PDF */
+
+  function hexToRgb01(hex) {
+    var n = parseInt(hex.slice(1), 16);
+    return PDFLib.rgb(((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255);
+  }
+
+  async function embedExportPhoto(pdfDoc) {
+    var file = state.img.file;
+    var bytes = await file.arrayBuffer();
+    if (file.type === 'image/png') return pdfDoc.embedPng(bytes);
+    if (file.type === 'image/jpeg' || file.type === 'image/jpg') return pdfDoc.embedJpg(bytes);
+    // Formato no soportado de forma nativa (webp, gif...): transcodificar a JPEG.
+    var bitmap = await createImageBitmap(file);
+    var canvas = document.createElement('canvas');
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    canvas.getContext('2d').drawImage(bitmap, 0, 0);
+    var blob = await new Promise(function (resolve) { canvas.toBlob(resolve, 'image/jpeg', 0.92); });
+    return pdfDoc.embedJpg(await blob.arrayBuffer());
+  }
+
+  async function buildExportPdf() {
+    var dims = currentPageDims();
+    var pageW = dims.w, pageH = dims.h;
+    var scene = buildExportScene(exportState.t, pageW, pageH);
+
+    var pdfDoc = await PDFLib.PDFDocument.create();
+    var page = pdfDoc.addPage([pageW, pageH]);
+    var font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+
+    var colors = {
+      A: hexToRgb01(EXPORT_COLORS.A),
+      B: hexToRgb01(EXPORT_COLORS.B),
+      horizon: hexToRgb01(EXPORT_COLORS.horizon)
+    };
+
+    function flipY(p) { return { x: p.x, y: pageH - p.y }; }
+
+    page.drawRectangle({ x: 0, y: 0, width: pageW, height: pageH, color: PDFLib.rgb(1, 1, 1) });
+
+    var embedded = await embedExportPhoto(pdfDoc);
+    page.drawImage(embedded, {
+      x: scene.photo.x,
+      y: pageH - scene.photo.y - scene.photo.h,
+      width: scene.photo.w,
+      height: scene.photo.h
+    });
+
+    scene.rays.forEach(function (r) {
+      page.drawLine({
+        start: flipY(r.a), end: flipY(r.b),
+        thickness: 0.9, color: colors[r.pair], dashArray: [5, 3.5], opacity: 0.85
+      });
+    });
+
+    if (scene.horizon) {
+      page.drawLine({
+        start: flipY(scene.horizon.a), end: flipY(scene.horizon.b),
+        thickness: 1.1, color: colors.horizon, dashArray: [7, 2, 1.5, 2]
+      });
+    }
+
+    scene.segments.forEach(function (s) {
+      page.drawLine({ start: flipY(s.a), end: flipY(s.b), thickness: 2, color: colors[s.pair] });
+    });
+
+    scene.edgeMarkers.forEach(function (mk) {
+      var s = 3.2, p = flipY(mk.point);
+      page.drawRectangle({
+        x: p.x, y: p.y - s * Math.SQRT2, width: s * 2, height: s * 2,
+        rotate: PDFLib.degrees(45), color: PDFLib.rgb(1, 1, 1),
+        borderColor: colors[mk.pair], borderWidth: 1
+      });
+    });
+
+    scene.vpMarkers.forEach(function (mk) {
+      var p = flipY(mk.point), rad = 5, arm = 10, color = colors[mk.pair];
+      page.drawEllipse({ x: p.x, y: p.y, xScale: rad, yScale: rad, borderColor: color, borderWidth: 1.1 });
+      page.drawLine({ start: { x: p.x - arm, y: p.y }, end: { x: p.x + arm, y: p.y }, thickness: 0.8, color: color });
+      page.drawLine({ start: { x: p.x, y: p.y - arm }, end: { x: p.x, y: p.y + arm }, thickness: 0.8, color: color });
+      page.drawText('VP-' + mk.pair, { x: p.x + arm * 0.7, y: p.y + arm * 0.5, size: 8, font: font, color: color });
+    });
+
+    return pdfDoc.save();
+  }
+
+  async function downloadExportPdf() {
+    btnExportDownload.disabled = true;
+    var prevHint = exportHint.textContent;
+    try {
+      var bytes = await buildExportPdf();
+      var blob = new Blob([bytes], { type: 'application/pdf' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'hasta-la-vista-line.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
+    } catch (err) {
+      exportHint.textContent = 'No se pudo generar el PDF.';
+      setTimeout(function () { exportHint.textContent = prevHint; }, 3000);
+    } finally {
+      btnExportDownload.disabled = false;
+    }
   }
 
   /* --------------------------------------------------------------- Eventos */
@@ -976,9 +1511,21 @@
   selCursorMode.addEventListener('change', function () {
     state.cursorMode = selCursorMode.value;
     if (state.cursorMode !== 'magnify') hideLoupe();
+    saveSetting('cursorMode', state.cursorMode);
   });
   btnFit.addEventListener('click', fitImage);
   btnFitAll.addEventListener('click', fitAll);
+
+  btnExport.addEventListener('click', openExportDialog);
+  btnExportClose.addEventListener('click', closeExportDialog);
+  btnExportDownload.addEventListener('click', downloadExportPdf);
+  selPageSize.addEventListener('change', function () {
+    renderExportPreview();
+    saveSetting('pageSize', selPageSize.value);
+  });
+  exportDialog.addEventListener('click', function (ev) {
+    if (ev.target === exportDialog) closeExportDialog();
+  });
 
   btnZoomIn.addEventListener('click', function () {
     var r = svg.getBoundingClientRect();
@@ -1002,6 +1549,7 @@
   });
 
   document.addEventListener('keydown', function (ev) {
+    if (exportDialog.open) return; // el dialogo modal gestiona su propio teclado
     var tag = ev.target && ev.target.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA') return;
     if (ev.key === 'Escape') {
@@ -1030,6 +1578,18 @@
   }
 
   /* ------------------------------------------------------------- Arranque */
+
+  (function applySettings() {
+    var saved = loadSettings();
+    if (CURSOR_MODES.indexOf(saved.cursorMode) !== -1) {
+      state.cursorMode = saved.cursorMode;
+      selCursorMode.value = saved.cursorMode;
+    }
+    if (PAGE_SIZE_VALUES.indexOf(saved.pageSize) !== -1) {
+      selPageSize.value = saved.pageSize;
+      exportState.pageSizeRestored = true;
+    }
+  })();
 
   syncAspect();
   fitImage();
