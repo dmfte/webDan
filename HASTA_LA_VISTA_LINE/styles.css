@@ -30,9 +30,9 @@
      los lee al arrancar (o usa el color guardado, si el usuario ya eligio
      uno con el selector junto a cada fuga/horizonte) y los reescribe en
      linea via setProperty. */
-  --pair-a: #ff6b35;
+  --pair-a: #b6ff3f;
   --pair-b: #35c2ff;
-  --horizon: #b6ff3f;
+  --horizon: #ff6b35;
 }
 
 *,

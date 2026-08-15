@@ -57,8 +57,8 @@
 
     <main class="stage">
       <div class="canvas-wrap">
-        <svg id="board" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"
-          preserveAspectRatio="xMidYMid meet" aria-label="Área de trabajo con la imagen y las líneas de fuga">
+        <svg id="board" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid meet"
+          aria-label="Área de trabajo con la imagen y las líneas de fuga">
           <defs>
             <pattern id="gridPattern" width="50" height="50" patternUnits="userSpaceOnUse">
               <path id="gridPath" d="M 50 0 L 0 0 L 0 50" fill="none" class="grid-stroke"
@@ -67,8 +67,8 @@
           </defs>
 
           <rect id="worldBg" x="-600" y="-400" width="2400" height="1600" fill="url(#gridPattern)"></rect>
-          <image id="photo" x="0" y="0" width="1200" height="800" preserveAspectRatio="none"
-            style="display:none"></image>
+          <image id="photo" x="0" y="0" width="1200" height="800" preserveAspectRatio="none" style="display:none">
+          </image>
           <rect id="photoFrame" x="0" y="0" width="1200" height="800" class="photo-frame"
             vector-effect="non-scaling-stroke"></rect>
 
@@ -114,7 +114,7 @@
             <!-- Color de partida del par A: JS lo sobrescribe al cargar con
                  --pair-a de styles.css (o con el color guardado); cambia el
                  valor por defecto ahi, no aqui. -->
-            <input type="color" id="colorA" class="dot dot-a" value="#ff6b35" aria-label="Color del par A">
+            <input type="color" id="colorA" class="dot dot-a" value="#b6ff3f" aria-label="Color del par A">
             <div class="vp-info">
               <p class="vp-name">Fuga A <span class="vp-count" id="countA">0/2</span></p>
               <p class="vp-coords" id="coordsA">Faltan 2 líneas</p>
@@ -154,7 +154,7 @@
 
           <div class="vp-row horizon-row">
             <!-- Idem: valor por defecto real en --horizon (styles.css). -->
-            <input type="color" id="colorH" class="dot dot-h" value="#b6ff3f" aria-label="Color del horizonte">
+            <input type="color" id="colorH" class="dot dot-h" value="#ff6b35" aria-label="Color del horizonte">
             <div class="vp-info">
               <p class="vp-name">Horizonte</p>
               <p class="vp-coords" id="horizonInfo">Aparece cuando existen las dos fugas.</p>
@@ -193,17 +193,19 @@
         <label class="export-field" for="selPageSize">
           <span>Tamaño de página</span>
           <select id="selPageSize">
-            <option value="A4-portrait">A4 · vertical</option>
-            <option value="A4-landscape">A4 · horizontal</option>
             <option value="Letter-portrait">Carta · vertical</option>
             <option value="Letter-landscape">Carta · horizontal</option>
+            <option value="Oficio-portrait">Oficio · vertical</option>
+            <option value="Oficio-landscape">Oficio · horizontal</option>
+            <option value="A4-portrait">A4 · vertical</option>
+            <option value="A4-landscape">A4 · horizontal</option>
           </select>
         </label>
 
         <div class="export-field">
           <span>Horizonte</span>
-          <button id="btnLevel" class="btn btn-mini" type="button" disabled
-            aria-pressed="false" title="Rotar la exportación para dejar el horizonte perfectamente horizontal">Nivelar</button>
+          <button id="btnLevel" class="btn btn-mini" type="button" disabled aria-pressed="false"
+            title="Rotar la exportación para dejar el horizonte perfectamente horizontal">Nivelar</button>
         </div>
         <label class="toggle-field" for="chkAutoCrop">
           <input type="checkbox" id="chkAutoCrop" checked>

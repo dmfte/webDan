@@ -105,9 +105,9 @@
     // Colores editables por el usuario (selector junto a cada fuga); el
     // valor de partida sale de --pair-a/--pair-b en styles.css.
     colors: {
-      A: cssVar('--pair-a', '#ff6b35'),
+      A: cssVar('--pair-a', '#b6ff3f'),
       B: cssVar('--pair-b', '#35c2ff'),
-      horizon: cssVar('--horizon', '#b6ff3f')
+      horizon: cssVar('--horizon', 'blue')
     },
     pending: null,      // primer punto mientras se inserta una linea
     pointerWorld: null, // posicion del puntero en el mundo (vista previa)
@@ -129,7 +129,7 @@
 
   var SETTINGS_KEY = 'hlvl:settings';
   var CURSOR_MODES = ['crosshair', 'magnify'];
-  var PAGE_SIZE_VALUES = ['A4-portrait', 'A4-landscape', 'Letter-portrait', 'Letter-landscape'];
+  var PAGE_SIZE_VALUES = ['Letter-portrait', 'Letter-landscape', 'Oficio-portrait', 'Oficio-landscape', 'A4-portrait', 'A4-landscape'];
   var HEX_COLOR_RE = /^#[0-9a-f]{6}$/i;
 
   function loadSettings() {
@@ -1097,7 +1097,7 @@
 
   var CM_TO_PT = 72 / 2.54;
   var EXPORT_MARGIN_PT = 0.5 * CM_TO_PT;
-  var PAGE_SIZES = { A4: [595.28, 841.89], Letter: [612, 792] };
+  var PAGE_SIZES = { A4: [595.28, 841.89], Letter: [612, 792], Oficio: [612, 936] };
 
   var exportState = { t: 0, slider: null, pageSizeRestored: false, leveled: false, autoCrop: true };
 
