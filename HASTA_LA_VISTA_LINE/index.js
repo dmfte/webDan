@@ -79,6 +79,8 @@
     }
   };
   var horizonInfo = document.getElementById('horizonInfo');
+  var btnLevel = document.getElementById('btnLevel');
+  var chkAutoCrop = document.getElementById('chkAutoCrop');
 
   /* -------------------------------------------------------------- Estado */
 
@@ -669,7 +671,8 @@
       });
     });
 
-    if (vps.A.status === 'ok' && vps.B.status === 'ok') {
+    var horizonOk = vps.A.status === 'ok' && vps.B.status === 'ok';
+    if (horizonOk) {
       var dy = vps.B.point.y - vps.A.point.y;
       var dx = vps.B.point.x - vps.A.point.x;
       var deg = Math.atan2(dy, dx) * 180 / Math.PI;
@@ -684,6 +687,11 @@
       horizonInfo.className = 'vp-coords';
       horizonInfo.textContent = 'Aparece cuando existen las dos fugas.';
     }
+
+    btnLevel.disabled = !horizonOk;
+    btnLevel.classList.toggle('is-active', exportState.leveled && horizonOk);
+    btnLevel.setAttribute('aria-pressed', String(exportState.leveled && horizonOk));
+    chkAutoCrop.disabled = !exportState.leveled || !horizonOk;
 
     btnAddLine.disabled = state.lines.length >= MAX_LINES;
     btnExport.disabled = !state.img.loaded;
@@ -1091,7 +1099,121 @@
   var EXPORT_MARGIN_PT = 0.5 * CM_TO_PT;
   var PAGE_SIZES = { A4: [595.28, 841.89], Letter: [612, 792] };
 
-  var exportState = { t: 0, slider: null, pageSizeRestored: false };
+  var exportState = { t: 0, slider: null, pageSizeRestored: false, leveled: false, autoCrop: true };
+
+  function rotatePoint(pt, theta, pivot) {
+    var dx = pt.x - pivot.x, dy = pt.y - pivot.y;
+    var cos = Math.cos(theta), sin = Math.sin(theta);
+    return { x: pivot.x + dx * cos - dy * sin, y: pivot.y + dx * sin + dy * cos };
+  }
+
+  /**
+   * Rectangulo axis-aligned mas grande que cabe dentro de un rectangulo
+   * WxH girado un angulo phi (radianes; se usa su valor absoluto).
+   * Sistema general (las dos restricciones -ancho y alto- a tope a la
+   * vez); cuando ese sistema pide una dimension negativa (angulo
+   * pronunciado en una imagen alargada -- nada raro para corregir un
+   * horizonte en una foto panoramica), solo UNA restriccion queda a tope
+   * y el rectangulo se dimensiona a partir de esa sola cara.
+   */
+  function computeInscribedCrop(W, H, phi) {
+    phi = Math.abs(phi) % Math.PI;
+    if (phi > Math.PI / 2) phi = Math.PI - phi;
+    // Reducir a [0, 45°]: el problema a mas de 45° es el mismo que a
+    // (90°-phi) con W y H intercambiados, y asi cos(2*phi) nunca es
+    // negativo en el resto de la funcion.
+    var swapped = false;
+    if (phi > Math.PI / 4) {
+      phi = Math.PI / 2 - phi;
+      var t = W; W = H; H = t;
+      swapped = true;
+    }
+
+    var cosP = Math.cos(phi), sinP = Math.sin(phi);
+    var cos2 = Math.cos(2 * phi);
+    var w, h;
+    if (Math.abs(cos2) < 1e-9) {
+      // 45° exactos: caso clasico del cuadrado inscrito.
+      w = h = Math.min(W, H) / Math.SQRT2;
+    } else {
+      var fullW = (W * cosP - H * sinP) / cos2;
+      var fullH = (H * cosP - W * sinP) / cos2;
+      if (fullW >= 0 && fullH >= 0) {
+        w = fullW; h = fullH;
+      } else if (fullH < 0) {
+        // H es la dimension que limita: solo esa cara queda a tope.
+        w = H / (2 * sinP); h = H / (2 * cosP);
+      } else {
+        w = W / (2 * cosP); h = W / (2 * sinP);
+      }
+    }
+
+    if (swapped) { var tmp = w; w = h; h = tmp; }
+    return { w: Math.max(w, 1), h: Math.max(h, 1) };
+  }
+
+  /**
+   * Angulo y pivote para "nivelar" la exportacion: gira foto + lineas +
+   * fugas para que el horizonte quede perfectamente horizontal. null si
+   * el nivelado esta desactivado o el horizonte todavia no existe (hacen
+   * falta las dos fugas finitas).
+   */
+  function getLevelTransform() {
+    if (!exportState.leveled) return null;
+    var vpA = pairVP('A'), vpB = pairVP('B');
+    if (vpA.status !== 'ok' || vpB.status !== 'ok') return null;
+    var dy = vpB.point.y - vpA.point.y;
+    var dx = vpB.point.x - vpA.point.x;
+    var deg = Math.atan2(dy, dx) * 180 / Math.PI;
+    if (deg > 90) deg -= 180;
+    if (deg < -90) deg += 180;
+    return {
+      deg: deg,
+      thetaDeg: -deg,
+      theta: -deg * Math.PI / 180,
+      pivot: { x: state.img.w / 2, y: state.img.h / 2 }
+    };
+  }
+
+  /**
+   * Marco efectivo para exportar: identidad si no hay nivelado. Si lo hay,
+   * mapPoint gira cualquier punto del mundo (foto, lineas, fugas) el mismo
+   * angulo alrededor del centro de la imagen, e imgBBox es el rectangulo
+   * -en ese mismo espacio ya girado- que representa "la foto" a efectos
+   * de encaje en la pagina: el rectangulo inscrito si se recorta, o el
+   * bbox de sus 4 esquinas giradas si no (la foto entera, inclinada).
+   */
+  function getExportFrame() {
+    var lvl = getLevelTransform();
+    if (!lvl) {
+      return {
+        mapPoint: function (pt) { return pt; },
+        imgBBox: { x0: 0, y0: 0, x1: state.img.w, y1: state.img.h },
+        leveled: null
+      };
+    }
+    var mapPoint = function (pt) { return rotatePoint(pt, lvl.theta, lvl.pivot); };
+    var imgBBox;
+    if (exportState.autoCrop) {
+      var crop = computeInscribedCrop(state.img.w, state.img.h, lvl.theta);
+      imgBBox = {
+        x0: lvl.pivot.x - crop.w / 2, y0: lvl.pivot.y - crop.h / 2,
+        x1: lvl.pivot.x + crop.w / 2, y1: lvl.pivot.y + crop.h / 2
+      };
+    } else {
+      var corners = [
+        mapPoint({ x: 0, y: 0 }), mapPoint({ x: state.img.w, y: 0 }),
+        mapPoint({ x: state.img.w, y: state.img.h }), mapPoint({ x: 0, y: state.img.h })
+      ];
+      var xs = corners.map(function (c) { return c.x; });
+      var ys = corners.map(function (c) { return c.y; });
+      imgBBox = {
+        x0: Math.min.apply(null, xs), y0: Math.min.apply(null, ys),
+        x1: Math.max.apply(null, xs), y1: Math.max.apply(null, ys)
+      };
+    }
+    return { mapPoint: mapPoint, imgBBox: imgBBox, leveled: lvl };
+  }
 
   function currentPageDims() {
     var parts = selPageSize.value.split('-');
@@ -1113,31 +1235,37 @@
    * por construccion.
    */
   function computePageGeom(pageW, pageH) {
-    var x0 = 0, y0 = 0, x1 = state.img.w, y1 = state.img.h;
+    var frame = getExportFrame();
+    var x0 = frame.imgBBox.x0, y0 = frame.imgBBox.y0;
+    var x1 = frame.imgBBox.x1, y1 = frame.imgBBox.y1;
     var vps = { A: pairVP('A'), B: pairVP('B') };
 
     ['A', 'B'].forEach(function (pair) {
       var vp = vps[pair];
       if (vp.status !== 'ok') return;
       if (Math.abs(vp.point.x) > COORD_LIMIT || Math.abs(vp.point.y) > COORD_LIMIT) return;
-      x0 = Math.min(x0, vp.point.x);
-      x1 = Math.max(x1, vp.point.x);
-      y0 = Math.min(y0, vp.point.y);
-      y1 = Math.max(y1, vp.point.y);
+      var p = frame.mapPoint(vp.point);
+      x0 = Math.min(x0, p.x);
+      x1 = Math.max(x1, p.x);
+      y0 = Math.min(y0, p.y);
+      y1 = Math.max(y1, p.y);
     });
 
     var printW = Math.max(pageW - 2 * EXPORT_MARGIN_PT, 1);
     var printH = Math.max(pageH - 2 * EXPORT_MARGIN_PT, 1);
     var bw = Math.max(x1 - x0, 1);
     var bh = Math.max(y1 - y0, 1);
+    var imgBW = Math.max(frame.imgBBox.x1 - frame.imgBBox.x0, 1);
+    var imgBH = Math.max(frame.imgBBox.y1 - frame.imgBBox.y0, 1);
 
     var scaleMin = Math.min(printW / bw, printH / bh);
-    var scaleMax = Math.min(printW / state.img.w, printH / state.img.h);
+    var scaleMax = Math.min(printW / imgBW, printH / imgBH);
     if (scaleMax < scaleMin) scaleMax = scaleMin; // resguardo por redondeo
 
     return {
       printW: printW, printH: printH, x0: x0, y0: y0, bw: bw, bh: bh,
-      scaleMin: scaleMin, scaleMax: scaleMax, vps: vps
+      imgBW: imgBW, imgBH: imgBH,
+      scaleMin: scaleMin, scaleMax: scaleMax, vps: vps, frame: frame
     };
   }
 
@@ -1150,8 +1278,11 @@
     var originX0 = px0 - geom.x0 * geom.scaleMin;
     var originY0 = py0 - geom.y0 * geom.scaleMin;
 
-    var originX1 = EXPORT_MARGIN_PT + (geom.printW - state.img.w * geom.scaleMax) / 2;
-    var originY1 = EXPORT_MARGIN_PT + (geom.printH - state.img.h * geom.scaleMax) / 2;
+    var imgBBox = geom.frame.imgBBox;
+    var px1 = EXPORT_MARGIN_PT + (geom.printW - geom.imgBW * geom.scaleMax) / 2;
+    var py1 = EXPORT_MARGIN_PT + (geom.printH - geom.imgBH * geom.scaleMax) / 2;
+    var originX1 = px1 - imgBBox.x0 * geom.scaleMax;
+    var originY1 = py1 - imgBBox.y0 * geom.scaleMax;
 
     return {
       scale: scale,
@@ -1176,21 +1307,35 @@
   function buildExportScene(t, pageW, pageH) {
     var geom = computePageGeom(pageW, pageH);
     var xf = pageTransformAt(t, geom, pageW, pageH);
+    var frame = geom.frame;
 
     var mx0 = EXPORT_MARGIN_PT, my0 = EXPORT_MARGIN_PT;
     var mx1 = pageW - EXPORT_MARGIN_PT, my1 = pageH - EXPORT_MARGIN_PT;
 
+    // La foto se coloca SIEMPRE en su posicion natural (sin girar); el
+    // nivelado se aplica como metadato (rotateDeg/pivotPage/clipRectPage)
+    // que cada dibujante (SVG o PDF) interpreta a su manera al final.
     var imgTL = worldToPage({ x: 0, y: 0 }, xf);
     var imgBR = worldToPage({ x: state.img.w, y: state.img.h }, xf);
     var photo = { x: imgTL.x, y: imgTL.y, w: imgBR.x - imgTL.x, h: imgBR.y - imgTL.y };
 
+    if (frame.leveled) {
+      photo.rotateDeg = frame.leveled.thetaDeg;
+      photo.pivotPage = worldToPage(frame.leveled.pivot, xf);
+      if (exportState.autoCrop) {
+        var cTL = worldToPage({ x: frame.imgBBox.x0, y: frame.imgBBox.y0 }, xf);
+        var cBR = worldToPage({ x: frame.imgBBox.x1, y: frame.imgBBox.y1 }, xf);
+        photo.clipRectPage = { x: cTL.x, y: cTL.y, w: cBR.x - cTL.x, h: cBR.y - cTL.y };
+      }
+    }
+
     var segments = state.lines.map(function (line) {
-      return { pair: line.pair, a: worldToPage(line.a, xf), b: worldToPage(line.b, xf) };
+      return { pair: line.pair, a: worldToPage(frame.mapPoint(line.a), xf), b: worldToPage(frame.mapPoint(line.b), xf) };
     });
 
     var rays = [];
     state.lines.forEach(function (line) {
-      var a = worldToPage(line.a, xf), b = worldToPage(line.b, xf);
+      var a = worldToPage(frame.mapPoint(line.a), xf), b = worldToPage(frame.mapPoint(line.b), xf);
       var seg = clipInfiniteLine(a, b, mx0, my0, mx1, my1);
       if (seg) rays.push({ pair: line.pair, a: seg.a, b: seg.b });
     });
@@ -1201,7 +1346,7 @@
 
     function markPairEdges(pair) {
       pairLines(pair).forEach(function (line) {
-        var a = worldToPage(line.a, xf), b = worldToPage(line.b, xf);
+        var a = worldToPage(frame.mapPoint(line.a), xf), b = worldToPage(frame.mapPoint(line.b), xf);
         [mx0, mx1].forEach(function (edgeX) {
           var pt = edgeCrossingV(a, b, edgeX, my0, my1);
           if (pt) edgeMarkers.push({ pair: pair, point: pt });
@@ -1217,7 +1362,7 @@
       var vp = geom.vps[pair];
       var p = null;
       if (vp.status === 'ok' && Math.abs(vp.point.x) <= COORD_LIMIT && Math.abs(vp.point.y) <= COORD_LIMIT) {
-        p = worldToPage(vp.point, xf);
+        p = worldToPage(frame.mapPoint(vp.point), xf);
         vpPagePoints[pair] = p;
       }
       if (p && withinRect(p, mx0, my0, mx1, my1)) {
@@ -1281,10 +1426,29 @@
       fill: 'none', stroke: '#c7c7c7', 'stroke-width': 1, 'stroke-dasharray': '4 3'
     }));
 
-    exportPreview.appendChild(svgEl('image', {
+    var photoImg = svgEl('image', {
       x: scene.photo.x, y: scene.photo.y, width: scene.photo.w, height: scene.photo.h,
       href: state.img.url, preserveAspectRatio: 'none'
-    }));
+    });
+    if (scene.photo.rotateDeg) {
+      photoImg.setAttribute('transform', 'rotate(' + scene.photo.rotateDeg + ' ' +
+        scene.photo.pivotPage.x + ' ' + scene.photo.pivotPage.y + ')');
+    }
+    if (scene.photo.clipRectPage) {
+      // El recorte se aplica ANTES de rotar (en espacio de pagina sin
+      // girar): un <g> exterior con el clip envuelve la <image> rotada.
+      var clipRect = scene.photo.clipRectPage;
+      var defs = svgEl('defs', {});
+      var clipPath = svgEl('clipPath', { id: 'exportCropClip' });
+      clipPath.appendChild(svgEl('rect', { x: clipRect.x, y: clipRect.y, width: clipRect.w, height: clipRect.h }));
+      defs.appendChild(clipPath);
+      exportPreview.appendChild(defs);
+      var photoGroup = svgEl('g', { 'clip-path': 'url(#exportCropClip)' });
+      photoGroup.appendChild(photoImg);
+      exportPreview.appendChild(photoGroup);
+    } else {
+      exportPreview.appendChild(photoImg);
+    }
 
     scene.rays.forEach(function (r) {
       exportPreview.appendChild(svgEl('line', {
@@ -1393,6 +1557,22 @@
     return PDFLib.rgb(((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255);
   }
 
+  /**
+   * pdf-lib rota page.drawImage alrededor de su propia esquina (x,y), no
+   * de su centro. Dado el tamano w x h y un angulo de rotacion (grados,
+   * convencion pdf-lib: Y arriba), devuelve el (x,y) que hay que pasarle
+   * para que el CENTRO de la imagen ya rotada caiga exactamente en target.
+   */
+  function drawImageAnchorForCenter(target, w, h, rotDeg) {
+    var rad = rotDeg * Math.PI / 180;
+    var cos = Math.cos(rad), sin = Math.sin(rad);
+    var cx = w / 2, cy = h / 2;
+    return {
+      x: target.x - (cx * cos - cy * sin),
+      y: target.y - (cx * sin + cy * cos)
+    };
+  }
+
   async function embedExportPhoto(pdfDoc) {
     var file = state.img.file;
     var bytes = await file.arrayBuffer();
@@ -1428,12 +1608,39 @@
     page.drawRectangle({ x: 0, y: 0, width: pageW, height: pageH, color: PDFLib.rgb(1, 1, 1) });
 
     var embedded = await embedExportPhoto(pdfDoc);
-    page.drawImage(embedded, {
-      x: scene.photo.x,
-      y: pageH - scene.photo.y - scene.photo.h,
-      width: scene.photo.w,
-      height: scene.photo.h
-    });
+    if (scene.photo.rotateDeg) {
+      // Y-arriba invierte el sentido visual de la rotacion respecto al
+      // espacio de pagina (Y-abajo): mismo angulo, signo contrario.
+      var pdfRotateDeg = -scene.photo.rotateDeg;
+      var pivotPdf = flipY(scene.photo.pivotPage);
+      var anchor = drawImageAnchorForCenter(pivotPdf, scene.photo.w, scene.photo.h, pdfRotateDeg);
+      var hasClip = !!scene.photo.clipRectPage;
+
+      if (hasClip) {
+        var clip = scene.photo.clipRectPage;
+        var clipPdfY = pageH - clip.y - clip.h;
+        page.pushOperators(
+          PDFLib.pushGraphicsState(),
+          PDFLib.rectangle(clip.x, clipPdfY, clip.w, clip.h),
+          PDFLib.clip(),
+          PDFLib.endPath()
+        );
+      }
+
+      page.drawImage(embedded, {
+        x: anchor.x, y: anchor.y, width: scene.photo.w, height: scene.photo.h,
+        rotate: PDFLib.degrees(pdfRotateDeg)
+      });
+
+      if (hasClip) page.pushOperators(PDFLib.popGraphicsState());
+    } else {
+      page.drawImage(embedded, {
+        x: scene.photo.x,
+        y: pageH - scene.photo.y - scene.photo.h,
+        width: scene.photo.w,
+        height: scene.photo.h
+      });
+    }
 
     scene.rays.forEach(function (r) {
       page.drawLine({
@@ -1555,6 +1762,16 @@
   colorH.addEventListener('input', function () {
     applyHorizonColor(colorH.value);
     saveSetting('colorH', colorH.value);
+  });
+
+  btnLevel.addEventListener('click', function () {
+    exportState.leveled = !exportState.leveled;
+    scheduleRender();
+    if (exportDialog.open) renderExportPreview();
+  });
+  chkAutoCrop.addEventListener('change', function () {
+    exportState.autoCrop = chkAutoCrop.checked;
+    if (exportDialog.open) renderExportPreview();
   });
 
   btnFit.addEventListener('click', fitImage);

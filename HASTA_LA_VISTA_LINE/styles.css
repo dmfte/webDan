@@ -718,6 +718,40 @@ input[type="color"].dot:focus-visible {
   color: var(--focus);
 }
 
+.vp-coords-row {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.vp-coords-row .btn-mini.is-active {
+  background: var(--focus);
+  color: #14171d;
+  border-color: var(--focus);
+}
+
+.toggle-field {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.toggle-field:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toggle-field input {
+  cursor: inherit;
+  accent-color: var(--focus);
+}
+
 .vp-actions {
   grid-column: 2;
   display: flex;
@@ -818,6 +852,18 @@ input[type="color"].dot:focus-visible {
   border-radius: var(--radius);
   background: var(--surface);
   color: var(--text);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* El dialogo de exportacion necesita sitio para la vista previa; casi a
+   pantalla completa, pero sin llegar a los bordes, para que se siga
+   leyendo como una ventana flotante (con su propio borde/sombra/fondo
+   difuminado) y no como si hubiera "navegado" a otra pagina. */
+#exportDialog {
+  width: 95vw;
+  height: 92svh;
+  max-width: 95vw;
+  max-height: 92svh;
 }
 
 /* El <dialog> nativo ya se oculta con display:none cuando no tiene el
@@ -881,12 +927,14 @@ input[type="color"].dot:focus-visible {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
+  flex: 1;
+  min-height: 0;
 }
 
 .export-field {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 0.6rem;
   font-size: 0.78rem;
   color: var(--muted);
@@ -915,11 +963,13 @@ input[type="color"].dot:focus-visible {
   padding: 0.7rem;
   border-radius: var(--radius);
   background: var(--void);
+  flex: 1;
+  min-height: 0;
 }
 
 .export-preview {
   width: 100%;
-  max-height: 46svh;
+  height: 100%;
   background: #fff;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
 }
