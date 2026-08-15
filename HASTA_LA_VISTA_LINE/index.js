@@ -1417,6 +1417,7 @@
     var dims = currentPageDims();
     var scene = buildExportScene(exportState.t, dims.w, dims.h);
 
+    exportPreview.style.aspectRatio = dims.w + ' / ' + dims.h;
     exportPreview.setAttribute('viewBox', '0 0 ' + dims.w + ' ' + dims.h);
     exportPreview.textContent = '';
 
