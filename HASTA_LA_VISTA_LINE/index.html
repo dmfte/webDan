@@ -79,6 +79,7 @@
             <g id="linesLayer"></g>
             <g id="edgeLayer"></g>
             <g id="vpLayer"></g>
+            <line id="previewLineB" class="preview-b" vector-effect="non-scaling-stroke" style="display:none"></line>
             <line id="previewLine" class="preview" vector-effect="non-scaling-stroke" style="display:none"></line>
           </g>
         </svg>
@@ -98,10 +99,18 @@
             <use href="#linesLayer"></use>
             <use href="#edgeLayer"></use>
             <use href="#vpLayer"></use>
+            <use href="#previewLineB"></use>
             <use href="#previewLine"></use>
           </svg>
           <span class="loupe-ring"></span>
-          <span class="loupe-reticle"></span>
+          <svg class="loupe-reticle" viewBox="0 0 20 20" aria-hidden="true">
+            <line x1="10" y1="6.5" x2="10" y2="1"></line>
+            <line x1="10" y1="6.5" x2="10" y2="1" transform="rotate(60 10 10)"></line>
+            <line x1="10" y1="6.5" x2="10" y2="1" transform="rotate(120 10 10)"></line>
+            <line x1="10" y1="6.5" x2="10" y2="1" transform="rotate(180 10 10)"></line>
+            <line x1="10" y1="6.5" x2="10" y2="1" transform="rotate(240 10 10)"></line>
+            <line x1="10" y1="6.5" x2="10" y2="1" transform="rotate(300 10 10)"></line>
+          </svg>
         </div>
       </div>
 

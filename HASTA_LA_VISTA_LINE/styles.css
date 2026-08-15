@@ -326,33 +326,28 @@ select {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
 
-.loupe-reticle::before,
-.loupe-reticle::after {
-  content: '';
-  position: absolute;
-  background: var(--focus);
+/* 6 marcas radiales tipo "horas de reloj" (mismo centro, sin tocarlo:
+   dejan un hueco vacio en medio), cada 60 grados, alternando negro puro /
+   blanco puro. Las 3 negras (2, 6 y 10 en punto) forman una Y; las 3
+   blancas (12, 4 y 8 en punto) forman una Y invertida. Asi, sobre
+   cualquier fondo (muy claro o muy oscuro) al menos 3 de las 6 siguen
+   siendo visibles. */
+.loupe-reticle line {
+  stroke-width: 1.2;
 }
 
-.loupe-reticle::before {
-  left: 50%;
-  top: 0;
-  width: 1.5px;
-  height: 100%;
-  transform: translateX(-50%);
+.loupe-reticle line:nth-child(odd) {
+  stroke: #fff;
 }
 
-.loupe-reticle::after {
-  top: 50%;
-  left: 0;
-  height: 1.5px;
-  width: 100%;
-  transform: translateY(-50%);
+.loupe-reticle line:nth-child(even) {
+  stroke: #000;
 }
 
 /* ---------- Escenario ---------- */
@@ -420,7 +415,8 @@ select {
 .vp-cross,
 .vp-halo-ring,
 .vp-halo-cross,
-.preview {
+.preview,
+.preview-b {
   fill: none;
   pointer-events: none;
 }
@@ -504,10 +500,21 @@ select {
   stroke-dasharray: 14 4 3 4;
 }
 
+/* Linea doble negro/blanco (como "hormigas marchantes"): mismo trazo y
+   patron de guiones, la segunda desplazada un guion completo para que
+   rellene justo los huecos de la primera y el conjunto se lea sobre
+   cualquier fondo. */
 .preview {
-  stroke: var(--focus);
+  stroke: #000;
   stroke-width: 2;
   stroke-dasharray: 5 5;
+}
+
+.preview-b {
+  stroke: #fff;
+  stroke-width: 2;
+  stroke-dasharray: 5 5;
+  stroke-dashoffset: 5;
 }
 
 .vp-cross {

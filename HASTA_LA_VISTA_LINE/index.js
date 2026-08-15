@@ -35,6 +35,7 @@
   var horizonLine = document.getElementById('horizonLine');
   var horizonHalo = document.getElementById('horizonHalo');
   var previewLine = document.getElementById('previewLine');
+  var previewLineB = document.getElementById('previewLineB');
 
   var fileInput = document.getElementById('ifLoadImg');
   var btnAddLine = document.getElementById('btnAddLine');
@@ -636,9 +637,15 @@
       previewLine.setAttribute('y1', state.pending.y);
       previewLine.setAttribute('x2', state.pointerWorld.x);
       previewLine.setAttribute('y2', state.pointerWorld.y);
+      previewLineB.setAttribute('x1', state.pending.x);
+      previewLineB.setAttribute('y1', state.pending.y);
+      previewLineB.setAttribute('x2', state.pointerWorld.x);
+      previewLineB.setAttribute('y2', state.pointerWorld.y);
       previewLine.style.display = '';
+      previewLineB.style.display = '';
     } else {
       previewLine.style.display = 'none';
+      previewLineB.style.display = 'none';
     }
 
     renderReadout(vps);
