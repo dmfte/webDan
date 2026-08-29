@@ -412,7 +412,7 @@ function downloadEntry(entry) {
   if (!entry.outputUrl) return;
   const a = document.createElement('a');
   a.href = entry.outputUrl;
-  a.download = outputFileName(entry.file.webkitRelativePath || entry.file.name);
+  a.download = entry.file.webkitRelativePath || entry.file.name;
   a.click();
 }
 
@@ -437,7 +437,7 @@ downloadAllBtn.addEventListener('click', async () => {
   downloadAllBtn.textContent = 'Generando ZIP…';
   try {
     const zipBlob = await createZipBlob(
-      doneEntries.map((e) => ({ name: zipEntryFileName(e.file.webkitRelativePath || e.file.name), blob: e.outputBlob }))
+      doneEntries.map((e) => ({ name: e.file.webkitRelativePath || e.file.name, blob: e.outputBlob }))
     );
     const a = document.createElement('a');
     a.href = URL.createObjectURL(zipBlob);
@@ -535,16 +535,3 @@ function formatBytes(bytes) {
   return `${val.toFixed(val < 10 ? 2 : 1)} ${units[i]}`;
 }
 
-function outputFileName(originalName) {
-  const base = originalName.replace(/\.[^./\\]+$/, '');
-  return `${base}-comprimido.jpg`;
-}
-
-// The zip itself already signals "these are the compressed outputs" (its
-// own filename), so entries inside keep their original name — just with
-// the extension corrected to .jpg, since output is always JPG regardless
-// of input format.
-function zipEntryFileName(originalName) {
-  const base = originalName.replace(/\.[^./\\]+$/, '');
-  return `${base}.jpg`;
-}
