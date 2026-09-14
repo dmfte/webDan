@@ -24,6 +24,8 @@ let pdfDoc = null;
 let pdfPages = [];
 let generatedPdfBytes = null;
 let currentRenderTask = null;
+let isGenerating = false;
+let needsGeneration = true; // true whenever current inputs haven't been generated yet
 
 // ============================================
 // DOM ELEMENTS
@@ -55,7 +57,8 @@ const elements = {
     controlPanelOverlay: document.getElementById('controlPanelOverlay'),
     bookletCounter: document.getElementById('bookletCounter'),
     previewCanvas: document.getElementById('previewCanvas'),
-    previewPlaceholder: document.getElementById('previewPlaceholder')
+    previewPlaceholder: document.getElementById('previewPlaceholder'),
+    generatingOverlay: document.getElementById('generatingOverlay')
 };
 
 // ============================================
@@ -74,6 +77,41 @@ function init() {
     elements.controlPanelOverlay.addEventListener('click', toggleMobileMenu);
 
     elements.signaturesPerBooklet.addEventListener('input', updateBookletCounter);
+
+    [
+        elements.pageSize, elements.signaturesPerBooklet, elements.gutterSpace,
+        elements.marginH, elements.marginV, elements.scale, elements.scissorLines
+    ].forEach(el => {
+        el.addEventListener('input', markDirty);
+        el.addEventListener('change', markDirty);
+    });
+
+    updateButtonStates();
+}
+
+// ============================================
+// GENERATE/DOWNLOAD BUTTON STATE
+// ============================================
+function markDirty() {
+    if (!needsGeneration) {
+        needsGeneration = true;
+        updateButtonStates();
+    }
+}
+
+function updateButtonStates() {
+    const hasPdf = !!pdfDoc && pdfPages.length > 0;
+    elements.generateBtn.disabled = isGenerating || !hasPdf || !needsGeneration;
+    const downloadDisabled = isGenerating || needsGeneration;
+    elements.downloadBtn.disabled = downloadDisabled;
+    elements.downloadBtnDesktop.disabled = downloadDisabled;
+}
+
+function showPlaceholderMessage(text, isError = false) {
+    elements.previewCanvas.classList.remove('visible');
+    elements.previewPlaceholder.textContent = text;
+    elements.previewPlaceholder.classList.remove('hidden');
+    elements.previewPlaceholder.classList.toggle('error', isError);
 }
 
 // ============================================
@@ -94,26 +132,25 @@ async function handleFileSelect(event) {
 
         updateBookletCounter();
         generatedPdfBytes = null;
+        needsGeneration = true;
+        updateButtonStates();
 
-        elements.previewCanvas.classList.remove('visible');
-        elements.previewPlaceholder.classList.remove('hidden');
-        elements.previewPlaceholder.textContent = 'PDF cargado. Haga clic en "Generar Cuadernillo" para procesar.';
+        showPlaceholderMessage('PDF cargado. Haga clic en "Generar Cuadernillo" para procesar.');
     } catch (error) {
         console.error('Error loading PDF:', error);
-        alert('Error al cargar el PDF. Por favor, intente con otro archivo.');
+        showPlaceholderMessage('Error al cargar el PDF. Por favor, intente con otro archivo.', true);
     }
 }
 
 async function generateAndPreview() {
-    if (!pdfDoc || !pdfPages.length) {
-        alert('Por favor, cargue un PDF primero.');
-        return;
-    }
-
-    elements.previewPlaceholder.textContent = 'Generando cuadernillo...';
-    elements.previewPlaceholder.classList.remove('hidden');
-    elements.previewCanvas.classList.remove('visible');
+    isGenerating = true;
+    updateButtonStates();
+    elements.generatingOverlay.classList.add('visible');
     elements.controlPanel.classList.remove('open');
+
+    // Yield to the browser so it actually paints the overlay before the
+    // (synchronous-under-the-hood) PDF generation loop blocks the main thread.
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
     try {
         const result = await generatePDF();
@@ -121,10 +158,14 @@ async function generateAndPreview() {
             throw new Error('PDF generation returned empty result');
         }
         await renderPreview();
+        needsGeneration = false;
     } catch (error) {
         console.error('Error generating booklet:', error);
-        alert('Error al generar el cuadernillo: ' + error.message);
-        elements.previewPlaceholder.textContent = 'Error al generar. Intente de nuevo.';
+        showPlaceholderMessage('Error al generar el cuadernillo: ' + error.message, true);
+    } finally {
+        isGenerating = false;
+        elements.generatingOverlay.classList.remove('visible');
+        updateButtonStates();
     }
 }
 
@@ -432,11 +473,6 @@ function renderSimplePreview() {
 // DOWNLOAD
 // ============================================
 function downloadPDF() {
-    if (!generatedPdfBytes || generatedPdfBytes.length === 0) {
-        alert('Por favor, genere el cuadernillo primero haciendo clic en "Generar Cuadernillo".');
-        return;
-    }
-
     const blob = new Blob([generatedPdfBytes], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

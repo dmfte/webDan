@@ -23,7 +23,7 @@
         <div class="mobile-buttons">
             <label for="pdfInput" class="btn btn-load">Cargar PDF</label>
             <input type="file" id="pdfInput" accept="application/pdf" style="display: none;">
-            <button class="btn btn-download" id="downloadBtn">Descargar PDF</button>
+            <button class="btn btn-download" id="downloadBtn" disabled>Descargar PDF</button>
         </div>
         <button class="hamburger" id="hamburgerBtn">
             <span></span>
@@ -40,6 +40,10 @@
             <div class="preview-placeholder" id="previewPlaceholder">
                 Cargue un PDF para ver la vista previa
             </div>
+            <div class="generating-overlay" id="generatingOverlay">
+                <div class="spinner"></div>
+                <div class="generating-overlay-text">Generando cuadernillo...</div>
+            </div>
         </div>
 
         <!-- Control panel (desktop sidebar / mobile menu) -->
@@ -50,7 +54,7 @@
                 <div class="desktop-buttons">
                     <label for="pdfInputDesktop" class="btn btn-load">Cargar PDF</label>
                     <input type="file" id="pdfInputDesktop" accept="application/pdf" style="display: none;">
-                    <button class="btn btn-download" id="downloadBtnDesktop">Descargar PDF</button>
+                    <button class="btn btn-download" id="downloadBtnDesktop" disabled>Descargar PDF</button>
                 </div>
 
                 <!-- Page size -->
