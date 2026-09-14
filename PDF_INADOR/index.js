@@ -3,12 +3,19 @@
 // ============================================
 const CM_TO_PT = 28.346; // 1 cm = 28.346 points
 const MIN_SCALE = 5; // Minimum scale percentage
-const MAX_SCALE = 50; // Maximum scale percentage (since one signature = 2 pages side by side)
+const MAX_SCALE = 50; // Maximum scale percentage (since one leaf = 2 pages side by side)
 
 const PAGE_SIZES = {
     carta: { width: 8.5 * 72, height: 11 * 72 }, // Letter: 8.5" x 11"
     oficio: { width: 8.5 * 72, height: 13 * 72 }  // Legal variant: 8.5" x 13"
 };
+
+const LABEL_FONT_SIZE = 6;
+const LABEL_INSET = 3; // pt, horizontal offset from the leaf's left edge
+const LABEL_GAP = 3; // pt, vertical gap between the leaf's top edge and the label baseline
+const LABEL_STRIP_HEIGHT = 12; // pt, reserved above each leaf (outside its trim area) for the label
+const LABEL_COLOR_RGB = [0.55, 0.55, 0.55];
+const CUT_LINE_COLOR_RGB = [0.3, 0.3, 0.3];
 
 // ============================================
 // STATE
@@ -55,33 +62,18 @@ const elements = {
 // INITIALIZATION
 // ============================================
 function init() {
-    // File input handlers
     elements.pdfInput.addEventListener('change', handleFileSelect);
     elements.pdfInputDesktop.addEventListener('change', handleFileSelect);
 
-    // Download button handlers
     elements.downloadBtn.addEventListener('click', downloadPDF);
     elements.downloadBtnDesktop.addEventListener('click', downloadPDF);
 
-    // Generate button handler
     elements.generateBtn.addEventListener('click', generateAndPreview);
 
-    // Hamburger menu
     elements.hamburgerBtn.addEventListener('click', toggleMobileMenu);
-
-    // Drawer overlay
     elements.controlPanelOverlay.addEventListener('click', toggleMobileMenu);
 
-    // Update booklet counter when configuration changes
-    [elements.signaturesPerBooklet]
-        .forEach(el => el.addEventListener('input', updateBookletCounter));
-
-    // Ensure number inputs display with correct decimal separator
-    // Force re-assignment to normalize display regardless of locale
-    elements.gutterSpace.value = elements.gutterSpace.value;
-    elements.marginH.value = elements.marginH.value;
-    elements.marginV.value = elements.marginV.value;
-    elements.scale.value = elements.scale.value;
+    elements.signaturesPerBooklet.addEventListener('input', updateBookletCounter);
 }
 
 // ============================================
@@ -100,13 +92,9 @@ async function handleFileSelect(event) {
         pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
         pdfPages = pdfDoc.getPages();
 
-        console.log(`PDF loaded: ${pdfPages.length} pages in sequential order`);
-
-        // Update counter and clear any previous generated PDF
         updateBookletCounter();
         generatedPdfBytes = null;
 
-        // Clear preview
         elements.previewCanvas.classList.remove('visible');
         elements.previewPlaceholder.classList.remove('hidden');
         elements.previewPlaceholder.textContent = 'PDF cargado. Haga clic en "Generar Cuadernillo" para procesar.';
@@ -122,7 +110,6 @@ async function generateAndPreview() {
         return;
     }
 
-    // Show loading state
     elements.previewPlaceholder.textContent = 'Generando cuadernillo...';
     elements.previewPlaceholder.classList.remove('hidden');
     elements.previewCanvas.classList.remove('visible');
@@ -147,271 +134,117 @@ function updateBookletCounter() {
         return;
     }
 
-    const totalPages = pdfPages.length;
-    const signaturesPerBookletCount = parseInt(elements.signaturesPerBooklet.value) || 1;
-    const pagesPerBooklet = calculatePagesPerBooklet(signaturesPerBookletCount);
-    const effectivePagesPerBooklet = Math.min(pagesPerBooklet, totalPages);
-    const numBooklets = Math.ceil(totalPages / effectivePagesPerBooklet);
+    const leavesPerQuire = getLeavesPerQuire();
+    const pagesPerQuire = leavesPerQuire * 4;
+    const numQuires = Math.ceil(pdfPages.length / pagesPerQuire);
 
-    elements.bookletCounter.textContent = numBooklets;
+    elements.bookletCounter.textContent = numQuires;
+}
+
+function getLeavesPerQuire() {
+    return Math.max(1, parseInt(elements.signaturesPerBooklet.value) || 1);
 }
 
 // ============================================
-// SIGNATURE CALCULATION
+// LAYOUT CALCULATION
+// A "leaf" is one physical sheet: two source pages side by side (with a
+// gutter between them), printed recto on one side and verso on the other.
+// Several leaves are packed onto one output sheet to save paper.
 // ============================================
-function calculateSignatureLayout() {
+function calculateLayout() {
     const pageSize = PAGE_SIZES[elements.pageSize.value];
     const scale = parseFloat(elements.scale.value) / 100;
-    const gutterCm = parseFloat(elements.gutterSpace.value) || 0;
-    const marginHCm = parseFloat(elements.marginH.value) || 0;
-    const marginVCm = parseFloat(elements.marginV.value) || 0;
+    const gutterPt = (parseFloat(elements.gutterSpace.value) || 0) * CM_TO_PT;
+    const marginHPt = (parseFloat(elements.marginH.value) || 0) * CM_TO_PT;
+    const marginVPt = (parseFloat(elements.marginV.value) || 0) * CM_TO_PT;
 
-    const gutterPt = gutterCm * CM_TO_PT;
-    const marginHPt = marginHCm * CM_TO_PT;
-    const marginVPt = marginVCm * CM_TO_PT;
+    const sourcePage = pdfPages[0];
+    const leafPageWidth = sourcePage.getWidth() * scale;
+    const leafPageHeight = sourcePage.getHeight() * scale;
 
-    // Get original page dimensions (assume first page)
-    const originalPage = pdfPages[0];
-    const originalWidth = originalPage.getWidth();
-    const originalHeight = originalPage.getHeight();
+    // One leaf = 2 source pages side by side + the gutter between them
+    const leafWidth = leafPageWidth * 2 + gutterPt;
+    const leafHeight = leafPageHeight;
 
-    // Calculate scaled page dimensions
-    const scaledPageWidth = originalWidth * scale;
-    const scaledPageHeight = originalHeight * scale;
+    const availableWidth = pageSize.width - 2 * marginHPt;
+    const availableHeight = pageSize.height - 2 * marginVPt;
 
-    // One signature = 2 pages side by side + gutter between them
-    const signatureWidth = scaledPageWidth * 2 + gutterPt;
-    const signatureHeight = scaledPageHeight;
+    // Each row reserves LABEL_STRIP_HEIGHT above the leaf's trim area for its label,
+    // so the label never lands inside the cut lines even when leaves are packed tight.
+    const cellHeight = leafHeight + LABEL_STRIP_HEIGHT;
 
-    // Available space on output page
-    const availableWidth = pageSize.width - (2 * marginHPt);
-    const availableHeight = pageSize.height - (2 * marginVPt);
+    const cols = Math.max(1, Math.floor(availableWidth / leafWidth));
+    const rows = Math.max(1, Math.floor(availableHeight / cellHeight));
+    const leavesPerSheet = cols * rows;
 
-    // Calculate how many signatures fit per page
-    const signaturesPerRow = Math.floor(availableWidth / signatureWidth) || 1;
-    const signaturesPerColumn = Math.floor(availableHeight / signatureHeight) || 1;
-    const signaturesPerOutputPage = signaturesPerRow * signaturesPerColumn;
-
-    // Calculate spacing between signatures (for cut guides)
-    const totalSignatureWidth = signatureWidth * signaturesPerRow;
-    const remainingWidth = availableWidth - totalSignatureWidth;
-    const spacingX = signaturesPerRow > 1 ? remainingWidth / (signaturesPerRow - 1) : 0;
-
-    const totalSignatureHeight = signatureHeight * signaturesPerColumn;
-    const remainingHeight = availableHeight - totalSignatureHeight;
-    const spacingY = signaturesPerColumn > 1 ? remainingHeight / (signaturesPerColumn - 1) : 0;
+    // Spread any leftover space evenly between leaves (for cut/visual clarity)
+    const gapX = cols > 1 ? (availableWidth - leafWidth * cols) / (cols - 1) : 0;
+    const gapY = rows > 1 ? (availableHeight - cellHeight * rows) / (rows - 1) : 0;
 
     return {
-        pageSize,
-        scale,
-        gutterPt,
-        marginHPt,
-        marginVPt,
-        scaledPageWidth,
-        scaledPageHeight,
-        signatureWidth,
-        signatureHeight,
-        signaturesPerRow,
-        signaturesPerColumn,
-        signaturesPerOutputPage,
-        spacingX,
-        spacingY
+        pageSize, scale, gutterPt, marginHPt, marginVPt,
+        leafPageWidth, leafPageHeight, leafWidth, leafHeight,
+        cols, rows, leavesPerSheet, gapX, gapY
     };
 }
 
 // ============================================
-// BOOKLET IMPOSITION
+// IMPOSITION (quires and leaves)
 // ============================================
 
 /**
- * Step 1: Compute pages_per_booklet
- * pages_per_booklet = signaturesPerBooklet × 4
+ * Splits the source page indices into quires (signatures) of
+ * `leavesPerQuire * 4` pages each. The final quire is padded with `null`
+ * (blank) slots up to the next multiple of 4 if the source doesn't divide
+ * evenly - blanks land on the innermost leaf(s) once imposed, never on a
+ * cover.
  */
-function calculatePagesPerBooklet(signaturesPerBooklet) {
-    return signaturesPerBooklet * 4;
-}
+function buildQuires(totalPages, leavesPerQuire) {
+    const pagesPerQuire = leavesPerQuire * 4;
+    const quires = [];
 
-/**
- * Step 2: Create total_booklets array
- * Groups consecutive page numbers by pages_per_booklet
- */
-function createTotalBooklets(totalPages, pagesPerBooklet) {
-    const booklets = [];
-    let currentPage = 0;
+    for (let start = 0; start < totalPages; start += pagesPerQuire) {
+        const end = Math.min(start + pagesPerQuire, totalPages);
+        const actualCount = end - start;
+        const paddedCount = Math.ceil(actualCount / 4) * 4;
 
-    while (currentPage < totalPages) {
-        const bookletPages = [];
-        const endPage = Math.min(currentPage + pagesPerBooklet, totalPages);
-
-        for (let i = currentPage; i < endPage; i++) {
-            bookletPages.push(i); // 0-indexed page numbers
+        const localPages = [];
+        for (let i = 0; i < paddedCount; i++) {
+            localPages.push(i < actualCount ? start + i : null);
         }
-
-        booklets.push(bookletPages);
-        currentPage = endPage;
+        quires.push(localPages);
     }
 
-    return booklets;
+    return quires;
 }
 
 /**
- * Step 3: Create paired_pages structure
- * Groups pages into pairs within each booklet using the pairing logic
- *
- * Pairing logic (b = booklet size):
- * Pair index alternates:
- * - Even pair index (0, 2, 4, ...): [b - 1 - pairIdx, pairIdx]
- * - Odd pair index (1, 3, 5, ...): [pairIdx, b - 1 - pairIdx]
+ * Standard saddle-stitch imposition for a quire of N pages (N a multiple of
+ * 4), 0-indexed. For leaf i (0 = outermost, counting inward):
+ *   recto (front) = [N - 2i - 1, 2i]       (left, right)
+ *   verso (back)  = [2i + 1, N - 2i - 2]   (left, right)
+ * Folding the whole stack in half and reading front-to-back yields pages
+ * 0, 1, 2, ... N-1 in order.
  */
-function createPairedPages(totalBooklets) {
-    const pairedBooklets = [];
+function buildLeaves(quires) {
+    const leaves = [];
 
-    for (const booklet of totalBooklets) {
-        const b = booklet.length;
-        const pairs = [];
+    quires.forEach((localPages, quireIdx) => {
+        const N = localPages.length;
+        const leafCount = N / 4;
 
-        // If booklet has odd size, append the next page number to complete the pair
-        let bookletSize = b;
-        if (b % 2 === 1) {
-            bookletSize = b + 1;
+        for (let i = 0; i < leafCount; i++) {
+            leaves.push({
+                quireNumber: quireIdx + 1,
+                leafNumber: i + 1,
+                leavesInQuire: leafCount,
+                recto: [localPages[N - 2 * i - 1], localPages[2 * i]],
+                verso: [localPages[2 * i + 1], localPages[N - 2 * i - 2]]
+            });
         }
+    });
 
-        // Calculate number of pairs
-        const numPairs = bookletSize / 2;
-
-        // Pairing logic
-        for (let pairIdx = 0; pairIdx < numPairs; pairIdx++) {
-            let pair;
-
-            if (pairIdx % 2 === 0) {
-                // Even pair index: [b - 1 - pairIdx, pairIdx]
-                const left = bookletSize - 1 - pairIdx;
-                const right = pairIdx;
-                pair = [
-                    left < b ? booklet[left] : bookletSize - 1,
-                    right < b ? booklet[right] : bookletSize - 1
-                ];
-            } else {
-                // Odd pair index: [pairIdx, b - 1 - pairIdx]
-                const left = pairIdx;
-                const right = bookletSize - 1 - pairIdx;
-                pair = [
-                    left < b ? booklet[left] : bookletSize - 1,
-                    right < b ? booklet[right] : bookletSize - 1
-                ];
-            }
-            pairs.push(pair);
-        }
-
-        pairedBooklets.push(pairs);
-    }
-
-    return pairedBooklets;
-}
-
-/**
- * Step 4: Create signatures_per_booklet structure
- * Groups every two pairs into one signature
- */
-function createSignaturesPerBooklet(pairedPages) {
-    const signaturesBooklets = [];
-
-    for (const pairs of pairedPages) {
-        const signatures = [];
-
-        for (let i = 0; i < pairs.length; i += 2) {
-            const signature = [];
-            signature.push(pairs[i]);
-            if (i + 1 < pairs.length) {
-                signature.push(pairs[i + 1]);
-            }
-            signatures.push(signature);
-        }
-
-        signaturesBooklets.push(signatures);
-    }
-
-    return signaturesBooklets;
-}
-
-/**
- * Step 5: Create signatures_per_booklet_front_and_back structure
- * Each signature stores: first pair → page_front, second pair → page_back
- */
-function createSignaturesFrontAndBack(signaturesPerBooklet) {
-    const result = [];
-
-    for (let bookletIdx = 0; bookletIdx < signaturesPerBooklet.length; bookletIdx++) {
-        const signatures = signaturesPerBooklet[bookletIdx];
-        const bookletObj = {};
-        const bookletName = `booklet${bookletIdx + 1}`;
-        const signaturesArray = [];
-
-        for (let sigIdx = 0; sigIdx < signatures.length; sigIdx++) {
-            const signature = signatures[sigIdx];
-            const signatureName = `signature${sigIdx + 1}`;
-            const signatureObj = {};
-
-            // First pair → page_front
-            if (signature[0]) {
-                signatureObj.page_front = signature[0];
-            }
-
-            // Second pair → page_back
-            if (signature[1]) {
-                signatureObj.page_back = signature[1];
-            }
-
-            signaturesArray.push({ [signatureName]: signatureObj });
-        }
-
-        bookletObj[bookletName] = signaturesArray;
-        result.push(bookletObj);
-    }
-
-    return result;
-}
-
-/**
- * Main function to get page order with new structure
- *
- * This function implements the complete booklet imposition algorithm:
- * 1. Computes pages_per_booklet based on signatures per booklet
- * 2. Splits the PDF into booklets
- * 3. Creates page pairs with the correct ordering for printing
- * 4. Groups pairs into signatures
- * 5. Separates signatures into front and back pages
- *
- * @param {number} totalPages - Total number of pages in the original PDF
- * @param {number} signaturesPerBookletCount - Number of signatures per booklet (from UI)
- * @returns {Object} Object containing all intermediate structures and final front/back layout
- */
-function getPageOrder(totalPages, signaturesPerBookletCount) {
-    // Step 1: Compute pages_per_booklet
-    const pagesPerBooklet = calculatePagesPerBooklet(signaturesPerBookletCount);
-
-    // Ensure pages_per_booklet doesn't exceed total page count
-    const effectivePagesPerBooklet = Math.min(pagesPerBooklet, totalPages);
-
-    // Step 2: Create total_booklets
-    const totalBooklets = createTotalBooklets(totalPages, effectivePagesPerBooklet);
-
-    // Step 3: Create paired_pages
-    const pairedPages = createPairedPages(totalBooklets);
-
-    // Step 4: Create signatures_per_booklet
-    const signaturesPerBooklet = createSignaturesPerBooklet(pairedPages);
-
-    // Step 5: Create signatures_per_booklet_front_and_back
-    const signaturesFrontAndBack = createSignaturesFrontAndBack(signaturesPerBooklet);
-    
-    return {
-        pagesPerBooklet: effectivePagesPerBooklet,
-        totalBooklets,
-        pairedPages,
-        signaturesPerBooklet,
-        signaturesFrontAndBack
-    };
+    return leaves;
 }
 
 // ============================================
@@ -420,76 +253,59 @@ function getPageOrder(totalPages, signaturesPerBookletCount) {
 async function generatePDF() {
     if (!pdfDoc || !pdfPages.length) return null;
 
-    const layout = calculateSignatureLayout();
-    const totalPages = pdfPages.length;
-    const signaturesPerBookletCount = parseInt(elements.signaturesPerBooklet.value) || 1;
+    const layout = calculateLayout();
+    const leavesPerQuire = getLeavesPerQuire();
+    const quires = buildQuires(pdfPages.length, leavesPerQuire);
+    const leaves = buildLeaves(quires);
+    const showCutLines = elements.scissorLines.checked;
 
-    const pageOrderResult = getPageOrder(totalPages, signaturesPerBookletCount);
-    const { signaturesFrontAndBack } = pageOrderResult;
-
-    // Create new PDF document
     const outputPdf = await PDFLib.PDFDocument.create();
+    const labelFont = await outputPdf.embedFont(PDFLib.StandardFonts.Helvetica);
 
-    // Flatten all signatures from all booklets
-    const allSignatures = [];
-    for (const bookletObj of signaturesFrontAndBack) {
-        const bookletName = Object.keys(bookletObj)[0];
-        const signaturesArray = bookletObj[bookletName];
-
-        for (const signatureObj of signaturesArray) {
-            const signatureName = Object.keys(signatureObj)[0];
-            const signatureData = signatureObj[signatureName];
-            allSignatures.push(signatureData);
+    const embedCache = new Map();
+    async function getEmbeddedPage(sourceIdx) {
+        if (sourceIdx === null) return null;
+        if (!embedCache.has(sourceIdx)) {
+            const [copiedPage] = await outputPdf.copyPages(pdfDoc, [sourceIdx]);
+            embedCache.set(sourceIdx, await outputPdf.embedPage(copiedPage));
         }
+        return embedCache.get(sourceIdx);
     }
 
-    // Calculate how many signatures fit per output page
-    const signaturesPerOutputPage = layout.signaturesPerOutputPage;
-    const totalSignatures = allSignatures.length;
-    const totalOutputPages = Math.ceil(totalSignatures / signaturesPerOutputPage);
+    const leavesPerSheet = layout.leavesPerSheet;
+    const totalSheets = Math.ceil(leaves.length / leavesPerSheet);
 
-    // Process each output page
-    for (let outputPageIdx = 0; outputPageIdx < totalOutputPages; outputPageIdx++) {
-        // Create front page
+    for (let sheetIdx = 0; sheetIdx < totalSheets; sheetIdx++) {
         const frontPage = outputPdf.addPage([layout.pageSize.width, layout.pageSize.height]);
-
-        // Create back page
         const backPage = outputPdf.addPage([layout.pageSize.width, layout.pageSize.height]);
 
-        // Determine which signatures go on this output page
-        const startSigIdx = outputPageIdx * signaturesPerOutputPage;
-        const endSigIdx = Math.min(startSigIdx + signaturesPerOutputPage, totalSignatures);
+        const startIdx = sheetIdx * leavesPerSheet;
+        const endIdx = Math.min(startIdx + leavesPerSheet, leaves.length);
 
-        // Place signatures on this output page
-        for (let sigIdx = startSigIdx; sigIdx < endSigIdx; sigIdx++) {
-            const signature = allSignatures[sigIdx];
-            const localSigIdx = sigIdx - startSigIdx;
+        for (let li = startIdx; li < endIdx; li++) {
+            const leaf = leaves[li];
+            const localIdx = li - startIdx;
+            const row = Math.floor(localIdx / layout.cols);
+            const col = localIdx % layout.cols;
 
-            const row = Math.floor(localSigIdx / layout.signaturesPerRow);
-            const col = localSigIdx % layout.signaturesPerRow;
+            const x = layout.marginHPt + col * (layout.leafWidth + layout.gapX);
+            const rowCellHeight = layout.leafHeight + LABEL_STRIP_HEIGHT;
+            const y = layout.pageSize.height - layout.marginVPt - (row + 1) * rowCellHeight - row * layout.gapY;
 
-            // Calculate position for this signature on the front page
-            const x = layout.marginHPt + col * (layout.signatureWidth + layout.spacingX);
-            const y = layout.pageSize.height - layout.marginVPt - (row + 1) * layout.signatureHeight - row * layout.spacingY;
+            // Back side is mirrored horizontally: duplex, flip on long edge
+            const backX = layout.pageSize.width - x - layout.leafWidth;
 
-            // Draw front pages (page_front)
-            if (signature.page_front) {
-                await drawPagePair(outputPdf, frontPage, signature.page_front, x, y, layout);
+            await drawLeafSide(frontPage, leaf.recto, x, y, layout, getEmbeddedPage);
+            await drawLeafSide(backPage, leaf.verso, backX, y, layout, getEmbeddedPage);
+
+            const label = `Q${leaf.quireNumber}·${leaf.leafNumber}/${leaf.leavesInQuire}`;
+            drawLeafLabel(frontPage, label, x, y, layout, labelFont);
+            drawLeafLabel(backPage, label, backX, y, layout, labelFont);
+
+            if (showCutLines) {
+                drawCutBorder(frontPage, x, y, layout);
+                drawCutBorder(backPage, backX, y, layout);
             }
-
-            // Draw back pages (page_back) - mirrored horizontally for duplex printing
-            if (signature.page_back) {
-                // Calculate mirrored X position for duplex printing
-                // When paper is flipped, left becomes right
-                const backX = layout.pageSize.width - x - layout.signatureWidth;
-                await drawPagePair(outputPdf, backPage, signature.page_back, backX, y, layout);
-            }
-        }
-
-        // Draw scissor lines if enabled
-        if (elements.scissorLines.checked) {
-            drawScissorLines(frontPage, layout, endSigIdx - startSigIdx, false);
-            drawScissorLines(backPage, layout, endSigIdx - startSigIdx, true);
         }
     }
 
@@ -498,86 +314,44 @@ async function generatePDF() {
 }
 
 /**
- * Draws a pair of pages (one signature side) on the output page
- *
- * @param {Object} outputPdf - The output PDF document
- * @param {Object} page - The target page (front or back)
- * @param {Array} pageNumbers - [leftPageIdx, rightPageIdx] (0-indexed)
- * @param {number} x - X position for the signature
- * @param {number} y - Y position for the signature
- * @param {Object} layout - Layout configuration
+ * Draws one side (recto or verso) of a leaf: two source pages side by side.
+ * `pagePair` entries are absolute source page indices, or null for a blank.
  */
-async function drawPagePair(outputPdf, page, pageNumbers, x, y, layout) {
-    const [leftPageIdx, rightPageIdx] = pageNumbers;
+async function drawLeafSide(page, pagePair, x, y, layout, getEmbeddedPage) {
+    const [leftIdx, rightIdx] = pagePair;
 
-    // Draw left page
-    if (leftPageIdx < pdfPages.length) {
-        await embedAndDrawPage(outputPdf, page, leftPageIdx, x, y, layout);
+    const leftEmbed = await getEmbeddedPage(leftIdx);
+    if (leftEmbed) {
+        page.drawPage(leftEmbed, { x, y, width: layout.leafPageWidth, height: layout.leafPageHeight });
     }
 
-    // Draw right page (offset by one page width + gutter)
-    const rightX = x + layout.scaledPageWidth + layout.gutterPt;
-    if (rightPageIdx < pdfPages.length) {
-        await embedAndDrawPage(outputPdf, page, rightPageIdx, rightX, y, layout);
+    const rightEmbed = await getEmbeddedPage(rightIdx);
+    if (rightEmbed) {
+        const rightX = x + layout.leafPageWidth + layout.gutterPt;
+        page.drawPage(rightEmbed, { x: rightX, y, width: layout.leafPageWidth, height: layout.leafPageHeight });
     }
 }
 
-/**
- * Embeds a page from the source PDF and draws it on the target page
- *
- * @param {Object} outputPdf - The output PDF document
- * @param {Object} targetPage - The target page to draw on
- * @param {number} sourcePageIdx - Index of the source page (0-indexed, based on actual position in PDF)
- * @param {number} x - X position
- * @param {number} y - Y position
- * @param {Object} layout - Layout configuration with scaled dimensions
- */
-async function embedAndDrawPage(outputPdf, targetPage, sourcePageIdx, x, y, layout) {
-    // Validate the page index
-    if (sourcePageIdx >= pdfPages.length) {
-        console.warn(`Page index ${sourcePageIdx} is out of bounds (total pages: ${pdfPages.length})`);
-        return;
-    }
-
-    // Use copyPages to ensure we copy pages by their actual index position in the array
-    // This guarantees we use the sequential page order, not embedded page numbers
-    const [copiedPage] = await outputPdf.copyPages(pdfDoc, [sourcePageIdx]);
-    const embeddedPage = await outputPdf.embedPage(copiedPage);
-
-    targetPage.drawPage(embeddedPage, {
-        x: x,
-        y: y,
-        width: layout.scaledPageWidth,
-        height: layout.scaledPageHeight
+function drawLeafLabel(page, text, x, y, layout, font) {
+    // Sits in the reserved strip above the leaf's top edge, outside its trim area.
+    page.drawText(text, {
+        x: x + LABEL_INSET,
+        y: y + layout.leafHeight + LABEL_GAP,
+        size: LABEL_FONT_SIZE,
+        font,
+        color: PDFLib.rgb(...LABEL_COLOR_RGB)
     });
 }
 
-function drawScissorLines(page, layout, numSignatures, mirrorHorizontal = false) {
-    // Draw a border around each signature on this page
-    for (let localSigIdx = 0; localSigIdx < numSignatures; localSigIdx++) {
-        const row = Math.floor(localSigIdx / layout.signaturesPerRow);
-        const col = localSigIdx % layout.signaturesPerRow;
-
-        // Calculate position for this signature
-        let x = layout.marginHPt + col * (layout.signatureWidth + layout.spacingX);
-        const y = layout.pageSize.height - layout.marginVPt - (row + 1) * layout.signatureHeight - row * layout.spacingY;
-
-        // Mirror X position for back pages (duplex printing)
-        if (mirrorHorizontal) {
-            x = layout.pageSize.width - x - layout.signatureWidth;
-        }
-
-        // Draw rectangle border around the signature
-        page.drawRectangle({
-            x: x,
-            y: y,
-            width: layout.signatureWidth,
-            height: layout.signatureHeight,
-            borderColor: PDFLib.rgb(0.3, 0.3, 0.3),
-            borderWidth: 1,
-            borderDashArray: [4, 2]
-        });
-    }
+function drawCutBorder(page, x, y, layout) {
+    page.drawRectangle({
+        x, y,
+        width: layout.leafWidth,
+        height: layout.leafHeight,
+        borderColor: PDFLib.rgb(...CUT_LINE_COLOR_RGB),
+        borderWidth: 1,
+        borderDashArray: [4, 2]
+    });
 }
 
 // ============================================
@@ -586,32 +360,26 @@ function drawScissorLines(page, layout, numSignatures, mirrorHorizontal = false)
 async function renderPreview() {
     if (!generatedPdfBytes) return;
 
-    // Cancel any ongoing render task
     if (currentRenderTask) {
         currentRenderTask.cancel();
         currentRenderTask = null;
     }
 
     try {
-        // Configure PDF.js worker
         if (typeof pdfjsLib !== 'undefined') {
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         }
 
-        // Load the generated PDF with PDF.js
-        // IMPORTANT: Pass a COPY so PDF.js doesn't consume our original data
+        // Pass a COPY so PDF.js doesn't consume our original data
         const loadingTask = pdfjsLib.getDocument({ data: generatedPdfBytes.slice() });
         const pdf = await loadingTask.promise;
 
-        // Get first page
         const page = await pdf.getPage(1);
         const viewport = page.getViewport({ scale: 1.0 });
 
-        // Prepare canvas
         const canvas = elements.previewCanvas;
         const context = canvas.getContext('2d');
 
-        // Calculate scale to fit preview area
         const previewContainer = elements.previewCanvas.parentElement;
         const maxWidth = previewContainer.clientWidth * 0.9;
         const maxHeight = previewContainer.clientHeight * 0.9;
@@ -619,32 +387,22 @@ async function renderPreview() {
 
         const scaledViewport = page.getViewport({ scale });
 
-        // Set canvas dimensions
         canvas.width = scaledViewport.width;
         canvas.height = scaledViewport.height;
 
-        // Render PDF page to canvas
-        const renderContext = {
-            canvasContext: context,
-            viewport: scaledViewport
-        };
-
-        currentRenderTask = page.render(renderContext);
+        currentRenderTask = page.render({ canvasContext: context, viewport: scaledViewport });
         await currentRenderTask.promise;
         currentRenderTask = null;
 
-        // Show canvas, hide placeholder
         elements.previewCanvas.classList.add('visible');
         elements.previewPlaceholder.classList.add('hidden');
 
     } catch (error) {
-        // Check if error is due to cancellation
         if (error.name === 'RenderingCancelledException') {
-            return; // Silently ignore cancellation errors
+            return;
         }
 
         console.error('Error rendering preview:', error);
-        // Fallback to simple preview
         renderSimplePreview();
     }
 }
@@ -656,11 +414,9 @@ function renderSimplePreview() {
     canvas.width = 400;
     canvas.height = 300;
 
-    // Draw white background
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw text
     ctx.fillStyle = '#000000';
     ctx.font = '16px Courier New';
     ctx.textAlign = 'center';
@@ -668,7 +424,6 @@ function renderSimplePreview() {
     ctx.font = '12px Courier New';
     ctx.fillText('Descargue el PDF para verlo', canvas.width / 2, canvas.height / 2 + 20);
 
-    // Show canvas, hide placeholder
     elements.previewCanvas.classList.add('visible');
     elements.previewPlaceholder.classList.add('hidden');
 }
