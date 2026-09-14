@@ -1,0 +1,229 @@
+@import url("https://fonts.googleapis.com/css2?family=Bitcount+Single:wght@100..900&display=swap");
+
+.px-outter {
+    /* Use .px-outter in your code to style the container. Use .px-content in your code to style the content. */
+    /* Define these variables in container of the DIV to pixelate:
+    --px-border: 
+    --color-bg: 
+    --color-highlight: 
+    --color-shadow: 
+    --color-border: 
+    */
+    position: relative;
+    display: flex;
+
+    & * {
+        box-sizing: border-box;
+    }
+
+    & .px-inner {
+        position: relative;
+        display: flex;
+        flex: 1;
+        height: 100%;
+        background-color: var(--color-bg);
+        color: var(--color-font);
+        font-size: var(--px-font);
+
+        & .px-content {
+            font-family: "Bitcount Single", system-ui;
+            overflow-y: auto;
+        }
+
+        & span {
+            /* The whole light/shadow comming from any side */
+            position: absolute;
+            background-color: var(--color-highlight);
+
+            &::after,
+            &::before {
+                /* The square that continues the light/shadow */
+                content: "";
+                position: absolute;
+                width: var(--px-border);
+                height: var(--px-border);
+                z-index: 2;
+            }
+
+            &.top,
+            &.bottom {
+                left: var(--px-border);
+                width: calc(100% - (2 * var(--px-border)));
+                height: var(--px-border);
+            }
+
+            &.top {
+                top: 0;
+
+                &::after {
+                    top: var(--px-border);
+                    left: 100%;
+                }
+
+                &::before {
+                    top: var(--px-border);
+                    left: calc(-1 * var(--px-border));
+                }
+            }
+
+            &.bottom {
+                bottom: 0;
+
+                &::after {
+                    bottom: var(--px-border);
+                    left: calc(-1 * var(--px-border));
+                }
+
+                &::before {
+                    top: calc(-1 * var(--px-border));
+                    right: calc(-1 * var(--px-border));
+                }
+            }
+
+            &.left,
+            &.right {
+                top: var(--px-border);
+                width: var(--px-border);
+                height: calc(100% - (2 * var(--px-border)));
+            }
+
+            &.right {
+                right: 0;
+
+                &::after {
+                    top: 100%;
+                    left: calc(-1 * var(--px-border));
+                }
+            }
+
+            &.left {
+                left: 0;
+
+                &::after {
+                    top: calc(-1 * var(--px-border));
+                    right: calc(-1 * var(--px-border));
+                }
+            }
+        }
+
+        /* Classes that changes where the light is comming from */
+        &.northeast {
+            & .top {
+                background-color: var(--color-highlight);
+            }
+
+            & .right {
+                background-color: var(--color-shadow);
+            }
+
+            & .bottom {
+                background-color: var(--color-shadow);
+            }
+
+            & .left {
+                background-color: var(--color-highlight);
+            }
+        }
+
+        &.north {
+            & .top {
+                background-color: var(--color-highlight);
+
+                &::after {
+                    background-color: var(--color-highlight);
+                }
+
+                &::before {
+                    background-color: var(--color-highlight);
+                }
+            }
+
+            & .right {
+                background-color: transparent;
+            }
+
+            & .bottom {
+                background-color: var(--color-shadow);
+
+                &::after {
+                    background-color: var(--color-shadow);
+                }
+
+                &::before {
+                    background-color: var(--color-shadow);
+                }
+            }
+
+            & .left {
+                background-color: transparent;
+            }
+        }
+    }
+
+    & .border-effect {
+        /* Due to the rounded pixelated corner the border has to be shorter than the DIV.
+    That's why a separate element has to simulate the border */
+        position: absolute;
+        background-color: var(--color-border);
+        z-index: 1;
+
+        &::after {
+            content: "";
+            background-color: var(--color-border);
+            position: absolute;
+            width: var(--px-border);
+            height: var(--px-border);
+        }
+
+        &.top,
+        &.bottom {
+            width: calc(100% - (2 * var(--px-border)));
+            height: var(--px-border);
+            left: var(--px-border);
+        }
+
+        &.top {
+            top: calc(-1 * var(--px-border));
+
+            &::after {
+                right: calc(-1 * var(--px-border));
+                top: calc(1 * var(--px-border));
+            }
+        }
+
+        &.bottom {
+            bottom: calc(-1 * var(--px-border));
+
+            &::after {
+                left: calc(-1 * var(--px-border));
+                top: calc(-1 * var(--px-border));
+            }
+        }
+
+        &.left,
+        &.right {
+            top: var(--px-border);
+            bottom: 0;
+            width: var(--px-border);
+            height: calc(100% - (var(--px-border) * 2));
+        }
+
+        &.right {
+            right: calc(-1 * var(--px-border));
+
+            &::after {
+                bottom: calc(-1 * var(--px-border));
+                left: calc(-1 * var(--px-border));
+            }
+        }
+
+        &.left {
+            left: calc(-1 * var(--px-border));
+
+            &::after {
+                top: calc(-1 * var(--px-border));
+                left: calc(1 * var(--px-border));
+            }
+        }
+    }
+}

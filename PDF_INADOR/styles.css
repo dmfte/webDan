@@ -20,113 +20,6 @@ body {
 }
 
 /* ============================================
-   CONTAINER PIXEL EFFECT
-   ============================================ */
-
-.pixel {
-    position: absolute;
-    width: var(--px-border);
-    height: var(--px-border);
-    z-index: 1;
-
-    &.top {
-        top: 0;
-    }
-
-    &.left {
-        left: 0;
-    }
-
-    &.bottom {
-        bottom: 0;
-    }
-
-    &.right {
-        right: 0;
-    }
-}
-
-.outter {
-    --px-border: 6px;
-    --color-bg: #5c94fc;
-    --color-highlight: #89aff4;
-    --color-shadow: #2969d8;
-    --color-font: rgb(20, 40, 70);
-    --px-font: 28px;
-    --color-border: #000;
-    /* --color-border: rgb(5, 15, 35); */
-
-    position: relative;
-    width: 100%;
-    height: 100%;
-
-    & .inner {
-        position: relative;
-        min-width: 100%;
-        min-height: 100%;
-        max-width: 100%;
-        max-height: 100%;
-        background-color: var(--color-bg);
-        color: var(--color-font);
-        font-size: var(--px-font);
-        border-top: var(--px-border) solid var(--color-highlight);
-        border-bottom: 5px solid var(--color-shadow);
-
-        & .pixel.top {
-            background-color: var(--color-highlight);
-        }
-
-        & .pixel.bottom {
-            background-color: var(--color-shadow);
-        }
-    }
-
-    & .border-effect {
-        position: absolute;
-        background-color: var(--color-border);
-        z-index: 10;
-
-        &.top,
-        &.bottom {
-            width: calc(100% - (2 * var(--px-border)));
-            height: var(--px-border);
-            left: var(--px-border);
-        }
-
-        &.top {
-            top: calc(-1 * var(--px-border));
-        }
-
-        &.bottom {
-            bottom: calc(-1 * var(--px-border));
-        }
-
-        &.left,
-        &.right {
-            top: var(--px-border);
-            bottom: 0;
-            width: var(--px-border);
-            height: calc(100% - (var(--px-border) * 2));
-        }
-
-        &.left {
-            left: calc(-1 * var(--px-border));
-        }
-
-        &.right {
-            right: calc(-1 * var(--px-border));
-        }
-    }
-
-    & .pixel {
-        background-color: var(--color-border);
-    }
-}
-
-
-
-
-/* ============================================
    TABS
    ============================================ */
 .tabs-container {
@@ -165,29 +58,30 @@ body {
 /* ============================================
    BOOKLET COUNTER
    ============================================ */
-.booklet-counter {
+.booklet-counter.px-outter {
+
+    --px-border: 10px;
+    --color-bg: #c84b0c;
+    --color-highlight: #f07030;
+    --color-shadow: #a43802;
+    --color-font: #fff;
+    --px-font: 32px;
+    --color-border: #1a1a1a;
+    --px-content-padd: 0px;
+
     position: fixed;
     width: 80px;
     height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 32px;
-    font-weight: bold;
     z-index: 90;
+    /* box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3); */
 
-    & .outter {
-        --color-bg: #c84b0c;
-        --color-shadow: #8f3102;
-        --color-highlight: #d88055;
-        --color-font: #fff;
-
-        & .inner {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-
-        }
+    & .px-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        font-size: 32px;
+        font-weight: bold;
     }
 }
 
@@ -317,14 +211,12 @@ body {
    ============================================ */
 .preview-container {
     flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
     position: relative;
     overflow: hidden;
-
-    * .inner {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
 }
 
 #previewCanvas {
@@ -407,21 +299,15 @@ body {
 }
 
 .control-panel {
-    padding: 10px;
     width: 300px;
+    background-color: #4a7fd8;
+    border-left: 4px solid #1a1a1a;
+    overflow-y: auto;
     display: none;
+}
 
-    & .outter {
-        --color-bg: #4a7fd8;
-        --color-highlight: #7399d9;
-        --color-shadow: #1a50ac;
-
-        & .inner {
-            overflow-y: auto;
-            padding: 20px 5px;
-        }
-    }
-
+.controls-inner {
+    padding: 20px;
 }
 
 .desktop-buttons {
@@ -544,7 +430,7 @@ body {
     }
 
     .preview-container {
-        padding: 10px;
+        padding: 40px;
     }
 
     #previewCanvas {
