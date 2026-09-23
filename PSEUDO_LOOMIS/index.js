@@ -561,14 +561,14 @@ const InputHandler = {
       return 'xNode';
     }
 
-    // Circle (check if near the circumference or inside)
+    // Inside the circle (but outside the nodes): rotate, like turning a dial
     const distFromCenter = Math.hypot(local.x, local.y);
     if (distFromCenter <= radius + strokeWidth) {
-      return 'circle';
+      return 'rotate';
     }
 
-    // Anywhere outside the circle acts as an invisible lever pivoting at its center
-    return 'rotate';
+    // Anywhere outside the circle: drag it (delta-based movement)
+    return 'circle';
   },
 
   /**
@@ -583,8 +583,8 @@ const InputHandler = {
   /**
    * Handle pointer down (mouse or touch)
    * - Clicking on nodes: drag that specific node
-   * - Clicking inside the circle: drag circle using delta movement
-   * - Clicking outside the circle: rotate, as if pivoting an invisible lever at its center
+   * - Clicking inside the circle (outside the nodes): rotate it, like turning a dial
+   * - Clicking outside the circle: drag circle using delta movement
    */
   handlePointerDown(e) {
     if (!AppState.image) return;
@@ -611,7 +611,7 @@ const InputHandler = {
       AppState.interaction.rotateAngleOffset = this.getPointerAngleDeg(pos.x, pos.y) - AppState.circle.rotation;
       this.canvas.classList.add('rotating');
     } else {
-      // Drag circle from anywhere inside it (delta-based movement)
+      // Drag circle from anywhere outside it (delta-based movement)
       AppState.interaction.isDraggingCircle = true;
       AppState.interaction.lastPointerPos = { x: pos.x, y: pos.y };
       this.canvas.classList.add('dragging-circle');
@@ -621,8 +621,8 @@ const InputHandler = {
   /**
    * Handle touch start
    * - Touching nodes: drag that specific node
-   * - Touching inside the circle: drag circle using delta movement
-   * - Touching outside the circle: rotate, as if pivoting an invisible lever at its center
+   * - Touching inside the circle (outside the nodes): rotate it, like turning a dial
+   * - Touching outside the circle: drag circle using delta movement
    */
   handleTouchStart(e) {
     if (!AppState.image) return;
@@ -656,7 +656,7 @@ const InputHandler = {
       AppState.interaction.isRotating = true;
       AppState.interaction.rotateAngleOffset = this.getPointerAngleDeg(pos.x, pos.y) - AppState.circle.rotation;
     } else {
-      // Drag circle from anywhere inside it (delta-based movement)
+      // Drag circle from anywhere outside it (delta-based movement)
       AppState.interaction.isDraggingCircle = true;
       AppState.interaction.lastPointerPos = { x: pos.x, y: pos.y };
     }
