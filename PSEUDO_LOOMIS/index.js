@@ -59,7 +59,9 @@ const AppState = {
     yNodeOffset: { position: 0, slide: 0 },  // Difference between raw pointer value and node value at grab time
     xNodeOffset: { position: 0, slide: 0 },
     hoverTarget: null,  // 'circle', 'yNode', 'xNode', 'rotate', or null
-    lastPointerPos: { x: 0, y: 0 }  // For delta-based circle dragging
+    lastPointerPos: { x: 0, y: 0 },  // For delta-based circle dragging
+    isPinching: false,
+    pinchLastDist: 0  // Distance between the two touches as of the last pinch update
   },
 
   // Overlay visibility toggles
@@ -72,7 +74,10 @@ const AppState = {
   display: {
     scale: 1,
     offsetX: 0,
-    offsetY: 0
+    offsetY: 0,
+    zoom: 1,   // Pinch-zoom level applied to .canvas-wrapper (CSS transform, not canvas resolution)
+    panX: 0,
+    panY: 0
   }
 };
 
@@ -97,7 +102,7 @@ const RANGE_SLIDER_EMPTY = '#DCA06D';
 // ========================================
 // CALIBRATION
 // ========================================
-const NODE_RADIUS = 50;  // <- CALIBRATE: node (handle) radius in pixels
+const NODE_RADIUS = 45;  // <- CALIBRATE: node (handle) radius in pixels
 const MOBILE_BREAKPOINT = 749;  // <- CALIBRATE: max-width for mobile mode (matches CSS)
 
 const DRAG_CONFIG = {
@@ -105,6 +110,8 @@ const DRAG_CONFIG = {
 };
 
 const ROTATION_LIMIT_DEG = 90;  // <- CALIBRATE: max |rotation| in either direction
+
+const ZOOM_LIMITS = { min: 1, max: 4 };  // <- CALIBRATE: pinch-zoom range on the canvas
 
 function getNodeRadius() {
   const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
@@ -207,6 +214,7 @@ function getVerticalArcPoint(xPos, slide, radius) {
 const ImageManager = {
   canvas: null,
   ctx: null,
+  wrapper: null,
 
   /**
    * Initialize canvas references
@@ -214,6 +222,7 @@ const ImageManager = {
   init(canvas) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
+    this.wrapper = canvas.closest('.canvas-wrapper');
   },
 
   /**
@@ -236,6 +245,8 @@ const ImageManager = {
     AppState.nodes.ySlide = 0;
     AppState.nodes.xPosition = 0;
     AppState.nodes.xSlide = 0;
+
+    this.resetZoom();
   },
 
   /**
@@ -246,6 +257,43 @@ const ImageManager = {
     AppState.display.scale = this.canvas.width / rect.width;
     AppState.display.offsetX = rect.left;
     AppState.display.offsetY = rect.top;
+  },
+
+  /**
+   * Apply the current zoom/pan as a CSS transform on the canvas wrapper.
+   * Scoped to the wrapper (not the whole page), so the toolbar - a flex
+   * sibling outside .canvas-wrapper - never gets pulled along with it.
+   */
+  applyZoomTransform() {
+    this.clampPan();
+    const { zoom, panX, panY } = AppState.display;
+    this.wrapper.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+  },
+
+  /**
+   * Keep panning bounded so the canvas can never be dragged fully out of the
+   * workbench - at most, pan reveals exactly the overflow the current zoom
+   * level created (0 when the canvas still fits at zoom 1).
+   */
+  clampPan() {
+    const workbenchRect = this.wrapper.parentElement.getBoundingClientRect();
+    const { zoom } = AppState.display;
+
+    const overflowX = Math.max(0, this.wrapper.offsetWidth * zoom - workbenchRect.width);
+    const overflowY = Math.max(0, this.wrapper.offsetHeight * zoom - workbenchRect.height);
+
+    const maxPanX = overflowX / 2;
+    const maxPanY = overflowY / 2;
+
+    AppState.display.panX = Math.max(-maxPanX, Math.min(maxPanX, AppState.display.panX));
+    AppState.display.panY = Math.max(-maxPanY, Math.min(maxPanY, AppState.display.panY));
+  },
+
+  resetZoom() {
+    AppState.display.zoom = 1;
+    AppState.display.panX = 0;
+    AppState.display.panY = 0;
+    this.applyZoomTransform();
   }
 };
 
@@ -577,7 +625,15 @@ const InputHandler = {
    * - Touching outside the circle: rotate, as if pivoting an invisible lever at its center
    */
   handleTouchStart(e) {
-    if (!AppState.image || e.touches.length !== 1) return;
+    if (!AppState.image) return;
+
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      this.startPinch(e.touches);
+      return;
+    }
+
+    if (e.touches.length !== 1) return;
     e.preventDefault();
 
     const touch = e.touches[0];
@@ -660,7 +716,16 @@ const InputHandler = {
    * Handle touch move
    */
   handleTouchMove(e) {
-    if (!AppState.image || e.touches.length !== 1) return;
+    if (!AppState.image) return;
+
+    if (AppState.interaction.isPinching) {
+      if (e.touches.length !== 2) return;
+      e.preventDefault();
+      this.updatePinch(e.touches);
+      return;
+    }
+
+    if (e.touches.length !== 1) return;
     e.preventDefault();
 
     const touch = e.touches[0];
@@ -702,6 +767,63 @@ const InputHandler = {
       Renderer.render();
       return;
     }
+  },
+
+  /**
+   * Distance between two touch points (pinch scale reference)
+   */
+  touchDistance(touches) {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.hypot(dx, dy);
+  },
+
+  /**
+   * Midpoint between two touch points, in screen coordinates (pinch anchor)
+   */
+  touchCenter(touches) {
+    return {
+      x: (touches[0].clientX + touches[1].clientX) / 2,
+      y: (touches[0].clientY + touches[1].clientY) / 2
+    };
+  },
+
+  startPinch(touches) {
+    AppState.interaction.isPinching = true;
+    AppState.interaction.pinchLastDist = this.touchDistance(touches);
+  },
+
+  /**
+   * Anchored pinch-zoom: whatever point sits under the pinch center stays
+   * under it as the fingers move, exactly like native pinch-zoom - but
+   * scoped to .canvas-wrapper instead of the whole page. Recomputed fresh
+   * from the current rect each move (rather than accumulating deltas), so
+   * there's no drift over a long gesture.
+   */
+  updatePinch(touches) {
+    const wrapper = ImageManager.wrapper;
+    const rect = wrapper.getBoundingClientRect();
+    const display = AppState.display;
+
+    const dist = this.touchDistance(touches);
+    const center = this.touchCenter(touches);
+    const ratio = dist / AppState.interaction.pinchLastDist;
+    const newZoom = Math.max(ZOOM_LIMITS.min, Math.min(ZOOM_LIMITS.max, display.zoom * ratio));
+
+    // Point in the wrapper's untransformed space currently under the pinch center
+    const localX = (center.x - rect.left) / display.zoom;
+    const localY = (center.y - rect.top) / display.zoom;
+
+    const elementBoxLeft = rect.left - display.panX;
+    const elementBoxTop = rect.top - display.panY;
+
+    display.panX = (center.x - localX * newZoom) - elementBoxLeft;
+    display.panY = (center.y - localY * newZoom) - elementBoxTop;
+    display.zoom = newZoom;
+
+    AppState.interaction.pinchLastDist = dist;
+
+    ImageManager.applyZoomTransform();
   },
 
   updateRotation(imgPos) {
@@ -767,6 +889,7 @@ const InputHandler = {
     AppState.interaction.isDraggingYNode = false;
     AppState.interaction.isDraggingXNode = false;
     AppState.interaction.isRotating = false;
+    AppState.interaction.isPinching = false;
 
     this.canvas.classList.remove('dragging-circle', 'dragging-node', 'rotating');
   },
@@ -1041,6 +1164,8 @@ const UIController = {
 
 const CropController = {
   enter() {
+    ImageManager.resetZoom();
+
     CropState.active = true;
     CropState.isDragging = false;
     CropState.startX = 0;
@@ -1125,5 +1250,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Handle window resize
   window.addEventListener('resize', () => {
     ImageManager.updateDisplayScale();
+    if (AppState.image) ImageManager.applyZoomTransform();
   });
 });
