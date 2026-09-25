@@ -19,6 +19,12 @@
   var LOUPE_SIZE = 160;    // debe coincidir con el ancho/alto de .loupe en CSS
   var LOUPE_ZOOM = 5;      // aumento de la lupa respecto al zoom actual del lienzo
   var LOUPE_GAP = 18;      // separacion vertical entre la lupa y el punto real
+  // Radio (en px de la lupa) del hueco que deja ver la imagen bajo la cruceta.
+  // Los nodos se dibujan con r = 6 * worldPerPx(), asi que dentro de la lupa
+  // siempre ocupan un radio constante de 6 * LOUPE_ZOOM px (el worldPerPx se
+  // cancela), sin importar el zoom del lienzo. El hueco debe ser mayor que
+  // eso para taparlos por completo.
+  var LOUPE_HOLE_PX = 6 * LOUPE_ZOOM + 6;
 
   /* ---------------------------------------------------------------- DOM */
 
@@ -52,6 +58,7 @@
   var selCursorMode = document.getElementById('selCursorMode');
   var loupeEl = document.getElementById('loupe');
   var loupeSvg = document.getElementById('loupeSvg');
+  var loupeHole = document.getElementById('loupeHole');
   var colorA = document.getElementById('colorA');
   var colorB = document.getElementById('colorB');
   var colorH = document.getElementById('colorH');
@@ -750,6 +757,9 @@
     var span = LOUPE_SIZE * worldPerPx() / LOUPE_ZOOM;
     loupeSvg.setAttribute('viewBox',
       (worldPt.x - span / 2) + ' ' + (worldPt.y - span / 2) + ' ' + span + ' ' + span);
+    loupeHole.setAttribute('cx', worldPt.x);
+    loupeHole.setAttribute('cy', worldPt.y);
+    loupeHole.setAttribute('r', LOUPE_HOLE_PX * span / LOUPE_SIZE);
   }
 
   /* --------------------------------------------------------- Interaccion */

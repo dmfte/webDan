@@ -90,17 +90,32 @@
 
         <div id="loupe" class="loupe" aria-hidden="true">
           <svg id="loupeSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+            <defs>
+              <!-- Los marcadores (nodos, VP...) tienen un tamano pensado para
+                   el zoom del lienzo principal; al clonarlos aqui con el zoom
+                   extra de la lupa, cualquiera de ellos que caiga bajo la
+                   cruceta puede tapar la imagen con un relleno solido. Esta
+                   mascara recorta un hueco de tamano fijo (en pixeles de la
+                   lupa) justo en el punto exacto del cursor, para que siempre
+                   se vea la imagen ahi, sin importar que marcador haya debajo. -->
+              <mask id="loupeHoleMask" maskUnits="userSpaceOnUse" x="-100000" y="-100000" width="200000" height="200000">
+                <rect x="-100000" y="-100000" width="200000" height="200000" fill="#fff"></rect>
+                <circle id="loupeHole" cx="0" cy="0" r="0" fill="#000"></circle>
+              </mask>
+            </defs>
             <use href="#worldBg"></use>
             <use href="#photo"></use>
             <use href="#photoFrame"></use>
-            <use href="#raysLayer"></use>
-            <use href="#horizonHalo"></use>
-            <use href="#horizonLine"></use>
-            <use href="#linesLayer"></use>
-            <use href="#edgeLayer"></use>
-            <use href="#vpLayer"></use>
-            <use href="#previewLineB"></use>
-            <use href="#previewLine"></use>
+            <g mask="url(#loupeHoleMask)">
+              <use href="#raysLayer"></use>
+              <use href="#horizonHalo"></use>
+              <use href="#horizonLine"></use>
+              <use href="#linesLayer"></use>
+              <use href="#edgeLayer"></use>
+              <use href="#vpLayer"></use>
+              <use href="#previewLineB"></use>
+              <use href="#previewLine"></use>
+            </g>
           </svg>
           <span class="loupe-ring"></span>
           <svg class="loupe-reticle" viewBox="0 0 20 20" aria-hidden="true">
