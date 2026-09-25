@@ -1525,7 +1525,7 @@
 
   function ensureExportSlider() {
     if (exportState.slider) return Promise.resolve(exportState.slider);
-    return import('/assets/js/RangeSlider.js').then(function (mod) {
+    return import('../assets/js/RangeSlider.js').then(function (mod) {
       var slider = new mod.RangeSlider(exportSliderMount, {
         min: 0, max: 100, step: 1, def: 0, title: 'Encuadre', color: '#f6c94b'
       });
