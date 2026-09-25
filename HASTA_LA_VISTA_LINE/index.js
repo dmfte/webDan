@@ -1581,12 +1581,13 @@
     };
   }
 
-  async function embedExportPhoto(pdfDoc) {
-    var file = state.img.file;
-    var bytes = await file.arrayBuffer();
-    if (file.type === 'image/png') return pdfDoc.embedPng(bytes);
-    if (file.type === 'image/jpeg' || file.type === 'image/jpg') return pdfDoc.embedJpg(bytes);
-    // Formato no soportado de forma nativa (webp, gif...): transcodificar a JPEG.
+  // pdf-lib re-decodifica el JPEG/PNG desde cero con su propio parser, que no
+  // cubre ciertas variantes reales de camara (p.ej. JPEG con gain-map HDR de
+  // moviles Android recientes, o perfiles de color poco comunes). Si falla,
+  // recurrimos al decodificador nativo del navegador (createImageBitmap, que
+  // es mucho mas tolerante) y reempaquetamos como JPEG limpio antes de
+  // reintentar, en vez de dejar que ese error tumbe toda la exportacion.
+  async function transcodeAndEmbed(pdfDoc, file) {
     var bitmap = await createImageBitmap(file);
     var canvas = document.createElement('canvas');
     canvas.width = bitmap.width;
@@ -1594,6 +1595,21 @@
     canvas.getContext('2d').drawImage(bitmap, 0, 0);
     var blob = await new Promise(function (resolve) { canvas.toBlob(resolve, 'image/jpeg', 0.92); });
     return pdfDoc.embedJpg(await blob.arrayBuffer());
+  }
+
+  async function embedExportPhoto(pdfDoc) {
+    var file = state.img.file;
+    var bytes = await file.arrayBuffer();
+    if (file.type === 'image/png') {
+      try { return await pdfDoc.embedPng(bytes); }
+      catch (e) { return transcodeAndEmbed(pdfDoc, file); }
+    }
+    if (file.type === 'image/jpeg' || file.type === 'image/jpg') {
+      try { return await pdfDoc.embedJpg(bytes); }
+      catch (e) { return transcodeAndEmbed(pdfDoc, file); }
+    }
+    // Formato no soportado de forma nativa (webp, gif...): transcodificar a JPEG.
+    return transcodeAndEmbed(pdfDoc, file);
   }
 
   async function buildExportPdf() {
@@ -1703,8 +1719,10 @@
       a.remove();
       setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
     } catch (err) {
-      exportHint.textContent = 'No se pudo generar el PDF.';
-      setTimeout(function () { exportHint.textContent = prevHint; }, 3000);
+      console.error('Export PDF failed:', err);
+      var detail = err && err.message ? (' (' + err.message + ')') : '';
+      exportHint.textContent = 'No se pudo generar el PDF.' + detail;
+      setTimeout(function () { exportHint.textContent = prevHint; }, 8000);
     } finally {
       btnExportDownload.disabled = false;
     }
