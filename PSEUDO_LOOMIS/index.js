@@ -124,7 +124,7 @@
       }
     }
 
-    // Cut-face circles. An edge point is visible if either the flat face or the
+    // Cut-face circles and their crosses. An edge point is visible if either the flat face or the
     // neighbouring sphere surface faces the viewer.
     const cutF = new Path2D(), cutB = new Path2D();
     if (state.cut > 0) {
@@ -140,6 +140,13 @@
           addSeg(cutF, cutB, prev, cur, vis);
           prev = cur;
         }
+        // Cross on the flat face: its upright and front-to-back diameters, which
+        // join the ends of the clipped meridian and equator. They lie in the
+        // face, so they are front lines only when the face itself is turned to
+        // the viewer.
+        const faceVis = () => faceFront ? 1 : -1;
+        addSeg(cutF, cutB, [sgn * d, -r, 0], [sgn * d, r, 0], faceVis);
+        addSeg(cutF, cutB, [sgn * d, 0, -r], [sgn * d, 0, r], faceVis);
       }
     }
 
@@ -297,32 +304,80 @@
   };
 
   // ---------- Dragging on the picture ----------
-  // A horizontal drag spins the globe about its own polar axis and a vertical
-  // drag tilts it about its own ear-to-ear axis: the same globe-relative turns
-  // as the Spin and Tilt sliders, fed with pointer deltas. The drag distance is
-  // divided by the globe's on-screen radius, so the surface at the centre of
-  // the globe keeps pace with the pointer.
-  let dragId = null, dragX = 0, dragY = 0;
+  // Rotate: a horizontal drag spins the globe about its own polar axis and a
+  // vertical drag tilts it about its own ear-to-ear axis: the same
+  // globe-relative turns as the Spin and Tilt sliders, fed with pointer deltas.
+  // The drag distance is divided by the globe's on-screen radius, so the
+  // surface at the centre of the globe keeps pace with the pointer.
+  // Place: a right-button drag (or any drag while the place toggle is on, for
+  // touch) moves the globe's centre with the pointer.
+  // Resize: the mouse wheel, or a two-finger pinch, scales the radius.
+  const clamp = (v, k) => Math.min(+ranges[k].el.max, Math.max(+ranges[k].el.min, v));
+  const placeMode = $('placeMode');
+  const pointers = new Map(); // pointerId -> last position
+  let gesture = null, dragId = null, pinchDist = 0;
+  const pinchSpan = () => {
+    const [p, q] = [...pointers.values()];
+    return Math.hypot(p.x - q.x, p.y - q.y);
+  };
+  const setGesture = g => {
+    gesture = g;
+    canvas.classList.toggle('dragging', g === 'rotate');
+    canvas.classList.toggle('placing', g === 'place');
+  };
   canvas.addEventListener('pointerdown', e => {
-    if (e.button) return;
-    dragId = e.pointerId; dragX = e.clientX; dragY = e.clientY;
-    canvas.setPointerCapture(dragId);
-    canvas.classList.add('dragging');
+    if (e.button !== 0 && e.button !== 2) return;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    canvas.setPointerCapture(e.pointerId);
+    if (pointers.size === 1) {
+      dragId = e.pointerId;
+      setGesture(e.button === 2 || placeMode.checked ? 'place' : 'rotate');
+    } else if (pointers.size === 2) {
+      setGesture('pinch'); pinchDist = pinchSpan();
+    }
   });
   canvas.addEventListener('pointermove', e => {
-    if (e.pointerId !== dragId) return;
-    const dx = e.clientX - dragX, dy = e.clientY - dragY;
-    dragX = e.clientX; dragY = e.clientY;
-    const perPx = 1 / (globeInPicture().R * view.s) / DEG;
-    turn('ry', dx * perPx); turn('rx', dy * perPx);
+    const last = pointers.get(e.pointerId);
+    if (!last) return;
+    const dx = e.clientX - last.x, dy = e.clientY - last.y;
+    last.x = e.clientX; last.y = e.clientY;
+    if (gesture === 'pinch') {
+      if (pointers.size < 2) return;
+      const d = pinchSpan();
+      if (pinchDist > 0) state.size = clamp(state.size * d / pinchDist, 'size');
+      pinchDist = d;
+    } else if (e.pointerId !== dragId) {
+      return;
+    } else if (gesture === 'place') {
+      state.gx = clamp(state.gx + dx / (picW() * view.s) * 100, 'gx');
+      state.gy = clamp(state.gy + dy / (picH() * view.s) * 100, 'gy');
+    } else if (gesture === 'rotate') {
+      const perPx = 1 / (globeInPicture().R * view.s) / DEG;
+      turn('ry', dx * perPx); turn('rx', dy * perPx);
+    } else {
+      return;
+    }
     sync(); schedule();
   });
-  const endDrag = e => {
-    if (e.pointerId !== dragId) return;
-    dragId = null; canvas.classList.remove('dragging');
+  const endPointer = e => {
+    if (!pointers.delete(e.pointerId)) return;
+    // After a pinch, the finger left on the glass does nothing until it lifts too
+    if (!pointers.size) { setGesture(null); dragId = null; }
+    else if (gesture !== 'pinch') { if (e.pointerId === dragId) { setGesture(null); dragId = null; } }
+    else setGesture('idle');
   };
-  canvas.addEventListener('pointerup', endDrag);
-  canvas.addEventListener('pointercancel', endDrag);
+  canvas.addEventListener('pointerup', endPointer);
+  canvas.addEventListener('pointercancel', endPointer);
+  // The right button places the globe, so it must not open the context menu
+  canvas.addEventListener('contextmenu', e => e.preventDefault());
+  canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    // Lines → pixels; a trackpad pinch arrives as a ctrl+wheel with small deltas
+    const dy = e.deltaY * (e.deltaMode === 1 ? 16 : 1);
+    state.size = clamp(state.size * Math.exp(-dy * (e.ctrlKey ? 0.01 : 0.0015)), 'size');
+    sync(); schedule();
+  }, { passive: false });
+  placeMode.addEventListener('change', () => canvas.classList.toggle('place-mode', placeMode.checked));
 
   // ---------- Loading a picture ----------
   const status = $('status');

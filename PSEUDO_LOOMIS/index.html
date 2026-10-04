@@ -18,6 +18,17 @@
   <div class="app">
     <div class="stage" id="stage">
       <canvas id="c" aria-label="Picture with wireframe globe"></canvas>
+      <label class="mode-toggle" title="Switch between rotating and placing the globe">
+        <input type="checkbox" id="placeMode" aria-label="Place mode: drag moves the globe instead of rotating it">
+        <svg class="ico-rotate" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/>
+          <path d="M17.5 3v4h-4"/>
+        </svg>
+        <svg class="ico-place" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3v18M3 12h18"/>
+          <path d="M9.5 5.5 12 3l2.5 2.5M9.5 18.5 12 21l2.5-2.5M5.5 9.5 3 12l2.5 2.5M18.5 9.5 21 12l-2.5 2.5"/>
+        </svg>
+      </label>
       <div class="empty" id="empty">
         <p>Choose a picture, or drop one here, then use the sliders to place and turn the globe.</p>
         <label class="btn primary picker">Choose picture<input type="file" class="file-in" accept="image/*"></label>
