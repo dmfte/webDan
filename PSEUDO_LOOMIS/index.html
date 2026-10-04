@@ -1,147 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Pseudo Loomis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/nav.css">
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
   <!-- Navigation -->
-  <nav>
-    <div class="navbar">
-      <div class="navbar__logo">
-        <a href="../" class="logo-link">
-          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <text x="50" y="70" font-size="60" text-anchor="middle" fill="currentColor">PL</text>
-          </svg>
-        </a>
+
+  <div class="app">
+    <div class="stage" id="stage">
+      <canvas id="c" aria-label="Picture with wireframe globe"></canvas>
+      <div class="empty" id="empty">
+        <p>Choose a picture, or drop one here, then use the sliders to place and turn the globe.</p>
+        <label class="btn primary picker">Choose picture<input type="file" class="file-in" accept="image/*"></label>
       </div>
-      <ul class="navbar__menu">
-        <li class="menu-item" tabindex="0">Pseudo Loomis</li>
-      </ul>
-      <div class="navbar__icons"></div>
     </div>
-  </nav>
-
-  <main class="app-container">
-    <!-- Desktop Sidebar Controls -->
-    <aside class="controls-sidebar">
-
-      <div class="mini-controls">
-        <div class="mini-ctrl">
-          <input type="file" id="imageInput" accept="image/*" class="file-input">
-          <label for="imageInput" class="file-input-label">⬆</label>
-        </div>
-        <div class="mini-ctrl" disabled>
-          <input type="button" id="downloadBtn">
-          <label for="downloadBtn">⬇</label>
-        </div>
-        <div class="mini-ctrl">
-          <input type="button" id="cutImageBtn">
-          <label for="cutImageBtn">&#9988;</label>
+    <aside class="panel">
+      <div id="intro">
+        <h1>Globe on image</h1>
+        <div class="file-row">
+          <label class="btn picker">Choose picture<input type="file" class="file-in" accept="image/*"></label>
         </div>
       </div>
-
-      <!-- Size Slider -->
-      <div class="control-group">
-        <label class="control-label">Circle Size</label>
-        <div id="sizeSlider" class="slider-container"></div>
+      <div class="file-row" id="dlRow" hidden>
+        <button type="button" class="btn primary" id="save">Download picture</button>
       </div>
 
-      <!-- Stroke Width Slider -->
-      <div class="control-group">
-        <label class="control-label">Stroke Width</label>
-        <div id="strokeSlider" class="slider-container"></div>
-      </div>
+      <fieldset>
+        <legend>Position and size</legend>
+        <div class="row"><label for="gx">Across</label><input id="gx" type="range" min="0" max="100" step="0.1"><output></output></div>
+        <div class="row"><label for="gy">Down</label><input id="gy" type="range" min="0" max="100" step="0.1"><output></output></div>
+        <div class="row"><label for="size">Radius</label><input id="size" type="range" min="1" max="80" step="0.1"><output></output></div>
+      </fieldset>
 
-      <!-- Color Picker -->
-      <div class="control-group">
-        <label class="control-label" for="colorPicker">Stroke Color</label>
-        <input type="color" id="colorPicker" value="#87CEEB" class="color-input">
-      </div>
+      <fieldset>
+        <legend>Rotation</legend>
+        <div class="row"><label for="ry">Spin</label><input id="ry" type="range" min="-180" max="180" step="1"><output></output></div>
+        <div class="row"><label for="rx">Tilt</label><input id="rx" type="range" min="-180" max="180" step="1"><output></output></div>
+        <div class="row"><label for="rz">Roll</label><input id="rz" type="range" min="-180" max="180" step="1"><output></output></div>
+      </fieldset>
 
-      <!-- Overlay Toggles -->
-      <div class="control-group">
-        <label class="toggle-control">
-          <input type="checkbox" id="toggleAxes" checked>
-          <span>Show Axes</span>
-        </label>
-        <label class="toggle-control">
-          <input type="checkbox" id="toggleGuideLines" checked>
-          <span>Show Guide Lines</span>
-        </label>
+      <fieldset>
+        <legend>Lines</legend>
+        <div class="row"><label for="cut">Side cuts</label><input id="cut" type="range" min="0" max="60" step="1"><output></output></div>
+        <div class="row"><label for="back">Back lines</label><input id="back" type="range" min="0" max="60" step="1"><output></output></div>
+        <div class="row"><label for="width">Thickness</label><input id="width" type="range" min="0.1" max="3" step="0.05"><output></output></div>
+        <label class="check"><input type="checkbox" id="outline"> Show sphere outline</label>
+        <label class="check"><input type="checkbox" id="diam"> Show equatorial axes</label>
+        <div class="colors">
+          <label><input type="color" id="colMer"> Meridians</label>
+          <label><input type="color" id="colEq"> Equator</label>
+          <label><input type="color" id="colOut"> Outline</label>
+        </div>
+      </fieldset>
+
+      <div class="actions">
+        <button type="button" class="btn" id="reset">Reset rotation</button>
       </div>
+      <div class="status" id="status" role="status"></div>
+      <div class="status" aria-hidden="true">Version 19 (globe-relative)</div>
     </aside>
-
-    <!-- Mobile Top Bar -->
-    <div class="mobile-top-bar">
-      <input type="file" id="mobileImageInput" accept="image/*" class="file-input">
-      <label for="mobileImageInput" class="mobile-btn">Load</label>
-      <button id="mobileCutBtn" class="mobile-btn" disabled>✄</button>
-      <button id="mobileDownloadBtn" class="mobile-btn" disabled>Download</button>
-    </div>
-
-    <!-- Workbench (Canvas Area) -->
-    <section class="workbench">
-      <div class="canvas-wrapper">
-        <canvas id="mainCanvas"></canvas>
-        <div class="placeholder-text" id="placeholder">
-          <p>Load an image to begin</p>
-        </div>
-        <button id="cropCancelBtn" class="hidden">✕</button>
-      </div>
-    </section>
-
-    <!-- Mobile Sidebar Controls -->
-    <aside class="mobile-controls">
-      <!-- Size -->
-      <div class="mobile-control-item" data-control="size">
-        <div class="mobile-control-icon">&#x1F4D0;</div>
-        <div class="mobile-control-slider">
-          <div id="mobileSizeSlider" class="slider-container"></div>
-        </div>
-      </div>
-
-      <!-- Stroke Width -->
-      <div class="mobile-control-item" data-control="stroke">
-        <div class="mobile-control-icon">&#x270F;</div>
-        <div class="mobile-control-slider">
-          <div id="mobileStrokeSlider" class="slider-container"></div>
-        </div>
-      </div>
-
-      <!-- Color -->
-      <div class="mobile-control-item" data-control="color">
-        <div class="mobile-control-icon">&#x1F3A8;</div>
-        <div class="mobile-control-slider">
-          <input type="color" id="mobileColorPicker" value="#87CEEB" class="color-input mobile-color">
-        </div>
-      </div>
-
-      <!-- Axes Toggle -->
-      <div class="mobile-control-item" data-control="axes">
-        <div class="mobile-control-icon">&#x271B;</div>
-        <div class="mobile-control-slider">
-          <label class="mobile-toggle-label">
-            <input type="checkbox" id="mobileToggleAxes" checked>
-          </label>
-        </div>
-      </div>
-
-      <!-- Guide Lines Toggle -->
-      <div class="mobile-control-item" data-control="guides">
-        <div class="mobile-control-icon">&#x1F4CF;</div>
-        <div class="mobile-control-slider">
-          <label class="mobile-toggle-label">
-            <input type="checkbox" id="mobileToggleGuideLines" checked>
-          </label>
-        </div>
-      </div>
-    </aside>
-  </main>
+  </div>
 
   <script type="module" src="index.js"></script>
 </body>
+
 </html>
