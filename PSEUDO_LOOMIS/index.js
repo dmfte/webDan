@@ -11,16 +11,17 @@
   //   frontSize, frontGap: the front marker's base diameter and its distance from
   //           the ball, as % of the globe's radius
   const defaults = {
-    gx: 50, gy: 50, size: 25, ry: 25, rx: 20, rz: 0,
+    gx: 50, gy: 50, size: 25, ry: 0, rx: 0, rz: 0,
     back: 20, width: 0.4, outline: true, diam: true, front: true, frontSize: 20, frontGap: 0, cut: 0,
     colMer: '#ffffff', colEq: '#f2b441', colOut: '#ffffff',
   };
   const state = { ...defaults };
 
-  // Settings are remembered between visits. The globe's place on the picture
-  // and its rotation belong to one picture, so they always start from the defaults.
+  // Settings are remembered between visits. The globe's place and size on the
+  // picture, its rotation and its side cuts belong to one picture, so they
+  // always start from the defaults.
   const STORE_KEY = 'pseudoLoomis.settings';
-  const STORED = Object.keys(defaults).filter(k => !['gx', 'gy', 'ry', 'rx', 'rz'].includes(k));
+  const STORED = Object.keys(defaults).filter(k => !['gx', 'gy', 'size', 'cut', 'ry', 'rx', 'rz'].includes(k));
   const snapshot = () => JSON.stringify(Object.fromEntries(STORED.map(k => [k, state[k]])));
   try {
     const saved = JSON.parse(localStorage.getItem(STORE_KEY)) || {};
