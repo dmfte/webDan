@@ -68,12 +68,13 @@
     state.ry = state.rx = state.rz = 0;
     turn('ry', ry); turn('rx', rx); turn('rz', rz);
   }
-  // Tilt lock. While it is on, the on-screen inclination of the Tilt axis (the
-  // globe's ear-to-ear axis, the dashed line in the equator colour) is held:
-  // after every Spin step, Roll is turned by whatever angle puts that axis back
-  // on the locked direction. The correction is an ordinary globe-relative Roll
-  // turn, so the Roll value drifts away from what was set by hand.
-  let tiltLock = false, lockDir = null; // unit screen direction of the Tilt axis
+  // Tilt lock (on by default). While it is on, the on-screen inclination of the
+  // Tilt axis (the globe's ear-to-ear axis, the dashed line in the equator
+  // colour) is held during drags: after every Spin step, Roll is turned by
+  // whatever angle puts that axis back on the locked direction. The correction
+  // is an ordinary globe-relative Roll turn, so the Roll value drifts away from
+  // what was set by hand.
+  let tiltLock = true, lockDir = null; // unit screen direction of the Tilt axis
   function captureTiltAxis() {
     const x = orient[0][0], y = orient[1][0], l = Math.hypot(x, y);
     lockDir = l > 1e-6 ? [x / l, y / l] : null; // no inclination while it points at the viewer
@@ -95,14 +96,16 @@
     if (phi > Math.PI / 2) phi -= Math.PI; else if (phi < -Math.PI / 2) phi += Math.PI;
     turn('rz', phi / DEG);
   }
-  // A turn asked for by the user. Spin drags Roll along while Tilt is locked; a
-  // Roll set by hand changes the inclination on purpose, so it becomes the new
-  // locked one. Tilt turns about the axis itself and never moves it.
-  function userTurn(axis, deg) {
+  // A turn asked for by the user. The lock only acts on drags over the picture:
+  // there, Spin drags Roll along to hold the inclination. The Spin and Roll
+  // sliders turn about their own axis alone, which changes the inclination on
+  // purpose, so the lock then picks up from the new one. Tilt turns about the
+  // axis itself and never moves it.
+  function userTurn(axis, deg, drag = false) {
     turn(axis, deg);
-    if (!tiltLock) return;
-    if (axis === 'ry') holdTiltAxis();
-    else if (axis === 'rz') captureTiltAxis();
+    if (!tiltLock || axis === 'rx') return;
+    if (drag && axis === 'ry') holdTiltAxis();
+    else captureTiltAxis();
   }
   function rotator() {
     const M = orient;
@@ -389,7 +392,7 @@
       state.gy = clamp(state.gy + dy / (picH() * view.s) * 100, 'gy');
     } else if (gesture === 'rotate') {
       const perPx = 1 / (globeInPicture().R * view.s) / DEG;
-      userTurn('ry', dx * perPx); userTurn('rx', dy * perPx);
+      userTurn('ry', dx * perPx, true); userTurn('rx', dy * perPx, true);
     } else {
       return;
     }
@@ -503,5 +506,6 @@
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', schedule);
   new ResizeObserver(resize).observe(stage);
   resetOrientation(defaults.ry, defaults.rx, defaults.rz);
+  captureTiltAxis();
   sync(); resize();
 })();
