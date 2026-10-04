@@ -18,20 +18,33 @@
   <div class="app">
     <div class="stage" id="stage">
       <canvas id="c" aria-label="Picture with wireframe globe"></canvas>
-      <label class="mode-toggle" title="Switch between rotating and placing the globe">
-        <input type="checkbox" id="placeMode" aria-label="Place mode: drag moves the globe instead of rotating it">
-        <svg class="ico-rotate" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/>
-          <path d="M17.5 3v4h-4"/>
-        </svg>
-        <svg class="ico-place" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 3v18M3 12h18"/>
-          <path d="M9.5 5.5 12 3l2.5 2.5M9.5 18.5 12 21l2.5-2.5M5.5 9.5 3 12l2.5 2.5M18.5 9.5 21 12l-2.5 2.5"/>
-        </svg>
-      </label>
       <div class="empty" id="empty">
-        <p>Choose a picture, or drop one here, then use the sliders to place and turn the globe.</p>
+        <p>Choose a picture, or drop one here, then drag on it to turn the globe.</p>
         <label class="btn primary picker">Choose picture<input type="file" class="file-in" accept="image/*"></label>
+      </div>
+      <div class="stage-controls">
+        <div class="roll">
+          <label for="rz">Roll</label>
+          <input id="rz" type="range" min="-180" max="180" step="1">
+          <output></output>
+        </div>
+        <button type="button" class="round" id="reset" title="Reset rotation" aria-label="Reset rotation">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="8.5"/>
+            <path d="M12 3.5v17M3.5 12h17"/>
+          </svg>
+        </button>
+        <label class="round mode-toggle" title="Switch between rotating and placing the globe">
+          <input type="checkbox" id="placeMode" aria-label="Place mode: drag moves the globe and right-button drag rotates it">
+          <svg class="ico-rotate" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/>
+            <path d="M17.5 3v4h-4"/>
+          </svg>
+          <svg class="ico-place" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3v18M3 12h18"/>
+            <path d="M9.5 5.5 12 3l2.5 2.5M9.5 18.5 12 21l2.5-2.5M5.5 9.5 3 12l2.5 2.5M18.5 9.5 21 12l-2.5 2.5"/>
+          </svg>
+        </label>
       </div>
     </div>
     <aside class="panel">
@@ -53,28 +66,15 @@
       </fieldset>
 
       <fieldset>
-        <legend>Rotation</legend>
-        <div class="row"><label for="ry">Spin</label><input id="ry" type="range" min="-180" max="180" step="1"><output></output></div>
-        <div class="row"><label for="rx">Tilt</label>
-          <div class="with-lock">
-            <input id="rx" type="range" min="-180" max="180" step="1">
-            <label class="lock" title="While dragging on the picture, keep the Tilt axis at its current inclination: Roll adjusts itself. The sliders are not affected">
-              <input type="checkbox" id="lockTilt" checked aria-label="Lock the inclination of the Tilt axis while dragging on the picture">
-              <svg class="ic-open" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg>
-              <svg class="ic-closed" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-            </label>
-          </div>
-          <output></output></div>
-        <div class="row"><label for="rz">Roll</label><input id="rz" type="range" min="-180" max="180" step="1"><output></output></div>
-      </fieldset>
-
-      <fieldset>
         <legend>Lines</legend>
         <div class="row"><label for="cut">Side cuts</label><input id="cut" type="range" min="0" max="60" step="1"><output></output></div>
         <div class="row"><label for="back">Back lines</label><input id="back" type="range" min="0" max="60" step="1"><output></output></div>
         <div class="row"><label for="width">Thickness</label><input id="width" type="range" min="0.1" max="3" step="0.05"><output></output></div>
         <label class="check"><input type="checkbox" id="outline"> Show sphere outline</label>
         <label class="check"><input type="checkbox" id="diam"> Show equatorial axes</label>
+        <label class="check"><input type="checkbox" id="front"> Show front marker</label>
+        <div class="row"><label for="frontSize">Marker size</label><input id="frontSize" type="range" min="5" max="60" step="1"><output></output></div>
+        <div class="row"><label for="frontGap">Marker gap</label><input id="frontGap" type="range" min="0" max="100" step="1"><output></output></div>
         <div class="colors">
           <label><input type="color" id="colMer"> Meridians</label>
           <label><input type="color" id="colEq"> Equator</label>
@@ -82,9 +82,6 @@
         </div>
       </fieldset>
 
-      <div class="actions">
-        <button type="button" class="btn" id="reset">Reset rotation</button>
-      </div>
       <div class="status" id="status" role="status"></div>
       <div class="status" aria-hidden="true">Version 19 (globe-relative)</div>
     </aside>

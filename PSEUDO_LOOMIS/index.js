@@ -8,9 +8,11 @@
   //   gx, gy: centre as % of picture width/height
   //   size:   radius as % of the picture's shorter side
   //   width:  line thickness as ‰ (per-mille) of the shorter side
+  //   frontSize, frontGap: the front marker's base diameter and its distance from
+  //           the ball, as % of the globe's radius
   const defaults = {
     gx: 50, gy: 50, size: 25, ry: 25, rx: 20, rz: 0,
-    back: 20, width: 0.4, outline: true, diam: true, cut: 0,
+    back: 20, width: 0.4, outline: true, diam: true, front: true, frontSize: 20, frontGap: 0, cut: 0,
     colMer: '#ffffff', colEq: '#f2b441', colOut: '#ffffff',
   };
   const state = { ...defaults };
@@ -31,11 +33,11 @@
   ];
 
   // Globe-relative rotation. The globe's orientation is kept as a matrix, and
-  // every change to a slider (or a drag) is applied as a rotation around one
-  // of the globe's OWN axes, wherever that axis currently points:
+  // every drag step (or change to the Roll slider) is applied as a rotation
+  // around one of the globe's OWN axes, wherever that axis currently points:
   //   Spin = polar axis (through the poles),
   //   Tilt = ear-to-ear axis, Roll = front-to-back axis.
-  // The slider values are the accumulated amount turned around each axis.
+  // state.ry/rx/rz are the accumulated amounts turned around each axis.
   const screenRot = (axis, deg) => {
     const c = Math.cos(deg * DEG), s = Math.sin(deg * DEG);
     if (axis === 'ry') return [[c, 0, s], [0, 1, 0], [-s, 0, c]];
@@ -53,10 +55,10 @@
     const c = [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
     return [0, 1, 2].map(i => [a[i], b[i], c[i]]);
   }
-  // Each slider move is one turn about that axis of the globe itself, wherever the
-  // axis currently points. Turns about different axes don't commute, so the slider
-  // values are per-axis totals, not a readout of the final orientation; Reset
-  // returns to the neutral pose.
+  // Each turn is about that axis of the globe itself, wherever the axis currently
+  // points. Turns about different axes don't commute, so the Roll slider value is
+  // a per-axis total, not a readout of the final orientation; Reset returns to
+  // the neutral pose.
   let orient = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
   function turn(axis, deg) {
     if (!deg) return;
@@ -68,19 +70,20 @@
     state.ry = state.rx = state.rz = 0;
     turn('ry', ry); turn('rx', rx); turn('rz', rz);
   }
-  // Tilt lock (on by default). While it is on, the on-screen inclination of the
-  // Tilt axis (the globe's ear-to-ear axis, the dashed line in the equator
-  // colour) is held during drags: after every Spin step, Roll is turned by
-  // whatever angle puts that axis back on the locked direction. The correction
-  // is an ordinary globe-relative Roll turn, so the Roll value drifts away from
-  // what was set by hand.
-  let tiltLock = true, lockDir = null; // unit screen direction of the Tilt axis
+  // Tilt lock. The on-screen inclination of the Tilt axis (the globe's
+  // ear-to-ear axis, the dashed line in the equator colour) is held during
+  // drags: after every Spin step, Roll is turned by whatever angle puts that
+  // axis back on the locked direction. The correction is an ordinary
+  // globe-relative Roll turn, so the Roll value drifts away from what was set
+  // by hand. The Roll slider turns about its own axis alone, which changes the
+  // inclination on purpose, so the lock then picks up from the new one. Tilt
+  // turns about the axis itself and never moves it.
+  let lockDir = null; // unit screen direction of the Tilt axis
   function captureTiltAxis() {
     const x = orient[0][0], y = orient[1][0], l = Math.hypot(x, y);
     lockDir = l > 1e-6 ? [x / l, y / l] : null; // no inclination while it points at the viewer
   }
   function holdTiltAxis() {
-    if (!tiltLock) return;
     if (!lockDir) { captureTiltAxis(); return; }
     const [ux, uy] = lockDir;
     // After a Roll of φ the axis is cos φ·X + sin φ·Y (X, Y = the globe's x and y
@@ -95,17 +98,6 @@
     // viewer and come out the other side without the globe jumping.
     if (phi > Math.PI / 2) phi -= Math.PI; else if (phi < -Math.PI / 2) phi += Math.PI;
     turn('rz', phi / DEG);
-  }
-  // A turn asked for by the user. The lock only acts on drags over the picture:
-  // there, Spin drags Roll along to hold the inclination. The Spin and Roll
-  // sliders turn about their own axis alone, which changes the inclination on
-  // purpose, so the lock then picks up from the new one. Tilt turns about the
-  // axis itself and never moves it.
-  function userTurn(axis, deg, drag = false) {
-    turn(axis, deg);
-    if (!tiltLock || axis === 'rx') return;
-    if (drag && axis === 'ry') holdTiltAxis();
-    else captureTiltAxis();
   }
   function rotator() {
     const M = orient;
@@ -160,6 +152,29 @@
           if (t1 < 1) addGhost(ghost[s.key], lerp(a, b, t1), b);
         }
         addSeg(F, B, lerp(a, b, t0), lerp(a, b, t1), sphereVis);
+      }
+    }
+
+    // Front marker: a small wireframe cone on the front axis (+z), where the
+    // brow line meets the centre line of the face, in the meridian colour. At no gap its base is a circle on the ball; the gap slides the
+    // whole cone outwards. It is outside the ball, so its lines are back lines
+    // only while they are behind the ball's disc. Its height follows its
+    // diameter, so the size slider scales it without changing its shape.
+    if (state.front) {
+      const r = state.frontSize / 200, z0 = Math.sqrt(1 - r * r) + state.frontGap / 100;
+      const apex = [0, 0, z0 + r * 2.5], K = 48, PARTS = 4;
+      const coneVis = p => { const q = rot(p); return q[0] * q[0] + q[1] * q[1] >= 1 ? 1 : q[2]; };
+      let prev = [r, 0, z0];
+      for (let i = 1; i <= K; i++) {
+        const t = i / K * 2 * Math.PI;
+        const cur = [r * Math.cos(t), r * Math.sin(t), z0];
+        addSeg(paths.merF, paths.merB, prev, cur, coneVis);
+        if (i % (K / 4) === 0) {
+          for (let k = 0; k < PARTS; k++) {
+            addSeg(paths.merF, paths.merB, lerp(cur, apex, k / PARTS), lerp(cur, apex, (k + 1) / PARTS), coneVis);
+          }
+        }
+        prev = cur;
       }
     }
 
@@ -267,9 +282,9 @@
   // View transform: picture fitted inside the stage
   let W = 0, H = 0, dpr = 1, view = { s: 1, ox: 0, oy: 0 };
   function layout() {
-    const pad = 16;
-    const s = Math.min((W - pad * 2) / picW(), (H - pad * 2) / picH());
-    view = { s, ox: (W - picW() * s) / 2, oy: (H - picH() * s) / 2 };
+    const pad = 16, foot = 68; // foot: room for the controls along the bottom of the stage
+    const s = Math.min((W - pad * 2) / picW(), (H - pad - foot) / picH());
+    view = { s, ox: (W - picW() * s) / 2, oy: pad + (H - pad - foot - picH() * s) / 2 };
   }
   function resize() {
     const r = stage.getBoundingClientRect();
@@ -308,15 +323,15 @@
   const wrap = a => ((a + 180) % 360 + 360) % 360 - 180;
   const fmt = {
     gx: v => `${v.toFixed(1)}%`, gy: v => `${v.toFixed(1)}%`, size: v => `${v.toFixed(1)}%`,
-    ry: v => `${Math.round(v)}°`, rx: v => `${Math.round(v)}°`, rz: v => `${Math.round(v)}°`,
+    rz: v => `${Math.round(v)}°`, frontSize: v => `${Math.round(v)}%`, frontGap: v => v == 0 ? 'None' : `${Math.round(v)}%`,
     back: v => v == 0 ? 'Gone' : `${Math.round(v)}%`, cut: v => v == 0 ? 'Off' : `${Math.round(v)}%`, width: v => v.toFixed(2),
   };
   const ranges = {};
   for (const k of Object.keys(fmt)) {
-    const el = $(k); ranges[k] = { el, out: el.closest('.row').querySelector('output') };
+    const el = $(k); ranges[k] = { el, out: el.parentElement.querySelector('output') };
     el.addEventListener('input', () => {
       const v = parseFloat(el.value);
-      if (k === 'ry' || k === 'rx' || k === 'rz') userTurn(k, wrap(v - state[k]));
+      if (k === 'rz') { turn(k, wrap(v - state[k])); captureTiltAxis(); }
       else state[k] = v;
       sync(); schedule();
     });
@@ -326,7 +341,7 @@
   }
   $('outline').addEventListener('change', e => { state.outline = e.target.checked; schedule(); });
   $('diam').addEventListener('change', e => { state.diam = e.target.checked; schedule(); });
-  $('lockTilt').addEventListener('change', e => { tiltLock = e.target.checked; captureTiltAxis(); });
+  $('front').addEventListener('change', e => { state.front = e.target.checked; schedule(); });
 
   function sync() {
     for (const k of Object.keys(ranges)) {
@@ -335,6 +350,7 @@
     }
     $('outline').checked = state.outline;
     $('diam').checked = state.diam;
+    $('front').checked = state.front;
     for (const k of ['colMer', 'colEq', 'colOut']) $(k).value = state[k];
   }
 
@@ -344,12 +360,13 @@
 
   // ---------- Dragging on the picture ----------
   // Rotate: a horizontal drag spins the globe about its own polar axis and a
-  // vertical drag tilts it about its own ear-to-ear axis: the same
-  // globe-relative turns as the Spin and Tilt sliders, fed with pointer deltas.
+  // vertical drag tilts it about its own ear-to-ear axis, fed with pointer
+  // deltas. Each Spin step is followed by the Tilt lock's Roll correction.
   // The drag distance is divided by the globe's on-screen radius, so the
   // surface at the centre of the globe keeps pace with the pointer.
-  // Place: a right-button drag (or any drag while the place toggle is on, for
-  // touch) moves the globe's centre with the pointer.
+  // Place: a right-button drag moves the globe's centre with the pointer. The
+  // place toggle swaps the two buttons, so a touch or left-button drag places
+  // and a right-button drag rotates.
   // Resize: the mouse wheel, or a two-finger pinch, scales the radius.
   const clamp = (v, k) => Math.min(+ranges[k].el.max, Math.max(+ranges[k].el.min, v));
   const placeMode = $('placeMode');
@@ -370,7 +387,7 @@
     canvas.setPointerCapture(e.pointerId);
     if (pointers.size === 1) {
       dragId = e.pointerId;
-      setGesture(e.button === 2 || placeMode.checked ? 'place' : 'rotate');
+      setGesture((e.button === 2) !== placeMode.checked ? 'place' : 'rotate');
     } else if (pointers.size === 2) {
       setGesture('pinch'); pinchDist = pinchSpan();
     }
@@ -392,7 +409,7 @@
       state.gy = clamp(state.gy + dy / (picH() * view.s) * 100, 'gy');
     } else if (gesture === 'rotate') {
       const perPx = 1 / (globeInPicture().R * view.s) / DEG;
-      userTurn('ry', dx * perPx, true); userTurn('rx', dy * perPx, true);
+      turn('ry', dx * perPx); holdTiltAxis(); turn('rx', dy * perPx);
     } else {
       return;
     }
