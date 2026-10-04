@@ -68,6 +68,42 @@
     state.ry = state.rx = state.rz = 0;
     turn('ry', ry); turn('rx', rx); turn('rz', rz);
   }
+  // Tilt lock. While it is on, the on-screen inclination of the Tilt axis (the
+  // globe's ear-to-ear axis, the dashed line in the equator colour) is held:
+  // after every Spin step, Roll is turned by whatever angle puts that axis back
+  // on the locked direction. The correction is an ordinary globe-relative Roll
+  // turn, so the Roll value drifts away from what was set by hand.
+  let tiltLock = false, lockDir = null; // unit screen direction of the Tilt axis
+  function captureTiltAxis() {
+    const x = orient[0][0], y = orient[1][0], l = Math.hypot(x, y);
+    lockDir = l > 1e-6 ? [x / l, y / l] : null; // no inclination while it points at the viewer
+  }
+  function holdTiltAxis() {
+    if (!tiltLock) return;
+    if (!lockDir) { captureTiltAxis(); return; }
+    const [ux, uy] = lockDir;
+    // After a Roll of φ the axis is cos φ·X + sin φ·Y (X, Y = the globe's x and y
+    // axes on screen); it is parallel to the locked direction when
+    // cos φ·A + sin φ·B = 0, A and B being their cross products with it.
+    const X = [orient[0][0], orient[1][0]], Y = [orient[0][1], orient[1][1]];
+    const A = X[0] * uy - X[1] * ux, B = Y[0] * uy - Y[1] * ux;
+    if (Math.hypot(A, B) < 1e-9) return; // every Roll gives the same inclination
+    let phi = Math.atan2(-A, B);
+    // The two solutions are half a turn apart; take the smaller correction. The
+    // axis is a line with no front end, so it may swing through pointing at the
+    // viewer and come out the other side without the globe jumping.
+    if (phi > Math.PI / 2) phi -= Math.PI; else if (phi < -Math.PI / 2) phi += Math.PI;
+    turn('rz', phi / DEG);
+  }
+  // A turn asked for by the user. Spin drags Roll along while Tilt is locked; a
+  // Roll set by hand changes the inclination on purpose, so it becomes the new
+  // locked one. Tilt turns about the axis itself and never moves it.
+  function userTurn(axis, deg) {
+    turn(axis, deg);
+    if (!tiltLock) return;
+    if (axis === 'ry') holdTiltAxis();
+    else if (axis === 'rz') captureTiltAxis();
+  }
   function rotator() {
     const M = orient;
     return ([x, y, z]) => [
@@ -277,7 +313,7 @@
     const el = $(k); ranges[k] = { el, out: el.closest('.row').querySelector('output') };
     el.addEventListener('input', () => {
       const v = parseFloat(el.value);
-      if (k === 'ry' || k === 'rx' || k === 'rz') turn(k, wrap(v - state[k]));
+      if (k === 'ry' || k === 'rx' || k === 'rz') userTurn(k, wrap(v - state[k]));
       else state[k] = v;
       sync(); schedule();
     });
@@ -287,7 +323,7 @@
   }
   $('outline').addEventListener('change', e => { state.outline = e.target.checked; schedule(); });
   $('diam').addEventListener('change', e => { state.diam = e.target.checked; schedule(); });
-  // Only one of Spin / Tilt can be locked; locking one unlocks the other
+  $('lockTilt').addEventListener('change', e => { tiltLock = e.target.checked; captureTiltAxis(); });
 
   function sync() {
     for (const k of Object.keys(ranges)) {
@@ -300,7 +336,7 @@
   }
 
   $('reset').onclick = () => {
-    resetOrientation(0, 0, 0); sync(); schedule();
+    resetOrientation(0, 0, 0); captureTiltAxis(); sync(); schedule();
   };
 
   // ---------- Dragging on the picture ----------
@@ -353,7 +389,7 @@
       state.gy = clamp(state.gy + dy / (picH() * view.s) * 100, 'gy');
     } else if (gesture === 'rotate') {
       const perPx = 1 / (globeInPicture().R * view.s) / DEG;
-      turn('ry', dx * perPx); turn('rx', dy * perPx);
+      userTurn('ry', dx * perPx); userTurn('rx', dy * perPx);
     } else {
       return;
     }
