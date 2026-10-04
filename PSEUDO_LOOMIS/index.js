@@ -17,6 +17,29 @@
   };
   const state = { ...defaults };
 
+  // Settings are remembered between visits. The globe's place on the picture
+  // and its rotation belong to one picture, so they always start from the defaults.
+  const STORE_KEY = 'pseudoLoomis.settings';
+  const STORED = Object.keys(defaults).filter(k => !['gx', 'gy', 'ry', 'rx', 'rz'].includes(k));
+  const snapshot = () => JSON.stringify(Object.fromEntries(STORED.map(k => [k, state[k]])));
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORE_KEY)) || {};
+    for (const k of STORED) {
+      const v = saved[k];
+      if (typeof v !== typeof defaults[k]) continue;
+      if (typeof v === 'number' && !Number.isFinite(v)) continue;
+      if (typeof v === 'string' && !/^#[0-9a-f]{6}$/i.test(v)) continue;
+      state[k] = v;
+    }
+  } catch { /* storage blocked or the saved text is damaged: keep the defaults */ }
+  let stored = snapshot();
+  function persist() {
+    const now = snapshot();
+    if (now === stored) return;
+    stored = now;
+    try { localStorage.setItem(STORE_KEY, now); } catch { /* private window, or storage is full */ }
+  }
+
   let img = null, imgName = 'picture', imgType = 'image/png';
   const PLACEHOLDER = { w: 1600, h: 1000 };
   const picW = () => img ? img.naturalWidth : PLACEHOLDER.w;
@@ -317,7 +340,7 @@
   }
 
   let raf = 0;
-  const schedule = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; draw(); }); };
+  const schedule = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; draw(); persist(); }); };
 
   // ---------- Controls ----------
   const wrap = a => ((a + 180) % 360 + 360) % 360 - 180;
@@ -524,5 +547,6 @@
   new ResizeObserver(resize).observe(stage);
   resetOrientation(defaults.ry, defaults.rx, defaults.rz);
   captureTiltAxis();
+  for (const k of STORED) if (ranges[k]) state[k] = clamp(state[k], k); // saved values from an older slider range
   sync(); resize();
 })();
