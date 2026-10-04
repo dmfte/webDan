@@ -45,6 +45,14 @@
   const picW = () => img ? img.naturalWidth : PLACEHOLDER.w;
   const picH = () => img ? img.naturalHeight : PLACEHOLDER.h;
 
+  // Snap points: places for the globe's centre, marked on the picture so the
+  // globe can be moved away and brought back. Stored like gx/gy (% of the
+  // picture's width/height); they belong to one picture, so they are not saved.
+  const marks = [];
+  const MAX_MARKS = 8, SNAP_PX = 14, MARK_COLOR = '#ff2d2d';
+  // Snapping puts the centre exactly on a point, so the snapped one is found by comparing
+  const snappedMark = () => marks.findIndex(m => m.x === state.gx && m.y === state.gy);
+
   // Great circles on a unit sphere (y = polar axis). Two meridians 90° apart
   // meet at right angles at the poles and cross the equator at right angles.
   const N = 240;
@@ -56,8 +64,8 @@
   ];
 
   // Globe-relative rotation. The globe's orientation is kept as a matrix, and
-  // every drag step (or change to the Roll slider) is applied as a rotation
-  // around one of the globe's OWN axes, wherever that axis currently points:
+  // every drag step is applied as a rotation around one of the globe's OWN
+  // axes, wherever that axis currently points:
   //   Spin = polar axis (through the poles),
   //   Tilt = ear-to-ear axis, Roll = front-to-back axis.
   // state.ry/rx/rz are the accumulated amounts turned around each axis.
@@ -79,8 +87,8 @@
     return [0, 1, 2].map(i => [a[i], b[i], c[i]]);
   }
   // Each turn is about that axis of the globe itself, wherever the axis currently
-  // points. Turns about different axes don't commute, so the Roll slider value is
-  // a per-axis total, not a readout of the final orientation; Reset returns to
+  // points. Turns about different axes don't commute, so state.ry/rx/rz are
+  // per-axis totals, not a readout of the final orientation; Reset returns to
   // the neutral pose.
   let orient = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
   function turn(axis, deg) {
@@ -97,15 +105,15 @@
   // ear-to-ear axis, the dashed line in the equator colour) is held during
   // drags: after every Spin step, Roll is turned by whatever angle puts that
   // axis back on the locked direction. The correction is an ordinary
-  // globe-relative Roll turn, so the Roll value drifts away from what was set
-  // by hand. The Roll slider turns about its own axis alone, which changes the
-  // inclination on purpose, so the lock then picks up from the new one. Tilt
-  // turns about the axis itself and never moves it.
+  // globe-relative Roll turn. The lever drag changes the inclination on
+  // purpose, so the lock then picks up from the new one. Tilt turns about the
+  // axis itself and never moves it.
   let lockDir = null; // unit screen direction of the Tilt axis
-  function captureTiltAxis() {
+  function tiltAxisDir() {
     const x = orient[0][0], y = orient[1][0], l = Math.hypot(x, y);
-    lockDir = l > 1e-6 ? [x / l, y / l] : null; // no inclination while it points at the viewer
+    return l > 1e-6 ? [x / l, y / l] : null; // no inclination while it points at the viewer
   }
+  function captureTiltAxis() { lockDir = tiltAxisDir(); }
   function holdTiltAxis() {
     if (!lockDir) { captureTiltAxis(); return; }
     const [ux, uy] = lockDir;
@@ -131,8 +139,10 @@
     ];
   }
 
-  // Draw the globe onto any 2D context in that context's pixel units.
-  function drawGlobe(g, cx, cy, R, lw) {
+  // Draw the globe onto any 2D context in that context's pixel units. The front
+  // marker only shows which way the globe faces while it is being set up, so the
+  // export leaves it out (marker = false).
+  function drawGlobe(g, cx, cy, R, lw, marker = true) {
     const rot = rotator();
     const proj = p => [cx + p[0] * R, cy - p[1] * R];
     const lerp = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
@@ -183,7 +193,7 @@
     // whole cone outwards. It is outside the ball, so its lines are back lines
     // only while they are behind the ball's disc. Its height follows its
     // diameter, so the size slider scales it without changing its shape.
-    if (state.front) {
+    if (marker && state.front) {
       const r = state.frontSize / 200, z0 = Math.sqrt(1 - r * r) + state.frontGap / 100;
       const apex = [0, 0, z0 + r * 2.5], K = 48, PARTS = 4;
       const coneVis = p => { const q = rot(p); return q[0] * q[0] + q[1] * q[1] >= 1 ? 1 : q[2]; };
@@ -337,6 +347,35 @@
     const g = globeInPicture();
     drawGlobe(ctx, ox + g.cx * s, oy + g.cy * s, g.R * s, g.lw * s);
     ctx.restore();
+    // Roll lever: only a guide for the gesture, so it is drawn here and never exported
+    const ax = lever && tiltAxisDir();
+    if (ax) {
+      const reach = lever.p[0] * ax[0] + lever.p[1] * ax[1];
+      const cx = ox + g.cx * s, cy = oy + g.cy * s;
+      ctx.save();
+      ctx.lineCap = 'round'; ctx.strokeStyle = LEVER_COLOR;
+      ctx.lineWidth = Math.max(2, g.lw * s * 1.5);
+      ctx.globalAlpha = Math.abs(reach) >= g.R * s ? 1 : 0.6; // dimmed until it reaches the circumference
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + ax[0] * reach, cy - ax[1] * reach); ctx.stroke();
+      ctx.restore();
+    }
+    // Snap points: guides for placing the globe, so they are never exported either.
+    // The one the globe is snapped to gets a second ring.
+    if (marks.length) {
+      const on = snappedMark();
+      ctx.save();
+      ctx.strokeStyle = MARK_COLOR; ctx.lineWidth = 1;
+      marks.forEach((m, i) => {
+        const x = ox + m.x / 100 * pw, y = oy + m.y / 100 * ph;
+        ctx.beginPath();
+        ctx.arc(x, y, 7, 0, 2 * Math.PI);
+        if (i === on) { ctx.moveTo(x + 10, y); ctx.arc(x, y, 10, 0, 2 * Math.PI); }
+        ctx.moveTo(x - 13, y); ctx.lineTo(x + 13, y);
+        ctx.moveTo(x, y - 13); ctx.lineTo(x, y + 13);
+        ctx.stroke();
+      });
+      ctx.restore();
+    }
   }
 
   let raf = 0;
@@ -346,16 +385,14 @@
   const wrap = a => ((a + 180) % 360 + 360) % 360 - 180;
   const fmt = {
     gx: v => `${v.toFixed(1)}%`, gy: v => `${v.toFixed(1)}%`, size: v => `${v.toFixed(1)}%`,
-    rz: v => `${Math.round(v)}°`, frontSize: v => `${Math.round(v)}%`, frontGap: v => v == 0 ? 'None' : `${Math.round(v)}%`,
+    frontSize: v => `${Math.round(v)}%`, frontGap: v => v == 0 ? 'None' : `${Math.round(v)}%`,
     back: v => v == 0 ? 'Gone' : `${Math.round(v)}%`, cut: v => v == 0 ? 'Off' : `${Math.round(v)}%`, width: v => v.toFixed(2),
   };
   const ranges = {};
   for (const k of Object.keys(fmt)) {
     const el = $(k); ranges[k] = { el, out: el.parentElement.querySelector('output') };
     el.addEventListener('input', () => {
-      const v = parseFloat(el.value);
-      if (k === 'rz') { turn(k, wrap(v - state[k])); captureTiltAxis(); }
-      else state[k] = v;
+      state[k] = parseFloat(el.value);
       sync(); schedule();
     });
   }
@@ -375,7 +412,25 @@
     $('diam').checked = state.diam;
     $('front').checked = state.front;
     for (const k of ['colMer', 'colEq', 'colOut']) $(k).value = state[k];
+    const on = snappedMark();
+    $('markCount').textContent = `${marks.length} / ${MAX_MARKS}`;
+    $('markAdd').disabled = on >= 0 || marks.length >= MAX_MARKS;
+    $('markClear').disabled = on < 0;
+    $('markClearAll').disabled = !marks.length;
   }
+
+  $('markAdd').onclick = () => {
+    if (snappedMark() >= 0 || marks.length >= MAX_MARKS) return;
+    marks.push({ x: state.gx, y: state.gy });
+    sync(); schedule();
+  };
+  $('markClear').onclick = () => {
+    const on = snappedMark();
+    if (on < 0) return;
+    marks.splice(on, 1);
+    sync(); schedule();
+  };
+  $('markClearAll').onclick = () => { marks.length = 0; sync(); schedule(); };
 
   $('reset').onclick = () => {
     resetOrientation(0, 0, 0); captureTiltAxis(); sync(); schedule();
@@ -387,22 +442,42 @@
   // deltas. Each Spin step is followed by the Tilt lock's Roll correction.
   // The drag distance is divided by the globe's on-screen radius, so the
   // surface at the centre of the globe keeps pace with the pointer.
+  // Lever: a rotate drag that starts inside the globe rolls it instead. A line
+  // runs from the centre along the ear-to-ear axis, on the pointer's side, as
+  // long as the pointer's projection onto that axis. While it reaches past the
+  // circumference, the axis follows the pointer's turn about the centre: the
+  // wanted direction goes to the Tilt lock, which finds the Roll turn for it.
   // Place: a right-button drag moves the globe's centre with the pointer. The
   // place toggle swaps the two buttons, so a touch or left-button drag places
-  // and a right-button drag rotates.
+  // and a right-button drag rotates. The centre jumps onto a snap point while
+  // it is within SNAP_PX of it on screen. The drag itself is tracked unsnapped
+  // (free), so that pulling further away lets go of the point again.
   // Resize: the mouse wheel, or a two-finger pinch, scales the radius.
   const clamp = (v, k) => Math.min(+ranges[k].el.max, Math.max(+ranges[k].el.min, v));
   const placeMode = $('placeMode');
   const pointers = new Map(); // pointerId -> last position
   let gesture = null, dragId = null, pinchDist = 0;
+  let lever = null; // { p: pointer position from the globe's centre } during a lever drag
+  let free = null; // { x, y }: where a place drag has taken the centre, before snapping
+  const LEVER_COLOR = '#3fd0ff';
   const pinchSpan = () => {
     const [p, q] = [...pointers.values()];
     return Math.hypot(p.x - q.x, p.y - q.y);
   };
+  // Pointer position measured from the globe's centre (y up), and the globe's radius, in CSS pixels
+  const fromGlobe = e => {
+    const g = globeInPicture(), r = canvas.getBoundingClientRect();
+    return {
+      p: [e.clientX - r.left - view.ox - g.cx * view.s, r.top + view.oy + g.cy * view.s - e.clientY],
+      R: g.R * view.s,
+    };
+  };
   const setGesture = g => {
     gesture = g;
-    canvas.classList.toggle('dragging', g === 'rotate');
+    canvas.classList.toggle('dragging', g === 'rotate' || g === 'lever');
     canvas.classList.toggle('placing', g === 'place');
+    // The lever leaves a new inclination behind for the Tilt lock to hold
+    if (g !== 'lever' && lever) { lever = null; captureTiltAxis(); schedule(); }
   };
   canvas.addEventListener('pointerdown', e => {
     if (e.button !== 0 && e.button !== 2) return;
@@ -410,7 +485,10 @@
     canvas.setPointerCapture(e.pointerId);
     if (pointers.size === 1) {
       dragId = e.pointerId;
-      setGesture((e.button === 2) !== placeMode.checked ? 'place' : 'rotate');
+      const { p, R } = fromGlobe(e);
+      if ((e.button === 2) !== placeMode.checked) { free = { x: state.gx, y: state.gy }; setGesture('place'); }
+      else if (Math.hypot(...p) <= R) { lever = { p }; setGesture('lever'); schedule(); }
+      else setGesture('rotate');
     } else if (pointers.size === 2) {
       setGesture('pinch'); pinchDist = pinchSpan();
     }
@@ -428,11 +506,28 @@
     } else if (e.pointerId !== dragId) {
       return;
     } else if (gesture === 'place') {
-      state.gx = clamp(state.gx + dx / (picW() * view.s) * 100, 'gx');
-      state.gy = clamp(state.gy + dy / (picH() * view.s) * 100, 'gy');
+      const pw = picW() * view.s, ph = picH() * view.s;
+      free.x = clamp(free.x + dx / pw * 100, 'gx');
+      free.y = clamp(free.y + dy / ph * 100, 'gy');
+      let near = free, best = SNAP_PX;
+      for (const m of marks) {
+        const dist = Math.hypot((m.x - free.x) / 100 * pw, (m.y - free.y) / 100 * ph);
+        if (dist <= best) { best = dist; near = m; }
+      }
+      state.gx = near.x; state.gy = near.y;
     } else if (gesture === 'rotate') {
       const perPx = 1 / (globeInPicture().R * view.s) / DEG;
       turn('ry', dx * perPx); holdTiltAxis(); turn('rx', dy * perPx);
+    } else if (gesture === 'lever') {
+      const { p, R } = fromGlobe(e), q = lever.p, ax = tiltAxisDir();
+      lever.p = p;
+      if (ax && Math.abs(p[0] * ax[0] + p[1] * ax[1]) >= R) {
+        // Turn the axis by the angle the pointer swept about the centre
+        const a = Math.atan2(q[0] * p[1] - q[1] * p[0], q[0] * p[0] + q[1] * p[1]);
+        const c = Math.cos(a), s = Math.sin(a);
+        lockDir = [ax[0] * c - ax[1] * s, ax[0] * s + ax[1] * c];
+        holdTiltAxis();
+      }
     } else {
       return;
     }
@@ -475,7 +570,8 @@
         intro.hidden = true; intro.style.display = 'none';
         dl.hidden = false; dl.style.display = 'flex';
         status.textContent = '';
-        layout(); schedule();
+        marks.length = 0; // the snap points were places on the previous picture
+        layout(); sync(); schedule();
       };
       im.onerror = () => { status.textContent = 'This browser can’t open that image format. Try a JPG or PNG.'; };
       im.src = reader.result;
@@ -514,7 +610,7 @@
     const g2 = out.getContext('2d');
     g2.drawImage(img, 0, 0);
     const g = globeInPicture();
-    drawGlobe(g2, g.cx, g.cy, g.R, g.lw);
+    drawGlobe(g2, g.cx, g.cy, g.R, g.lw, false);
     status.textContent = 'Preparing image…';
     // Keep the original format: JPEG and WebP stay lossy at high quality, everything else is PNG
     const type = imgType === 'image/jpeg' || imgType === 'image/webp' ? imgType : 'image/png';

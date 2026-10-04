@@ -19,15 +19,10 @@
     <div class="stage" id="stage">
       <canvas id="c" aria-label="Picture with wireframe globe"></canvas>
       <div class="empty" id="empty">
-        <p>Choose a picture, or drop one here, then drag on it to turn the globe.</p>
+        <p>Choose a picture, or drop one here, then drag around the globe to turn it, or from inside the globe to roll it.</p>
         <label class="btn primary picker">Choose picture<input type="file" class="file-in" accept="image/*"></label>
       </div>
       <div class="stage-controls">
-        <div class="roll">
-          <label for="rz">Roll</label>
-          <input id="rz" type="range" min="-180" max="180" step="1">
-          <output></output>
-        </div>
         <button type="button" class="round" id="reset" title="Reset rotation" aria-label="Reset rotation">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="12" cy="12" r="8.5"/>
@@ -63,6 +58,15 @@
         <div class="row"><label for="gx">Across</label><input id="gx" type="range" min="0" max="100" step="0.1"><output></output></div>
         <div class="row"><label for="gy">Down</label><input id="gy" type="range" min="0" max="100" step="0.1"><output></output></div>
         <div class="row"><label for="size">Radius</label><input id="size" type="range" min="1" max="80" step="0.1"><output></output></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Snap points <output id="markCount"></output></legend>
+        <div class="marks">
+          <button type="button" class="btn" id="markAdd" title="Mark the globe's centre as a snap point">Mark centre</button>
+          <button type="button" class="btn" id="markClear" title="Remove the snap point the globe is on">Clear snapped</button>
+          <button type="button" class="btn" id="markClearAll" title="Remove every snap point">Clear all</button>
+        </div>
       </fieldset>
 
       <fieldset>
