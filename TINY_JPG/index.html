@@ -7,117 +7,117 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="app-shell">
-    <header class="topbar">
-      <div class="brand">
-        <a class="brand-back" href="../index.html" aria-label="Volver al portafolio">←</a>
-        <span class="brand-mark" aria-hidden="true">JPG</span>
-        <div class="brand-title">
-          <h1>Tiny JPG</h1>
-          <p>Comprime fotos con la mínima pérdida visible de calidad.</p>
-        </div>
+  <header class="topbar">
+    <a class="brand-back" href="../index.html" aria-label="Volver al portafolio">←</a>
+    <span class="brand-mark" aria-hidden="true">JPG</span>
+    <span class="brand-name">Tiny JPG</span>
+  </header>
+
+  <main class="page">
+    <section class="hero" aria-labelledby="heroTitle">
+      <h1 id="heroTitle">Comprime y convierte tus imágenes</h1>
+      <p class="hero-sub">JPG, PNG y WebP, al instante y sin salir de tu navegador.</p>
+
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="fileInput" name="fileInput" accept="image/jpeg,image/png,image/webp" multiple>
+        <label class="drop-label" for="fileInput">
+          <span class="upload-mark" aria-hidden="true"></span>
+          <strong>Suelta tus imágenes aquí</strong>
+          <span>o haz clic para elegirlas · JPG, PNG o WebP</span>
+        </label>
       </div>
 
-      <div class="topbar-actions">
-        <button type="button" class="button button-secondary panel-open" id="panelOpenBtn" aria-expanded="false" aria-controls="controlsPanel">Ajustes</button>
-        <button class="button button-secondary" type="button" id="downloadAll" disabled>Descargar todas</button>
-        <button class="button button-secondary" type="button" id="cancelAll" disabled>Cancelar todo</button>
+      <div class="folder-row">
+        <input type="file" id="folderInput" name="folderInput" webkitdirectory multiple>
+        <label class="button button-secondary" for="folderInput">Seleccionar carpeta</label>
+        <p class="hint" id="lastFolderHint" hidden></p>
       </div>
-    </header>
+    </section>
 
-    <main class="app-layout">
-      <aside class="controls-panel" id="controlsPanel" aria-label="Ajustes de Tiny JPG">
-        <div class="panel-heading">
-          <div>
-            <p class="eyebrow">Ajustes</p>
-            <h2>Compresión</h2>
-          </div>
-          <button type="button" class="panel-close" id="panelCloseBtn" aria-label="Cerrar ajustes">Cerrar</button>
-        </div>
+    <section class="options" aria-label="Ajustes">
+      <div class="option">
+        <label class="switch" for="convertToggle">
+          <input type="checkbox" role="switch" id="convertToggle">
+          <span>Convertir mis imágenes automáticamente</span>
+        </label>
 
-        <section class="control-card upload-card" aria-labelledby="addPhotosTitle">
-          <div class="section-title">
-            <span class="step-number">1</span>
-            <h3 id="addPhotosTitle">Agregar fotos</h3>
-          </div>
-
-          <div class="drop-zone" id="dropZone">
-            <input type="file" id="fileInput" name="fileInput" accept="image/jpeg,image/png,image/webp" multiple>
-            <label class="drop-label" for="fileInput">
-              <span class="upload-mark" aria-hidden="true"></span>
-              <strong>Suelta tus fotos aquí</strong>
-              <span>o elige archivos</span>
-            </label>
-          </div>
-
-          <input type="file" id="folderInput" name="folderInput" webkitdirectory multiple>
-          <label class="button button-secondary" for="folderInput">Seleccionar carpeta</label>
-          <p class="hint" id="lastFolderHint" hidden></p>
-
-          <p class="hint">Acepta JPG, PNG y WebP · siempre entrega JPG.</p>
-        </section>
-
-        <section class="control-card" aria-labelledby="resizeTitle">
-          <div class="section-title">
-            <span class="step-number">2</span>
-            <h3 id="resizeTitle">Redimensionar</h3>
-          </div>
-
-          <label class="field-check" for="resizeToggle">
-            <input type="checkbox" id="resizeToggle">
-            <span>Reducir dimensiones antes de comprimir</span>
+        <fieldset class="format-picker" id="formatPicker" disabled>
+          <legend class="sr-only">Formato de salida</legend>
+          <label class="format-pill">
+            <input type="radio" name="convertFormat" value="image/webp" checked>
+            <span>WebP</span>
           </label>
+          <label class="format-pill">
+            <input type="radio" name="convertFormat" value="image/jpeg">
+            <span>JPG</span>
+          </label>
+          <label class="format-pill">
+            <input type="radio" name="convertFormat" value="image/png">
+            <span>PNG</span>
+          </label>
+        </fieldset>
+      </div>
+      <p class="hint" id="convertHint">Sin convertir, cada imagen se comprime y conserva su formato.</p>
 
-          <div class="rs-mount" id="resizeSlider" hidden></div>
-          <p class="hint" id="resizePreview" hidden></p>
-        </section>
+      <div class="option">
+        <label class="switch" for="resizeToggle">
+          <input type="checkbox" role="switch" id="resizeToggle">
+          <span>Reducir dimensiones antes de comprimir</span>
+        </label>
+      </div>
+      <div class="rs-mount" id="resizeSlider" hidden></div>
+    </section>
 
-        <section class="control-card notice-card">
-          <p class="hint">
-            Todo ocurre en tu navegador — nada se sube a ningún servidor. Si cierras o recargas
-            la pestaña, se pierde todo lo que no hayas descargado todavía, esté comprimiéndose
-            o ya listo.
-          </p>
-        </section>
-      </aside>
+    <div class="large-file-banner" id="largeFileBanner" role="status" hidden>
+      <p>Hay archivos de más de 20 MB en el lote — la compresión puede tardar unos segundos más de lo habitual.</p>
+    </div>
 
-      <section class="workspace" aria-label="Lote de compresión">
-        <div class="large-file-banner" id="largeFileBanner" role="status" hidden>
-          <p>Hay archivos de más de 20 MB en el lote — la compresión puede tardar unos segundos más de lo habitual.</p>
+    <div id="fileAnnouncer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+    <section class="results" id="results" aria-label="Lote de compresión" hidden>
+      <div class="batch-summary">
+        <div class="batch-counts" id="batchCounts" aria-live="polite"></div>
+        <div class="batch-progress">
+          <div class="batch-progress-fill" id="batchProgressFill"></div>
         </div>
+      </div>
 
-        <div id="fileAnnouncer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+      <ul class="file-list" id="fileList"></ul>
 
-        <div class="batch-summary" id="batchSummary" hidden>
-          <div class="batch-counts" id="batchCounts" aria-live="polite"></div>
-          <div class="batch-progress">
-            <div class="batch-progress-fill" id="batchProgressFill"></div>
-          </div>
+      <div class="results-footer">
+        <p class="savings" id="savingsSummary"></p>
+        <div class="results-actions">
+          <button class="button button-secondary" type="button" id="cancelAll" disabled>Cancelar todo</button>
+          <button class="button button-primary" type="button" id="downloadAll" disabled>Descargar todas</button>
         </div>
+      </div>
+    </section>
 
-        <ul class="file-list" id="fileList"></ul>
-
-        <p class="empty-hint" id="emptyHint">Todavía no has agregado fotos.</p>
-      </section>
-    </main>
-  </div>
+    <p class="hint privacy-note">
+      Todo ocurre en tu navegador — nada se sube a ningún servidor. Si cierras o recargas
+      la pestaña, se pierde todo lo que no hayas descargado todavía, esté comprimiéndose
+      o ya listo.
+    </p>
+  </main>
 
   <template id="fileRowTemplate">
     <li class="file-row" data-status="queued">
-      <div class="file-row-main">
+      <div class="file-info">
         <p class="file-name"></p>
         <p class="file-meta">
-          <span class="file-size-original"></span>
+          <span class="file-format"></span>
           <span class="file-dims"></span>
         </p>
+        <p class="file-error" hidden></p>
       </div>
-      <div class="file-row-status">
-        <span class="status-chip"></span>
-        <p class="file-result" hidden></p>
+      <span class="file-size-original"></span>
+      <div class="file-progress">
+        <div class="file-progress-fill"></div>
+        <span class="status-label"></span>
       </div>
-      <div class="file-row-actions">
-        <button class="button button-secondary button-action" type="button">Cancelar</button>
-      </div>
+      <span class="file-size-result"></span>
+      <span class="file-saving"></span>
+      <button class="button button-secondary button-action" type="button">Cancelar</button>
     </li>
   </template>
 

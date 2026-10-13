@@ -1,9 +1,9 @@
 // Minimal ZIP writer, "store" method only (no compression). The files going
-// in are already-compressed JPEGs, so re-compressing them inside the archive
+// in are already-compressed images, so re-compressing them inside the archive
 // buys nothing — storing them raw skips needing a DEFLATE implementation
 // entirely and keeps this a zero-dependency module like the rest of the repo.
 
-function crc32(bytes) {
+export function crc32(bytes) {
   let crc = ~0;
   for (let i = 0; i < bytes.length; i++) {
     crc ^= bytes[i];

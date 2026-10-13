@@ -2,33 +2,36 @@ import { RangeSlider } from '../assets/js/RangeSlider.js';
 import { createZipBlob } from './zip.js';
 
 const MAX_CONCURRENT = 3;
-const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+// Every accepted input type is also a type the canvas encoder can write, so
+// "keep the original format" is always possible.
+const FORMATS = {
+  'image/jpeg': { label: 'JPG', ext: 'jpg' },
+  'image/png': { label: 'PNG', ext: 'png' },
+  'image/webp': { label: 'WebP', ext: 'webp' }
+};
 // Typical phone/DSLR photos stay well under this even at high resolution;
 // past it (big panoramas, scans, upscaled exports) the repeated encode
 // passes in worker.js's quality search take noticeably longer.
 const LARGE_FILE_THRESHOLD = 20 * 1024 * 1024;
+const ACTIVE_STATUSES = ['queued', 'preparing', 'compressing'];
 
-const appShell = document.querySelector('.app-shell');
-const topbarEl = document.querySelector('.topbar');
-const workspaceEl = document.querySelector('.workspace');
-const controlsPanel = document.getElementById('controlsPanel');
-const panelOpenBtn = document.getElementById('panelOpenBtn');
-const panelCloseBtn = document.getElementById('panelCloseBtn');
 const fileAnnouncer = document.getElementById('fileAnnouncer');
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
 const folderInput = document.getElementById('folderInput');
 const lastFolderHint = document.getElementById('lastFolderHint');
 const LAST_FOLDER_KEY = 'tinyjpg-last-folder';
+const convertToggle = document.getElementById('convertToggle');
+const formatPicker = document.getElementById('formatPicker');
+const convertHint = document.getElementById('convertHint');
 const resizeToggle = document.getElementById('resizeToggle');
 const resizeSliderMount = document.getElementById('resizeSlider');
-const resizePreviewEl = document.getElementById('resizePreview');
 const largeFileBanner = document.getElementById('largeFileBanner');
-const batchSummary = document.getElementById('batchSummary');
+const resultsEl = document.getElementById('results');
 const batchCounts = document.getElementById('batchCounts');
 const batchProgressFill = document.getElementById('batchProgressFill');
 const fileList = document.getElementById('fileList');
-const emptyHint = document.getElementById('emptyHint');
+const savingsSummary = document.getElementById('savingsSummary');
 const cancelAllBtn = document.getElementById('cancelAll');
 const downloadAllBtn = document.getElementById('downloadAll');
 const fileRowTemplate = document.getElementById('fileRowTemplate');
@@ -38,6 +41,8 @@ const queue = [];
 let activeCount = 0;
 let idCounter = 0;
 
+let convertEnabled = false;
+let convertFormat = 'image/webp';
 let resizeEnabled = false;
 let resizePercent = 80;
 let resizeSliderInstance = null;
@@ -53,10 +58,43 @@ function announce(message) {
 
 // === Settings ===
 
+// Safari's canvas can decode WebP but not encode it — asking for it quietly
+// yields a PNG instead, so the option is withdrawn rather than left to fail.
+const canEncodeWebp = document.createElement('canvas').toDataURL('image/webp').startsWith('data:image/webp');
+if (!canEncodeWebp) {
+  formatPicker.querySelector('input[value="image/webp"]').disabled = true;
+  formatPicker.querySelector('input[value="image/jpeg"]').checked = true;
+  convertFormat = 'image/jpeg';
+}
+
+function renderConvertHint() {
+  if (!convertEnabled) {
+    convertHint.textContent = 'Sin convertir, cada imagen se comprime y conserva su formato.';
+  } else if (convertFormat === 'image/jpeg') {
+    convertHint.textContent = 'Todas las imágenes se comprimen y se entregan en JPG, con sus metadatos EXIF.';
+  } else {
+    convertHint.textContent =
+      `Todas las imágenes se comprimen y se entregan en ${FORMATS[convertFormat].label}. Los metadatos EXIF solo se conservan en JPG.`;
+  }
+  if (!canEncodeWebp) convertHint.textContent += ' Este navegador no puede generar WebP.';
+}
+
+convertToggle.addEventListener('change', () => {
+  convertEnabled = convertToggle.checked;
+  formatPicker.disabled = !convertEnabled;
+  renderConvertHint();
+  refreshQueuedPreviews();
+});
+
+formatPicker.addEventListener('change', (e) => {
+  convertFormat = e.target.value;
+  renderConvertHint();
+  refreshQueuedPreviews();
+});
+
 resizeToggle.addEventListener('change', () => {
   resizeEnabled = resizeToggle.checked;
   resizeSliderMount.hidden = !resizeEnabled;
-  resizePreviewEl.hidden = !resizeEnabled;
 
   if (resizeEnabled && !resizeSliderInstance) {
     resizeSliderInstance = new RangeSlider(resizeSliderMount, {
@@ -73,86 +111,14 @@ resizeToggle.addEventListener('change', () => {
     resizePercent = resizeSliderInstance.val;
     resizeSliderInstance.onValueChange((val) => {
       resizePercent = val;
-      refreshResizePreviews();
+      refreshQueuedPreviews();
     });
   }
 
-  refreshResizePreviews();
+  refreshQueuedPreviews();
 });
 
-const mobileQuery = window.matchMedia('(max-width: 900px)');
-let panelOpen = false;
-
-function getFocusableChildren(container) {
-  return Array.from(
-    container.querySelectorAll(
-      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-    )
-  ).filter((el) => el.offsetParent !== null);
-}
-
-function trapFocus(e) {
-  const focusable = getFocusableChildren(controlsPanel);
-  if (!focusable.length) return;
-  const first = focusable[0];
-  const last = focusable[focusable.length - 1];
-  if (e.shiftKey && document.activeElement === first) {
-    e.preventDefault();
-    last.focus();
-  } else if (!e.shiftKey && document.activeElement === last) {
-    e.preventDefault();
-    first.focus();
-  }
-}
-
-function onPanelKeydown(e) {
-  if (e.key === 'Escape') {
-    e.preventDefault();
-    closePanel();
-  } else if (e.key === 'Tab') {
-    trapFocus(e);
-  }
-}
-
-function openPanel() {
-  if (!mobileQuery.matches || panelOpen) return;
-  panelOpen = true;
-  appShell.classList.add('is-panel-open');
-  panelOpenBtn.setAttribute('aria-expanded', 'true');
-  controlsPanel.setAttribute('role', 'dialog');
-  controlsPanel.setAttribute('aria-modal', 'true');
-  topbarEl.inert = true;
-  workspaceEl.inert = true;
-  document.addEventListener('keydown', onPanelKeydown);
-  const firstFocusable = getFocusableChildren(controlsPanel)[0];
-  (firstFocusable || controlsPanel).focus();
-}
-
-function closePanel({ returnFocus = true } = {}) {
-  if (!panelOpen) return;
-  panelOpen = false;
-  appShell.classList.remove('is-panel-open');
-  panelOpenBtn.setAttribute('aria-expanded', 'false');
-  controlsPanel.removeAttribute('role');
-  controlsPanel.removeAttribute('aria-modal');
-  topbarEl.inert = false;
-  workspaceEl.inert = false;
-  document.removeEventListener('keydown', onPanelKeydown);
-  if (returnFocus) panelOpenBtn.focus();
-}
-
-panelOpenBtn.addEventListener('click', openPanel);
-panelCloseBtn.addEventListener('click', () => closePanel());
-
-document.addEventListener('click', (e) => {
-  if (!panelOpen) return;
-  if (controlsPanel.contains(e.target) || e.target.closest('.panel-open')) return;
-  closePanel({ returnFocus: false });
-});
-
-mobileQuery.addEventListener('change', (e) => {
-  if (!e.matches) closePanel({ returnFocus: false });
-});
+renderConvertHint();
 
 // === File intake ===
 
@@ -178,31 +144,40 @@ function renderLastFolderHint() {
 }
 renderLastFolderHint();
 
+// Drops are accepted anywhere on the page, not just on the drop zone — a
+// near miss would otherwise make the browser navigate away to the image.
 ['dragenter', 'dragover'].forEach((evtName) => {
-  dropZone.addEventListener(evtName, (e) => {
+  window.addEventListener(evtName, (e) => {
     e.preventDefault();
     dropZone.classList.add('drag-over');
   });
 });
 
 ['dragleave', 'drop'].forEach((evtName) => {
-  dropZone.addEventListener(evtName, (e) => {
+  window.addEventListener(evtName, (e) => {
     e.preventDefault();
     dropZone.classList.remove('drag-over');
   });
 });
 
-dropZone.addEventListener('drop', (e) => {
+window.addEventListener('drop', (e) => {
   if (e.dataTransfer && e.dataTransfer.files) handleFiles(e.dataTransfer.files);
 });
 
 function handleFiles(fileListArg) {
+  let skipped = 0;
   for (const file of fileListArg) {
-    if (!ACCEPTED_TYPES.includes(file.type)) {
+    if (!FORMATS[file.type]) {
       console.warn(`Formato no soportado, se omite: ${file.name}`);
+      skipped++;
       continue;
     }
     addFile(file);
+  }
+  if (skipped) {
+    announce(skipped === 1
+      ? 'Se omitió 1 archivo con formato no soportado.'
+      : `Se omitieron ${skipped} archivos con formato no soportado.`);
   }
 }
 
@@ -213,10 +188,13 @@ function addFile(file) {
 
   const els = {
     name: row.querySelector('.file-name'),
-    sizeOriginal: row.querySelector('.file-size-original'),
+    format: row.querySelector('.file-format'),
     dims: row.querySelector('.file-dims'),
-    chip: row.querySelector('.status-chip'),
-    result: row.querySelector('.file-result'),
+    error: row.querySelector('.file-error'),
+    sizeOriginal: row.querySelector('.file-size-original'),
+    statusLabel: row.querySelector('.status-label'),
+    sizeResult: row.querySelector('.file-size-result'),
+    saving: row.querySelector('.file-saving'),
     actionBtn: row.querySelector('.button-action')
   };
 
@@ -227,7 +205,6 @@ function addFile(file) {
   els.actionBtn.addEventListener('click', () => handleActionClick(id));
 
   fileList.appendChild(row);
-  emptyHint.hidden = true;
 
   const entry = {
     id,
@@ -237,6 +214,9 @@ function addFile(file) {
     worker: null,
     width: null,
     height: null,
+    // Fixed when processing starts; until then the row previews whatever the
+    // settings currently say.
+    outputType: null,
     outputBlob: null,
     outputUrl: null,
     row,
@@ -245,14 +225,16 @@ function addFile(file) {
   entries.set(id, entry);
 
   setStatus(entry, 'queued');
-  updateBatchSummary();
+  updateFormatLabel(entry);
 
   readImageDims(file).then(({ width, height }) => {
+    // The worker can finish before this decode does; its numbers win.
+    if (entry.status === 'done') return;
     entry.width = width;
     entry.height = height;
     updateDimsPreview(entry);
   }).catch(() => {
-    els.dims.textContent = '';
+    if (entry.status !== 'done') els.dims.textContent = '';
   });
 
   queue.push(id);
@@ -275,6 +257,16 @@ function readImageDims(file) {
   });
 }
 
+function targetType(file) {
+  return convertEnabled ? convertFormat : file.type;
+}
+
+function updateFormatLabel(entry) {
+  const from = FORMATS[entry.file.type].label;
+  const to = FORMATS[entry.outputType || targetType(entry.file)].label;
+  entry.els.format.textContent = from === to ? from : `${from} → ${to}`;
+}
+
 function updateDimsPreview(entry) {
   if (!entry.width) return;
   let text = `${entry.width}×${entry.height}`;
@@ -286,9 +278,11 @@ function updateDimsPreview(entry) {
   entry.els.dims.textContent = text;
 }
 
-function refreshResizePreviews() {
+function refreshQueuedPreviews() {
   for (const entry of entries.values()) {
-    if (entry.status === 'queued') updateDimsPreview(entry);
+    if (entry.status !== 'queued') continue;
+    updateFormatLabel(entry);
+    updateDimsPreview(entry);
   }
 }
 
@@ -305,7 +299,9 @@ function processQueue() {
 
 function startEntry(entry) {
   activeCount++;
-  setStatus(entry, 'resizing');
+  entry.outputType = targetType(entry.file);
+  updateFormatLabel(entry);
+  setStatus(entry, 'preparing');
 
   const worker = new Worker('worker.js', { type: 'module' });
   entry.worker = worker;
@@ -327,7 +323,8 @@ function startEntry(entry) {
 
   worker.postMessage({
     file: entry.file,
-    resizePercent: resizeEnabled ? resizePercent : null
+    resizePercent: resizeEnabled ? resizePercent : null,
+    outputType: entry.outputType
   });
 }
 
@@ -339,16 +336,18 @@ function finishEntry(entry, blob, width, height) {
   entry.width = width;
   entry.height = height;
 
-  const savedPct = Math.max(0, Math.round((1 - blob.size / entry.file.size) * 100));
-
-  entry.els.result.hidden = false;
-  entry.els.result.textContent = `${formatBytes(blob.size)} · ${savedPct}% menos`;
+  entry.els.sizeResult.textContent = formatBytes(blob.size);
+  entry.els.saving.textContent = formatChange(entry.file.size, blob.size);
+  entry.els.saving.classList.toggle('is-larger', blob.size > entry.file.size);
   entry.els.dims.textContent = `${width}×${height}`;
 
   setStatus(entry, 'done');
+  // The worker hands the source file straight back when it can't beat it.
+  if (blob === entry.file || blob.size === entry.file.size) {
+    entry.els.statusLabel.textContent = 'Ya optimizada';
+  }
   activeCount--;
   processQueue();
-  updateBatchSummary();
 }
 
 function failEntry(entry, message) {
@@ -356,19 +355,18 @@ function failEntry(entry, message) {
     entry.worker.terminate();
     entry.worker = null;
   }
-  entry.els.result.hidden = false;
-  entry.els.result.textContent = message;
+  entry.els.error.hidden = false;
+  entry.els.error.textContent = message;
   setStatus(entry, 'error');
   activeCount--;
   processQueue();
-  updateBatchSummary();
   announce(`${entry.els.name.textContent}: ${message}`);
 }
 
 function cancelEntry(id) {
   const entry = entries.get(id);
   if (!entry) return;
-  if (['done', 'error', 'cancelled'].includes(entry.status)) return;
+  if (!ACTIVE_STATUSES.includes(entry.status)) return;
 
   const wasActive = Boolean(entry.worker);
   if (entry.worker) {
@@ -385,7 +383,6 @@ function cancelEntry(id) {
     activeCount--;
     processQueue();
   }
-  updateBatchSummary();
 }
 
 cancelAllBtn.addEventListener('click', () => {
@@ -400,26 +397,37 @@ function restartEntry(id) {
   if (entry.outputUrl) URL.revokeObjectURL(entry.outputUrl);
   entry.outputBlob = null;
   entry.outputUrl = null;
-  entry.els.result.hidden = true;
-  entry.els.result.textContent = '';
+  entry.outputType = null;
+  entry.els.error.hidden = true;
+  entry.els.error.textContent = '';
 
   setStatus(entry, 'queued');
+  updateFormatLabel(entry);
+  updateDimsPreview(entry);
   queue.push(id);
   processQueue();
+}
+
+// Same path and basename as the source; only the extension follows the
+// output format, and only when the format actually changed.
+function outputName(entry) {
+  const original = entry.file.webkitRelativePath || entry.file.name;
+  if (entry.outputType === entry.file.type) return original;
+  return `${original.replace(/\.[^./]+$/, '')}.${FORMATS[entry.outputType].ext}`;
 }
 
 function downloadEntry(entry) {
   if (!entry.outputUrl) return;
   const a = document.createElement('a');
   a.href = entry.outputUrl;
-  a.download = entry.file.webkitRelativePath || entry.file.name;
+  a.download = outputName(entry);
   a.click();
 }
 
 function handleActionClick(id) {
   const entry = entries.get(id);
   if (!entry) return;
-  if (['queued', 'resizing', 'compressing'].includes(entry.status)) {
+  if (ACTIVE_STATUSES.includes(entry.status)) {
     cancelEntry(id);
   } else if (entry.status === 'done') {
     downloadEntry(entry);
@@ -432,13 +440,25 @@ downloadAllBtn.addEventListener('click', async () => {
   const doneEntries = [...entries.values()].filter((e) => e.status === 'done');
   if (!doneEntries.length) return;
 
+  // Converting can make two siblings land on the same name (foto.png and
+  // foto.jpg → foto.webp). The basename stays untouched; the later one goes
+  // into a subfolder named after the format it came from.
+  const usedNames = new Set();
+  const zipEntries = doneEntries.map((e) => {
+    let name = outputName(e);
+    if (usedNames.has(name)) {
+      const slash = name.lastIndexOf('/') + 1;
+      name = `${name.slice(0, slash)}desde-${FORMATS[e.file.type].ext}/${name.slice(slash)}`;
+    }
+    usedNames.add(name);
+    return { name, blob: e.outputBlob };
+  });
+
   const originalLabel = downloadAllBtn.textContent;
   downloadAllBtn.disabled = true;
   downloadAllBtn.textContent = 'Generando ZIP…';
   try {
-    const zipBlob = await createZipBlob(
-      doneEntries.map((e) => ({ name: e.file.webkitRelativePath || e.file.name, blob: e.outputBlob }))
-    );
+    const zipBlob = await createZipBlob(zipEntries);
     const a = document.createElement('a');
     a.href = URL.createObjectURL(zipBlob);
     a.download = 'tiny-jpg-fotos.zip';
@@ -453,8 +473,8 @@ downloadAllBtn.addEventListener('click', async () => {
 
 const STATUS_LABELS = {
   queued: 'En cola',
-  resizing: 'Redimensionando',
-  compressing: 'Comprimiendo',
+  preparing: 'Preparando…',
+  compressing: 'Comprimiendo…',
   done: 'Lista',
   error: 'Error',
   cancelled: 'Cancelada'
@@ -462,17 +482,21 @@ const STATUS_LABELS = {
 
 const ACTION_LABELS = {
   queued: 'Cancelar',
-  resizing: 'Cancelar',
+  preparing: 'Cancelar',
   compressing: 'Cancelar',
   done: 'Descargar',
-  error: 'Optimizar',
-  cancelled: 'Optimizar'
+  error: 'Reintentar',
+  cancelled: 'Reintentar'
 };
 
 function setStatus(entry, status) {
   entry.status = status;
   entry.row.dataset.status = status;
-  entry.els.chip.textContent = STATUS_LABELS[status] || status;
+  entry.els.statusLabel.textContent = STATUS_LABELS[status] || status;
+  if (status !== 'done') {
+    entry.els.sizeResult.textContent = '';
+    entry.els.saving.textContent = '';
+  }
   updateActionButton(entry);
   updateBatchSummary();
 }
@@ -480,31 +504,31 @@ function setStatus(entry, status) {
 function updateActionButton(entry) {
   const btn = entry.els.actionBtn;
   btn.textContent = ACTION_LABELS[entry.status] || entry.status;
-  const isPrimary = entry.status === 'done' || entry.status === 'cancelled' || entry.status === 'error';
+  const isPrimary = entry.status === 'done';
   btn.classList.toggle('button-primary', isPrimary);
   btn.classList.toggle('button-secondary', !isPrimary);
 }
 
 function updateBatchSummary() {
-  largeFileBanner.hidden = ![...entries.values()].some(
-    (e) => e.isLarge && ['queued', 'resizing', 'compressing'].includes(e.status)
-  );
+  const all = [...entries.values()];
+  const total = all.length;
 
-  const total = entries.size;
-  batchSummary.hidden = total === 0;
-  cancelAllBtn.disabled = ![...entries.values()].some(
-    (e) => !['done', 'error', 'cancelled'].includes(e.status)
-  );
+  largeFileBanner.hidden = !all.some((e) => e.isLarge && ACTIVE_STATUSES.includes(e.status));
+  resultsEl.hidden = total === 0;
+  cancelAllBtn.disabled = !all.some((e) => ACTIVE_STATUSES.includes(e.status));
 
   if (total === 0) {
     downloadAllBtn.disabled = true;
     return;
   }
 
-  let done = 0, error = 0, cancelled = 0;
-  for (const entry of entries.values()) {
-    if (entry.status === 'done') done++;
-    else if (entry.status === 'error') error++;
+  let done = 0, error = 0, cancelled = 0, bytesIn = 0, bytesOut = 0;
+  for (const entry of all) {
+    if (entry.status === 'done') {
+      done++;
+      bytesIn += entry.file.size;
+      bytesOut += entry.outputBlob.size;
+    } else if (entry.status === 'error') error++;
     else if (entry.status === 'cancelled') cancelled++;
   }
   const pending = total - done - error - cancelled;
@@ -519,9 +543,26 @@ function updateBatchSummary() {
 
   const finished = done + error + cancelled;
   batchProgressFill.style.width = `${(finished / total) * 100}%`;
+
+  if (!done) {
+    savingsSummary.textContent = '';
+  } else if (bytesOut <= bytesIn) {
+    const pct = Math.round((1 - bytesOut / bytesIn) * 100);
+    savingsSummary.innerHTML =
+      `Ahorraste <strong>${pct}%</strong> (${formatBytes(bytesIn - bytesOut)} en total)`;
+  } else {
+    // Only reachable by converting to a heavier format (e.g. JPG → PNG).
+    savingsSummary.textContent =
+      `El formato elegido pesa ${formatBytes(bytesOut - bytesIn)} más que los originales.`;
+  }
 }
 
 // === Formatting ===
+
+function formatChange(sizeIn, sizeOut) {
+  const pct = Math.round((1 - sizeOut / sizeIn) * 100);
+  return pct >= 0 ? `−${pct}%` : `+${-pct}%`;
+}
 
 function formatBytes(bytes) {
   if (bytes < 1024) return `${bytes} B`;
@@ -534,4 +575,3 @@ function formatBytes(bytes) {
   }
   return `${val.toFixed(val < 10 ? 2 : 1)} ${units[i]}`;
 }
-
