@@ -394,7 +394,9 @@ var c0 = canv0.getContext("2d", { willReadFrequently: true });
 
 var pxColorCache = new Map(); //  packed rgb -> [r, g, b] of the closest palette color.
 
-const PX_MAX_DIM = 250; //  Safety cap for the largest dimension of the working canvas.
+const PX_DIM_MAX = 256; //  Top of the Dimension slider.
+const PX_MAX_DIM = PX_DIM_MAX * 2; //  Safety cap for the largest dimension of the working canvas.
+const PX_GRID_MIN_BLOCK = 3; //  Below this the grid lines would cover the cells they outline.
 
 //-- Floating panel listing every distinct color actually present in the pixelated output.
 const paletteContainerPx = document.getElementById("paletteContainerPx");
@@ -577,7 +579,7 @@ var paramsPxLevel = {
     title: "Dimension",
     min: 8,
     step: 1,
-    max: 128,
+    max: PX_DIM_MAX,
     def: paramsPx.dimension,
     color: "#576b9e",
     color2: "rgb(142, 167, 231)"
@@ -621,7 +623,10 @@ function getPixelatedCanvas(params) {
 
 function applyPixelation(canvasTarget, canvasPixelated, params) {
     if (imageIn == undefined) return;
-    let block = (params.horizontal) ? parseInt(imageIn.width / params.dimension) : parseInt(imageIn.height / params.dimension);
+    //  Measured against the working canvas (not params.dimension) so it stays right when PX_MAX_DIM
+    //  shrank it; never below 1, or an image smaller than the chosen dimension yields a 0x0 output.
+    let block = (params.horizontal) ? parseInt(imageIn.width / canvasPixelated.width) : parseInt(imageIn.height / canvasPixelated.height);
+    block = Math.max(1, block);
     let pw = canvasPixelated.width * block;
     let ph = canvasPixelated.height * block;
     canvasTarget.width = pw;
@@ -640,7 +645,7 @@ function applyPixelation(canvasTarget, canvasPixelated, params) {
         drawNearestNeighborUpscale(ctx, canvasPixelated, block);
     }
 
-    if (params.grid) {
+    if (params.grid && block >= PX_GRID_MIN_BLOCK) {
         for (let i = 1; i < canvasPixelated.height; i++) {
             let x = 0;
             let y = i * block
