@@ -2,7 +2,8 @@
   'use strict';
 
   // ── State ─────────────────────────────────────────────────────────
-  let splitLevel = 'h1';
+  let splitLevel = 'h1h2';
+  let coverDesign = 'retro';      // key into COVER_DESIGNS
   let metaModalOpened = false;    // first-open flag for title auto-fill
   let modalFromDownload = false;  // true when modal was opened by Download
   let fontInfo = null;            // embedded font: {family, filename, mime, format, file}
@@ -25,6 +26,7 @@
   const downloadBtn  = document.getElementById('download-btn');
   const editMetaBtn  = document.getElementById('edit-meta-btn');
   const metaSubmit   = document.getElementById('meta-submit');
+  const coverPicker  = document.getElementById('cover-picker');
 
   const metaOverlay  = document.getElementById('meta-overlay');
   const metaForm     = document.getElementById('meta-form');
@@ -189,6 +191,7 @@
       if (!metaTitle.value) {
         const headingMatch = mdInput.value.match(/^#{1,2}\s+(.+)$/m);
         if (headingMatch) metaTitle.value = headingMatch[1].trim();
+        refreshCoverThumbs();
       }
     }
 
@@ -239,6 +242,10 @@
     }
   });
 
+  // Thumbnails show the real title/author as they're typed.
+  metaTitle.addEventListener('input', refreshCoverThumbs);
+  metaAuthor.addEventListener('input', refreshCoverThumbs);
+
   function collectMeta() {
     return {
       title:  metaTitle.value.trim(),
@@ -267,7 +274,7 @@
     showLoading('PAINTING COVER...');
     await tick();
 
-    const coverPng = await generateCoverPng(meta.title, meta.author);
+    const coverPng = await generateCoverPng(meta.title, meta.author, coverDesign);
 
     showLoading('ASSEMBLING EPUB...');
     await tick();
@@ -323,7 +330,7 @@
     const url    = URL.createObjectURL(blob);
     const a      = document.createElement('a');
     a.href       = url;
-    a.download   = slugify(meta.title) + '.epub';
+    a.download   = fileNameFrom(meta.title) + '.epub';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -412,7 +419,8 @@ ${body}
   <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
     <dc:identifier id="BookId">urn:uuid:${uuid}</dc:identifier>
     <dc:title>${escXml(meta.title)}</dc:title>
-    <dc:creator>${escXml(meta.author)}</dc:creator>
+    <dc:creator id="creator">${escXml(meta.author)}</dc:creator>
+    <meta refines="#creator" property="role" scheme="marc:relators">aut</meta>
     <dc:date>${meta.date}</dc:date>
     <dc:language>${meta.lang}</dc:language>
     <meta property="dcterms:modified">${modified}</meta>
@@ -519,82 +527,299 @@ a{color:#00f;}`;
   }
 
   // ── Canvas cover ──────────────────────────────────────────────────
-  function generateCoverPng(title, author) {
+  // Every design draws in a fixed 600×900 space; thumbnails reuse the
+  // same draw functions under a scale transform.
+  const COVER_W = 600, COVER_H = 900;
+  const SERIF = "'EB Garamond', Garamond, 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif";
+
+  const COVER_DESIGNS = {
+    retro: { label: 'RETRO', draw: drawRetroCover },
+    waves: { label: 'WAVES', draw: drawWavesCover },
+    arch:  { label: 'ARCH',  draw: drawArchCover },
+    dunes: { label: 'DUNES', draw: drawDunesCover }
+  };
+
+  function generateCoverPng(title, author, design) {
     return new Promise(resolve => {
-      const W = 600, H = 900;
       const canvas = document.createElement('canvas');
-      canvas.width = W; canvas.height = H;
-      const ctx = canvas.getContext('2d');
-
-      // Background gradient
-      const grad = ctx.createLinearGradient(0, 0, 0, H);
-      grad.addColorStop(0, '#080818');
-      grad.addColorStop(1, '#0c0c28');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, W, H);
-
-      // Pixel grid overlay (subtle)
-      ctx.fillStyle = 'rgba(255,255,255,0.02)';
-      for (let y = 0; y < H; y += 8) ctx.fillRect(0, y, W, 1);
-      for (let x = 0; x < W; x += 8) ctx.fillRect(x, 0, 1, H);
-
-      // Outer border (neon green, 6px pixel blocks)
-      ctx.fillStyle = '#00ff41';
-      [0,1,2].forEach(i => {
-        ctx.fillRect(i*8, 0, 8, H);
-        ctx.fillRect(W-8-i*8, 0, 8, H);
-        ctx.fillRect(0, i*8, W, 8);
-        ctx.fillRect(0, H-8-i*8, W, 8);
-      });
-
-      // Inner border (cyan)
-      ctx.fillStyle = '#00ffff';
-      ctx.fillRect(28, 28, W-56, 4);
-      ctx.fillRect(28, H-32, W-56, 4);
-      ctx.fillRect(28, 28, 4, H-56);
-      ctx.fillRect(W-32, 28, 4, H-56);
-
-      // Decorative pixel row (center divider)
-      ctx.fillStyle = '#ff2d55';
-      for (let x = 40; x < W-40; x += 16) {
-        ctx.fillRect(x, H/2 + 80, 8, 8);
-      }
-      ctx.fillStyle = '#ffdd00';
-      for (let x = 48; x < W-48; x += 16) {
-        ctx.fillRect(x, H/2 + 96, 8, 8);
-      }
-
-      // Title text
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#00ff41';
-      const titleLines = wrapText(ctx, title.toUpperCase(), W - 100, 48);
-      const titleFont = titleLines.length > 3 ? 36 : 48;
-      ctx.font = `bold ${titleFont}px "Courier New", monospace`;
-      const titleLines2 = wrapText(ctx, title.toUpperCase(), W - 100, titleFont);
-      const titleStartY = H/2 - (titleLines2.length * (titleFont + 10)) / 2 - 20;
-      titleLines2.forEach((line, i) => {
-        ctx.fillText(line, W/2, titleStartY + i * (titleFont + 10));
-      });
-
-      // Author text
-      ctx.font = 'bold 28px "Courier New", monospace';
-      ctx.fillStyle = '#ffdd00';
-      ctx.fillText(author.toUpperCase(), W/2, H/2 + 130);
-
-      // Corner pixels (decorative)
-      [[40,40],[W-40,40],[40,H-40],[W-40,H-40]].forEach(([x,y]) => {
-        ctx.fillStyle = '#ff2d55';
-        ctx.fillRect(x-4, y-4, 8, 8);
-        ctx.fillRect(x+8, y-4, 8, 8);
-        ctx.fillRect(x-4, y+8, 8, 8);
-        ctx.fillStyle = '#00ffff';
-        ctx.fillRect(x+8, y+8, 8, 8);
-      });
-
+      canvas.width = COVER_W; canvas.height = COVER_H;
+      renderCover(canvas, design, title, author);
       canvas.toBlob(blob => {
         blob.arrayBuffer().then(buf => resolve(new Uint8Array(buf)));
       }, 'image/png');
     });
+  }
+
+  function renderCover(canvas, design, title, author) {
+    const ctx = canvas.getContext('2d');
+    const s = canvas.width / COVER_W;
+    ctx.setTransform(s, 0, 0, s, 0, 0);
+    ctx.clearRect(0, 0, COVER_W, COVER_H);
+    (COVER_DESIGNS[design] || COVER_DESIGNS.retro).draw(ctx, COVER_W, COVER_H, title, author);
+  }
+
+  // ── Cover picker ──────────────────────────────────────────────────
+  function buildCoverPicker() {
+    Object.entries(COVER_DESIGNS).forEach(([key, d]) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'cover-opt' + (key === coverDesign ? ' active' : '');
+      btn.dataset.val = key;
+      btn.setAttribute('role', 'radio');
+      btn.setAttribute('aria-checked', key === coverDesign);
+      const canvas = document.createElement('canvas');
+      canvas.width = 128; canvas.height = 192;   // 2× the CSS size for crispness
+      const label = document.createElement('span');
+      label.textContent = d.label;
+      btn.append(canvas, label);
+      coverPicker.appendChild(btn);
+    });
+    refreshCoverThumbs();
+  }
+
+  coverPicker.addEventListener('click', e => {
+    const btn = e.target.closest('.cover-opt');
+    if (!btn) return;
+    coverDesign = btn.dataset.val;
+    coverPicker.querySelectorAll('.cover-opt').forEach(b => {
+      b.classList.toggle('active', b === btn);
+      b.setAttribute('aria-checked', b === btn);
+    });
+  });
+
+  function refreshCoverThumbs() {
+    const title  = metaTitle.value.trim()  || 'Your Title';
+    const author = metaAuthor.value.trim() || 'Author Name';
+    coverPicker.querySelectorAll('.cover-opt').forEach(btn => {
+      renderCover(btn.querySelector('canvas'), btn.dataset.val, title, author);
+    });
+  }
+
+  // Called here, not in Init: COVER_DESIGNS is a const declared above,
+  // so it isn't initialised until execution reaches this point.
+  buildCoverPicker();
+
+  // ── Cover designs ─────────────────────────────────────────────────
+  function drawRetroCover(ctx, W, H, title, author) {
+    // Background gradient
+    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, '#080818');
+    grad.addColorStop(1, '#0c0c28');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    // Pixel grid overlay (subtle)
+    ctx.fillStyle = 'rgba(255,255,255,0.02)';
+    for (let y = 0; y < H; y += 8) ctx.fillRect(0, y, W, 1);
+    for (let x = 0; x < W; x += 8) ctx.fillRect(x, 0, 1, H);
+
+    // Outer border (neon green, 6px pixel blocks)
+    ctx.fillStyle = '#00ff41';
+    [0,1,2].forEach(i => {
+      ctx.fillRect(i*8, 0, 8, H);
+      ctx.fillRect(W-8-i*8, 0, 8, H);
+      ctx.fillRect(0, i*8, W, 8);
+      ctx.fillRect(0, H-8-i*8, W, 8);
+    });
+
+    // Inner border (cyan)
+    ctx.fillStyle = '#00ffff';
+    ctx.fillRect(28, 28, W-56, 4);
+    ctx.fillRect(28, H-32, W-56, 4);
+    ctx.fillRect(28, 28, 4, H-56);
+    ctx.fillRect(W-32, 28, 4, H-56);
+
+    // Decorative pixel row (center divider)
+    ctx.fillStyle = '#ff2d55';
+    for (let x = 40; x < W-40; x += 16) {
+      ctx.fillRect(x, H/2 + 80, 8, 8);
+    }
+    ctx.fillStyle = '#ffdd00';
+    for (let x = 48; x < W-48; x += 16) {
+      ctx.fillRect(x, H/2 + 96, 8, 8);
+    }
+
+    // Title text
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#00ff41';
+    const titleLines = wrapText(ctx, title.toUpperCase(), W - 100, 48);
+    const titleFont = titleLines.length > 3 ? 36 : 48;
+    ctx.font = `bold ${titleFont}px "Courier New", monospace`;
+    const titleLines2 = wrapText(ctx, title.toUpperCase(), W - 100, titleFont);
+    const titleStartY = H/2 - (titleLines2.length * (titleFont + 10)) / 2 - 20;
+    titleLines2.forEach((line, i) => {
+      ctx.fillText(line, W/2, titleStartY + i * (titleFont + 10));
+    });
+
+    // Author text
+    ctx.font = 'bold 28px "Courier New", monospace';
+    ctx.fillStyle = '#ffdd00';
+    ctx.fillText(author.toUpperCase(), W/2, H/2 + 130);
+
+    // Corner pixels (decorative)
+    [[40,40],[W-40,40],[40,H-40],[W-40,H-40]].forEach(([x,y]) => {
+      ctx.fillStyle = '#ff2d55';
+      ctx.fillRect(x-4, y-4, 8, 8);
+      ctx.fillRect(x+8, y-4, 8, 8);
+      ctx.fillRect(x-4, y+8, 8, 8);
+      ctx.fillStyle = '#00ffff';
+      ctx.fillRect(x+8, y+8, 8, 8);
+    });
+  }
+
+  // Navy field with a teal ribbon and a gold strip running top to bottom.
+  function drawWavesCover(ctx, W, H, title, author) {
+    ctx.fillStyle = '#1d2f55';
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.fillStyle = '#3f7f7a';
+    ctx.beginPath();
+    ctx.moveTo(290, 0);
+    ctx.bezierCurveTo(170, 180, 430, 330, 300, 500);
+    ctx.bezierCurveTo(200, 640, 390, 760, 300, 900);
+    ctx.lineTo(W, H);
+    ctx.lineTo(W, 0);
+    ctx.fill();
+
+    ctx.fillStyle = '#d9a441';
+    ctx.beginPath();
+    ctx.moveTo(470, 0);
+    ctx.bezierCurveTo(570, 150, 420, 320, 520, 460);
+    ctx.bezierCurveTo(580, 540, 600, 600, 600, 650);
+    ctx.lineTo(W, 0);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(170, 0);
+    ctx.bezierCurveTo(150, 120, 80, 200, 0, 220);
+    ctx.fill();
+
+    ctx.fillStyle = '#2f6b6a';
+    ctx.beginPath();
+    ctx.moveTo(0, 640);
+    ctx.bezierCurveTo(110, 680, 160, 800, 130, 900);
+    ctx.lineTo(0, H);
+    ctx.fill();
+
+    drawTitle(ctx, title, { color: '#f0c46a', cx: W / 2, cy: 400, maxW: 480, maxLines: 5, size: 96 });
+    drawAuthor(ctx, author, { color: '#f4efe6', cx: W / 2, y: 830, maxW: 520, size: 34 });
+  }
+
+  // Cream page, title on top, a terracotta arch framing a sun and a hill.
+  function drawArchCover(ctx, W, H, title, author) {
+    ctx.fillStyle = '#efe4d2';
+    ctx.fillRect(0, 0, W, H);
+
+    const arch = new Path2D();
+    arch.moveTo(90, H);
+    arch.lineTo(90, 560);
+    arch.arc(300, 560, 210, Math.PI, 0);
+    arch.lineTo(510, H);
+    arch.closePath();
+
+    ctx.fillStyle = '#c4643f';
+    ctx.fill(arch);
+
+    ctx.save();
+    ctx.clip(arch);
+    ctx.fillStyle = '#e8b04a';
+    ctx.beginPath();
+    ctx.arc(300, 640, 90, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#2f4a3a';
+    ctx.beginPath();
+    ctx.moveTo(90, 720);
+    ctx.bezierCurveTo(200, 670, 380, 770, 510, 700);
+    ctx.lineTo(510, H);
+    ctx.lineTo(90, H);
+    ctx.fill();
+    ctx.restore();
+
+    drawTitle(ctx, title, { color: '#2f4a3a', cx: W / 2, cy: 190, maxW: 500, maxLines: 4, size: 80 });
+    drawAuthor(ctx, author, { color: '#efe4d2', cx: W / 2, y: 830, maxW: 380, size: 28 });
+  }
+
+  // Plum dusk sky over layered horizontal dunes and a low sun.
+  function drawDunesCover(ctx, W, H, title, author) {
+    ctx.fillStyle = '#3b2346';
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.fillStyle = '#f2c38b';
+    ctx.beginPath();
+    ctx.arc(430, 560, 70, 0, Math.PI * 2);
+    ctx.fill();
+
+    const dune = (color, y0, c1x, c1y, c2x, c2y, y1) => {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(0, y0);
+      ctx.bezierCurveTo(c1x, c1y, c2x, c2y, W, y1);
+      ctx.lineTo(W, H);
+      ctx.lineTo(0, H);
+      ctx.fill();
+    };
+    dune('#a8506b', 600, 160, 530, 380, 650, 580);
+    dune('#e07a5f', 680, 200, 750, 400, 630, 710);
+    dune('#f2c9a0', 790, 180, 740, 420, 830, 770);
+
+    drawTitle(ctx, title, { color: '#f6ead8', cx: W / 2, cy: 270, maxW: 480, maxLines: 5, size: 92 });
+    drawAuthor(ctx, author, { color: '#3b2346', cx: W / 2, y: 855, maxW: 520, size: 30 });
+  }
+
+  // Big uppercase serif title, shrunk until it fits maxLines and every
+  // word fits maxW, then centred vertically on cy.
+  function drawTitle(ctx, title, o) {
+    const text = title.toUpperCase();
+    let size = o.size, lines;
+    for (; size > 28; size -= 4) {
+      ctx.font = `${size}px ${SERIF}`;
+      lines = wrapLines(ctx, text, o.maxW);
+      if (lines.length <= o.maxLines && lines.every(l => ctx.measureText(l).width <= o.maxW)) break;
+    }
+    ctx.font = `${size}px ${SERIF}`;
+    lines = wrapLines(ctx, text, o.maxW);
+    const lineH = size * 1.08;
+    const top = o.cy - (lines.length - 1) * lineH / 2;
+    ctx.fillStyle = o.color;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    lines.forEach((l, i) => ctx.fillText(l, o.cx, top + i * lineH));
+    ctx.textBaseline = 'alphabetic';
+  }
+
+  // Letter-spaced uppercase author line on a single row.
+  function drawAuthor(ctx, author, o) {
+    const text = author.toUpperCase();
+    const spaced = 'letterSpacing' in ctx;
+    let size = o.size;
+    for (; size > 8; size -= 2) {
+      ctx.font = `${size}px ${SERIF}`;
+      if (spaced) ctx.letterSpacing = Math.round(size * 0.18) + 'px';
+      if (ctx.measureText(text).width <= o.maxW) break;
+    }
+    ctx.fillStyle = o.color;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, o.cx, o.y);
+    ctx.textBaseline = 'alphabetic';
+    if (spaced) ctx.letterSpacing = '0px';
+  }
+
+  function wrapLines(ctx, text, maxWidth) {
+    const lines = [];
+    let line = '';
+    text.split(/\s+/).forEach(word => {
+      const test = line ? line + ' ' + word : word;
+      if (ctx.measureText(test).width > maxWidth && line) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = test;
+      }
+    });
+    if (line) lines.push(line);
+    return lines;
   }
 
   function wrapText(ctx, text, maxWidth, fontSize) {
@@ -623,12 +848,15 @@ a{color:#00f;}`;
     });
   }
 
-  function slugify(str) {
-    return str.toLowerCase()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .slice(0, 60) || 'book';
+  // Keep the title as written (spaces, accents, case) and only strip
+  // characters that are illegal in Windows/macOS file names.
+  function fileNameFrom(str) {
+    return str
+      .replace(/[\\/:*?"<>|\u0000-\u001f]/g, '')
+      .replace(/\s+/g, ' ')
+      .replace(/^[\s.]+|[\s.]+$/g, '')
+      .slice(0, 120)
+      .trim() || 'book';
   }
 
   function escXml(str) {
