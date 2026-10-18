@@ -110,6 +110,14 @@ const defaultState = {
 // State & Persistence
 // ============================================
 
+// True when this browser had nothing saved yet (fresh device). The first Drive
+// sync then adopts the remote data wholesale instead of merging the demo prompts in.
+let localIsPristine = localStorage.getItem(STORAGE_KEY) === null;
+
+// Set at the end of init(); saves made before that (migrations, restoring UI)
+// aren't user edits, so they mustn't make local data look newer than Drive's.
+let appReady = false;
+
 let state = loadState();
 
 // Tracks the original category name for each textarea line so that
@@ -128,13 +136,448 @@ function loadState() {
     return JSON.parse(JSON.stringify(defaultState));
 }
 
-/** Persists the current state to localStorage. */
+/** Persists the current state to localStorage and queues a Drive upload. */
 function saveState() {
+    if (appReady) {
+        state.modifiedAt = Date.now();
+        localIsPristine = false;
+    }
+    persistLocal();
+    driveSync.schedulePush();
+}
+
+/** Writes the state to localStorage without stamping it as a user edit. */
+function persistLocal() {
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch (e) {
         console.error("Error saving state:", e);
     }
+}
+
+/** Last time a prompt was created or edited (seed prompts have neither: 0). */
+function promptTime(prompt) {
+    return prompt.updatedAt || prompt.createdAt || 0;
+}
+
+/**
+ * Merges two copies of the app state (this device vs. Drive).
+ * Prompts merge one by one: the most recently edited version of each id wins,
+ * and a prompt deleted on either side stays deleted unless it was edited after
+ * the deletion. Everything else (categories, editor, config) comes from
+ * whichever copy was modified last; the active tab always stays per-device.
+ *
+ * On a device's first sync (firstJoin) its data predates the shared file, so
+ * nothing in it can have been deliberately deleted elsewhere: categories are
+ * combined instead of replaced, and this device's unsaved editor draft is kept.
+ */
+function mergeStates(local, remote, { firstJoin = false } = {}) {
+    const localTime = local.modifiedAt || 0;
+    const remoteTime = remote.modifiedAt || 0;
+    const newer = remoteTime > localTime ? remote : local;
+    const older = newer === local ? remote : local;
+
+    const deleted = { ...(remote.deletedPrompts || {}) };
+    for (const [id, time] of Object.entries(local.deletedPrompts || {})) {
+        deleted[id] = Math.max(deleted[id] || 0, time);
+    }
+
+    const olderById = new Map((older.prompts || []).map(p => [p.id, p]));
+    const seen = new Set();
+    const prompts = [];
+    for (const p of newer.prompts || []) {
+        const other = olderById.get(p.id);
+        prompts.push(other && promptTime(other) > promptTime(p) ? other : p);
+        seen.add(p.id);
+    }
+    for (const p of older.prompts || []) {
+        if (!seen.has(p.id)) prompts.push(p);
+    }
+
+    const categories = firstJoin
+        ? [...new Set([...(newer.categories || []), ...(older.categories || [])])]
+        : newer.categories;
+
+    return {
+        ...newer,
+        categories,
+        editor: firstJoin ? local.editor : newer.editor,
+        config: { ...newer.config, activeTab: local.config.activeTab },
+        selectedPromptId: local.selectedPromptId,
+        prompts: prompts.filter(p => !(p.id in deleted) || promptTime(p) > deleted[p.id]),
+        deletedPrompts: deleted,
+        modifiedAt: Math.max(localTime, remoteTime)
+    };
+}
+
+// ============================================
+// Google Drive Sync
+// ============================================
+
+// OAuth "Web application" client ID from Google Cloud Console → APIs & Services →
+// Credentials. It's public by design: Google only honours it from the
+// "Authorized JavaScript origins" listed on that client.
+// const GOOGLE_CLIENT_ID = "992607166992-2vbnllsiie2la6pfedck6ebpafpjcpck.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = "455648430646-e9bhv3qpjb89vi2ompsepssvhbqij4kp.apps.googleusercontent.com";
+const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file";
+const DRIVE_API = "https://www.googleapis.com/drive/v3";
+const DRIVE_UPLOAD_API = "https://www.googleapis.com/upload/drive/v3";
+const DRIVE_FILE_NAME = "mi-prompt-itud.json";
+const DRIVE_SESSION_KEY = "mi-prompt-itud-drive";
+const DRIVE_PUSH_DELAY = 2000;
+
+/**
+ * Keeps state in sync with a JSON file in the user's Google Drive.
+ * Every sync is pull → merge → push, so two devices never blindly overwrite
+ * each other. Browser-only OAuth tokens last ~1 hour and can't be refreshed
+ * without a popup, so the token is cached across reloads and, once expired,
+ * the header button asks for a one-tap reconnect (edits stay local meanwhile
+ * and are merged in on reconnect).
+ */
+const driveSync = {
+    session: {},   // { token, expiresAt, fileId, email, connected, joined }
+    status: "ok",
+    lastError: "",
+    lastSync: null,
+    pushTimer: null,
+    busy: false,
+    pending: false,
+
+    init() {
+        try {
+            this.session = JSON.parse(localStorage.getItem(DRIVE_SESSION_KEY)) || {};
+        } catch (e) {
+            this.session = {};
+        }
+        this.button = document.querySelector(".btn-drive-sync");
+        this.disconnectItem = document.querySelector(".config-item-drive");
+
+        this.button.addEventListener("click", () => this.onButtonClick());
+        document.querySelector(".btn-drive-disconnect").addEventListener("click", () => this.confirmDisconnect());
+
+        // Pick up edits from other devices when returning to the tab; flush pending ones when leaving.
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") this.sync();
+            else if (this.pushTimer) this.flush();
+        });
+
+        this.render();
+        if (this.hasValidToken()) this.sync();
+    },
+
+    hasValidToken() {
+        return Boolean(this.session.token) && Date.now() < (this.session.expiresAt || 0);
+    },
+
+    saveSession() {
+        try {
+            localStorage.setItem(DRIVE_SESSION_KEY, JSON.stringify(this.session));
+        } catch (e) {
+            console.error("Error saving Drive session:", e);
+        }
+    },
+
+    /** Debounced upload after a local save. */
+    schedulePush() {
+        if (!this.session.connected) return;
+        clearTimeout(this.pushTimer);
+        this.pushTimer = setTimeout(() => this.flush(), DRIVE_PUSH_DELAY);
+    },
+
+    flush() {
+        clearTimeout(this.pushTimer);
+        this.pushTimer = null;
+        this.sync();
+    },
+
+    cancelPending() {
+        clearTimeout(this.pushTimer);
+        this.pushTimer = null;
+    },
+
+    onButtonClick() {
+        if (!GOOGLE_CLIENT_ID) {
+            popup.show({
+                title: "Google Drive",
+                content: "<p>Falta configurar <code>GOOGLE_CLIENT_ID</code> en <code>index.js</code>.</p>",
+                buttons: [{ text: "Cerrar", class: "btn-primary" }]
+            });
+            return;
+        }
+        if (this.hasValidToken()) this.syncNow();
+        else this.connect();
+    },
+
+    /** Manual sync from the button: unlike background syncs, a failure is shown in a popup. */
+    async syncNow() {
+        this.cancelPending();
+        await this.sync();
+        if (this.status !== "error") return;
+        popup.show({
+            title: "Google Drive",
+            content: `<p>No se pudo sincronizar: ${escapeHtml(this.lastError)}</p>`,
+            buttons: [{ text: "Cerrar", class: "btn-primary" }]
+        });
+    },
+
+    /** Signs in (popup) and runs a first sync. Must run from a click: browsers block popups otherwise. */
+    async connect() {
+        try {
+            await this.requestToken();
+            if (!this.session.email) {
+                try {
+                    const res = await this.api(`${DRIVE_API}/about?fields=user(emailAddress)`);
+                    this.session.email = (await res.json()).user?.emailAddress || "";
+                    this.saveSession();
+                } catch (e) {
+                    // Only used for the tooltip and as a login hint; not worth failing over.
+                }
+            }
+            await this.syncNow();
+        } catch (e) {
+            this.render();
+            if (e.silent) return;
+            console.error("Drive connect:", e);
+            popup.show({
+                title: "Google Drive",
+                content: `<p>No se pudo conectar: ${escapeHtml(e.message)}</p>`,
+                buttons: [{ text: "Cerrar", class: "btn-primary" }]
+            });
+        }
+    },
+
+    requestToken() {
+        return new Promise((resolve, reject) => {
+            const oauth2 = window.google?.accounts?.oauth2;
+            if (!oauth2) {
+                reject(new Error("no se pudo cargar Google Identity Services. Revisa tu conexión o bloqueador de anuncios."));
+                return;
+            }
+            const client = oauth2.initTokenClient({
+                client_id: GOOGLE_CLIENT_ID,
+                scope: DRIVE_SCOPE,
+                ...(this.session.email && { login_hint: this.session.email }),
+                callback: (res) => {
+                    if (res.error) {
+                        reject(new Error(res.error_description || res.error));
+                        return;
+                    }
+                    if (!oauth2.hasGrantedAllScopes(res, DRIVE_SCOPE)) {
+                        reject(new Error("no se concedió el permiso de Google Drive."));
+                        return;
+                    }
+                    this.session.token = res.access_token;
+                    // Refresh a minute early so a request never goes out with a token about to die.
+                    this.session.expiresAt = Date.now() + (Number(res.expires_in) - 60) * 1000;
+                    this.session.connected = true;
+                    this.saveSession();
+                    resolve();
+                },
+                error_callback: (err) => {
+                    const error = new Error(err.message || err.type);
+                    error.silent = err.type === "popup_closed";
+                    reject(error);
+                }
+            });
+            // Returning users already granted access, so the popup just flashes and closes.
+            client.requestAccessToken({ prompt: this.session.connected ? "" : "consent" });
+        });
+    },
+
+    async api(url, options = {}) {
+        const res = await fetch(url, {
+            ...options,
+            headers: { ...options.headers, Authorization: `Bearer ${this.session.token}` }
+        });
+        if (res.status === 401) {
+            this.session.token = null;
+            this.saveSession();
+            const error = new Error("sesión de Google expirada");
+            error.auth = true;
+            throw error;
+        }
+        if (res.status === 404 && options.allow404) return null;
+        if (!res.ok) {
+            // Google returns { error: { message } }; show that line, not the whole JSON body.
+            const body = await res.text();
+            let message = body;
+            try {
+                message = JSON.parse(body).error?.message || body;
+            } catch (e) {
+                // Not JSON (e.g. a proxy error page); keep the raw text.
+            }
+            throw new Error(`Drive ${res.status}: ${message}`);
+        }
+        return res;
+    },
+
+    /** drive.file only exposes files this app created, so a name search finds our file on any device. */
+    async findFileId() {
+        const params = new URLSearchParams({
+            q: `name = '${DRIVE_FILE_NAME}' and trashed = false`,
+            spaces: "drive",
+            orderBy: "modifiedTime desc",
+            fields: "files(id)"
+        });
+        const res = await this.api(`${DRIVE_API}/files?${params}`);
+        return (await res.json()).files?.[0]?.id || null;
+    },
+
+    async pull() {
+        if (!this.session.fileId) {
+            this.session.fileId = await this.findFileId();
+            this.saveSession();
+        }
+        if (!this.session.fileId) return null;
+
+        const res = await this.api(`${DRIVE_API}/files/${this.session.fileId}?alt=media`, { allow404: true });
+        if (!res) {
+            // File was deleted in Drive; the next push creates a new one.
+            this.session.fileId = null;
+            this.saveSession();
+            return null;
+        }
+        const data = await res.json();
+        return Array.isArray(data?.prompts) ? data : null;
+    },
+
+    async push(json) {
+        if (this.session.fileId) {
+            await this.api(`${DRIVE_UPLOAD_API}/files/${this.session.fileId}?uploadType=media`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: json
+            });
+            return;
+        }
+        const boundary = `mpi-${generateId()}`;
+        const metadata = JSON.stringify({ name: DRIVE_FILE_NAME, mimeType: "application/json" });
+        const body =
+            `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${metadata}\r\n` +
+            `--${boundary}\r\nContent-Type: application/json\r\n\r\n${json}\r\n` +
+            `--${boundary}--`;
+        const res = await this.api(`${DRIVE_UPLOAD_API}/files?uploadType=multipart&fields=id`, {
+            method: "POST",
+            headers: { "Content-Type": `multipart/related; boundary=${boundary}` },
+            body
+        });
+        this.session.fileId = (await res.json()).id;
+        this.saveSession();
+    },
+
+    /** Pull → merge → push. Overlapping calls collapse into one follow-up run. */
+    async sync() {
+        if (!GOOGLE_CLIENT_ID || !this.hasValidToken()) {
+            this.render();
+            return;
+        }
+        if (this.busy) {
+            this.pending = true;
+            return;
+        }
+        this.busy = true;
+        this.setStatus("syncing");
+
+        try {
+            const remote = await this.pull();
+            if (remote) {
+                const merged = localIsPristine
+                    ? { ...remote, config: { ...remote.config, activeTab: state.config.activeTab } }
+                    : mergeStates(state, remote, { firstJoin: !this.session.joined });
+                localIsPristine = false;
+                if (JSON.stringify(merged) !== JSON.stringify(state)) applyState(merged);
+            }
+            const json = JSON.stringify(state);
+            if (!remote || json !== JSON.stringify(remote)) await this.push(json);
+
+            // From now on this device's data is part of the shared file, so later
+            // merges let deletions (e.g. of categories) win instead of combining.
+            if (!this.session.joined) {
+                this.session.joined = true;
+                this.saveSession();
+            }
+            this.lastSync = new Date();
+            this.setStatus("ok");
+        } catch (e) {
+            console.error("Drive sync:", e);
+            this.lastError = e.message;
+            this.setStatus(e.auth ? "ok" : "error"); // an auth failure renders as "Reconectar"
+        } finally {
+            this.busy = false;
+            if (this.pending) {
+                this.pending = false;
+                this.sync();
+            }
+        }
+    },
+
+    confirmDisconnect() {
+        document.querySelector(".config-dropdown").classList.remove("is-open");
+        popup.confirm(
+            "Desconectar Google Drive",
+            "Tus prompts se quedan en este navegador y en tu Drive; solo se deja de sincronizar.",
+            () => this.disconnect()
+        );
+    },
+
+    disconnect() {
+        this.cancelPending();
+        if (this.session.token) window.google?.accounts?.oauth2?.revoke(this.session.token);
+        this.session = {};
+        localStorage.removeItem(DRIVE_SESSION_KEY);
+        this.render();
+    },
+
+    setStatus(status) {
+        this.status = status;
+        this.render();
+    },
+
+    render() {
+        if (!this.button) return;
+        let status = this.status;
+        if (!this.session.connected) status = "off";
+        else if (!this.hasValidToken()) status = "expired";
+
+        const labels = {
+            off: "Conectar Drive",
+            expired: "Reconectar Drive",
+            syncing: "Sincronizando…",
+            ok: "Drive al día",
+            error: "Reintentar Drive"
+        };
+        const titles = {
+            off: "Guarda tus prompts en Google Drive para usarlos en cualquier dispositivo",
+            expired: "La sesión de Google expiró. Tus cambios siguen guardados aquí y se sincronizarán al reconectar.",
+            syncing: "Sincronizando con Google Drive…",
+            ok: `Sincronizado${this.session.email ? ` con ${this.session.email}` : ""}${this.lastSync ? ` a las ${this.lastSync.toLocaleTimeString()}` : ""}. Clic para sincronizar ahora.`,
+            error: `Error al sincronizar: ${this.lastError}`
+        };
+
+        this.button.textContent = labels[status];
+        this.button.title = titles[status];
+        this.button.dataset.status = status;
+        this.button.disabled = status === "syncing";
+        this.disconnectItem.hidden = !this.session.connected;
+    }
+};
+
+/** Replaces the whole state (after a Drive merge) and re-renders everything. */
+function applyState(newState) {
+    state = newState;
+    persistLocal();
+    renderAll();
+}
+
+/** Re-renders every view from the current state. */
+function renderAll() {
+    updateCategorySelect();
+    renderCategoriesEditor();
+    renderTags();
+    renderPromptsList();
+    applySavedConfig();
+    updateEditorUI();
+    document.getElementById("prompt-nombre").value = state.editor.promptName || "";
 }
 
 // ============================================
@@ -195,8 +638,9 @@ function formatPromptPreview(tags) {
 
         lines.push(`${indent(depth)}<${openTag}>`);
         if (tag.content) {
+            // Content sits one level deeper than its tag; blank lines stay empty (no trailing spaces).
             tag.content.split("\n").forEach(line => {
-                lines.push(`${indent(depth)}${line}`);
+                lines.push(line ? `${indent(depth + 1)}${line}` : "");
             });
         }
         stack.push({ name: tag.name, depth });
@@ -233,11 +677,11 @@ function getCaretCoords(field) {
 
     if (!caretRect.height) {
         const fieldRect = field.getBoundingClientRect();
-        const style     = getComputedStyle(field);
+        const style = getComputedStyle(field);
         // lineHeight in px: getComputedStyle returns "normal" when not set, so fall back
         // to fontSize * 1.2 in that case.
-        const lineH   = parseFloat(style.lineHeight) || (parseFloat(style.fontSize) * 1.2) || 20;
-        const padTop  = parseFloat(style.paddingTop);
+        const lineH = parseFloat(style.lineHeight) || (parseFloat(style.fontSize) * 1.2) || 20;
+        const padTop = parseFloat(style.paddingTop);
         const padLeft = parseFloat(style.paddingLeft);
 
         // Strategy 1: measure the character immediately before the caret.
@@ -268,8 +712,8 @@ function getCaretCoords(field) {
 
     const containerRect = field.parentElement.getBoundingClientRect();
     return {
-        top:    caretRect.top    - containerRect.top,
-        left:   caretRect.left   - containerRect.left,
+        top: caretRect.top - containerRect.top,
+        left: caretRect.left - containerRect.left,
         height: caretRect.height
     };
 }
@@ -380,6 +824,9 @@ const popup = {
         });
         input.addEventListener("keydown", (e) => {
             if (e.key === "Enter") {
+                // Focus moves to the editor below while this keydown is still in flight;
+                // without this, the browser applies the Enter there and inserts a line break.
+                e.preventDefault();
                 const newName = sanitizeTagName(input.value);
                 if (newName) {
                     onSave(newName);
@@ -742,11 +1189,7 @@ function handleImport(event) {
             if (data.config) state.config = data.config;
 
             saveState();
-            updateCategorySelect();
-            renderCategoriesEditor();
-            renderTags();
-            renderPromptsList();
-            applySavedConfig();
+            renderAll();
             showEditorFeedback("Datos importados");
         } catch (err) {
             console.error("Error importing:", err);
@@ -929,6 +1372,7 @@ function deleteSelectedPrompt() {
         "Eliminar prompt",
         `¿Estás seguro de que quieres eliminar "${prompt.title}"?`,
         () => {
+            state.deletedPrompts = { ...state.deletedPrompts, [state.selectedPromptId]: Date.now() };
             state.prompts = state.prompts.filter(p => p.id !== state.selectedPromptId);
             state.selectedPromptId = null;
             saveState();
@@ -940,7 +1384,7 @@ function deleteSelectedPrompt() {
 /** Updates sort order and re-renders. */
 function setSortOrder(order) {
     state.config.sortOrder = order;
-    saveState();
+    persistLocal(); // display preference, not an edit worth syncing
     renderPromptsList();
     updateSortButtons();
 }
@@ -1084,21 +1528,21 @@ function saveConfigOnChange() {
     document.querySelectorAll('input[name="tema"]').forEach(input => {
         input.addEventListener("change", () => {
             state.config.theme = input.id.replace("tema-", "");
-            saveState();
+            persistLocal(); // display preference, not an edit worth syncing
         });
     });
 
     document.querySelectorAll('input[name="main-tab"]').forEach(input => {
         input.addEventListener("change", () => {
             state.config.activeTab = input.id.replace("tab-", "");
-            saveState();
+            persistLocal(); // display preference, not an edit worth syncing
         });
     });
 
     document.querySelectorAll('input[name="vista-prompts"]').forEach(input => {
         input.addEventListener("change", () => {
             state.config.viewMode = input.id.replace("vista-", "");
-            saveState();
+            persistLocal(); // display preference, not an edit worth syncing
         });
     });
 }
@@ -1110,22 +1554,22 @@ function saveConfigOnChange() {
 const autocomplete = (() => {
     let chipEl, hintEl, field;
     let currentSuggestion = null;
-    let debounceTimer     = null;
-    let controller        = null;
-    let getContext        = null;
+    let debounceTimer = null;
+    let controller = null;
+    let getContext = null;
 
     // Set this to your deployed worker URL after `wrangler deploy`.
     // While null the hardcoded stub is used instead.
     const WORKER_URL = 'https://mi-prompt-itude-predictive-worker.dmfte-dev.workers.dev';
 
     const DEBOUNCE_MS = 350;
-    const MIN_LENGTH  = 20;
-    const CURSOR_GAP  = 12;
+    const MIN_LENGTH = 20;
+    const CURSOR_GAP = 12;
 
     function init(fieldEl, chipElement, hintElement, contextFn) {
-        field      = fieldEl;
-        chipEl     = chipElement;
-        hintEl     = hintElement;
+        field = fieldEl;
+        chipEl = chipElement;
+        hintEl = hintElement;
         getContext = contextFn;
     }
 
@@ -1162,10 +1606,10 @@ const autocomplete = (() => {
 
         const { text, tagName } = getContext();
         const res = await fetch(WORKER_URL, {
-            method:  'POST',
+            method: 'POST',
             signal,
             headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ text, tagName })
+            body: JSON.stringify({ text, tagName })
         });
         if (!res.ok) throw new Error(`Worker ${res.status}`);
         const data = await res.json();
@@ -1173,19 +1617,19 @@ const autocomplete = (() => {
     }
 
     function show(text) {
-        currentSuggestion  = text;
+        currentSuggestion = text;
         chipEl.textContent = text;
 
         const coords = getCaretCoords(field);
         if (!coords) { hide(); return; }
 
         const containerWidth = field.parentElement.offsetWidth;
-        const fieldPadLeft   = parseFloat(getComputedStyle(field).paddingLeft) || 12;
-        const inlineLeft     = coords.left + CURSOR_GAP;
-        const inlineWidth    = containerWidth - inlineLeft - 8;
+        const fieldPadLeft = parseFloat(getComputedStyle(field).paddingLeft) || 12;
+        const inlineLeft = coords.left + CURSOR_GAP;
+        const inlineWidth = containerWidth - inlineLeft - 8;
 
         // Measure the suggestion's natural (unconstrained) pixel width
-        chipEl.style.maxWidth   = "none";
+        chipEl.style.maxWidth = "none";
         chipEl.style.visibility = "hidden";
         chipEl.hidden = false;
         const naturalWidth = chipEl.scrollWidth;
@@ -1194,12 +1638,12 @@ const autocomplete = (() => {
 
         const fitsInline = naturalWidth <= inlineWidth;
 
-        chipEl.style.top      = fitsInline ? coords.top + "px"
-                                           : (coords.top + coords.height + 2) + "px";
-        chipEl.style.left     = fitsInline ? inlineLeft + "px"
-                                           : fieldPadLeft + "px";
+        chipEl.style.top = fitsInline ? coords.top + "px"
+            : (coords.top + coords.height + 2) + "px";
+        chipEl.style.left = fitsInline ? inlineLeft + "px"
+            : fieldPadLeft + "px";
         chipEl.style.maxWidth = fitsInline ? inlineWidth + "px"
-                                           : (containerWidth - fieldPadLeft - 8) + "px";
+            : (containerWidth - fieldPadLeft - 8) + "px";
 
         chipEl.hidden = false;
         hintEl.hidden = false;
@@ -1207,8 +1651,8 @@ const autocomplete = (() => {
 
     function hide() {
         currentSuggestion = null;
-        chipEl.hidden     = true;
-        hintEl.hidden     = true;
+        chipEl.hidden = true;
+        hintEl.hidden = true;
     }
 
     function accept() {
@@ -1246,14 +1690,14 @@ function initContentEditable(field) {
         const coords = getCaretCoords(field);
         if (!coords) { cursorEl.hidden = true; return; }
         cursorEl.hidden = false;
-        cursorEl.style.top    = coords.top    + "px";
-        cursorEl.style.left   = coords.left   + "px";
+        cursorEl.style.top = coords.top + "px";
+        cursorEl.style.left = coords.left + "px";
         cursorEl.style.height = coords.height + "px";
     }
 
     document.addEventListener("selectionchange", positionCursor);
     field.addEventListener("focus", positionCursor);
-    field.addEventListener("blur",  () => { cursorEl.hidden = true; });
+    field.addEventListener("blur", () => { cursorEl.hidden = true; });
     field.addEventListener("scroll", positionCursor);
 
     // --- Plain text only ---
@@ -1373,7 +1817,7 @@ function init() {
         document.getElementById("suggestion-chip"),
         document.getElementById("suggestion-hint"),
         () => ({
-            text:    contentField.textContent,
+            text: contentField.textContent,
             tagName: state.editor.tags[state.editor.selectedTagIndex]?.name || "tag"
         })
     );
@@ -1464,16 +1908,21 @@ function init() {
 
     document.querySelector(".btn-reset-storage").addEventListener("click", () => {
         configDropdown.classList.remove("is-open");
+        driveSync.cancelPending();
         localStorage.removeItem(STORAGE_KEY);
         popup.show({
             title: "Datos borrados",
-            content: "<p>Información de la página ha sido borrada del navegador. Para volver a crearla, vuelva a cargar la página.</p>",
+            content: "<p>Información de la página ha sido borrada del navegador. Para volver a crearla, vuelva a cargar la página.</p>" +
+                (driveSync.session.connected ? "<p>Tu copia en Google Drive no se borra: se volverá a cargar al refrescar.</p>" : ""),
             buttons: [
                 { text: "Cancelar", class: "" },
                 { text: "Refrescar", class: "btn-primary", action: () => location.reload(), close: false }
             ]
         });
     });
+
+    driveSync.init();
+    appReady = true;
 }
 
 document.addEventListener("DOMContentLoaded", init);

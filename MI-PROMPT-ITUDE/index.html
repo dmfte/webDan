@@ -18,6 +18,8 @@
                 <p class="eyebrow">Editor estructurado XML</p>
                 <h1>Mi Prompt-itud</h1>
             </div>
+            <div class="header-actions">
+            <button type="button" class="btn btn-drive-sync" data-status="off">Conectar Drive</button>
             <div class="config-menu">
                 <button type="button" class="btn btn-config-toggle" aria-label="Configuración">
                     <span class="top-bun"></span>
@@ -65,10 +67,14 @@
                             <span class="config-slider"></span>
                         </label>
                     </div>
+                    <div class="config-item config-item-drive" hidden>
+                        <button type="button" class="btn btn-drive-disconnect">Desconectar Google Drive</button>
+                    </div>
                     <div class="config-item">
                         <button type="button" class="btn btn-danger btn-reset-storage">Borrar datos</button>
                     </div>
                 </div>
+            </div>
             </div>
         </header>
 
@@ -311,6 +317,7 @@
         </div>
     </div>
 
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="index.js"></script>
 
 
