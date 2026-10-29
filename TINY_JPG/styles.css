@@ -134,6 +134,69 @@ button, select, input[type="file"], input[type="checkbox"], label {
   line-height: 1;
 }
 
+/* ---------- Tabs ---------- */
+
+.tool-tabs {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.tool-tabs input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tool-tab {
+  min-height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.tool-tab:hover {
+  border-color: var(--primary);
+  color: var(--text);
+}
+
+.tool-tabs input:checked + .tool-tab {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #0e1116;
+}
+
+/* Same mechanism as GENERADOR CSV HACIENDA: the radios live in the header and
+   :has() reaches across to the sibling page container — no JS involved. */
+.topbar:has(#tabJpg:checked) + .tool-pages #pageMp4,
+.topbar:has(#tabMp4:checked) + .tool-pages #pageJpg {
+  display: none;
+}
+
+.tool-page {
+  animation: tool-page-in 300ms ease-in-out;
+}
+
+@keyframes tool-page-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tool-page {
+    animation: none;
+  }
+}
+
 /* ---------- Page ---------- */
 
 .page {
@@ -255,7 +318,8 @@ button, select, input[type="file"], input[type="checkbox"], label {
   gap: 12px;
 }
 
-#folderInput {
+#folderInput,
+#vFolderInput {
   position: fixed;
   inset: 0 auto auto 0;
   width: 1px;
@@ -313,6 +377,8 @@ button, select, input[type="file"], input[type="checkbox"], label {
 }
 
 #folderInput:focus-visible + label,
+#vFolderInput:focus-visible + label,
+.tool-tabs input:focus-visible + .tool-tab,
 .format-pill input:focus-visible + span {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
@@ -388,6 +454,7 @@ button, select, input[type="file"], input[type="checkbox"], label {
 
 .format-picker {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   padding: 0;
   border: 0;
@@ -435,6 +502,36 @@ button, select, input[type="file"], input[type="checkbox"], label {
 
 .rs-mount {
   height: 4.5rem;
+}
+
+.option-label {
+  font-size: 0.85rem;
+}
+
+.advanced {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.advanced summary {
+  width: fit-content;
+  color: var(--muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.advanced summary:hover {
+  color: var(--text);
+}
+
+.advanced[open] summary {
+  margin-bottom: 12px;
+}
+
+.advanced > .hint {
+  margin-top: -4px;
+  margin-bottom: 12px;
 }
 
 /* ---------- Results ---------- */
@@ -664,6 +761,99 @@ button, select, input[type="file"], input[type="checkbox"], label {
   text-align: center;
 }
 
+/* ---------- Video rows ---------- */
+
+.video-row {
+  grid-template-areas:
+    "info original progress result saving action"
+    "notice notice notice notice notice notice";
+}
+
+.video-row[data-status="compressing"] .file-progress-fill {
+  width: calc(var(--progress, 0) * 1%);
+  transition: width 200ms linear;
+}
+
+.video-row[data-status="larger"] .file-progress-fill {
+  width: 100%;
+  background: var(--focus);
+}
+
+.video-row[data-status="larger"] .status-label {
+  color: var(--focus);
+}
+
+.video-row[data-status="larger"] .button-action {
+  display: none;
+}
+
+.file-notice {
+  grid-area: notice;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  padding: 10px 14px;
+  border: 1px solid rgba(246, 201, 75, 0.4);
+  border-radius: var(--radius);
+  background: rgba(246, 201, 75, 0.1);
+}
+
+.file-notice-text {
+  flex: 1 1 260px;
+  color: var(--focus);
+  font-size: 0.75rem;
+}
+
+.file-notice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.file-notice-actions .button {
+  min-height: 34px;
+  font-size: 0.75rem;
+}
+
+/* ---------- Confirm dialog ---------- */
+
+.confirm-dialog {
+  width: min(420px, calc(100vw - 32px));
+  padding: 22px 22px 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: 1rem;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+
+.confirm-dialog::backdrop {
+  background: rgba(8, 10, 14, 0.7);
+}
+
+.confirm-dialog h2 {
+  font-family: "VT323", monospace;
+  font-size: 1.7rem;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.confirm-dialog p {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
 /* ---------- Responsive ---------- */
 
 @media (max-width: 720px) {
@@ -674,6 +864,27 @@ button, select, input[type="file"], input[type="checkbox"], label {
       "progress progress action"
       "original result saving";
     padding: 14px 16px;
+  }
+
+  .video-row {
+    grid-template-areas:
+      "info info info"
+      "progress progress action"
+      "original result saving"
+      "notice notice notice";
+  }
+
+  .topbar {
+    flex-wrap: wrap;
+  }
+
+  .tool-tabs {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .tool-tab {
+    flex: 1;
   }
 
   .file-size-original {

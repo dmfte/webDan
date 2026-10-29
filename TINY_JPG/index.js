@@ -1,5 +1,6 @@
 import { RangeSlider } from '../assets/js/RangeSlider.js';
 import { createZipBlob } from './zip.js';
+import { formatBytes, formatChange, isVideoFile } from './utils.js';
 
 const MAX_CONCURRENT = 3;
 // Every accepted input type is also a type the canvas encoder can write, so
@@ -146,10 +147,14 @@ renderLastFolderHint();
 
 // Drops are accepted anywhere on the page, not just on the drop zone — a
 // near miss would otherwise make the browser navigate away to the image.
+// video.js listens the same way and takes the videos; each side only claims
+// its own files, and a drop made up purely of images switches to this tab.
+const jpgTab = document.getElementById('tabJpg');
+
 ['dragenter', 'dragover'].forEach((evtName) => {
   window.addEventListener(evtName, (e) => {
     e.preventDefault();
-    dropZone.classList.add('drag-over');
+    if (jpgTab.checked) dropZone.classList.add('drag-over');
   });
 });
 
@@ -161,12 +166,19 @@ renderLastFolderHint();
 });
 
 window.addEventListener('drop', (e) => {
-  if (e.dataTransfer && e.dataTransfer.files) handleFiles(e.dataTransfer.files);
+  if (!e.dataTransfer || !e.dataTransfer.files.length) return;
+  const files = [...e.dataTransfer.files];
+  const videos = files.filter(isVideoFile);
+  if (videos.length === files.length) return;
+  if (!videos.length) jpgTab.checked = true;
+  handleFiles(files);
 });
 
 function handleFiles(fileListArg) {
   let skipped = 0;
   for (const file of fileListArg) {
+    // Videos belong to the Tiny MP4 tab, which picks them up on its own.
+    if (isVideoFile(file)) continue;
     if (!FORMATS[file.type]) {
       console.warn(`Formato no soportado, se omite: ${file.name}`);
       skipped++;
@@ -555,23 +567,4 @@ function updateBatchSummary() {
     savingsSummary.textContent =
       `El formato elegido pesa ${formatBytes(bytesOut - bytesIn)} más que los originales.`;
   }
-}
-
-// === Formatting ===
-
-function formatChange(sizeIn, sizeOut) {
-  const pct = Math.round((1 - sizeOut / sizeIn) * 100);
-  return pct >= 0 ? `−${pct}%` : `+${-pct}%`;
-}
-
-function formatBytes(bytes) {
-  if (bytes < 1024) return `${bytes} B`;
-  const units = ['KB', 'MB', 'GB'];
-  let val = bytes / 1024;
-  let i = 0;
-  while (val >= 1024 && i < units.length - 1) {
-    val /= 1024;
-    i++;
-  }
-  return `${val.toFixed(val < 10 ? 2 : 1)} ${units[i]}`;
 }

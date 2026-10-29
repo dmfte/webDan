@@ -11,9 +11,16 @@
     <a class="brand-back" href="../index.html" aria-label="Volver al portafolio">←</a>
     <span class="brand-mark" aria-hidden="true">JPG</span>
     <span class="brand-name">Tiny JPG</span>
+    <nav class="tool-tabs" aria-label="Herramientas">
+      <input type="radio" name="toolTabs" id="tabJpg" checked>
+      <label class="tool-tab" for="tabJpg">Tiny JPG</label>
+      <input type="radio" name="toolTabs" id="tabMp4">
+      <label class="tool-tab" for="tabMp4">Tiny MP4</label>
+    </nav>
   </header>
 
-  <main class="page">
+  <main class="tool-pages">
+  <div class="page tool-page" id="pageJpg">
     <section class="hero" aria-labelledby="heroTitle">
       <h1 id="heroTitle">Comprime y convierte tus imágenes</h1>
       <p class="hero-sub">JPG, PNG y WebP, al instante y sin salir de tu navegador.</p>
@@ -98,6 +105,296 @@
       la pestaña, se pierde todo lo que no hayas descargado todavía, esté comprimiéndose
       o ya listo.
     </p>
+  </div>
+
+  <div class="page tool-page" id="pageMp4">
+    <section class="hero" aria-labelledby="vHeroTitle">
+      <h1 id="vHeroTitle">Comprime y convierte tus videos</h1>
+      <p class="hero-sub">MP4, MOV, WebM y MKV, con el codificador de tu propio dispositivo.</p>
+
+      <div class="large-file-banner" id="vUnsupportedBanner" role="status" hidden>
+        <p>Este navegador no tiene WebCodecs, así que no puede comprimir videos. Prueba con Chrome, Edge, Safari o un Firefox reciente.</p>
+      </div>
+
+      <div class="drop-zone" id="vDropZone">
+        <input type="file" id="vFileInput" name="vFileInput" accept="video/mp4,video/quicktime,video/webm,video/x-matroska,.mp4,.m4v,.mov,.webm,.mkv" multiple>
+        <label class="drop-label" for="vFileInput">
+          <span class="upload-mark" aria-hidden="true"></span>
+          <strong>Suelta tus videos aquí</strong>
+          <span>o haz clic para elegirlos · MP4, MOV, WebM o MKV</span>
+        </label>
+      </div>
+
+      <div class="folder-row">
+        <input type="file" id="vFolderInput" name="vFolderInput" webkitdirectory multiple>
+        <label class="button button-secondary" for="vFolderInput">Seleccionar carpeta</label>
+        <p class="hint" id="vLastFolderHint" hidden></p>
+      </div>
+    </section>
+
+    <section class="options" aria-label="Ajustes de video">
+      <div class="option">
+        <label class="switch" for="vConvertToggle">
+          <input type="checkbox" role="switch" id="vConvertToggle">
+          <span>Convertir mis videos a otro formato</span>
+        </label>
+
+        <fieldset class="format-picker" id="vFormatPicker" disabled>
+          <legend class="sr-only">Formato de salida</legend>
+          <label class="format-pill">
+            <input type="radio" name="vFormat" value="mp4-avc" checked>
+            <span>MP4 · H.264</span>
+          </label>
+          <label class="format-pill">
+            <input type="radio" name="vFormat" value="mp4-hevc">
+            <span>MP4 · H.265</span>
+          </label>
+          <label class="format-pill">
+            <input type="radio" name="vFormat" value="mp4-av1">
+            <span>MP4 · AV1</span>
+          </label>
+          <label class="format-pill">
+            <input type="radio" name="vFormat" value="webm-vp9">
+            <span>WebM · VP9</span>
+          </label>
+        </fieldset>
+      </div>
+      <p class="hint" id="vConvertHint"></p>
+
+      <div class="option">
+        <span class="option-label" id="vQualityLabel">Calidad</span>
+        <fieldset class="format-picker" id="vQualityPicker" aria-labelledby="vQualityLabel">
+          <label class="format-pill">
+            <input type="radio" name="vQuality" value="alta">
+            <span>Alta</span>
+          </label>
+          <label class="format-pill">
+            <input type="radio" name="vQuality" value="media" checked>
+            <span>Media</span>
+          </label>
+          <label class="format-pill">
+            <input type="radio" name="vQuality" value="baja">
+            <span>Baja</span>
+          </label>
+          <label class="format-pill">
+            <input type="radio" name="vQuality" value="custom">
+            <span>Personalizada</span>
+          </label>
+        </fieldset>
+      </div>
+      <div class="rs-mount" id="vBitrateSlider" hidden></div>
+      <p class="hint" id="vQualityHint"></p>
+
+      <div class="option">
+        <label class="switch" for="vResizeToggle">
+          <input type="checkbox" role="switch" id="vResizeToggle">
+          <span>Reducir resolución</span>
+        </label>
+
+        <fieldset class="format-picker" id="vResizePicker" disabled>
+          <legend class="sr-only">Resolución máxima</legend>
+          <label class="format-pill">
+            <input type="radio" name="vResize" value="1080">
+            <span>1080p</span>
+          </label>
+          <label class="format-pill">
+            <input type="radio" name="vResize" value="720" checked>
+            <span>720p</span>
+          </label>
+          <label class="format-pill">
+            <input type="radio" name="vResize" value="480">
+            <span>480p</span>
+          </label>
+          <label class="format-pill">
+            <input type="radio" name="vResize" value="360">
+            <span>360p</span>
+          </label>
+          <label class="format-pill">
+            <input type="radio" name="vResize" value="pct">
+            <span>%</span>
+          </label>
+        </fieldset>
+      </div>
+      <div class="rs-mount" id="vResizeSlider" hidden></div>
+      <p class="hint">Se aplica al lado corto del video (720p = 720 px), así que sirve igual para videos verticales. Nunca se amplía.</p>
+
+      <div class="option">
+        <label class="switch" for="vFpsToggle">
+          <input type="checkbox" role="switch" id="vFpsToggle">
+          <span>Limitar fotogramas por segundo</span>
+        </label>
+
+        <fieldset class="format-picker" id="vFpsPicker" disabled>
+          <legend class="sr-only">Fotogramas por segundo máximos</legend>
+          <label class="format-pill">
+            <input type="radio" name="vFps" value="60">
+            <span>60</span>
+          </label>
+          <label class="format-pill">
+            <input type="radio" name="vFps" value="30" checked>
+            <span>30</span>
+          </label>
+          <label class="format-pill">
+            <input type="radio" name="vFps" value="24">
+            <span>24</span>
+          </label>
+          <label class="format-pill">
+            <input type="radio" name="vFps" value="15">
+            <span>15</span>
+          </label>
+        </fieldset>
+      </div>
+      <p class="hint">Solo reduce: un video de 30 fps nunca se convierte a 60.</p>
+
+      <div class="option">
+        <span class="option-label" id="vAudioLabel">Audio</span>
+        <fieldset class="format-picker" id="vAudioPicker" aria-labelledby="vAudioLabel">
+          <label class="format-pill">
+            <input type="radio" name="vAudio" value="keep" checked>
+            <span>Conservar</span>
+          </label>
+          <label class="format-pill">
+            <input type="radio" name="vAudio" value="reencode">
+            <span>Recomprimir</span>
+          </label>
+          <label class="format-pill">
+            <input type="radio" name="vAudio" value="remove">
+            <span>Quitar</span>
+          </label>
+        </fieldset>
+      </div>
+      <div class="option" id="vAudioBitrateRow" hidden>
+        <span class="option-label" id="vAudioBitrateLabel">Tasa de audio</span>
+        <fieldset class="format-picker" id="vAudioBitratePicker" aria-labelledby="vAudioBitrateLabel">
+          <label class="format-pill">
+            <input type="radio" name="vAudioKbps" value="64">
+            <span>64k</span>
+          </label>
+          <label class="format-pill">
+            <input type="radio" name="vAudioKbps" value="96">
+            <span>96k</span>
+          </label>
+          <label class="format-pill">
+            <input type="radio" name="vAudioKbps" value="128" checked>
+            <span>128k</span>
+          </label>
+          <label class="format-pill">
+            <input type="radio" name="vAudioKbps" value="192">
+            <span>192k</span>
+          </label>
+        </fieldset>
+      </div>
+      <p class="hint" id="vAudioHint"></p>
+
+      <div class="option">
+        <span class="option-label" id="vRotateLabel">Rotar</span>
+        <fieldset class="format-picker" id="vRotatePicker" aria-labelledby="vRotateLabel">
+          <label class="format-pill">
+            <input type="radio" name="vRotate" value="0" checked>
+            <span>0°</span>
+          </label>
+          <label class="format-pill">
+            <input type="radio" name="vRotate" value="90">
+            <span>90°</span>
+          </label>
+          <label class="format-pill">
+            <input type="radio" name="vRotate" value="180">
+            <span>180°</span>
+          </label>
+          <label class="format-pill">
+            <input type="radio" name="vRotate" value="270">
+            <span>270°</span>
+          </label>
+        </fieldset>
+      </div>
+      <p class="hint">En sentido horario, sumado a la orientación que el video ya tenga.</p>
+
+      <div class="option">
+        <label class="switch" for="vTagsToggle">
+          <input type="checkbox" role="switch" id="vTagsToggle" checked>
+          <span>Conservar metadatos</span>
+        </label>
+      </div>
+      <p class="hint">Título, fecha, comentarios y demás etiquetas descriptivas del original.</p>
+
+      <details class="advanced">
+        <summary>Opciones avanzadas</summary>
+
+        <div class="option">
+          <span class="option-label" id="vKeyframeLabel">Fotograma clave cada</span>
+          <fieldset class="format-picker" id="vKeyframePicker" aria-labelledby="vKeyframeLabel">
+            <label class="format-pill">
+              <input type="radio" name="vKeyframe" value="1">
+              <span>1 s</span>
+            </label>
+            <label class="format-pill">
+              <input type="radio" name="vKeyframe" value="2">
+              <span>2 s</span>
+            </label>
+            <label class="format-pill">
+              <input type="radio" name="vKeyframe" value="5" checked>
+              <span>5 s</span>
+            </label>
+            <label class="format-pill">
+              <input type="radio" name="vKeyframe" value="10">
+              <span>10 s</span>
+            </label>
+          </fieldset>
+        </div>
+        <p class="hint">Más frecuentes: adelantar y retroceder es más preciso, pero el archivo pesa algo más.</p>
+
+        <div class="option">
+          <span class="option-label" id="vAccelLabel">Codificador</span>
+          <fieldset class="format-picker" id="vAccelPicker" aria-labelledby="vAccelLabel">
+            <label class="format-pill">
+              <input type="radio" name="vAccel" value="no-preference" checked>
+              <span>Auto</span>
+            </label>
+            <label class="format-pill">
+              <input type="radio" name="vAccel" value="prefer-hardware">
+              <span>Hardware</span>
+            </label>
+            <label class="format-pill">
+              <input type="radio" name="vAccel" value="prefer-software">
+              <span>Software</span>
+            </label>
+          </fieldset>
+        </div>
+        <p class="hint">Hardware es mucho más rápido; software suele dar mejor calidad por cada MB. Es una preferencia: el navegador puede ignorarla.</p>
+      </details>
+    </section>
+
+    <div class="large-file-banner" id="vLargeFileBanner" role="status" hidden>
+      <p>Hay videos de más de 500 MB en el lote — la conversión puede tardar varios minutos y usar mucha memoria.</p>
+    </div>
+
+    <div id="vFileAnnouncer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+    <section class="results" id="vResults" aria-label="Lote de videos" hidden>
+      <div class="batch-summary">
+        <div class="batch-counts" id="vBatchCounts" aria-live="polite"></div>
+        <div class="batch-progress">
+          <div class="batch-progress-fill" id="vBatchProgressFill"></div>
+        </div>
+      </div>
+
+      <ul class="file-list" id="vFileList"></ul>
+
+      <div class="results-footer">
+        <p class="savings" id="vSavingsSummary"></p>
+        <div class="results-actions">
+          <button class="button button-secondary" type="button" id="vCancelAll" disabled>Cancelar todo</button>
+          <button class="button button-primary" type="button" id="vDownloadAll" disabled>Descargar todos</button>
+        </div>
+      </div>
+    </section>
+
+    <p class="hint privacy-note">
+      Todo ocurre en tu navegador — nada se sube a ningún servidor. Los videos se procesan
+      de uno en uno y el resultado se guarda en memoria hasta que lo descargas: si cierras
+      o recargas la pestaña, se pierde.
+    </p>
+  </div>
   </main>
 
   <template id="fileRowTemplate">
@@ -121,6 +418,47 @@
     </li>
   </template>
 
+  <template id="videoRowTemplate">
+    <li class="file-row video-row" data-status="queued">
+      <div class="file-info">
+        <p class="file-name"></p>
+        <p class="file-meta">
+          <span class="file-format"></span>
+          <span class="file-dims"></span>
+          <span class="file-extra"></span>
+        </p>
+        <p class="file-error" hidden></p>
+      </div>
+      <span class="file-size-original"></span>
+      <div class="file-progress">
+        <div class="file-progress-fill"></div>
+        <span class="status-label"></span>
+      </div>
+      <span class="file-size-result"></span>
+      <span class="file-saving"></span>
+      <button class="button button-secondary button-action" type="button">Cancelar</button>
+      <div class="file-notice" hidden>
+        <p class="file-notice-text"></p>
+        <div class="file-notice-actions">
+          <button class="button button-primary notice-stronger" type="button"></button>
+          <button class="button button-secondary notice-anyway" type="button">Descargar igual</button>
+        </div>
+      </div>
+    </li>
+  </template>
+
+  <dialog class="confirm-dialog" id="vConfirmDialog" aria-labelledby="vConfirmTitle">
+    <form method="dialog">
+      <h2 id="vConfirmTitle">¿Descargar un video más pesado?</h2>
+      <p id="vConfirmText"></p>
+      <div class="dialog-actions">
+        <button class="button button-secondary" type="submit" value="cancel">Cancelar</button>
+        <button class="button button-primary" type="submit" value="confirm">Descargar igual</button>
+      </div>
+    </form>
+  </dialog>
+
   <script src="index.js" type="module"></script>
+  <script src="video.js" type="module"></script>
 </body>
 </html>
