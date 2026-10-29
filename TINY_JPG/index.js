@@ -568,3 +568,11 @@ function updateBatchSummary() {
       `El formato elegido pesa ${formatBytes(bytesOut - bytesIn)} más que los originales.`;
   }
 }
+
+// Info tooltips are pure CSS (hover / focus); Escape just drops focus so a
+// keyboard user can dismiss one without tabbing away.
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && document.activeElement.classList.contains('info-btn')) {
+    document.activeElement.blur();
+  }
+});

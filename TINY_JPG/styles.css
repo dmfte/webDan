@@ -508,6 +508,71 @@ button, select, input[type="file"], input[type="checkbox"], label {
   font-size: 0.85rem;
 }
 
+/* ---------- Info tooltips ---------- */
+
+/* The tooltip anchors to the whole label group (not the tiny icon) so it
+   starts at the row's left edge and has room to grow even when the icon
+   sits near the right edge of a phone screen. */
+.option-head {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-btn {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: none;
+  color: var(--muted);
+  font-family: Georgia, serif;
+  font-size: 0.72rem;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1;
+  transition: border-color 160ms ease, color 160ms ease;
+}
+
+.info-btn:hover,
+.info-btn:focus-visible {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.info-tip {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 10;
+  width: max-content;
+  max-width: min(320px, calc(100vw - 72px));
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface-soft);
+  box-shadow: var(--shadow);
+  color: var(--text);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  white-space: normal;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 140ms ease, visibility 140ms ease;
+}
+
+.info-btn:hover + .info-tip,
+.info-btn:focus + .info-tip {
+  opacity: 1;
+  visibility: visible;
+}
+
 .advanced {
   display: flex;
   flex-direction: column;

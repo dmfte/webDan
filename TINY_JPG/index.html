@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tiny JPG</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
   <header class="topbar">
@@ -43,10 +43,14 @@
 
     <section class="options" aria-label="Ajustes">
       <div class="option">
-        <label class="switch" for="convertToggle">
-          <input type="checkbox" role="switch" id="convertToggle">
-          <span>Convertir mis imágenes automáticamente</span>
-        </label>
+        <span class="option-head">
+          <label class="switch" for="convertToggle">
+            <input type="checkbox" role="switch" id="convertToggle">
+            <span>Convertir mis imágenes automáticamente</span>
+          </label>
+          <button class="info-btn" type="button" aria-label="Qué significa: Convertir" aria-describedby="tipConvertToggle">i</button>
+          <span class="info-tip" role="tooltip" id="tipConvertToggle">Cambia el tipo de archivo de tus imágenes. WebP suele ser el más ligero. JPG se abre en cualquier parte. PNG es para imágenes con fondo transparente o dibujos de colores planos.</span>
+        </span>
 
         <fieldset class="format-picker" id="formatPicker" disabled>
           <legend class="sr-only">Formato de salida</legend>
@@ -67,10 +71,14 @@
       <p class="hint" id="convertHint">Sin convertir, cada imagen se comprime y conserva su formato.</p>
 
       <div class="option">
-        <label class="switch" for="resizeToggle">
-          <input type="checkbox" role="switch" id="resizeToggle">
-          <span>Reducir dimensiones antes de comprimir</span>
-        </label>
+        <span class="option-head">
+          <label class="switch" for="resizeToggle">
+            <input type="checkbox" role="switch" id="resizeToggle">
+            <span>Reducir dimensiones antes de comprimir</span>
+          </label>
+          <button class="info-btn" type="button" aria-label="Qué significa: Reducir dimensiones" aria-describedby="tipResizeToggle">i</button>
+          <span class="info-tip" role="tooltip" id="tipResizeToggle">Hace la imagen más pequeña en píxeles (de ancho y de alto). Una imagen más pequeña pesa mucho menos. Ideal si solo se va a ver en una pantalla o subir a internet.</span>
+        </span>
       </div>
       <div class="rs-mount" id="resizeSlider" hidden></div>
     </section>
@@ -134,10 +142,14 @@
 
     <section class="options" aria-label="Ajustes de video">
       <div class="option">
-        <label class="switch" for="vConvertToggle">
-          <input type="checkbox" role="switch" id="vConvertToggle">
-          <span>Convertir mis videos a otro formato</span>
-        </label>
+        <span class="option-head">
+          <label class="switch" for="vConvertToggle">
+            <input type="checkbox" role="switch" id="vConvertToggle">
+            <span>Convertir mis videos a otro formato</span>
+          </label>
+          <button class="info-btn" type="button" aria-label="Qué significa: Convertir formato" aria-describedby="tipVConvertToggle">i</button>
+          <span class="info-tip" role="tooltip" id="tipVConvertToggle">El formato es la manera en que se guarda el video. H.264 funciona en todas partes. H.265 y AV1 pesan menos, pero algunos aparatos viejos no los abren. WebM es para páginas web.</span>
+        </span>
 
         <fieldset class="format-picker" id="vFormatPicker" disabled>
           <legend class="sr-only">Formato de salida</legend>
@@ -162,7 +174,11 @@
       <p class="hint" id="vConvertHint"></p>
 
       <div class="option">
-        <span class="option-label" id="vQualityLabel">Calidad</span>
+        <span class="option-head">
+          <span class="option-label" id="vQualityLabel">Calidad</span>
+          <button class="info-btn" type="button" aria-label="Qué significa: Calidad" aria-describedby="tipVQualityLabel">i</button>
+          <span class="info-tip" role="tooltip" id="tipVQualityLabel">Cuánta información se guarda en cada segundo de video. Más calidad se ve mejor, pero pesa más. «Media» casi siempre es suficiente. «Personalizada» te deja elegir el número exacto (kbps): más alto, mejor y más pesado.</span>
+        </span>
         <fieldset class="format-picker" id="vQualityPicker" aria-labelledby="vQualityLabel">
           <label class="format-pill">
             <input type="radio" name="vQuality" value="alta">
@@ -186,10 +202,14 @@
       <p class="hint" id="vQualityHint"></p>
 
       <div class="option">
-        <label class="switch" for="vResizeToggle">
-          <input type="checkbox" role="switch" id="vResizeToggle">
-          <span>Reducir resolución</span>
-        </label>
+        <span class="option-head">
+          <label class="switch" for="vResizeToggle">
+            <input type="checkbox" role="switch" id="vResizeToggle">
+            <span>Reducir resolución</span>
+          </label>
+          <button class="info-btn" type="button" aria-label="Qué significa: Reducir resolución" aria-describedby="tipVResizeToggle">i</button>
+          <span class="info-tip" role="tooltip" id="tipVResizeToggle">La resolución es el tamaño de la imagen del video. 1080p es Full HD, 720p es HD y 480p es como un DVD. Menos resolución = archivo mucho más ligero, pero menos nítido en pantallas grandes.</span>
+        </span>
 
         <fieldset class="format-picker" id="vResizePicker" disabled>
           <legend class="sr-only">Resolución máxima</legend>
@@ -219,10 +239,14 @@
       <p class="hint">Se aplica al lado corto del video (720p = 720 px), así que sirve igual para videos verticales. Nunca se amplía.</p>
 
       <div class="option">
-        <label class="switch" for="vFpsToggle">
-          <input type="checkbox" role="switch" id="vFpsToggle">
-          <span>Limitar fotogramas por segundo</span>
-        </label>
+        <span class="option-head">
+          <label class="switch" for="vFpsToggle">
+            <input type="checkbox" role="switch" id="vFpsToggle">
+            <span>Limitar fotogramas por segundo</span>
+          </label>
+          <button class="info-btn" type="button" aria-label="Qué significa: Limitar fotogramas por segundo" aria-describedby="tipVFpsToggle">i</button>
+          <span class="info-tip" role="tooltip" id="tipVFpsToggle">Los fps son cuántas imágenes por segundo tiene el video. 30 es lo normal, 60 se ve más fluido y 24 es el de cine. Menos fps = archivo más ligero, pero el movimiento se ve menos suave.</span>
+        </span>
 
         <fieldset class="format-picker" id="vFpsPicker" disabled>
           <legend class="sr-only">Fotogramas por segundo máximos</legend>
@@ -247,7 +271,11 @@
       <p class="hint">Solo reduce: un video de 30 fps nunca se convierte a 60.</p>
 
       <div class="option">
-        <span class="option-label" id="vAudioLabel">Audio</span>
+        <span class="option-head">
+          <span class="option-label" id="vAudioLabel">Audio</span>
+          <button class="info-btn" type="button" aria-label="Qué significa: Audio" aria-describedby="tipVAudioLabel">i</button>
+          <span class="info-tip" role="tooltip" id="tipVAudioLabel">«Conservar» deja el sonido tal cual. «Recomprimir» lo hace más ligero (casi nunca vale la pena: el sonido pesa poco). «Quitar» deja el video mudo.</span>
+        </span>
         <fieldset class="format-picker" id="vAudioPicker" aria-labelledby="vAudioLabel">
           <label class="format-pill">
             <input type="radio" name="vAudio" value="keep" checked>
@@ -264,7 +292,11 @@
         </fieldset>
       </div>
       <div class="option" id="vAudioBitrateRow" hidden>
-        <span class="option-label" id="vAudioBitrateLabel">Tasa de audio</span>
+        <span class="option-head">
+          <span class="option-label" id="vAudioBitrateLabel">Tasa de audio</span>
+          <button class="info-btn" type="button" aria-label="Qué significa: Tasa de audio" aria-describedby="tipVAudioBitrateLabel">i</button>
+          <span class="info-tip" role="tooltip" id="tipVAudioBitrateLabel">Cuánta información del sonido se guarda por segundo. 128k suena bien para casi todo, 64k alcanza para voz y 192k es para música.</span>
+        </span>
         <fieldset class="format-picker" id="vAudioBitratePicker" aria-labelledby="vAudioBitrateLabel">
           <label class="format-pill">
             <input type="radio" name="vAudioKbps" value="64">
@@ -287,7 +319,11 @@
       <p class="hint" id="vAudioHint"></p>
 
       <div class="option">
-        <span class="option-label" id="vRotateLabel">Rotar</span>
+        <span class="option-head">
+          <span class="option-label" id="vRotateLabel">Rotar</span>
+          <button class="info-btn" type="button" aria-label="Qué significa: Rotar" aria-describedby="tipVRotateLabel">i</button>
+          <span class="info-tip" role="tooltip" id="tipVRotateLabel">Gira el video si quedó de lado o de cabeza. 90° es un cuarto de vuelta hacia la derecha; 180°, media vuelta.</span>
+        </span>
         <fieldset class="format-picker" id="vRotatePicker" aria-labelledby="vRotateLabel">
           <label class="format-pill">
             <input type="radio" name="vRotate" value="0" checked>
@@ -310,10 +346,14 @@
       <p class="hint">En sentido horario, sumado a la orientación que el video ya tenga.</p>
 
       <div class="option">
-        <label class="switch" for="vTagsToggle">
-          <input type="checkbox" role="switch" id="vTagsToggle" checked>
-          <span>Conservar metadatos</span>
-        </label>
+        <span class="option-head">
+          <label class="switch" for="vTagsToggle">
+            <input type="checkbox" role="switch" id="vTagsToggle" checked>
+            <span>Conservar metadatos</span>
+          </label>
+          <button class="info-btn" type="button" aria-label="Qué significa: Conservar metadatos" aria-describedby="tipVTagsToggle">i</button>
+          <span class="info-tip" role="tooltip" id="tipVTagsToggle">Datos escondidos dentro del archivo, como el título o la fecha. Desactívalo si no quieres compartir esa información junto con el video.</span>
+        </span>
       </div>
       <p class="hint">Título, fecha, comentarios y demás etiquetas descriptivas del original.</p>
 
@@ -321,7 +361,11 @@
         <summary>Opciones avanzadas</summary>
 
         <div class="option">
-          <span class="option-label" id="vKeyframeLabel">Fotograma clave cada</span>
+          <span class="option-head">
+            <span class="option-label" id="vKeyframeLabel">Fotograma clave cada</span>
+            <button class="info-btn" type="button" aria-label="Qué significa: Fotograma clave" aria-describedby="tipVKeyframeLabel">i</button>
+            <span class="info-tip" role="tooltip" id="tipVKeyframeLabel">Cada cuánto el video guarda una imagen completa. Más seguido = al adelantar o retroceder salta justo adonde quieres, pero pesa un poco más. Si no sabes, déjalo en 5 s.</span>
+          </span>
           <fieldset class="format-picker" id="vKeyframePicker" aria-labelledby="vKeyframeLabel">
             <label class="format-pill">
               <input type="radio" name="vKeyframe" value="1">
@@ -344,7 +388,11 @@
         <p class="hint">Más frecuentes: adelantar y retroceder es más preciso, pero el archivo pesa algo más.</p>
 
         <div class="option">
-          <span class="option-label" id="vAccelLabel">Codificador</span>
+          <span class="option-head">
+            <span class="option-label" id="vAccelLabel">Codificador</span>
+            <button class="info-btn" type="button" aria-label="Qué significa: Codificador" aria-describedby="tipVAccelLabel">i</button>
+            <span class="info-tip" role="tooltip" id="tipVAccelLabel">Qué parte de tu aparato hace el trabajo. Hardware: un chip especial, muy rápido. Software: el procesador normal, más lento pero a veces con mejor resultado. Auto deja que el navegador decida.</span>
+          </span>
           <fieldset class="format-picker" id="vAccelPicker" aria-labelledby="vAccelLabel">
             <label class="format-pill">
               <input type="radio" name="vAccel" value="no-preference" checked>
@@ -458,7 +506,7 @@
     </form>
   </dialog>
 
-  <script src="index.js" type="module"></script>
+  <script src="index.js?v=3" type="module"></script>
   <script src="video.js" type="module"></script>
 </body>
 </html>
