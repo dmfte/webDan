@@ -980,6 +980,47 @@ body {
                 padding: 0.5em;
                 font-size: 0.7em;
                 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 0.4em;
+
+                & .palette-toggle {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5em;
+                    font: inherit;
+                    font-weight: bold;
+                    color: inherit;
+                    background: none;
+                    border: none;
+                    padding: 0;
+                    cursor: pointer;
+                    white-space: nowrap;
+
+                    & .chevron {
+                        display: inline-block;
+                        transition: transform 0.15s;
+                    }
+
+                    &:focus-visible {
+                        outline: 2px solid var(--color-controls-btn);
+                        outline-offset: 2px;
+                    }
+                }
+
+                & .palette-body {
+                    display: flex;
+                }
+
+                &.collapsed {
+                    & .palette-body {
+                        display: none;
+                    }
+
+                    & .palette-toggle .chevron {
+                        transform: rotate(90deg);
+                    }
+                }
 
                 & .resolution {
                     font-weight: bold;

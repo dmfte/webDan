@@ -479,8 +479,15 @@
             </div>
             <div class="display img-out">
                 <div class="palette-container" id="paletteContainerPx">
-                    <div class="resolution" id="paletteResolutionPx"></div>
-                    <div class="color-list" id="paletteColorListPx"></div>
+                    <button type="button" class="palette-toggle" id="paletteTogglePx" aria-expanded="true"
+                        aria-controls="paletteBodyPx" title="Mostrar/ocultar lista de colores">
+                        <span class="count" id="paletteCountPx"></span>
+                        <span class="chevron" aria-hidden="true">▾</span>
+                    </button>
+                    <div class="palette-body" id="paletteBodyPx">
+                        <div class="resolution" id="paletteResolutionPx"></div>
+                        <div class="color-list" id="paletteColorListPx"></div>
+                    </div>
                 </div>
                 <canvas id="canvOut" width="0" height="0"></canvas>
             </div>

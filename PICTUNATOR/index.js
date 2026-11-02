@@ -402,6 +402,20 @@ const PX_GRID_MIN_BLOCK = 3; //  Below this the grid lines would cover the cells
 const paletteContainerPx = document.getElementById("paletteContainerPx");
 const paletteResolutionPx = document.getElementById("paletteResolutionPx");
 const paletteColorListPx = document.getElementById("paletteColorListPx");
+const paletteTogglePx = document.getElementById("paletteTogglePx");
+const paletteCountPx = document.getElementById("paletteCountPx");
+
+//-- Collapsing the panel leaves only the color count, so it stops covering the picture.
+//   The choice is remembered per browser (storage can be blocked, hence the try/catch).
+function setPxPaletteCollapsed(collapsed) {
+    paletteContainerPx.classList.toggle("collapsed", collapsed);
+    paletteTogglePx.setAttribute("aria-expanded", String(!collapsed));
+    try { localStorage.setItem("pictunator.paletteCollapsed", collapsed ? "1" : "0"); } catch (e) { }
+}
+try { setPxPaletteCollapsed(localStorage.getItem("pictunator.paletteCollapsed") === "1"); } catch (e) { }
+paletteTogglePx.addEventListener("click", () => {
+    setPxPaletteCollapsed(!paletteContainerPx.classList.contains("collapsed"));
+});
 
 const debouncedPxRender = debounceFn(() => {
     canv0 = getPixelatedCanvas(paramsPx);
@@ -684,6 +698,7 @@ function renderPxPalette() {
     }
     const sorted = [...counts.keys()].sort((a, b) => counts.get(b) - counts.get(a));
 
+    paletteCountPx.innerText = sorted.length === 1 ? "1 color" : `${sorted.length} colores`;
     paletteResolutionPx.innerText = `${canv0.width}px x ${canv0.height}px`;
     paletteColorListPx.innerHTML = "";
     sorted.forEach(packed => {
