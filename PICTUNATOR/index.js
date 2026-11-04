@@ -387,7 +387,7 @@ var paramsPx = {
     grid: true,
     trueColors: false,
     numColors: 16,
-    tolerance: 200
+    tolerance: 16 //  Starts at 256 / numColors, like the Max palette slider sets it.
 }
 var canv0 = document.createElement("canvas");
 var c0 = canv0.getContext("2d", { willReadFrequently: true });
@@ -460,7 +460,7 @@ cbPxGrid.addEventListener("click", () => {
 
 //-- True colors: skips palette quantization entirely and shows the plain downscaled image.
 //   Off (default) shows Representative colors instead: a palette built from the image's own
-//   most-popular colors (see buildPopularityPalette), at the count the Palette slider selects.
+//   most-popular colors (see buildPopularityPalette), capped by the Max palette slider.
 const cbPxTrueColors = document.getElementById("cbPxTrueColors");
 const wrapperPxTolerance = document.getElementById("wrapperPxTolerance");
 cbPxTrueColors.addEventListener("input", () => {
@@ -473,14 +473,16 @@ cbPxTrueColors.addEventListener("input", () => {
     renderPxPalette();
 });
 
-//-- Slider to pick how many representative colors to keep.
+//-- Slider: upper limit of representative colors to keep (Tolerance may merge them into fewer).
+//   Moving it also moves Tolerance to round(256 / maxColors) as a starting point; the user can
+//   still adjust Tolerance freely afterwards.
 const containerPxPalette = document.getElementById("containerPxPalette");
 const labelForContainerPxPalette = document.querySelector("[label-for=containerPxPalette]");
 var rsPxPalette = new RangeSlider(containerPxPalette, {
-    title: "Palette",
-    min: 8,
+    title: "Max palette",
+    min: 4,
     max: 256,
-    step: 8,
+    step: 1,
     def: paramsPx.numColors,
     color: "#576b9e",
     color2: "rgb(142, 167, 231)"
@@ -489,20 +491,21 @@ labelForContainerPxPalette.innerText = paramsPx.numColors;
 rsPxPalette.onValueChange(function () {
     paramsPx.numColors = rsPxPalette.val;
     labelForContainerPxPalette.innerText = paramsPx.numColors;
+    rsPxTolerance.val = { value: Math.round(256 / paramsPx.numColors) }; //  Fires Tolerance's own onValueChange.
     pxColorCache.clear(); //  Cached matches belong to the previous palette.
     if (imageIn == undefined || paramsPx.trueColors) return;
     debouncedPxRender();
 });
 
-//-- Slider: how close two colors must be, in weightedDistance() units, before the less popular
-//   one is absorbed into the more popular one instead of taking its own palette slot.
+//-- Slider: how far (straight weightedDistance() units, 0-255) a color may be from a more
+//   popular one and still be absorbed into its group. Wider tolerance -> fewer, broader colors.
 const containerPxTolerance = document.getElementById("containerPxTolerance");
 const labelForContainerPxTolerance = document.querySelector("[label-for=containerPxTolerance]");
 var rsPxTolerance = new RangeSlider(containerPxTolerance, {
     title: "Tolerance",
-    min: 0,
-    max: 3000,
-    step: 50,
+    min: 1,
+    max: 100,
+    step: 1,
     def: paramsPx.tolerance,
     color: "#576b9e",
     color2: "rgb(142, 167, 231)"
@@ -547,30 +550,70 @@ function getClosestPaletteColor(r, g, b, colors) {
     return match;
 }
 
-//-- Popularity algorithm: counts how many times each exact RGB color occurs in the image,
-//   then keeps the `numColors` most frequent ones as the palette. Unlike median-cut, every
-//   palette entry is a real color lifted straight from the picture, not an average.
-//   `tolerance` lets a color already in the palette absorb a less popular near-duplicate
-//   (weightedDistance() below `tolerance`) instead of it taking its own slot, freeing that
-//   slot for the next, more distinct color. If the image doesn't have `numColors` sufficiently
-//   distinct colors, the returned palette can end up smaller than requested.
-function buildPopularityPalette(data, numColors, tolerance = 0) {
+//-- Popularity algorithm with grouping: counts how many times each exact RGB color occurs,
+//   then walks them from most to least frequent. Each color joins the closest existing group
+//   whose representative lies within `tolerance` (straight weightedDistance() units, 0-255), or
+//   founds a new group. A group's representative is its founder, i.e. the most frequent color
+//   in that range, and every joining color adds its pixel count to the group. Groups are then
+//   ranked by that pooled count and up to `maxColors` are kept, so every palette entry is a
+//   real color lifted from the picture, and a wider tolerance merges more colors and naturally
+//   yields fewer of them.
+function buildPopularityPalette(data, maxColors, tolerance = 0) {
     const counts = new Map(); //  packed rgb -> occurrence count.
     for (let i = 0; i < data.length; i += 4) {
         const packed = (data[i] << 16) | (data[i + 1] << 8) | data[i + 2];
         counts.set(packed, (counts.get(packed) || 0) + 1);
     }
     const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
-    const palette = [];
-    for (const [packed] of sorted) {
-        if (palette.length >= numColors) break;
-        const r = (packed >> 16) & 0xff;
-        const g = (packed >> 8) & 0xff;
-        const b = packed & 0xff;
-        const absorbed = tolerance > 0 && palette.some(c => weightedDistance(r, g, b, c[0], c[1], c[2]) < tolerance);
-        if (!absorbed) palette.push([r, g, b]);
+    const unpack = packed => [(packed >> 16) & 0xff, (packed >> 8) & 0xff, packed & 0xff];
+    //  Without tolerance every color is its own group, already ranked by count.
+    if (tolerance <= 0) return sorted.slice(0, maxColors).map(([packed]) => unpack(packed));
+
+    //  Spatial hash of group representatives so each color only checks nearby groups instead of
+    //  all of them. A color can only be within `tolerance` of a representative if each channel
+    //  differs by less than tolerance / sqrt(weight), so cells of that size per channel guarantee
+    //  every candidate lies in the 3x3x3 block of cells around the color's own cell.
+    const maxDist = tolerance * tolerance; //  weightedDistance() is squared.
+    const cellR = Math.max(1, Math.ceil(tolerance / Math.sqrt(PX_WEIGHT_R)));
+    const cellG = Math.max(1, Math.ceil(tolerance / Math.sqrt(PX_WEIGHT_G)));
+    const cellB = Math.max(1, Math.ceil(tolerance / Math.sqrt(PX_WEIGHT_B)));
+    const cells = new Map(); //  packed cell coords -> groups whose representative falls in it.
+    const groups = []; //  { rgb: [r, g, b], count }
+    for (const [packed, count] of sorted) {
+        const [r, g, b] = unpack(packed);
+        const cr = Math.floor(r / cellR);
+        const cg = Math.floor(g / cellG);
+        const cb = Math.floor(b / cellB);
+        let best = null;
+        let bestDist = maxDist;
+        for (let dr = -1; dr <= 1; dr++) {
+            for (let dg = -1; dg <= 1; dg++) {
+                for (let db = -1; db <= 1; db++) {
+                    const cell = cells.get(((cr + dr) << 16) | ((cg + dg) << 8) | (cb + db));
+                    if (cell === undefined) continue;
+                    for (const group of cell) {
+                        const c = group.rgb;
+                        const dist = weightedDistance(r, g, b, c[0], c[1], c[2]);
+                        if (dist < bestDist) {
+                            bestDist = dist;
+                            best = group;
+                        }
+                    }
+                }
+            }
+        }
+        if (best !== null) {
+            best.count += count;
+            continue;
+        }
+        const group = { rgb: [r, g, b], count };
+        groups.push(group);
+        const key = (cr << 16) | (cg << 8) | cb;
+        if (!cells.has(key)) cells.set(key, []);
+        cells.get(key).push(group);
     }
-    return palette;
+    groups.sort((a, b) => b.count - a.count);
+    return groups.slice(0, maxColors).map(group => group.rgb);
 }
 
 //-- Substitutes every pixel of canv0 with the closest color of the Representative-colors palette.
