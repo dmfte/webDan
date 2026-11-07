@@ -245,6 +245,15 @@
                             </g>
                         </svg>
                     </label>
+                    <input type="checkbox" id="cbPxContiguous" checked>
+                    <label for="cbPxContiguous" class="btn" title="Contiguous (selección)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                            <!-- Off: every cell of the color, wherever it is (scattered squares). -->
+                            <path class="off" fill="#aaa" d="M 1 1 H 4 V 4 H 1 Z M 6 3 H 9 V 6 H 6 Z M 2 6 H 5 V 9 H 2 Z" />
+                            <!-- On: only the connected region around the clicked cell. -->
+                            <path class="on" fill="#00FF00" d="M 1 1 H 5 V 4 H 9 V 9 H 4 V 6 H 1 Z" />
+                        </svg>
+                    </label>
                 </div>
                 <div class="rs-wrapper" tabindex="0">
                     <span class="mobile-label" label-for="containerPxLevel"></span>
@@ -255,6 +264,31 @@
                     <span class="mobile-label" label-for="containerPxPalette"></span>
                     <div class="slider" id="containerPxPalette"></div>
 
+                </div>
+                <div class="rs-wrapper" tabindex="0" id="wrapperPxSelTolerance">
+                    <span class="mobile-label" label-for="containerPxSelTolerance"></span>
+                    <div class="slider" id="containerPxSelTolerance"></div>
+
+                </div>
+                <!-- Colors in the output; also where a selection gets its fill color. On mobile the
+                     toggle stays in the bar and .palette-pop opens to its left, like the sliders. -->
+                <div class="palette-container" id="paletteContainerPx">
+                    <button type="button" class="palette-toggle" id="paletteTogglePx" aria-expanded="true"
+                        aria-controls="palettePopPx" title="Mostrar/ocultar lista de colores">
+                        <span class="count" id="paletteCountPx"></span>
+                        <span class="chevron" aria-hidden="true">▾</span>
+                    </button>
+                    <div class="palette-pop" id="palettePopPx">
+                        <div class="sel-bar" id="selBarPx">
+                            <span class="sel-info" id="selInfoPx" aria-live="polite"></span>
+                            <button type="button" class="sel-btn" id="selClearPx" title="Deseleccionar (Esc)">✕</button>
+                            <button type="button" class="sel-btn" id="editUndoPx" title="Deshacer relleno (Ctrl/Cmd+Z)">↶</button>
+                        </div>
+                        <div class="palette-body" id="paletteBodyPx">
+                            <div class="resolution" id="paletteResolutionPx"></div>
+                            <div class="color-list" id="paletteColorListPx"></div>
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -473,18 +507,11 @@
                 <canvas id="canvIn" width="0" height="0"></canvas>
             </div>
             <div class="display img-out">
-                <div class="palette-container" id="paletteContainerPx">
-                    <button type="button" class="palette-toggle" id="paletteTogglePx" aria-expanded="true"
-                        aria-controls="paletteBodyPx" title="Mostrar/ocultar lista de colores">
-                        <span class="count" id="paletteCountPx"></span>
-                        <span class="chevron" aria-hidden="true">▾</span>
-                    </button>
-                    <div class="palette-body" id="paletteBodyPx">
-                        <div class="resolution" id="paletteResolutionPx"></div>
-                        <div class="color-list" id="paletteColorListPx"></div>
-                    </div>
-                </div>
                 <canvas id="canvOut" width="0" height="0"></canvas>
+                <!-- Selection outline (marching ants) drawn over canvOut; kept separate so it never ends up in downloads. -->
+                <canvas id="canvSelPx" class="sel-overlay" width="0" height="0" aria-hidden="true"></canvas>
+                <button type="button" class="zoom-badge" id="outZoomBadge" hidden
+                    title="Restablecer zoom (0 o doble clic)"></button>
             </div>
         </div>
         <!-- ------------ -->

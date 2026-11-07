@@ -386,7 +386,9 @@ var paramsPx = {
     horizontal: false,
     grid: true,
     trueColors: false,
-    numColors: 16 //  Which fixed palette to use (a key of PX_PALETTES).
+    numColors: 16, //  Which fixed palette to use (a key of PX_PALETTES).
+    selContiguous: true, //  Canvas clicks select only the connected region (off: every match in the image).
+    selTolerance: 0 //  How far (weightedDistance() units, ~0-255) a color may be from the clicked one.
 }
 //  Sizes the Maximum palette slider steps through (the slider moves over the index).
 const PX_PALETTE_SIZES = [8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256, 384, 512, 1440, 4096, 11520, 32768];
@@ -461,15 +463,19 @@ cbPxGrid.addEventListener("click", () => {
 //   Off (default) maps every pixel to the fixed palette picked by the Maximum palette slider.
 const cbPxTrueColors = document.getElementById("cbPxTrueColors");
 const wrapperPxPalette = document.getElementById("wrapperPxPalette");
+const wrapperPxSelTolerance = document.getElementById("wrapperPxSelTolerance");
 
-//-- True colors uses no palette at all, so the palette slider is hidden while it is on.
+//-- True colors uses no palette at all, so the palette slider is hidden while it is on. Selecting
+//   and filling needs the colors panel (hidden in True colors too), so its Tolerance goes as well.
 function updatePxSliderVisibility() {
     wrapperPxPalette.style.display = paramsPx.trueColors ? "none" : "";
+    wrapperPxSelTolerance.style.display = paramsPx.trueColors ? "none" : "";
 }
 
 cbPxTrueColors.addEventListener("input", () => {
     paramsPx.trueColors = cbPxTrueColors.checked;
     updatePxSliderVisibility();
+    if (paramsPx.trueColors) clearPxSelection();
     if (imageIn == undefined) return;
     canv0 = getPixelatedCanvas(paramsPx);
     applyPixelation(canvOut, canv0, paramsPx);
@@ -629,7 +635,9 @@ rsPxLevel.onValueChange(onPxLevelChange);
 labelForContainerPxLevel.innerText = rsPxLevel.val;
 
 function getPixelatedCanvas(params) {
-    if (imageIn == undefined) return undefined;
+    //  Callers assign the result back to canv0, so hand back the (empty) canvas instead of undefined:
+    //  picking Pixelate before loading an image used to leave canv0 undefined and crash the next render.
+    if (imageIn == undefined) return canv0;
 
     let w = (params.horizontal) ? params.dimension : parseInt(params.dimension / RATIO);
     let h = (params.horizontal) ? parseInt(params.dimension * RATIO) : params.dimension;
@@ -650,6 +658,8 @@ function getPixelatedCanvas(params) {
     c0.imageSmoothingEnabled = params.smooth;
     c0.drawImage(imageIn, 0, 0, canv0.width, canv0.height);
     if (!params.trueColors) applyPaletteToCanv0(params);
+    syncPxEditGeometry(w, h);
+    applyPxEditsToCanv0();
     return canv0;
 }
 
@@ -698,7 +708,8 @@ function applyPixelation(canvasTarget, canvasPixelated, params) {
 }
 
 //-- Rebuilds the floating swatch table from every distinct color present in canv0 (the
-//   pixelated result before it gets upscaled/gridded onto canvOut), most-used first.
+//   pixelated result before it gets upscaled/gridded onto canvOut), similar colors side by side
+//   (see sortPxColorsBySimilarity).
 //   Hides itself whenever there's no image, Pixelate isn't the active effect, or True
 //   Colors is on (that mode skips quantization, so the color count can run into the
 //   thousands and isn't a meaningful "palette" to list).
@@ -706,6 +717,8 @@ const PX_PALETTE_LIST_MAX = 512;
 function renderPxPalette() {
     if (imageIn == undefined || !rgEffPixelate.checked || paramsPx.trueColors) {
         paletteContainerPx.style.display = "none";
+        updatePxSelUi();
+        drawPxSelection(); //  Hides the selection outline too.
         return;
     }
     const imagedata = c0.getImageData(0, 0, canv0.width, canv0.height);
@@ -717,15 +730,21 @@ function renderPxPalette() {
     }
     const sorted = [...counts.keys()].sort((a, b) => counts.get(b) - counts.get(a));
 
-    paletteCountPx.innerText = sorted.length === 1 ? "1 color" : `${sorted.length} colores`;
+    //  Number and word apart: the narrow mobile bar only has room for the number.
+    const countWord = document.createElement("span");
+    countWord.className = "word";
+    countWord.innerText = sorted.length === 1 ? " color" : " colores";
+    paletteCountPx.replaceChildren(String(sorted.length), countWord);
     paletteResolutionPx.innerText = `${canv0.width}px x ${canv0.height}px`;
     paletteColorListPx.innerHTML = "";
     //  Large palettes can leave thousands of colors; listing only the most used keeps the
     //  DOM light (the header still shows the full count).
-    sorted.slice(0, PX_PALETTE_LIST_MAX).forEach(packed => {
+    //  Popularity only decides which colors make the list; they are shown grouped by similarity.
+    sortPxColorsBySimilarity(sorted.slice(0, PX_PALETTE_LIST_MAX)).forEach(packed => {
         const hex = "#" + packed.toString(16).padStart(6, "0");
         const row = document.createElement("div");
         row.className = "color";
+        row.dataset.packed = packed; //  Read by the click handler (see onPxPaletteListClick).
         const swatch = document.createElement("span");
         swatch.className = "swatch";
         swatch.style.backgroundColor = hex;
@@ -742,11 +761,700 @@ function renderPxPalette() {
         paletteColorListPx.appendChild(more);
     }
     paletteContainerPx.style.display = "flex";
+    updatePxSelUi();
+    drawPxSelection();
+}
+
+//-- Orders packed colors so similar ones sit together: grays first (dark -> light), then the
+//   chromatic ones by hue in PX_HUE_BAND-degree bands starting at red, each band by lightness.
+//   Bands alternate direction (dark -> light, then light -> dark) so every band starts near
+//   where the previous one ended instead of jumping from white back to black.
+//   Grayness uses chroma (max - min channel) rather than HSL saturation, which shoots up for
+//   near-black and near-white colors that look gray anyway.
+const PX_GRAY_CHROMA = 24; //  Below this chroma (0-255) a color is listed with the grays.
+const PX_HUE_BAND = 15; //  Degrees of hue per band.
+function sortPxColorsBySimilarity(packedColors) {
+    const keyed = packedColors.map(packed => {
+        const r = (packed >> 16) & 0xff, g = (packed >> 8) & 0xff, b = packed & 0xff;
+        const max = Math.max(r, g, b), min = Math.min(r, g, b);
+        const chroma = max - min;
+        const light = 0.30 * r + 0.59 * g + 0.11 * b; //  Same weights as weightedDistance().
+        let hue = 0;
+        if (chroma > 0) {
+            if (max === r) hue = ((g - b) / chroma + 6) % 6;
+            else if (max === g) hue = (b - r) / chroma + 2;
+            else hue = (r - g) / chroma + 4;
+            hue *= 60;
+        }
+        //  Band -1 holds the grays so they come first.
+        const band = chroma < PX_GRAY_CHROMA ? -1 : Math.floor(hue / PX_HUE_BAND);
+        return { packed, band, light, hue };
+    });
+    keyed.sort((a, b) => {
+        if (a.band !== b.band) return a.band - b.band;
+        //  Grays and even bands run dark -> light; odd bands light -> dark.
+        const dir = a.band >= 0 && a.band % 2 === 1 ? -1 : 1;
+        const d = (a.light - b.light) * dir;
+        return d !== 0 ? d : a.hue - b.hue;
+    });
+    return keyed.map(k => k.packed);
 }
 
 //-- Any effect switch can hide (or reveal) the palette panel, not just Pixelate's own controls.
 document.querySelectorAll("[name=rbgEffects]").forEach(rb => {
     rb.addEventListener("input", renderPxPalette);
+});
+
+//  PIXELATE: SELECT & FILL
+//-- Clicking a cell of the output (or a color in the panel) selects cells of that color; picking
+//   a color in the panel then paints them. Everything works on canv0 (at most PX_MAX_DIM per side),
+//   never on the upscaled canvOut, so a selection or fill touches a few thousand cells at most.
+//   Fills are kept as per-cell overrides re-applied after every palette pass, so they survive
+//   palette/True colors/smooth/grid changes; a different grid size (Dimension, orientation, new
+//   image) makes the cell indices meaningless, so it drops them (see syncPxEditGeometry).
+var pxEdits = new Map(); //  cell index (y * w + x) -> packed rgb painted over it.
+var pxEditGeometry = ""; //  "WxH" of the grid pxEdits was painted on.
+var pxUndoStack = []; //  { idx: Int32Array, prev: Int32Array, seeds } per fill; prev -1 = no override.
+const PX_UNDO_MAX = 50;
+var pxSelSeeds = []; //  { cell: index } from canvas clicks, or { packed } from panel clicks.
+var pxSelMask = null; //  Uint8Array(w * h), 1 = selected; null = nothing selected.
+var pxSelCount = 0;
+
+const displayImgOut = document.querySelector(".display.img-out");
+const canvSelPx = document.getElementById("canvSelPx");
+const ctxSelPx = canvSelPx.getContext("2d");
+const selInfoPx = document.getElementById("selInfoPx");
+const selClearPx = document.getElementById("selClearPx");
+const editUndoPx = document.getElementById("editUndoPx");
+const cbPxContiguous = document.getElementById("cbPxContiguous");
+
+function resetPxEdits() {
+    pxEdits.clear();
+    pxUndoStack = [];
+    pxEditGeometry = "";
+    pxSelSeeds = [];
+    pxSelMask = null;
+    pxSelCount = 0;
+}
+
+function syncPxEditGeometry(w, h) {
+    const key = `${w}x${h}`;
+    if (key === pxEditGeometry) return;
+    resetPxEdits();
+    pxEditGeometry = key;
+}
+
+function applyPxEditsToCanv0() {
+    if (pxEdits.size === 0) return;
+    const imagedata = c0.getImageData(0, 0, canv0.width, canv0.height);
+    const data = imagedata.data;
+    for (const [cell, packed] of pxEdits) {
+        const i = cell * 4;
+        data[i + 0] = (packed >> 16) & 0xff;
+        data[i + 1] = (packed >> 8) & 0xff;
+        data[i + 2] = packed & 0xff;
+        data[i + 3] = 255;
+    }
+    c0.putImageData(imagedata, 0, 0);
+}
+
+//-- Rebuilds pxSelMask from the seeds against canv0's current colors. A cell matches when its
+//   weighted distance to the seed's color is within Tolerance (0 = exact color only). Contiguous
+//   canvas seeds flood-fill through 4-connected neighbours, always comparing against the seed's own
+//   color (not the neighbour's) so the region can't drift into unrelated colors step by step.
+//   Panel seeds have no position, so they always select every matching cell.
+function computePxSelection() {
+    pxSelMask = null;
+    pxSelCount = 0;
+    if (pxSelSeeds.length === 0 || imageIn == undefined) return;
+    const w = canv0.width, h = canv0.height, n = w * h;
+    const data = c0.getImageData(0, 0, w, h).data;
+    const mask = new Uint8Array(n);
+    const tol = paramsPx.selTolerance;
+    const maxDist = tol * tol; //  weightedDistance() is squared.
+    const matches = (cell, r, g, b) => {
+        const i = cell * 4;
+        if (tol === 0) return data[i] === r && data[i + 1] === g && data[i + 2] === b;
+        return weightedDistance(data[i], data[i + 1], data[i + 2], r, g, b) <= maxDist;
+    };
+    let visited = null;
+    let stack = null;
+    for (const seed of pxSelSeeds) {
+        let r, g, b;
+        if (seed.cell !== undefined) {
+            if (seed.cell >= n) continue;
+            r = data[seed.cell * 4]; g = data[seed.cell * 4 + 1]; b = data[seed.cell * 4 + 2];
+        } else {
+            r = (seed.packed >> 16) & 0xff; g = (seed.packed >> 8) & 0xff; b = seed.packed & 0xff;
+        }
+        if (seed.cell !== undefined && paramsPx.selContiguous) {
+            //  Own visited array per seed: stopping at cells another seed already selected could
+            //  cut this region short where it passes through them.
+            if (visited === null) { visited = new Uint8Array(n); stack = new Int32Array(n); }
+            else visited.fill(0);
+            let top = 0;
+            stack[top++] = seed.cell;
+            visited[seed.cell] = 1;
+            while (top > 0) {
+                const cell = stack[--top];
+                mask[cell] = 1;
+                const x = cell % w;
+                const neighbours = [
+                    x > 0 ? cell - 1 : -1,
+                    x < w - 1 ? cell + 1 : -1,
+                    cell >= w ? cell - w : -1,
+                    cell < n - w ? cell + w : -1
+                ];
+                for (const nb of neighbours) {
+                    if (nb < 0 || visited[nb]) continue;
+                    visited[nb] = 1;
+                    if (matches(nb, r, g, b)) stack[top++] = nb;
+                }
+            }
+        } else {
+            for (let cell = 0; cell < n; cell++) {
+                if (!mask[cell] && matches(cell, r, g, b)) mask[cell] = 1;
+            }
+        }
+    }
+    for (let cell = 0; cell < n; cell++) pxSelCount += mask[cell];
+    if (pxSelCount > 0) pxSelMask = mask;
+}
+
+function setPxSelection(seeds) {
+    pxSelSeeds = seeds;
+    computePxSelection();
+    if (pxSelCount > 0) setPxPaletteCollapsed(false); //  Filling needs the swatches in view.
+    updatePxSelUi();
+    drawPxSelection();
+}
+
+function clearPxSelection() {
+    if (pxSelSeeds.length === 0 && pxSelMask === null) return;
+    setPxSelection([]);
+}
+
+//-- Paints every selected cell with `packed`, then lets the selection follow the merge: it is
+//   recomputed with color seeds switched to the fill color (canvas seeds re-read their cells, which
+//   now hold it too). So after merging A into B the selection is all of B, and the next color
+//   recolors the whole merged group instead of only the cells that used to be A.
+function fillPxSelection(packed) {
+    if (pxSelMask === null) return;
+    const idx = new Int32Array(pxSelCount);
+    const prev = new Int32Array(pxSelCount);
+    let k = 0;
+    for (let cell = 0; cell < pxSelMask.length; cell++) {
+        if (!pxSelMask[cell]) continue;
+        idx[k] = cell;
+        prev[k] = pxEdits.has(cell) ? pxEdits.get(cell) : -1;
+        pxEdits.set(cell, packed);
+        k++;
+    }
+    pxUndoStack.push({ idx, prev, seeds: pxSelSeeds });
+    if (pxUndoStack.length > PX_UNDO_MAX) pxUndoStack.shift();
+    const cellSeeds = pxSelSeeds.filter(seed => seed.cell !== undefined);
+    const hadColorSeed = cellSeeds.length < pxSelSeeds.length;
+    rerenderPxEdits();
+    setPxSelection(hadColorSeed ? [...cellSeeds, { packed }] : cellSeeds);
+}
+
+function undoPxFill() {
+    const step = pxUndoStack.pop();
+    if (step === undefined) return;
+    for (let k = 0; k < step.idx.length; k++) {
+        if (step.prev[k] === -1) pxEdits.delete(step.idx[k]);
+        else pxEdits.set(step.idx[k], step.prev[k]);
+    }
+    rerenderPxEdits();
+    setPxSelection(step.seeds); //  Back to the selection that fill started from.
+}
+
+function rerenderPxEdits() {
+    if (imageIn == undefined) return;
+    canv0 = getPixelatedCanvas(paramsPx);
+    applyPixelation(canvOut, canv0, paramsPx);
+    renderPxPalette(); //  Also refreshes the selection bar and outline.
+}
+
+function updatePxSelUi() {
+    const hasSel = pxSelCount > 0;
+    //  Kept short: the panel sits over the picture and grows with this text.
+    selInfoPx.innerText = hasSel ? `${pxSelCount} px · elige color` : "Clic: seleccionar";
+    selInfoPx.title = hasSel
+        ? "Clic en un color de la lista, u Option/Alt+clic, clic derecho o pulsación larga en la imagen, para rellenar la selección (Shift: añadir a la selección)"
+        : "Clic en la imagen o en un color de la lista para seleccionar (Shift: añadir)";
+    selClearPx.hidden = !hasSel;
+    //  Tolerance only re-selects from existing clicks, so it means nothing without a selection.
+    //  (Checked for existence: the first UI refresh can run before the slider is built.)
+    if (typeof rsPxSelTolerance !== "undefined") {
+        rsPxSelTolerance.disabled = !hasSel;
+        wrapperPxSelTolerance.classList.toggle("is-disabled", !hasSel);
+    }
+    editUndoPx.hidden = pxUndoStack.length === 0;
+    paletteColorListPx.classList.toggle("filling", hasSel);
+    highlightPxSelectedColors();
+    canvOut.classList.toggle("pickable", imageIn != undefined && rgEffPixelate.checked && !paramsPx.trueColors);
+}
+
+//-- Marks in the panel every color found among the selected cells (with Tolerance or several clicks
+//   that can be more than one; after a fill it is the fill color). Read from canv0, so it is always
+//   what the selection holds right now.
+function highlightPxSelectedColors() {
+    const rows = paletteColorListPx.querySelectorAll(".color[data-packed]");
+    const selected = new Set();
+    if (pxSelMask !== null && pxSelMask.length === canv0.width * canv0.height) {
+        const data = c0.getImageData(0, 0, canv0.width, canv0.height).data;
+        for (let cell = 0; cell < pxSelMask.length; cell++) {
+            if (!pxSelMask[cell]) continue;
+            const i = cell * 4;
+            selected.add((data[i] << 16) | (data[i + 1] << 8) | data[i + 2]);
+        }
+    }
+    rows.forEach(row => row.classList.toggle("selected", selected.has(Number(row.dataset.packed))));
+}
+
+//-- Cell of canv0 under a pointer position, or -1 when picking isn't possible right now. canvOut is
+//   displayed without object-fit, so its box is exactly the image and a proportional mapping is enough.
+function pxCellAt(clientX, clientY) {
+    if (imageIn == undefined || !rgEffPixelate.checked || paramsPx.trueColors) return -1;
+    const rect = canvOut.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return -1;
+    const x = Math.min(canv0.width - 1, Math.max(0, Math.floor((clientX - rect.left) / rect.width * canv0.width)));
+    const y = Math.min(canv0.height - 1, Math.max(0, Math.floor((clientY - rect.top) / rect.height * canv0.height)));
+    return y * canv0.width + x;
+}
+
+//-- Eyedropper fill: paints the selection with the color of the cell under the pointer (same as
+//   picking that color in the panel). Returns false, doing nothing, when there's no selection.
+function pxEyedropperFillAt(clientX, clientY) {
+    if (pxSelCount === 0) return false;
+    const cell = pxCellAt(clientX, clientY);
+    if (cell < 0) return false;
+    const d = c0.getImageData(cell % canv0.width, Math.floor(cell / canv0.width), 1, 1).data;
+    fillPxSelection((d[0] << 16) | (d[1] << 8) | d[2]);
+    return true;
+}
+
+//-- Canvas click selects the cell's color region; Shift/Ctrl/Cmd adds to the selection.
+//   Eyedropper fill (selection active) has three triggers: Option/Alt+click, right-click, and a
+//   long-press on touch screens; without a selection they fall back to their normal behaviour.
+var pxSuppressNextClick = false; //  A long-press already acted; the click that follows must not.
+canvOut.addEventListener("click", (evt) => {
+    if (pxSuppressNextClick) {
+        pxSuppressNextClick = false;
+        return;
+    }
+    if (evt.altKey && pxEyedropperFillAt(evt.clientX, evt.clientY)) return;
+    const cell = pxCellAt(evt.clientX, evt.clientY);
+    if (cell < 0) return;
+    const seed = { cell };
+    const add = evt.shiftKey || evt.ctrlKey || evt.metaKey;
+    setPxSelection(add ? [...pxSelSeeds, seed] : [seed]);
+});
+
+//-- Right-click: eyedropper fill instead of the browser menu, but only with a selection, so the
+//   native menu ("Save image as...") still works otherwise. Touch long-presses also raise
+//   contextmenu on some browsers (Android); the long-press timer handles those, so just swallow it.
+var pxTouchActive = false;
+canvOut.addEventListener("contextmenu", (evt) => {
+    if (pxTouchActive || pxSuppressNextClick) {
+        if (pxSelCount > 0) evt.preventDefault();
+        return;
+    }
+    if (pxEyedropperFillAt(evt.clientX, evt.clientY)) evt.preventDefault();
+});
+
+//-- Long-press (touch/pen): holding still for PX_LONG_PRESS_MS fills from the cell under the finger.
+//   Moving more than PX_LONG_PRESS_SLOP px cancels it, so scrolling/panning stays untouched.
+const PX_LONG_PRESS_MS = 500;
+const PX_LONG_PRESS_SLOP = 10;
+var pxLongPress = null; //  { id, x, y, timer } of the pending press.
+function cancelPxLongPress() {
+    if (pxLongPress !== null) clearTimeout(pxLongPress.timer);
+    pxLongPress = null;
+}
+canvOut.addEventListener("pointerdown", (evt) => {
+    if (evt.pointerType === "mouse") return;
+    pxTouchActive = true;
+    cancelPxLongPress();
+    if (pxSelCount === 0) return; //  Nothing to fill; a long-press then just ends in a normal tap.
+    const press = { id: evt.pointerId, x: evt.clientX, y: evt.clientY };
+    press.timer = setTimeout(() => {
+        pxLongPress = null;
+        if (pxEyedropperFillAt(press.x, press.y)) {
+            pxSuppressNextClick = true;
+            if (navigator.vibrate) navigator.vibrate(15); //  Haptic tick where supported (Android).
+        }
+    }, PX_LONG_PRESS_MS);
+    pxLongPress = press;
+});
+canvOut.addEventListener("pointermove", (evt) => {
+    if (pxLongPress === null || evt.pointerId !== pxLongPress.id) return;
+    if (Math.hypot(evt.clientX - pxLongPress.x, evt.clientY - pxLongPress.y) > PX_LONG_PRESS_SLOP) cancelPxLongPress();
+});
+["pointerup", "pointercancel", "pointerleave"].forEach(type => {
+    canvOut.addEventListener(type, (evt) => {
+        if (evt.pointerType === "mouse") return;
+        cancelPxLongPress();
+        //  The click (if any) fires right after pointerup; drop the flags once it has had its turn.
+        setTimeout(() => {
+            pxTouchActive = false;
+            pxSuppressNextClick = false;
+        }, 400);
+    });
+});
+
+//-- Clicking the dark area around the picture drops the selection (not when it ends a pan).
+displayImgOut.addEventListener("click", (evt) => {
+    if (pxSuppressNextClick) return;
+    if (evt.target === displayImgOut) clearPxSelection();
+});
+
+//-- Panel click: with a selection it fills it with that color (Shift/Ctrl/Cmd adds that color to the
+//   selection instead); without one, it selects every cell of that color.
+paletteColorListPx.addEventListener("click", (evt) => {
+    const row = evt.target.closest(".color[data-packed]");
+    if (row === null) return;
+    const packed = Number(row.dataset.packed);
+    const add = evt.shiftKey || evt.ctrlKey || evt.metaKey;
+    if (pxSelCount > 0 && !add) fillPxSelection(packed);
+    else setPxSelection(add ? [...pxSelSeeds, { packed }] : [{ packed }]);
+});
+
+selClearPx.addEventListener("click", clearPxSelection);
+editUndoPx.addEventListener("click", undoPxFill);
+
+document.addEventListener("keydown", (evt) => {
+    if (!rgEffPixelate.checked || imageIn == undefined) return;
+    const tag = evt.target.tagName;
+    if (tag === "INPUT" && evt.target.type !== "checkbox" && evt.target.type !== "radio" || tag === "TEXTAREA") return;
+    if (evt.key === "Escape") {
+        clearPxSelection();
+    } else if ((evt.ctrlKey || evt.metaKey) && !evt.shiftKey && evt.key.toLowerCase() === "z") {
+        if (pxUndoStack.length === 0) return;
+        evt.preventDefault();
+        undoPxFill();
+    }
+});
+
+cbPxContiguous.addEventListener("input", () => {
+    paramsPx.selContiguous = cbPxContiguous.checked;
+    if (pxSelSeeds.length > 0) setPxSelection(pxSelSeeds);
+});
+
+//-- Slider: Tolerance for the selection; re-selects live from the same clicks.
+const containerPxSelTolerance = document.getElementById("containerPxSelTolerance");
+const labelForContainerPxSelTolerance = document.querySelector("[label-for=containerPxSelTolerance]");
+var rsPxSelTolerance = new RangeSlider(containerPxSelTolerance, {
+    title: "Tolerance",
+    min: 0,
+    max: 100,
+    step: 1,
+    def: paramsPx.selTolerance,
+    color: "#576b9e",
+    color2: "rgb(142, 167, 231)"
+});
+labelForContainerPxSelTolerance.innerText = rsPxSelTolerance.val;
+const debouncedPxReselect = debounceFn(() => {
+    if (pxSelSeeds.length > 0) setPxSelection(pxSelSeeds);
+}, 40);
+rsPxSelTolerance.onValueChange(function () {
+    paramsPx.selTolerance = rsPxSelTolerance.val;
+    labelForContainerPxSelTolerance.innerText = paramsPx.selTolerance;
+    debouncedPxReselect();
+});
+updatePxSliderVisibility(); //  The Tolerance wrapper exists now too.
+
+//-- Selection outline: "marching ants" on a separate canvas laid exactly over canvOut. Only the
+//   region borders are drawn (runs of cell edges where selected meets unselected, merged into long
+//   segments so the dashes flow), built once into a Path2D and just re-stroked to animate.
+var pxSelPath = null;
+var pxAntsFrame = 0;
+var pxAntsLast = 0;
+var pxAntsOffset = 0;
+const pxReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+function drawPxSelection() {
+    const visible = imageIn != undefined && rgEffPixelate.checked && !paramsPx.trueColors && pxSelMask !== null
+        && pxSelMask.length === canv0.width * canv0.height;
+    if (!visible) {
+        canvSelPx.style.display = "none";
+        pxSelPath = null;
+        cancelAnimationFrame(pxAntsFrame);
+        pxAntsFrame = 0;
+        return;
+    }
+    //  The overlay covers the whole output display (not just the picture) so it stays the size of the
+    //  viewport however far the output is zoomed (see OUTPUT ZOOM): lines stay crisp and the canvas
+    //  never grows past browser limits. Cells are placed where canvOut currently is on screen.
+    const r = canvOut.getBoundingClientRect(); //  Includes the zoom transform.
+    const p = displayImgOut.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvSelPx.style.display = "block";
+    canvSelPx.style.left = "0px";
+    canvSelPx.style.top = "0px";
+    canvSelPx.style.width = `${displayImgOut.clientWidth}px`;
+    canvSelPx.style.height = `${displayImgOut.clientHeight}px`;
+    canvSelPx.width = Math.max(1, Math.round(displayImgOut.clientWidth * dpr));
+    canvSelPx.height = Math.max(1, Math.round(displayImgOut.clientHeight * dpr));
+
+    const w = canv0.width, h = canv0.height, mask = pxSelMask;
+    const ox = (r.left - p.left - displayImgOut.clientLeft) * dpr;
+    const oy = (r.top - p.top - displayImgOut.clientTop) * dpr;
+    const iw = r.width * dpr, ih = r.height * dpr;
+    const sx = iw / w, sy = ih / h;
+    const inset = Math.max(1, dpr); //  Keeps lines on the picture's outer border fully visible.
+    const px = x => Math.min(ox + iw - inset, Math.max(ox + inset, ox + x * sx));
+    const py = y => Math.min(oy + ih - inset, Math.max(oy + inset, oy + y * sy));
+    const path = new Path2D();
+    for (let y = 0; y <= h; y++) { //  Horizontal edges: between row y-1 and row y.
+        let start = -1;
+        for (let x = 0; x <= w; x++) {
+            const edge = x < w && (y > 0 ? mask[(y - 1) * w + x] : 0) !== (y < h ? mask[y * w + x] : 0);
+            if (edge && start < 0) start = x;
+            if (!edge && start >= 0) { path.moveTo(px(start), py(y)); path.lineTo(px(x), py(y)); start = -1; }
+        }
+    }
+    for (let x = 0; x <= w; x++) { //  Vertical edges: between column x-1 and column x.
+        let start = -1;
+        for (let y = 0; y <= h; y++) {
+            const edge = y < h && (x > 0 ? mask[y * w + x - 1] : 0) !== (x < w ? mask[y * w + x] : 0);
+            if (edge && start < 0) start = y;
+            if (!edge && start >= 0) { path.moveTo(px(x), py(start)); path.lineTo(px(x), py(y)); start = -1; }
+        }
+    }
+    pxSelPath = path;
+    strokePxAnts();
+    if (pxAntsFrame === 0 && !pxReducedMotion.matches) pxAntsFrame = requestAnimationFrame(animatePxAnts);
+}
+
+function strokePxAnts() {
+    if (pxSelPath === null) return;
+    const dpr = window.devicePixelRatio || 1;
+    ctxSelPx.clearRect(0, 0, canvSelPx.width, canvSelPx.height);
+    ctxSelPx.lineWidth = 1.5 * dpr;
+    ctxSelPx.setLineDash([]);
+    ctxSelPx.strokeStyle = "#000";
+    ctxSelPx.stroke(pxSelPath);
+    ctxSelPx.setLineDash([4 * dpr, 4 * dpr]);
+    ctxSelPx.lineDashOffset = -pxAntsOffset * dpr;
+    ctxSelPx.strokeStyle = "#fff";
+    ctxSelPx.stroke(pxSelPath);
+}
+
+//-- ~12 fps is plenty for the ants and keeps big selections cheap to re-stroke.
+function animatePxAnts(time) {
+    if (pxSelPath === null) { pxAntsFrame = 0; return; }
+    if (time - pxAntsLast > 80) {
+        pxAntsLast = time;
+        pxAntsOffset = (pxAntsOffset + 1) % 8;
+        strokePxAnts();
+    }
+    pxAntsFrame = requestAnimationFrame(animatePxAnts);
+}
+
+//-- canvOut resizes with every render and with the layout toggles; re-clamp the zoom (which also
+//   redraws the selection overlay) so both stay glued to it.
+const pxSelResizeObserver = new ResizeObserver(() => applyOutZoom());
+pxSelResizeObserver.observe(canvOut);
+pxSelResizeObserver.observe(displayImgOut);
+updatePxSelUi();
+
+//  OUTPUT ZOOM (every effect)
+//-- Zooms and pans the output display only (the input image is a separate element, docked or
+//   floating, and is never touched). It's a CSS transform on canvOut, so nothing is re-rendered and
+//   downloads are unaffected; pxCellAt() and the selection overlay read the transformed box, so
+//   picking and the marching ants follow the zoom.
+//   Zoom: wheel / trackpad pinch, two-finger pinch, + and - keys. Pan: drag once zoomed (mouse or one
+//   finger), or middle-button drag. Reset: double-click, 0 key, or the % badge. A drag only starts
+//   past OUT_DRAG_SLOP px, so clicks, taps and long-presses keep selecting and filling.
+const OUT_ZOOM_MAX = 32;
+const OUT_DRAG_SLOP = 4;
+var outZoom = { s: 1, tx: 0, ty: 0 }; //  Scale, then translation in CSS px (transform-origin 0 0).
+const outZoomBadge = document.getElementById("outZoomBadge");
+
+//-- canvOut's untransformed box in client coordinates (offset* ignore transforms).
+function outBaseBox() {
+    const p = displayImgOut.getBoundingClientRect();
+    return {
+        left: p.left + displayImgOut.clientLeft + canvOut.offsetLeft,
+        top: p.top + displayImgOut.clientTop + canvOut.offsetTop,
+        w: canvOut.offsetWidth,
+        h: canvOut.offsetHeight
+    };
+}
+
+//-- Clamps one axis of the pan: a picture bigger than the viewport must keep covering it (no empty
+//   strip past its edges); a smaller one must stay fully inside it.
+function clampOutAxis(t, base, size, viewStart, viewSize) {
+    const minStart = size > viewSize ? viewStart + viewSize - size : viewStart;
+    const maxStart = size > viewSize ? viewStart : viewStart + viewSize - size;
+    return Math.min(maxStart, Math.max(minStart, base + t)) - base;
+}
+
+//-- Clamps and applies outZoom (viewport = the output display's inner box).
+var outOverlayFrame = 0;
+function applyOutZoom() {
+    const b = outBaseBox();
+    const z = outZoom;
+    z.s = Math.min(OUT_ZOOM_MAX, Math.max(1, z.s));
+    if (z.s === 1) {
+        z.tx = 0;
+        z.ty = 0;
+    } else {
+        const p = displayImgOut.getBoundingClientRect();
+        const vx = p.left + displayImgOut.clientLeft, vy = p.top + displayImgOut.clientTop;
+        z.tx = clampOutAxis(z.tx, b.left, b.w * z.s, vx, displayImgOut.clientWidth);
+        z.ty = clampOutAxis(z.ty, b.top, b.h * z.s, vy, displayImgOut.clientHeight);
+    }
+    canvOut.style.transform = z.s === 1 ? "" : `translate(${z.tx}px, ${z.ty}px) scale(${z.s})`;
+    //  Past 1:1 the browser would blur the upscaled canvas; keep its pixels square instead.
+    canvOut.classList.toggle("magnified", canvOut.width > 0 && b.w * z.s / canvOut.width > 1);
+    outZoomBadge.hidden = z.s === 1;
+    outZoomBadge.textContent = `${Math.round(z.s * 100)}% ⟲`;
+    if (outOverlayFrame === 0) {
+        outOverlayFrame = requestAnimationFrame(() => {
+            outOverlayFrame = 0;
+            if (pxSelMask !== null) drawPxSelection();
+        });
+    }
+}
+
+//-- Multiplies the zoom by `factor`, keeping the picture point under (clientX, clientY) in place.
+function zoomOutAt(clientX, clientY, factor) {
+    if (imageIn == undefined) return;
+    const b = outBaseBox();
+    const z = outZoom;
+    const lx = (clientX - b.left - z.tx) / z.s;
+    const ly = (clientY - b.top - z.ty) / z.s;
+    const s2 = Math.min(OUT_ZOOM_MAX, Math.max(1, z.s * factor));
+    z.tx = clientX - b.left - s2 * lx;
+    z.ty = clientY - b.top - s2 * ly;
+    z.s = s2;
+    applyOutZoom();
+}
+
+function resetOutZoom() {
+    outZoom = { s: 1, tx: 0, ty: 0 };
+    applyOutZoom();
+}
+
+function zoomOutAtCenter(factor) {
+    const p = displayImgOut.getBoundingClientRect();
+    zoomOutAt(p.left + p.width / 2, p.top + p.height / 2, factor);
+}
+
+//-- Wheel: pinch on a trackpad arrives as ctrl+wheel with small deltas, a mouse wheel as plain wheel.
+displayImgOut.addEventListener("wheel", (evt) => {
+    if (imageIn == undefined) return;
+    evt.preventDefault();
+    const dy = evt.deltaY * (evt.deltaMode === 1 ? 16 : evt.deltaMode === 2 ? 400 : 1);
+    zoomOutAt(evt.clientX, evt.clientY, Math.exp(-dy * (evt.ctrlKey ? 0.01 : 0.0015)));
+}, { passive: false });
+
+displayImgOut.addEventListener("dblclick", (evt) => {
+    if (evt.target === outZoomBadge) return;
+    resetOutZoom();
+});
+outZoomBadge.addEventListener("click", resetOutZoom);
+
+//-- Drag-to-pan and two-finger pinch.
+const outPointers = new Map(); //  pointerId -> { x, y }
+var outGesture = null; //  { kind: "pending" | "pan", id, x0, y0, lastX, lastY, middle } or { kind: "pinch", ... }
+var outGestureUsed = false; //  A pan/pinch happened: the click that ends it must not select.
+
+function outPinchStart() {
+    const [a, b] = [...outPointers.values()];
+    outGesture = {
+        kind: "pinch",
+        dist0: Math.max(1, Math.hypot(b.x - a.x, b.y - a.y)),
+        midX0: (a.x + b.x) / 2,
+        midY0: (a.y + b.y) / 2,
+        s0: outZoom.s,
+        tx0: outZoom.tx,
+        ty0: outZoom.ty
+    };
+}
+
+displayImgOut.addEventListener("pointerdown", (evt) => {
+    if (imageIn == undefined) return;
+    if (evt.pointerType === "mouse" && evt.button !== 0 && evt.button !== 1) return;
+    outPointers.set(evt.pointerId, { x: evt.clientX, y: evt.clientY });
+    if (outPointers.size === 2) {
+        cancelPxLongPress();
+        outGestureUsed = true;
+        outPinchStart();
+    } else if (outPointers.size === 1) {
+        if (evt.button === 1) evt.preventDefault(); //  No middle-click autoscroll.
+        outGesture = {
+            kind: "pending", id: evt.pointerId, x0: evt.clientX, y0: evt.clientY,
+            lastX: evt.clientX, lastY: evt.clientY, middle: evt.button === 1
+        };
+    }
+});
+
+displayImgOut.addEventListener("pointermove", (evt) => {
+    if (!outPointers.has(evt.pointerId) || outGesture === null) return;
+    outPointers.set(evt.pointerId, { x: evt.clientX, y: evt.clientY });
+    const g = outGesture;
+    if (g.kind === "pinch") {
+        if (outPointers.size < 2) return;
+        const [a, b] = [...outPointers.values()];
+        const dist = Math.max(1, Math.hypot(b.x - a.x, b.y - a.y));
+        const midX = (a.x + b.x) / 2, midY = (a.y + b.y) / 2;
+        const base = outBaseBox();
+        //  Picture point that was under the starting midpoint follows the current midpoint.
+        const lx = (g.midX0 - base.left - g.tx0) / g.s0;
+        const ly = (g.midY0 - base.top - g.ty0) / g.s0;
+        const s2 = Math.min(OUT_ZOOM_MAX, Math.max(1, g.s0 * dist / g.dist0));
+        outZoom = { s: s2, tx: midX - base.left - s2 * lx, ty: midY - base.top - s2 * ly };
+        applyOutZoom();
+        return;
+    }
+    if (evt.pointerId !== g.id) return;
+    if (g.kind === "pending") {
+        const far = Math.hypot(evt.clientX - g.x0, evt.clientY - g.y0) > OUT_DRAG_SLOP;
+        if (!far || (outZoom.s === 1 && !g.middle)) return;
+        g.kind = "pan";
+        outGestureUsed = true;
+        cancelPxLongPress();
+        displayImgOut.setPointerCapture(evt.pointerId); //  Keep panning when the pointer leaves the display.
+        displayImgOut.classList.add("panning");
+    }
+    outZoom.tx += evt.clientX - g.lastX;
+    outZoom.ty += evt.clientY - g.lastY;
+    g.lastX = evt.clientX;
+    g.lastY = evt.clientY;
+    applyOutZoom();
+});
+
+function onOutPointerEnd(evt) {
+    if (!outPointers.has(evt.pointerId)) return;
+    outPointers.delete(evt.pointerId);
+    if (outGesture !== null && outGesture.kind === "pinch" && outPointers.size === 1) {
+        outGesture = null; //  The finger left on screen doesn't start a pan (it would jump).
+    } else if (outPointers.size === 0) {
+        outGesture = null;
+        displayImgOut.classList.remove("panning");
+        if (outGestureUsed) {
+            outGestureUsed = false;
+            //  The click (if any) is dispatched right after this; let it see the flag, then drop it.
+            pxSuppressNextClick = true;
+            setTimeout(() => { pxSuppressNextClick = false; }, evt.pointerType === "mouse" ? 0 : 400);
+        }
+    }
+}
+displayImgOut.addEventListener("pointerup", onOutPointerEnd);
+displayImgOut.addEventListener("pointercancel", onOutPointerEnd);
+
+//-- Keys (any effect, not while typing; Ctrl/Cmd combos stay the browser's own zoom).
+document.addEventListener("keydown", (evt) => {
+    if (imageIn == undefined || evt.ctrlKey || evt.metaKey || evt.altKey) return;
+    const tag = evt.target.tagName;
+    if (tag === "INPUT" && evt.target.type !== "checkbox" && evt.target.type !== "radio" || tag === "TEXTAREA") return;
+    if (evt.key === "0") resetOutZoom();
+    else if (evt.key === "+" || evt.key === "=") zoomOutAtCenter(1.25);
+    else if (evt.key === "-") zoomOutAtCenter(1 / 1.25);
 });
 
 //-- Replicates every pixel of `source` into a `block`x`block` square on `ctx`, bypassing
@@ -1488,6 +2196,8 @@ var imageInData;
 
 async function onceImageLoads(inputFileEvent) {
     imageIn = await getLoadedImage(inputFileEvent);
+    resetPxEdits(); //  Fills belong to the previous picture, even if the new one yields the same grid.
+    resetOutZoom();
     SMALLEST_DIM = Math.min(imageIn.width, imageIn.height);
     RATIO = imageIn.height / imageIn.width;
     // if (cbOriginalDimensions.checked) {

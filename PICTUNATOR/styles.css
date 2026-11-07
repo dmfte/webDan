@@ -915,6 +915,221 @@ body {
                 }
             }
 
+            /* Colors panel (Pixelate), under the sliders. Desktop: a plain block. Mobile (<=1024px):
+               the toggle is a square in the bar showing the count, and .palette-pop opens to its
+               left, like the sliders do. JS switches display between none and flex. */
+            & .palette-container {
+                display: none;
+                flex-direction: column;
+                gap: 0.4em;
+                position: relative;
+                font-size: 0.8em;
+                margin-bottom: 0.2rem;
+
+                & .palette-toggle {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 0.5em;
+                    font: inherit;
+                    font-weight: bold;
+                    color: inherit;
+                    background-color: var(--color-controls-btn);
+                    border: none;
+                    border-radius: 0.5rem;
+                    padding: 0.4em 0.6em;
+                    cursor: pointer;
+                    white-space: nowrap;
+
+                    & .chevron {
+                        display: inline-block;
+                        transition: transform 0.15s;
+                    }
+
+                    &:hover {
+                        background-color: var(--color-controls-btn-hover);
+                    }
+
+                    &:focus-visible {
+                        outline: 2px solid var(--color-controls-btn-active);
+                        outline-offset: 2px;
+                    }
+
+                    @media only screen and (max-width: 1024px) {
+                        width: calc(var(--controlsbar-w) - (var(--controlsbar-padd) * 2) - (var(--controls-padd) * 2));
+                        height: calc(var(--controlsbar-w) - (var(--controlsbar-padd) * 2) - (var(--controls-padd) * 2));
+                        justify-content: center;
+                        padding: 0;
+                        font-family: monospace;
+                        font-size: 1.4em;
+
+                        & .word,
+                        & .chevron {
+                            display: none;
+                        }
+                    }
+                }
+
+                & .palette-pop {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.4em;
+
+                    @media only screen and (max-width: 1024px) {
+                        position: absolute;
+                        top: 0;
+                        right: 115%;
+                        width: max-content;
+                        max-width: 70vw;
+                        background-color: var(--color-controls-bg);
+                        border-radius: 0.5rem;
+                        padding: 0.5em;
+                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+                    }
+                }
+
+                & .palette-body {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.3em;
+                }
+
+                &.collapsed {
+                    & .palette-body {
+                        display: none;
+                    }
+
+                    & .palette-toggle .chevron {
+                        transform: rotate(90deg);
+                    }
+
+                    /* Mobile: nothing pops out while collapsed, only the count stays in the bar. */
+                    @media only screen and (max-width: 1024px) {
+                        & .palette-pop {
+                            display: none;
+                        }
+                    }
+                }
+
+                & .resolution {
+                    font-weight: bold;
+                    white-space: nowrap;
+                }
+
+                & .sel-bar {
+                    display: flex;
+                    flex-wrap: wrap;
+                    align-items: center;
+                    gap: 0.4em;
+
+                    & .sel-info {
+                        flex: 1;
+                        opacity: 0.8;
+                    }
+
+                    & .sel-btn {
+                        font: inherit;
+                        font-weight: bold;
+                        line-height: 1;
+                        color: inherit;
+                        background-color: var(--color-controls-btn);
+                        border: none;
+                        border-radius: 0.3rem;
+                        padding: 0.25em 0.5em;
+                        cursor: pointer;
+
+                        &:hover {
+                            background-color: var(--color-controls-btn-hover);
+                        }
+
+                        &:focus-visible {
+                            outline: 2px solid var(--color-controls-btn-active);
+                            outline-offset: 2px;
+                        }
+
+                        &[hidden] {
+                            display: none;
+                        }
+                    }
+                }
+
+                & .color-list {
+                    display: flex;
+                    flex-flow: column wrap;
+                    align-content: flex-start;
+                    height: min(40vh, 320px);
+                    gap: 0.25em 0.6em;
+                    /* Big palettes wrap into many columns: scroll them sideways. */
+                    overflow-x: auto;
+
+                    /* Mobile pop-out: first column next to the bar. */
+                    @media only screen and (max-width: 1024px) {
+                        direction: rtl;
+                        max-width: min(70vw, 40em);
+                    }
+
+                    & .color {
+                        direction: ltr;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.4em;
+                        white-space: nowrap;
+                        cursor: pointer;
+                        border-radius: 3px;
+
+                        &:hover {
+                            background-color: rgba(255, 255, 255, 0.35);
+                        }
+
+                        &.more {
+                            cursor: default;
+                            background-color: transparent;
+                        }
+
+                        /* Color present in the current selection. */
+                        &.selected {
+                            background-color: rgba(255, 255, 255, 0.6);
+                            font-weight: bold;
+
+                            & .swatch {
+                                outline: 2px solid #000;
+                                outline-offset: 1px;
+                            }
+                        }
+
+                        & .swatch {
+                            /* Matches the 14px hex label beside it. */
+                            width: 14px;
+                            height: 14px;
+                            flex-shrink: 0;
+                            border-radius: 2px;
+                            border: 1px solid rgba(0, 0, 0, 0.3);
+                        }
+
+                        & .hex {
+                            font-family: monospace;
+                            font-size: 14px;
+                            color: #1e2c2c;
+                        }
+                    }
+
+                    /* A selection is active: rows are fill targets. */
+                    &.filling .color:not(.more) {
+                        cursor: copy;
+
+                        &:hover .swatch {
+                            outline: 2px solid #fff;
+                            outline-offset: 1px;
+                        }
+                    }
+                }
+            }
+
+            /* Slider unusable right now (e.g. Tolerance with nothing selected). */
+            & .rs-wrapper.is-disabled .mobile-label {
+                opacity: 0.45;
+            }
+
             & .rs-wrapper:focus-within {
 
                 & .slider {
@@ -969,98 +1184,62 @@ body {
             right: 0;
             z-index: 1;
 
-            & .palette-container {
+            /* Zoom/pan is a JS-set transform (see OUTPUT ZOOM); gestures are handled in JS too. */
+            touch-action: none;
+
+            & canvas#canvOut {
+                transform-origin: 0 0;
+            }
+
+            & canvas#canvOut.magnified {
+                image-rendering: pixelated;
+            }
+
+            &.panning,
+            &.panning canvas#canvOut.pickable {
+                cursor: grabbing;
+            }
+
+            & .zoom-badge {
+                position: absolute;
+                left: 0.6em;
+                bottom: 0.6em;
+                z-index: 2;
+                font-family: monospace;
+                font-weight: bold;
+                color: inherit;
+                background-color: var(--color-controls-bg);
+                border: none;
+                border-radius: 0.4rem;
+                padding: 0.3em 0.6em;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+                cursor: pointer;
+
+                &:hover {
+                    background-color: var(--color-controls-btn-hover);
+                }
+
+                &[hidden] {
+                    display: none;
+                }
+            }
+
+            & canvas#canvOut.pickable {
+                cursor: crosshair;
+                /* Long-press is a fill gesture here: no iOS callout/magnifier or text selection. */
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                user-select: none;
+            }
+
+            /* Selection outline laid over canvOut by JS (position/size synced to it). */
+            & .sel-overlay {
                 display: none;
                 position: absolute;
-                top: 1em;
-                right: 1em;
-                max-width: 90%;
-                background-color: var(--color-controls-bg);
-                border-radius: 0.5rem;
-                padding: 0.5em;
-                font-size: 0.7em;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-                flex-direction: column;
-                align-items: flex-end;
-                gap: 0.4em;
-
-                & .palette-toggle {
-                    display: flex;
-                    align-items: center;
-                    gap: 0.5em;
-                    font: inherit;
-                    font-weight: bold;
-                    color: inherit;
-                    background: none;
-                    border: none;
-                    padding: 0;
-                    cursor: pointer;
-                    white-space: nowrap;
-
-                    & .chevron {
-                        display: inline-block;
-                        transition: transform 0.15s;
-                    }
-
-                    &:focus-visible {
-                        outline: 2px solid var(--color-controls-btn);
-                        outline-offset: 2px;
-                    }
-                }
-
-                & .palette-body {
-                    display: flex;
-                }
-
-                &.collapsed {
-                    & .palette-body {
-                        display: none;
-                    }
-
-                    & .palette-toggle .chevron {
-                        transform: rotate(90deg);
-                    }
-                }
-
-                & .resolution {
-                    font-weight: bold;
-                    text-align: center;
-                    white-space: nowrap;
-                    margin-bottom: 0.4em;
-                }
-
-                & .color-list {
-                    display: flex;
-                    flex-flow: column wrap;
-                    direction: rtl;
-                    align-content: flex-start;
-                    height: min(45vh, 320px);
-                    gap: 0.25em 0.6em;
-                    /* Big palettes wrap into many columns: scroll them instead of spilling off-screen
-                       (rtl keeps the most-used colors in view first). */
-                    max-width: min(70vw, 40em);
-                    overflow-x: auto;
-
-                    & .color {
-                        direction: ltr;
-                        display: flex;
-                        align-items: center;
-                        gap: 0.4em;
-                        white-space: nowrap;
-
-                        & .swatch {
-                            width: 0.9em;
-                            height: 0.9em;
-                            flex-shrink: 0;
-                            border-radius: 2px;
-                            border: 1px solid rgba(0, 0, 0, 0.3);
-                        }
-
-                        & .hex {
-                            font-family: monospace;
-                        }
-                    }
-                }
+                pointer-events: none;
+                max-width: none;
+                max-height: none;
+                z-index: 1;
             }
         }
     }
