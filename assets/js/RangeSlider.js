@@ -13,7 +13,8 @@
  *   title: 'Speed',
  *   color: '#3d98c2', // optional custom accent color,
 *    progressColorBlend: true, // soft transition of colors in the track bar
- *   format: v => v    // optional: how a value is displayed (labels, hover thumb, aria-valuetext)
+ *   format: v => v,   // optional: how a value is displayed (labels, hover thumb, aria-valuetext)
+ *   disabled: false   // optional: start disabled (toggle later with `slider.disabled = true/false`)
  * });
  *
  * slider.onValueChange(newValue => {
@@ -60,11 +61,12 @@ export class RangeSlider {
     #changeCallbackArgs = [];
     #mqlRotate;
     #format;
+    #disabled = false;
 
     constructor(parent, params) {
         if (!RangeSlider.#stylesInjected) {
             const style = document.createElement('style');
-            style.textContent = '@import url(https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap);range-slider,range-slider *{box-sizing:border-box;user-select:none;touch-action:none;font-family:Quicksand,sans-serif}range-slider{display:grid;grid-template-rows:1fr 1fr;width:100%;height:100%;position:relative;border-radius:1rem}range-slider .rs-labels{display:flex;justify-content:space-between;align-items:center;padding:0 .5em}range-slider .rs-track-container{display:flex;position:relative; padding: 1px; cursor: pointer;}range-slider .rs-track{position:relative;width:100%;background:linear-gradient(to right,#3d98c2 49%,#6fcaff 50%,#abe0ff 50%)}range-slider .rs-track .rs-pixel{position:absolute;top:50%;width:1px;height:1px;opacity:0}range-slider .rs-track .rs-pixel.beginning{left:0}range-slider .rs-track .rs-pixel.end{right:0}range-slider .rs-track .floating-thumb{position:absolute;bottom:50%;display:none;justify-content:center;align-items:center;background-color:#fff;border-radius:10px;padding:.3em;min-width:2em;height:1.5em;width:fit-content;box-shadow:0 0 5px rgba(0,0,0,.5)}range-slider .rs-track .floating-thumb::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#fff}range-slider .rs-track-container>.minus,range-slider .rs-track-container>.plus{position:absolute;bottom:0;aspect-ratio:1;display:flex;justify-content:center;align-items:center;font-weight:bolder;cursor:pointer;height:100%;border:none;background:transparent;padding:0;margin:0;appearance:none;font:inherit;color:inherit}range-slider .rs-track-container>.minus:hover,range-slider .rs-track-container>.plus:hover{box-shadow:0 0 5px rgba(0,0,0,.5)}range-slider .rs-track-container>.minus{left:0;border-radius:50% 0 0 50%}range-slider .rs-track-container>.plus{right:0;border-radius:0 50% 50% 0}range-slider *:focus-visible{outline:2px solid var(--focus, #f6c94b);outline-offset:2px}'
+            style.textContent = '@import url(https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap);range-slider,range-slider *{box-sizing:border-box;user-select:none;touch-action:none;font-family:Quicksand,sans-serif}range-slider{display:grid;grid-template-rows:1fr 1fr;width:100%;height:100%;position:relative;border-radius:1rem}range-slider .rs-labels{display:flex;justify-content:space-between;align-items:center;padding:0 .5em}range-slider .rs-track-container{display:flex;position:relative; padding: 1px; cursor: pointer;}range-slider .rs-track{position:relative;width:100%;background:linear-gradient(to right,#3d98c2 49%,#6fcaff 50%,#abe0ff 50%)}range-slider .rs-track .rs-pixel{position:absolute;top:50%;width:1px;height:1px;opacity:0}range-slider .rs-track .rs-pixel.beginning{left:0}range-slider .rs-track .rs-pixel.end{right:0}range-slider .rs-track .floating-thumb{position:absolute;bottom:50%;display:none;justify-content:center;align-items:center;background-color:#fff;border-radius:10px;padding:.3em;min-width:2em;height:1.5em;width:fit-content;box-shadow:0 0 5px rgba(0,0,0,.5)}range-slider .rs-track .floating-thumb::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#fff}range-slider .rs-track-container>.minus,range-slider .rs-track-container>.plus{position:absolute;bottom:0;aspect-ratio:1;display:flex;justify-content:center;align-items:center;font-weight:bolder;cursor:pointer;height:100%;border:none;background:transparent;padding:0;margin:0;appearance:none;font:inherit;color:inherit}range-slider .rs-track-container>.minus:hover,range-slider .rs-track-container>.plus:hover{box-shadow:0 0 5px rgba(0,0,0,.5)}range-slider .rs-track-container>.minus{left:0;border-radius:50% 0 0 50%}range-slider .rs-track-container>.plus{right:0;border-radius:0 50% 50% 0}range-slider *:focus-visible{outline:2px solid var(--focus, #f6c94b);outline-offset:2px}range-slider[disabled]{filter:grayscale(1);opacity:.8}range-slider[disabled],range-slider[disabled] *{cursor:not-allowed!important}range-slider[disabled] .rs-track-container>.minus:hover,range-slider[disabled] .rs-track-container>.plus:hover{box-shadow:none}'
             document.head.appendChild(style);
             RangeSlider.#stylesInjected = true;
         }
@@ -85,6 +87,25 @@ export class RangeSlider {
         // Render initial state
         this.#updateUI();
         this.#attachEventListeners();
+        this.disabled = !!params.disabled;
+    }
+
+    /** Whether the slider ignores user input (pointer, keyboard, +/- buttons) */
+    get disabled() {
+        return this.#disabled;
+    }
+
+    set disabled(state) {
+        this.#disabled = !!state;
+        this.#container.toggleAttribute('disabled', this.#disabled);
+        this.#track.setAttribute('aria-disabled', String(this.#disabled));
+        this.#track.tabIndex = this.#disabled ? -1 : 0;
+        this.#minusButton.disabled = this.#disabled;
+        this.#plusButton.disabled = this.#disabled;
+        if (this.#disabled) {
+            this.#thumb.style.display = 'none';
+            this.#isDragging = false;
+        }
     }
 
     /** Public getter for the current value of the slider */
@@ -241,6 +262,7 @@ export class RangeSlider {
 
         this.#track.addEventListener('pointermove', hoverBound);
         this.#track.addEventListener('pointerdown', e => {
+            if (this.#disabled) return;
             this.#isDragging = true;
             this.#track.setPointerCapture(e.pointerId);
             this.#onPointerDrag(e);
@@ -264,6 +286,7 @@ export class RangeSlider {
         this.#plusButton.addEventListener('click', () => this.#stepBy(1));
 
         this.#track.addEventListener('keydown', e => {
+            if (this.#disabled) return;
             switch (e.key) {
                 case 'ArrowRight':
                 case 'ArrowUp':
@@ -288,6 +311,7 @@ export class RangeSlider {
     }
 
     #stepBy(direction) {
+        if (this.#disabled) return;
         const cand = this.#currentValue + direction * this.#params.step;
         if (direction > 0 && cand > this.#params.max) return;
         if (direction < 0 && cand < this.#params.min) return;
@@ -304,6 +328,7 @@ export class RangeSlider {
 
     #onPointerDrag(ev) {
         this.#thumb.style.display = 'none';
+        if (this.#disabled) return;
 
         const percent = this.#getPercentFromEvent(ev);
         const newValue = this.#getValueFromPercent(percent);
@@ -314,7 +339,7 @@ export class RangeSlider {
     }
 
     #onPointerHover(ev) {
-        if (this.#isDragging) return this.#thumb.style.display = 'none';
+        if (this.#isDragging || this.#disabled) return this.#thumb.style.display = 'none';
         const hoverPerct = this.#getPercentFromEvent(ev);
         this.#thumb.style.left = `calc(${hoverPerct}% - (${this.#thumb.offsetWidth}px/2))`;
         const hoverValue = this.#getValueFromPercent(hoverPerct);
