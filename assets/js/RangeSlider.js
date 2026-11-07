@@ -12,7 +12,8 @@
  *   def: 50,
  *   title: 'Speed',
  *   color: '#3d98c2', // optional custom accent color,
-*    progressColorBlend: true  // soft transition of colors in the track bar
+*    progressColorBlend: true, // soft transition of colors in the track bar
+ *   format: v => v    // optional: how a value is displayed (labels, hover thumb, aria-valuetext)
  * });
  *
  * slider.onValueChange(newValue => {
@@ -58,6 +59,7 @@ export class RangeSlider {
     #changeCallback = null;
     #changeCallbackArgs = [];
     #mqlRotate;
+    #format;
 
     constructor(parent, params) {
         if (!RangeSlider.#stylesInjected) {
@@ -68,6 +70,7 @@ export class RangeSlider {
         }
 
         this.#params = params;
+        this.#format = params.format || (v => v);
 
         this.#buildDOM(parent);
         this.#initializeColors();
@@ -121,7 +124,7 @@ export class RangeSlider {
 
         this.#minLabel = document.createElement('div');
         this.#minLabel.className = 'rs-mm min';
-        this.#minLabel.textContent = this.#params.min;
+        this.#minLabel.textContent = this.#format(this.#params.min);
 
         this.#valueLabel = document.createElement('div');
         this.#valueLabel.className = 'rs-units';
@@ -131,7 +134,7 @@ export class RangeSlider {
 
         this.#maxLabel = document.createElement('div');
         this.#maxLabel.className = 'rs-mm max';
-        this.#maxLabel.textContent = this.#params.max;
+        this.#maxLabel.textContent = this.#format(this.#params.max);
 
         this.#labels.append(this.#minLabel, this.#valueLabel, this.#maxLabel);
         this.#container.appendChild(this.#labels);
@@ -318,7 +321,7 @@ export class RangeSlider {
         if (this.#lastHoverValue === hoverValue) return;
         this.#lastHoverValue = hoverValue;
 
-        this.#thumb.textContent = hoverValue;
+        this.#thumb.textContent = this.#format(hoverValue);
         this.#thumb.style.display = 'flex';
     }
 
@@ -368,9 +371,10 @@ export class RangeSlider {
 
     #updateUI() {
         // this.#currentPercent = ((this.#currentValue - this.#params.min)/(this.#params.max - this.#params.min))*100;
-        this.#valueLabel.textContent = `${this.#params.title}: ${this.#currentValue}`;
+        const shown = this.#format(this.#currentValue);
+        this.#valueLabel.textContent = `${this.#params.title}: ${shown}`;
         this.#track.setAttribute('aria-valuenow', this.#currentValue);
-        this.#track.setAttribute('aria-valuetext', `${this.#currentValue}${this.#params.title ? ' ' + this.#params.title : ''}`);
+        this.#track.setAttribute('aria-valuetext', `${shown}${this.#params.title ? ' ' + this.#params.title : ''}`);
         const perct = (this.#currentValue - this.#params.min) / (this.#params.max - this.#params.min) * 100;
         this.#track.style.background = `linear-gradient(to right, ${this.#colorFilledBeginning} 0%, ${this.#colorFilledEnd} ${perct}%, ${this.#colorEmptyBeginning} ${perct + this.#secondPercent}%, ${this.#colorEmptyEnd} 100%)`;
 

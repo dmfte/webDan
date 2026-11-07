@@ -1036,6 +1036,10 @@ body {
                     align-content: flex-start;
                     height: min(45vh, 320px);
                     gap: 0.25em 0.6em;
+                    /* Big palettes wrap into many columns: scroll them instead of spilling off-screen
+                       (rtl keeps the most-used colors in view first). */
+                    max-width: min(70vw, 40em);
+                    overflow-x: auto;
 
                     & .color {
                         direction: ltr;

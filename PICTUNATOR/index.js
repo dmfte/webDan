@@ -386,13 +386,12 @@ var paramsPx = {
     horizontal: false,
     grid: true,
     trueColors: false,
-    numColors: 16,
-    tolerance: 16 //  Starts at 256 / numColors, like the Max palette slider sets it.
+    numColors: 16 //  Which fixed palette to use (a key of PX_PALETTES).
 }
+//  Sizes the Maximum palette slider steps through (the slider moves over the index).
+const PX_PALETTE_SIZES = [8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256, 384, 512, 1440, 4096, 11520, 32768];
 var canv0 = document.createElement("canvas");
 var c0 = canv0.getContext("2d", { willReadFrequently: true });
-
-var pxColorCache = new Map(); //  packed rgb -> [r, g, b] of the closest palette color.
 
 const PX_DIM_MAX = 256; //  Top of the Dimension slider.
 const PX_MAX_DIM = PX_DIM_MAX * 2; //  Safety cap for the largest dimension of the working canvas.
@@ -459,65 +458,47 @@ cbPxGrid.addEventListener("click", () => {
 });
 
 //-- True colors: skips palette quantization entirely and shows the plain downscaled image.
-//   Off (default) shows Representative colors instead: a palette built from the image's own
-//   most-popular colors (see buildPopularityPalette), capped by the Max palette slider.
+//   Off (default) maps every pixel to the fixed palette picked by the Maximum palette slider.
 const cbPxTrueColors = document.getElementById("cbPxTrueColors");
-const wrapperPxTolerance = document.getElementById("wrapperPxTolerance");
+const wrapperPxPalette = document.getElementById("wrapperPxPalette");
+
+//-- True colors uses no palette at all, so the palette slider is hidden while it is on.
+function updatePxSliderVisibility() {
+    wrapperPxPalette.style.display = paramsPx.trueColors ? "none" : "";
+}
+
 cbPxTrueColors.addEventListener("input", () => {
     paramsPx.trueColors = cbPxTrueColors.checked;
-    wrapperPxTolerance.style.display = paramsPx.trueColors ? "none" : ""; //  Tolerance only means anything for Representative colors.
-    pxColorCache.clear(); //  Cached matches belong to the previous color source.
+    updatePxSliderVisibility();
     if (imageIn == undefined) return;
     canv0 = getPixelatedCanvas(paramsPx);
     applyPixelation(canvOut, canv0, paramsPx);
     renderPxPalette();
 });
 
-//-- Slider: upper limit of representative colors to keep (Tolerance may merge them into fewer).
-//   Moving it also moves Tolerance to round(256 / maxColors) as a starting point; the user can
-//   still adjust Tolerance freely afterwards.
+//-- Slider: which fixed palette to use (see PX_PALETTES).
 const containerPxPalette = document.getElementById("containerPxPalette");
 const labelForContainerPxPalette = document.querySelector("[label-for=containerPxPalette]");
 var rsPxPalette = new RangeSlider(containerPxPalette, {
-    title: "Max palette",
-    min: 4,
-    max: 256,
+    title: "Maximum palette",
+    min: 0,
+    max: PX_PALETTE_SIZES.length - 1,
     step: 1,
-    def: paramsPx.numColors,
+    def: PX_PALETTE_SIZES.indexOf(paramsPx.numColors),
+    format: i => PX_PALETTE_SIZES[i],
     color: "#576b9e",
     color2: "rgb(142, 167, 231)"
 });
-labelForContainerPxPalette.innerText = paramsPx.numColors;
+//  The side label (mobile) is narrow, so large sizes are shortened: 4096 -> "4K", 32768 -> "32K".
+const compactPaletteSize = n => n >= 1024 && n % 1024 === 0 ? `${n / 1024}K` : String(n);
+labelForContainerPxPalette.innerText = compactPaletteSize(paramsPx.numColors);
 rsPxPalette.onValueChange(function () {
-    paramsPx.numColors = rsPxPalette.val;
-    labelForContainerPxPalette.innerText = paramsPx.numColors;
-    rsPxTolerance.val = { value: Math.round(256 / paramsPx.numColors) }; //  Fires Tolerance's own onValueChange.
-    pxColorCache.clear(); //  Cached matches belong to the previous palette.
+    paramsPx.numColors = PX_PALETTE_SIZES[rsPxPalette.val];
+    labelForContainerPxPalette.innerText = compactPaletteSize(paramsPx.numColors);
     if (imageIn == undefined || paramsPx.trueColors) return;
     debouncedPxRender();
 });
-
-//-- Slider: how far (straight weightedDistance() units, 0-255) a color may be from a more
-//   popular one and still be absorbed into its group. Wider tolerance -> fewer, broader colors.
-const containerPxTolerance = document.getElementById("containerPxTolerance");
-const labelForContainerPxTolerance = document.querySelector("[label-for=containerPxTolerance]");
-var rsPxTolerance = new RangeSlider(containerPxTolerance, {
-    title: "Tolerance",
-    min: 1,
-    max: 100,
-    step: 1,
-    def: paramsPx.tolerance,
-    color: "#576b9e",
-    color2: "rgb(142, 167, 231)"
-});
-labelForContainerPxTolerance.innerText = rsPxTolerance.val;
-rsPxTolerance.onValueChange(function () {
-    paramsPx.tolerance = rsPxTolerance.val;
-    labelForContainerPxTolerance.innerText = paramsPx.tolerance;
-    pxColorCache.clear(); //  Cached matches belong to the previous palette.
-    if (imageIn == undefined || paramsPx.trueColors) return;
-    debouncedPxRender();
-});
+updatePxSliderVisibility();
 
 //-- Weighted Euclidean color distance: fixed arbitrary per-channel weights (tune to taste).
 //   No sqrt needed since only relative ordering matters for nearest-match comparisons.
@@ -531,102 +512,96 @@ function weightedDistance(r1, g1, b1, r2, g2, b2) {
     return PX_WEIGHT_R * dr * dr + PX_WEIGHT_G * dg * dg + PX_WEIGHT_B * db * db;
 }
 
-function getClosestPaletteColor(r, g, b, colors) {
+//-- Palettes: one fixed palette per Maximum palette size, independent of the image.
+//   Grids split each channel into evenly spaced levels (0 and 255 included) and take every
+//   combination, so a pixel's color is found by snapping each channel on its own. Lists are
+//   conventional hand-picked palettes, matched by nearest weighted distance and cached per color.
+const hexToRgb = hex => [parseInt(hex.slice(0, 2), 16), parseInt(hex.slice(2, 4), 16), parseInt(hex.slice(4, 6), 16)];
+
+//  VGA / HTML 4 standard 16 colors.
+const PX_VGA16 = [
+    "000000", "800000", "008000", "808000", "000080", "800080", "008080", "c0c0c0",
+    "808080", "ff0000", "00ff00", "ffff00", "0000ff", "ff00ff", "00ffff", "ffffff"
+].map(hexToRgb);
+
+//  xterm 256: the 16 system colors, a 6x6x6 cube on xterm's levels, and a 24-step gray ramp.
+function buildXterm256() {
+    const levels = [0, 95, 135, 175, 215, 255];
+    const colors = PX_VGA16.slice();
+    for (const r of levels) for (const g of levels) for (const b of levels) colors.push([r, g, b]);
+    for (let i = 0; i < 24; i++) {
+        const v = 8 + i * 10;
+        colors.push([v, v, v]);
+    }
+    return colors;
+}
+
+const PX_PALETTES = {
+    //  In-between sizes (12, 24, 48...) are the midpoints of their neighbours, built as grids that
+    //  spend the extra levels on green first and blue last (the eye's sensitivity order).
+    8: { grid: [2, 2, 2] }, //  3-bit RGB: the cube's corners.
+    12: { grid: [2, 3, 2] },
+    16: { list: PX_VGA16, cache: new Map() },
+    24: { grid: [3, 4, 2] },
+    32: { grid: [4, 4, 2] },
+    48: { grid: [4, 4, 3] },
+    64: { grid: [4, 4, 4] }, //  EGA's 64-color master palette.
+    96: { grid: [4, 6, 4] },
+    128: { grid: [4, 8, 4] },
+    192: { grid: [6, 8, 4] },
+    256: { list: buildXterm256(), cache: new Map() },
+    384: { grid: [8, 8, 6] },
+    512: { grid: [8, 8, 8] }, //  9-bit RGB (Sega Genesis, Atari ST).
+    1440: { grid: [12, 12, 10] }, //  Big gaps (x8) use the geometric middle so the steps feel even.
+    4096: { grid: [16, 16, 16] }, //  12-bit RGB (Amiga OCS).
+    11520: { grid: [24, 24, 20] },
+    32768: { grid: [32, 32, 32] } //  15-bit "high color" (SNES, GBA).
+};
+
+//-- Nearest color of a fixed list palette. The cache is kept for the whole session: the palette
+//   never changes, so a color matched once stays matched.
+function getClosestListColor(r, g, b, palette) {
     const packed = (r << 16) | (g << 8) | b;
-    let match = pxColorCache.get(packed);
+    let match = palette.cache.get(packed);
     if (match !== undefined) return match;
-    let bestIdx = 0;
     let bestDist = Infinity;
-    for (let i = 0; i < colors.length; i++) {
-        const c = colors[i];
+    for (const c of palette.list) {
         const dist = weightedDistance(r, g, b, c[0], c[1], c[2]);
         if (dist < bestDist) {
             bestDist = dist;
-            bestIdx = i;
+            match = c;
         }
     }
-    match = colors[bestIdx];
-    pxColorCache.set(packed, match);
+    palette.cache.set(packed, match);
     return match;
 }
 
-//-- Popularity algorithm with grouping: counts how many times each exact RGB color occurs,
-//   then walks them from most to least frequent. Each color joins the closest existing group
-//   whose representative lies within `tolerance` (straight weightedDistance() units, 0-255), or
-//   founds a new group. A group's representative is its founder, i.e. the most frequent color
-//   in that range, and every joining color adds its pixel count to the group. Groups are then
-//   ranked by that pooled count and up to `maxColors` are kept, so every palette entry is a
-//   real color lifted from the picture, and a wider tolerance merges more colors and naturally
-//   yields fewer of them.
-function buildPopularityPalette(data, maxColors, tolerance = 0) {
-    const counts = new Map(); //  packed rgb -> occurrence count.
-    for (let i = 0; i < data.length; i += 4) {
-        const packed = (data[i] << 16) | (data[i + 1] << 8) | data[i + 2];
-        counts.set(packed, (counts.get(packed) || 0) + 1);
-    }
-    const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
-    const unpack = packed => [(packed >> 16) & 0xff, (packed >> 8) & 0xff, packed & 0xff];
-    //  Without tolerance every color is its own group, already ranked by count.
-    if (tolerance <= 0) return sorted.slice(0, maxColors).map(([packed]) => unpack(packed));
-
-    //  Spatial hash of group representatives so each color only checks nearby groups instead of
-    //  all of them. A color can only be within `tolerance` of a representative if each channel
-    //  differs by less than tolerance / sqrt(weight), so cells of that size per channel guarantee
-    //  every candidate lies in the 3x3x3 block of cells around the color's own cell.
-    const maxDist = tolerance * tolerance; //  weightedDistance() is squared.
-    const cellR = Math.max(1, Math.ceil(tolerance / Math.sqrt(PX_WEIGHT_R)));
-    const cellG = Math.max(1, Math.ceil(tolerance / Math.sqrt(PX_WEIGHT_G)));
-    const cellB = Math.max(1, Math.ceil(tolerance / Math.sqrt(PX_WEIGHT_B)));
-    const cells = new Map(); //  packed cell coords -> groups whose representative falls in it.
-    const groups = []; //  { rgb: [r, g, b], count }
-    for (const [packed, count] of sorted) {
-        const [r, g, b] = unpack(packed);
-        const cr = Math.floor(r / cellR);
-        const cg = Math.floor(g / cellG);
-        const cb = Math.floor(b / cellB);
-        let best = null;
-        let bestDist = maxDist;
-        for (let dr = -1; dr <= 1; dr++) {
-            for (let dg = -1; dg <= 1; dg++) {
-                for (let db = -1; db <= 1; db++) {
-                    const cell = cells.get(((cr + dr) << 16) | ((cg + dg) << 8) | (cb + db));
-                    if (cell === undefined) continue;
-                    for (const group of cell) {
-                        const c = group.rgb;
-                        const dist = weightedDistance(r, g, b, c[0], c[1], c[2]);
-                        if (dist < bestDist) {
-                            bestDist = dist;
-                            best = group;
-                        }
-                    }
-                }
-            }
-        }
-        if (best !== null) {
-            best.count += count;
-            continue;
-        }
-        const group = { rgb: [r, g, b], count };
-        groups.push(group);
-        const key = (cr << 16) | (cg << 8) | cb;
-        if (!cells.has(key)) cells.set(key, []);
-        cells.get(key).push(group);
-    }
-    groups.sort((a, b) => b.count - a.count);
-    return groups.slice(0, maxColors).map(group => group.rgb);
+//-- Nearest of n evenly spaced levels (0..255) for one channel. The weighted distance is a sum of
+//   independent per-channel terms and the palette is a full grid, so snapping each channel on its
+//   own gives exactly the nearest palette color, with no search over the palette.
+function snapToLevel(v, n) {
+    if (n === 1) return 128;
+    const step = 255 / (n - 1);
+    return Math.round(Math.round(v / step) * step);
 }
 
-//-- Substitutes every pixel of canv0 with the closest color of the Representative-colors palette.
+//-- Substitutes every pixel of canv0 with its color from the active palette.
 function applyPaletteToCanv0(params) {
     const imagedata = c0.getImageData(0, 0, canv0.width, canv0.height);
     const data = imagedata.data;
-    const colors = buildPopularityPalette(data, params.numColors, params.tolerance);
-    pxColorCache.clear(); //  Colors are rebuilt every call; stale cache entries would misquantize.
+    const palette = PX_PALETTES[params.numColors];
     for (let i = 0; i < data.length; i += 4) {
-        const match = getClosestPaletteColor(data[i], data[i + 1], data[i + 2], colors);
-        data[i + 0] = match[0];
-        data[i + 1] = match[1];
-        data[i + 2] = match[2];
+        if (palette.grid) {
+            const [nR, nG, nB] = palette.grid;
+            data[i + 0] = snapToLevel(data[i + 0], nR);
+            data[i + 1] = snapToLevel(data[i + 1], nG);
+            data[i + 2] = snapToLevel(data[i + 2], nB);
+        } else {
+            const match = getClosestListColor(data[i], data[i + 1], data[i + 2], palette);
+            data[i + 0] = match[0];
+            data[i + 1] = match[1];
+            data[i + 2] = match[2];
+        }
     }
     c0.putImageData(imagedata, 0, 0);
 }
@@ -727,6 +702,7 @@ function applyPixelation(canvasTarget, canvasPixelated, params) {
 //   Hides itself whenever there's no image, Pixelate isn't the active effect, or True
 //   Colors is on (that mode skips quantization, so the color count can run into the
 //   thousands and isn't a meaningful "palette" to list).
+const PX_PALETTE_LIST_MAX = 512;
 function renderPxPalette() {
     if (imageIn == undefined || !rgEffPixelate.checked || paramsPx.trueColors) {
         paletteContainerPx.style.display = "none";
@@ -744,7 +720,9 @@ function renderPxPalette() {
     paletteCountPx.innerText = sorted.length === 1 ? "1 color" : `${sorted.length} colores`;
     paletteResolutionPx.innerText = `${canv0.width}px x ${canv0.height}px`;
     paletteColorListPx.innerHTML = "";
-    sorted.forEach(packed => {
+    //  Large palettes can leave thousands of colors; listing only the most used keeps the
+    //  DOM light (the header still shows the full count).
+    sorted.slice(0, PX_PALETTE_LIST_MAX).forEach(packed => {
         const hex = "#" + packed.toString(16).padStart(6, "0");
         const row = document.createElement("div");
         row.className = "color";
@@ -757,6 +735,12 @@ function renderPxPalette() {
         row.append(swatch, hexLabel);
         paletteColorListPx.appendChild(row);
     });
+    if (sorted.length > PX_PALETTE_LIST_MAX) {
+        const more = document.createElement("div");
+        more.className = "color more";
+        more.innerText = `+${sorted.length - PX_PALETTE_LIST_MAX} más`;
+        paletteColorListPx.appendChild(more);
+    }
     paletteContainerPx.style.display = "flex";
 }
 
