@@ -13,7 +13,9 @@
   const defaults = {
     gx: 50, gy: 50, size: 25, ry: 0, rx: 0, rz: 0,
     back: 20, width: 0.4, outline: true, diam: true, front: true, frontSize: 20, frontGap: 0, cut: 0,
+    grid: true,
     colMer: '#ffffff', colEq: '#f2b441', colOut: '#ffffff',
+    colGrid: '#ff2d2d', // the snap points' colour (MARK_COLOR)
   };
   const state = { ...defaults };
 
@@ -167,6 +169,8 @@
       (bf ? F : B).moveTo(...proj(m));  (bf ? F : B).lineTo(...proj(rb));
     }
     const sphereVis = p => rot(p)[2];
+    // Distance of the front marker's base plane from the centre, along the front axis
+    const frontR = state.frontSize / 200, frontZ = Math.sqrt(1 - frontR * frontR) + state.frontGap / 100;
 
     // Great circles, with the parts beyond the cut planes removed
     for (const s of shapes) {
@@ -195,7 +199,7 @@
     // only while they are behind the ball's disc. Its height follows its
     // diameter, so the size slider scales it without changing its shape.
     if (marker && state.front) {
-      const r = state.frontSize / 200, z0 = Math.sqrt(1 - r * r) + state.frontGap / 100;
+      const r = frontR, z0 = frontZ;
       const apex = [0, 0, z0 + r * 2.5], K = 48, PARTS = 4;
       const coneVis = p => { const q = rot(p); return q[0] * q[0] + q[1] * q[1] >= 1 ? 1 : q[2]; };
       let prev = [r, 0, z0];
@@ -301,6 +305,28 @@
     g.lineWidth = lw;
     g.strokeStyle = state.colMer; g.stroke(paths.merF); g.stroke(cutF);
     g.strokeStyle = state.colEq;  g.stroke(paths.eqF);
+    if (state.grid) {
+      // Face grid: 2 columns × 3 rows of squares, each as wide as the globe's
+      // radius, lying in the plane of the front marker's base, so it turns and
+      // tilts with the globe. Its centre lines are the front axis's own cross:
+      // columns at x = −1, 0, 1, rows at y = 1 (above the brow line), 0 (brow),
+      // −1 and −2 (below). The inner lines run on one square past the grid.
+      // Same thickness and dashes as the equatorial axes.
+      const P = (x, y) => proj(rot([x, y, frontZ]));
+      const grid = new Path2D();
+      // Every square edge is its own subpath, so each one's dashes start at a
+      // crossing and the crossings stay solid.
+      const seg = (a, b) => { grid.moveTo(...a); grid.lineTo(...b); };
+      const xs = [-1, 0, 1], ys = [1, 0, -1, -2];
+      for (const x of xs) for (let i = 1; i < ys.length; i++) seg(P(x, ys[i - 1]), P(x, ys[i]));
+      for (const y of ys) for (let i = 1; i < xs.length; i++) seg(P(xs[i - 1], y), P(xs[i], y));
+      // Extensions, drawn outwards from the grid's edge so their dashes start there
+      seg(P(0, 1), P(0, 2)); seg(P(0, -2), P(0, -3));
+      for (const y of [0, -1]) { seg(P(-1, y), P(-2, y)); seg(P(1, y), P(2, y)); }
+      g.lineWidth = lw; g.strokeStyle = state.colGrid; g.setLineDash([lw * 4, lw * 3]);
+      g.stroke(grid);
+      g.setLineDash([]);
+    }
     g.restore();
   }
 
@@ -397,22 +423,21 @@
       sync(); schedule();
     });
   }
-  for (const k of ['colMer', 'colEq', 'colOut']) {
+  const COLORS = ['colMer', 'colEq', 'colOut', 'colGrid'], CHECKS = ['outline', 'diam', 'front', 'grid'];
+  for (const k of COLORS) {
     $(k).addEventListener('input', e => { state[k] = e.target.value; schedule(); });
   }
-  $('outline').addEventListener('change', e => { state.outline = e.target.checked; schedule(); });
-  $('diam').addEventListener('change', e => { state.diam = e.target.checked; schedule(); });
-  $('front').addEventListener('change', e => { state.front = e.target.checked; schedule(); });
+  for (const k of CHECKS) {
+    $(k).addEventListener('change', e => { state[k] = e.target.checked; schedule(); });
+  }
 
   function sync() {
     for (const k of Object.keys(ranges)) {
       ranges[k].el.value = state[k];
       ranges[k].out.textContent = fmt[k](state[k]);
     }
-    $('outline').checked = state.outline;
-    $('diam').checked = state.diam;
-    $('front').checked = state.front;
-    for (const k of ['colMer', 'colEq', 'colOut']) $(k).value = state[k];
+    for (const k of CHECKS) $(k).checked = state[k];
+    for (const k of COLORS) $(k).value = state[k];
     const on = snappedMark();
     $('markCount').textContent = `${marks.length} / ${MAX_MARKS}`;
     $('markAdd').disabled = on >= 0 || marks.length >= MAX_MARKS;
