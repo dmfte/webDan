@@ -284,7 +284,9 @@
       // Dashed diameters in the equatorial plane, rotating with the globe:
       //   roll diameter   = x axis (ear to ear), equator colour; ends at the cut faces
       //   front–back axis = z axis (brow point to back of head), meridian colour
-      // Both are broken around a hollow centre marker so the circle stays empty.
+      // plus the polar axis (y, pole to pole), where the two meridians cross,
+      // in the meridian colour. All are broken around a hollow centre marker so
+      // the circle stays empty.
       const rr = lw * 3;
       g.lineWidth = lw;
       const dashed = (axis, color) => {
@@ -298,6 +300,7 @@
       };
       dashed([d, 0, 0], state.colEq);
       dashed([0, 0, 1], state.colMer);
+      dashed([0, 1, 0], state.colMer);
       g.setLineDash([]);
       g.strokeStyle = state.colEq;
       g.beginPath(); g.arc(cx, cy, rr, 0, 2 * Math.PI); g.stroke();
