@@ -342,12 +342,41 @@
     };
   }
 
-  // View transform: picture fitted inside the stage
-  let W = 0, H = 0, dpr = 1, view = { s: 1, ox: 0, oy: 0 };
-  function layout() {
+  // View transform: picture fitted inside the stage, times the zoom. Zoom only
+  // changes the view; the globe's size on the picture (and the export) stays.
+  // At zoom 1 the picture is fitted and centred; zoomed in, it can be panned but
+  // never leaves an empty gap on a side it overflows.
+  let W = 0, H = 0, dpr = 1, view = { s: 1, ox: 0, oy: 0 }, fit = 1, zoom = 1;
+  const MAX_ZOOM = 8;
+  const viewArea = () => {
     const pad = 16, foot = 68; // foot: room for the controls along the bottom of the stage
-    const s = Math.min((W - pad * 2) / picW(), (H - pad - foot) / picH());
-    view = { s, ox: (W - picW() * s) / 2, oy: pad + (H - pad - foot - picH() * s) / 2 };
+    return { l: pad, t: pad, w: W - pad * 2, h: H - pad - foot };
+  };
+  function clampView() {
+    const a = viewArea(), pw = picW() * view.s, ph = picH() * view.s;
+    view.ox = pw <= a.w ? a.l + (a.w - pw) / 2 : Math.min(a.l, Math.max(a.l + a.w - pw, view.ox));
+    view.oy = ph <= a.h ? a.t + (a.h - ph) / 2 : Math.min(a.t, Math.max(a.t + a.h - ph, view.oy));
+  }
+  // reset = a new picture: back to the fitted view. Otherwise (the stage was
+  // resized) the zoom is kept, along with the picture point in the middle.
+  function layout(reset = false) {
+    const a = viewArea();
+    // (No usable middle while the stage had no size: the picture's centre stands in)
+    const ok = view.s > 0;
+    const mx = ok ? (a.l + a.w / 2 - view.ox) / view.s : picW() / 2;
+    const my = ok ? (a.t + a.h / 2 - view.oy) / view.s : picH() / 2;
+    fit = Math.min(a.w / picW(), a.h / picH());
+    if (reset) zoom = 1;
+    view.s = fit * zoom;
+    view.ox = a.l + a.w / 2 - mx * view.s; view.oy = a.t + a.h / 2 - my * view.s;
+    clampView();
+  }
+  // Zoom by factor f, keeping the stage point (x, y) over the same spot of the picture
+  function zoomAt(x, y, f) {
+    const z = Math.min(MAX_ZOOM, Math.max(1, zoom * f)), k = z / zoom;
+    zoom = z; view.s = fit * zoom;
+    view.ox = x - (x - view.ox) * k; view.oy = y - (y - view.oy) * k;
+    clampView();
   }
   function resize() {
     const r = stage.getBoundingClientRect();
@@ -481,17 +510,24 @@
   // and a right-button drag rotates. The centre jumps onto a snap point while
   // it is within SNAP_PX of it on screen. The drag itself is tracked unsnapped
   // (free), so that pulling further away lets go of the point again.
-  // Resize: the mouse wheel, or a two-finger pinch, scales the radius.
+  // Resize: the mouse wheel scales the radius.
+  // Zoom: a two-finger pinch (touch, or ctrl+wheel from a trackpad) zooms the
+  // view about the fingers, and moving both fingers pans it.
   const clamp = (v, k) => Math.min(+ranges[k].el.max, Math.max(+ranges[k].el.min, v));
   const placeMode = $('placeMode');
   const pointers = new Map(); // pointerId -> last position
-  let gesture = null, dragId = null, pinchDist = 0;
+  let gesture = null, dragId = null, pinchDist = 0, pinchMid = null;
   let lever = null; // { p: pointer position from the globe's centre } during a lever drag
   let free = null; // { x, y }: where a place drag has taken the centre, before snapping
   const LEVER_COLOR = '#3fd0ff';
   const pinchSpan = () => {
     const [p, q] = [...pointers.values()];
     return Math.hypot(p.x - q.x, p.y - q.y);
+  };
+  // Midpoint between the two fingers, in stage coordinates
+  const pinchCentre = () => {
+    const [p, q] = [...pointers.values()], r = canvas.getBoundingClientRect();
+    return { x: (p.x + q.x) / 2 - r.left, y: (p.y + q.y) / 2 - r.top };
   };
   // Pointer position measured from the globe's centre (y up), and the globe's radius, in CSS pixels
   const fromGlobe = e => {
@@ -519,7 +555,7 @@
       else if (Math.hypot(...p) <= R) { lever = { p }; setGesture('lever'); schedule(); }
       else setGesture('rotate');
     } else if (pointers.size === 2) {
-      setGesture('pinch'); pinchDist = pinchSpan();
+      setGesture('pinch'); pinchDist = pinchSpan(); pinchMid = pinchCentre();
     }
   });
   canvas.addEventListener('pointermove', e => {
@@ -529,9 +565,10 @@
     last.x = e.clientX; last.y = e.clientY;
     if (gesture === 'pinch') {
       if (pointers.size < 2) return;
-      const d = pinchSpan();
-      if (pinchDist > 0) state.size = clamp(state.size * d / pinchDist, 'size');
-      pinchDist = d;
+      const d = pinchSpan(), m = pinchCentre();
+      view.ox += m.x - pinchMid.x; view.oy += m.y - pinchMid.y; // pan with the fingers
+      zoomAt(m.x, m.y, pinchDist > 0 ? d / pinchDist : 1);
+      pinchDist = d; pinchMid = m;
     } else if (e.pointerId !== dragId) {
       return;
     } else if (gesture === 'place') {
@@ -577,7 +614,12 @@
     e.preventDefault();
     // Lines → pixels; a trackpad pinch arrives as a ctrl+wheel with small deltas
     const dy = e.deltaY * (e.deltaMode === 1 ? 16 : 1);
-    state.size = clamp(state.size * Math.exp(-dy * (e.ctrlKey ? 0.01 : 0.0015)), 'size');
+    if (e.ctrlKey) {
+      const r = canvas.getBoundingClientRect();
+      zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-dy * 0.01));
+    } else {
+      state.size = clamp(state.size * Math.exp(-dy * 0.0015), 'size');
+    }
     sync(); schedule();
   }, { passive: false });
   placeMode.addEventListener('change', () => canvas.classList.toggle('place-mode', placeMode.checked));
@@ -600,7 +642,7 @@
         dl.hidden = false; dl.style.display = 'flex';
         status.textContent = '';
         marks.length = 0; // the snap points were places on the previous picture
-        layout(); sync(); schedule();
+        layout(true); sync(); schedule();
       };
       im.onerror = () => { status.textContent = 'This browser can’t open that image format. Try a JPG or PNG.'; };
       im.src = reader.result;
