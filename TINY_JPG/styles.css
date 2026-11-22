@@ -696,6 +696,12 @@ button, select, input[type="file"], input[type="checkbox"], label {
   font-size: 0.72rem;
 }
 
+.file-disk-note {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
 .file-size-original {
   grid-area: original;
   text-align: right;

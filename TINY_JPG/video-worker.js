@@ -10,6 +10,7 @@ import {
   ALL_FORMATS,
   BlobSource,
   BufferTarget,
+  StreamTarget,
   Mp4OutputFormat,
   MovOutputFormat,
   WebMOutputFormat,
@@ -30,20 +31,57 @@ const DISCARD_MESSAGES = {
   no_encodable_target_codec: 'Este navegador no puede codificar el formato elegido.'
 };
 
+// Must match video.js: the folder in the origin-private file system (OPFS)
+// that holds results too big to keep in memory.
+const DISK_DIR = 'tinymp4-output';
+
+// Writes the result straight to an OPFS file as it's encoded, so its size is
+// bounded by disk space instead of by the largest ArrayBuffer the browser
+// will allocate. The sync access handle is worker-only but is the variant
+// every current browser supports.
+async function openDiskTarget(name) {
+  const root = await navigator.storage.getDirectory();
+  const dir = await root.getDirectoryHandle(DISK_DIR, { create: true });
+  const handle = await dir.getFileHandle(name, { create: true });
+  const access = await handle.createSyncAccessHandle();
+  access.truncate(0);
+  const stream = new WritableStream({
+    write(chunk) {
+      access.write(chunk.data, { at: chunk.position });
+    },
+    close() {
+      access.flush();
+      access.close();
+    }
+  });
+  // chunked batches the muxer's many small writes into 16 MiB ones.
+  return { target: new StreamTarget(stream, { chunked: true }), access };
+}
+
 self.onmessage = async (event) => {
   const { file, plan } = event.data;
   const { Format, mime } = OUTPUT_FORMATS[plan.container];
+  let disk = null;
 
   try {
     self.postMessage({ type: 'status', status: 'preparing' });
 
     const input = new Input({ source: new BlobSource(file), formats: ALL_FORMATS });
     // MP4/MOV only: the equivalent of ffmpeg's -movflags +faststart, so the
-    // result starts playing in a browser before it has fully downloaded.
-    const formatOptions = Format === Mp4OutputFormat || Format === MovOutputFormat
-      ? { fastStart: 'in-memory' }
-      : {};
-    const output = new Output({ format: new Format(formatOptions), target: new BufferTarget() });
+    // result starts playing in a browser before it has fully downloaded. It
+    // needs the whole file in memory, so results written to disk skip it.
+    const isMp4Family = Format === Mp4OutputFormat || Format === MovOutputFormat;
+    let target;
+    let formatOptions = {};
+    if (plan.diskName) {
+      disk = await openDiskTarget(plan.diskName);
+      target = disk.target;
+      if (isMp4Family) formatOptions = { fastStart: false };
+    } else {
+      target = new BufferTarget();
+      if (isMp4Family) formatOptions = { fastStart: 'in-memory' };
+    }
+    const output = new Output({ format: new Format(formatOptions), target });
 
     const conversion = await Conversion.init({
       input,
@@ -96,9 +134,24 @@ self.onmessage = async (event) => {
     await conversion.execute();
     input.dispose();
 
-    const blob = new Blob([output.target.buffer], { type: mime });
-    self.postMessage({ type: 'done', blob });
+    if (disk) {
+      // The main thread reopens the file from OPFS by name.
+      self.postMessage({ type: 'done', diskName: plan.diskName, mime });
+    } else {
+      const blob = new Blob([output.target.buffer], { type: mime });
+      self.postMessage({ type: 'done', blob });
+    }
   } catch (err) {
     self.postMessage({ type: 'error', message: err && err.message ? err.message : 'Error desconocido.' });
+  } finally {
+    // Normally the muxer already closed it; on failure this frees the lock
+    // so the main thread can delete the partial file.
+    if (disk) {
+      try {
+        disk.access.close();
+      } catch {
+        // Already closed.
+      }
+    }
   }
 };

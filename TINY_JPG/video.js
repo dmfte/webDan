@@ -6,10 +6,19 @@ import { Input, ALL_FORMATS, BlobSource, getEncodableVideoCodecs } from './media
 // The device's hardware encoder is one shared resource, so unlike the image
 // tab, running videos side by side only makes each of them slower.
 const MAX_CONCURRENT = 1;
-// Output is held in memory until downloaded; past this, long encodes and
-// memory pressure become realistic.
+// Past this source size, long encodes and memory pressure become realistic
+// (results under DISK_OUTPUT_THRESHOLD are held in memory until downloaded).
 const LARGE_FILE_THRESHOLD = 500 * 1024 * 1024;
 const ACTIVE_STATUSES = ['queued', 'preparing', 'compressing'];
+// Results estimated above this are written to disk (OPFS) while encoding
+// instead of being held in memory: browsers refuse a single ArrayBuffer of a
+// few GB, which used to fail right after 100%. Kept well under that ceiling
+// because the estimate can undershoot (VBR, copied audio of unknown size).
+const DISK_OUTPUT_THRESHOLD = 1024 * 1024 * 1024;
+// Must match video-worker.js.
+const DISK_DIR = 'tinymp4-output';
+// Copied audio keeps its source bitrate, which the probe doesn't measure.
+const COPIED_AUDIO_BPS = 256_000;
 
 const CONTAINERS = {
   mp4: { label: 'MP4', ext: 'mp4', audioCodec: 'aac', audioLabel: 'AAC', codecs: ['avc', 'hevc', 'av1', 'vp9'] },
@@ -79,6 +88,76 @@ const confirmDialog = document.getElementById('vConfirmDialog');
 const confirmText = document.getElementById('vConfirmText');
 
 const entries = new Map();
+
+// === Disk-backed results (OPFS) ===
+
+// createSyncAccessHandle (what the worker writes with) is only exposed inside
+// workers, so it can't be detected from here; every browser that has OPFS
+// shipped it alongside getDirectory.
+const supportsDiskOutput = Boolean(navigator.storage && navigator.storage.getDirectory);
+// Files are named after the tab that made them. Each tab holds a Web Lock
+// under its id for as long as it's open, so a sweep can tell an abandoned
+// file (closed tab, crash) from one another open tab is still using.
+const tabId = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`).replace(/-/g, '');
+const TAB_LOCK_PREFIX = 'tinymp4-tab-';
+let diskCounter = 0;
+
+if (supportsDiskOutput && navigator.locks) {
+  navigator.locks.request(TAB_LOCK_PREFIX + tabId, () => new Promise(() => {}));
+  sweepAbandonedDiskFiles();
+}
+
+async function diskDir() {
+  const root = await navigator.storage.getDirectory();
+  return root.getDirectoryHandle(DISK_DIR, { create: true });
+}
+
+async function sweepAbandonedDiskFiles() {
+  try {
+    const { held = [] } = await navigator.locks.query();
+    const liveTabs = new Set(held
+      .map((lock) => lock.name)
+      .filter((name) => name && name.startsWith(TAB_LOCK_PREFIX))
+      .map((name) => name.slice(TAB_LOCK_PREFIX.length)));
+    const dir = await diskDir();
+    for await (const name of dir.keys()) {
+      if (!liveTabs.has(name.split('-')[0])) {
+        await dir.removeEntry(name).catch(() => {});
+      }
+    }
+  } catch {
+    // Best effort: leftovers only cost space until the next visit.
+  }
+}
+
+// A worker that was just terminated may still hold the file's lock for a
+// moment, so deleting retries briefly before giving up to the next sweep.
+async function removeDiskFile(name) {
+  if (!name) return;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      const dir = await diskDir();
+      await dir.removeEntry(name);
+      return;
+    } catch (err) {
+      if (err && err.name === 'NotFoundError') return;
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    }
+  }
+}
+
+async function readDiskFile(name, mime) {
+  const dir = await diskDir();
+  const file = await (await dir.getFileHandle(name)).getFile();
+  // Same bytes, still backed by disk; only the type is set for the download.
+  return new Blob([file], { type: mime });
+}
+
+function estimateOutputBytes(videoBitrate, audio, duration) {
+  if (!duration) return 0;
+  const audioBps = audio.discard ? 0 : audio.bitrate || COPIED_AUDIO_BPS;
+  return ((videoBitrate + audioBps) * duration) / 8;
+}
 const queue = [];
 let activeCount = 0;
 let idCounter = 0;
@@ -363,6 +442,8 @@ function buildPlan(entry) {
     audio = {};
   }
 
+  const estimatedBytes = estimateOutputBytes(videoBitrate, audio, info.duration);
+
   return {
     container,
     codec,
@@ -376,7 +457,11 @@ function buildPlan(entry) {
     audio,
     keepTags: settings.keepTags,
     keyFrameInterval: settings.keyFrameInterval,
-    hardwareAcceleration: settings.hardwareAcceleration
+    hardwareAcceleration: settings.hardwareAcceleration,
+    estimatedBytes,
+    toDisk: supportsDiskOutput && estimatedBytes > DISK_OUTPUT_THRESHOLD,
+    // Set by startEntry for each attempt when toDisk is on.
+    diskName: null
   };
 }
 
@@ -483,7 +568,8 @@ function addFile(file) {
     notice: row.querySelector('.file-notice'),
     noticeText: row.querySelector('.file-notice-text'),
     strongerBtn: row.querySelector('.notice-stronger'),
-    anywayBtn: row.querySelector('.notice-anyway')
+    anywayBtn: row.querySelector('.notice-anyway'),
+    diskNote: row.querySelector('.file-disk-note')
   };
 
   els.name.textContent = file.webkitRelativePath || file.name;
@@ -513,6 +599,8 @@ function addFile(file) {
     plan: null,
     outputBlob: null,
     outputUrl: null,
+    // OPFS file name when the result lives on disk.
+    diskName: null,
     row,
     els
   };
@@ -593,6 +681,16 @@ function updatePreview(entry) {
     parts.push(plan ? `${formatMbps(info.bitrate)} → ≈${formatMbps(plan.videoBitrate)}` : formatMbps(info.bitrate));
   }
   els.extra.textContent = parts.filter(Boolean).join(' · ');
+
+  els.diskNote.hidden = !(plan && plan.toDisk);
+  if (plan && plan.toDisk) {
+    const fastStartNote = ['mp4', 'mov'].includes(plan.container)
+      ? ' Sin «inicio rápido»: en la web empieza a reproducirse solo tras descargarse completo.'
+      : '';
+    els.diskNote.textContent =
+      `Resultado grande (≈${formatBytes(plan.estimatedBytes)}): se guarda en el disco mientras se comprime ` +
+      `y se descarga por separado, fuera del ZIP.${fastStartNote}`;
+  }
 }
 
 function refreshQueuedPreviews() {
@@ -626,6 +724,16 @@ async function startEntry(entry) {
   }
   updatePreview(entry);
 
+  if (entry.plan.toDisk) {
+    if (!(await hasRoomFor(entry.plan.estimatedBytes))) {
+      failEntry(entry, `No hay espacio suficiente en el navegador para un resultado de ≈${formatBytes(entry.plan.estimatedBytes)}. Libera espacio en disco o elige una calidad más ligera.`);
+      return;
+    }
+    if (entry.status !== 'preparing') return;
+    entry.plan.diskName = `${tabId}-${entry.id}-${++diskCounter}`;
+    entry.diskName = entry.plan.diskName;
+  }
+
   const worker = new Worker('video-worker.js', { type: 'module' });
   entry.worker = worker;
 
@@ -636,6 +744,12 @@ async function startEntry(entry) {
     } else if (data.type === 'progress') {
       entry.row.style.setProperty('--progress', data.value);
       entry.els.statusLabel.textContent = `Comprimiendo… ${data.value}%`;
+    } else if (data.type === 'done' && data.diskName) {
+      readDiskFile(data.diskName, data.mime).then((blob) => {
+        if (entry.status === 'compressing') finishEntry(entry, blob);
+      }).catch(() => {
+        failEntry(entry, 'No se pudo leer el resultado guardado en el disco.');
+      });
     } else if (data.type === 'done') {
       finishEntry(entry, data.blob);
     } else if (data.type === 'error') {
@@ -648,6 +762,23 @@ async function startEntry(entry) {
   };
 
   worker.postMessage({ file: entry.file, plan: entry.plan });
+}
+
+// The browser's storage quota is a share of free disk; leave some slack
+// since the estimate can undershoot.
+async function hasRoomFor(bytes) {
+  try {
+    const { quota, usage } = await navigator.storage.estimate();
+    if (!quota) return true;
+    return quota - usage > bytes * 1.25;
+  } catch {
+    return true;
+  }
+}
+
+function discardDiskFile(entry) {
+  removeDiskFile(entry.diskName);
+  entry.diskName = null;
 }
 
 function releaseWorker(entry) {
@@ -744,6 +875,7 @@ function failEntry(entry, message) {
   if (!ACTIVE_STATUSES.includes(entry.status)) return;
   const wasActive = entry.status !== 'queued';
   releaseWorker(entry);
+  discardDiskFile(entry);
   if (!wasActive) {
     const qIdx = queue.indexOf(entry.id);
     if (qIdx !== -1) queue.splice(qIdx, 1);
@@ -768,6 +900,7 @@ function cancelEntry(id) {
   // still be waiting on the probe).
   const wasActive = entry.status !== 'queued';
   releaseWorker(entry);
+  discardDiskFile(entry);
   if (!wasActive) {
     const qIdx = queue.indexOf(id);
     if (qIdx !== -1) queue.splice(qIdx, 1);
@@ -789,6 +922,7 @@ function resetOutput(entry) {
   if (entry.outputUrl) URL.revokeObjectURL(entry.outputUrl);
   entry.outputBlob = null;
   entry.outputUrl = null;
+  discardDiskFile(entry);
   entry.plan = null;
   entry.row.style.removeProperty('--progress');
   entry.els.notice.hidden = true;
@@ -851,7 +985,14 @@ function handleActionClick(id) {
 }
 
 downloadAllBtn.addEventListener('click', async () => {
-  const doneEntries = [...entries.values()].filter((e) => e.status === 'done');
+  const allDone = [...entries.values()].filter((e) => e.status === 'done');
+  if (!allDone.length) return;
+
+  // Disk-backed results are too big for the in-memory ZIP (and its 4 GB
+  // format limit), so they download on their own.
+  const onDisk = allDone.filter((e) => e.diskName);
+  const doneEntries = allDone.filter((e) => !e.diskName);
+  for (const e of onDisk) downloadEntry(e);
   if (!doneEntries.length) return;
 
   // Converting can make two siblings land on the same name (clip.mov and
